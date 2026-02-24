@@ -1,11 +1,23 @@
-const carousel = document.getElementById('promoCarousel');
-const next = document.getElementById('promoNext');
-const prev = document.getElementById('promoPrev');
+document.addEventListener("DOMContentLoaded", () => {
+  const carousel = document.getElementById("promoCarousel");
+  const prev = document.getElementById("promoPrev");
+  const next = document.getElementById("promoNext");
 
-if (carousel && next && prev) {
-  next.onclick = () =>
-    carousel.scrollBy({ left: 400, behavior: 'smooth' });
+  if (!carousel || !prev || !next) return;
 
-  prev.onclick = () =>
-    carousel.scrollBy({ left: -400, behavior: 'smooth' });
-}
+  const scrollAmount = carousel.offsetWidth;
+
+  next.addEventListener("click", () => {
+    carousel.scrollBy({
+      left: scrollAmount,
+      behavior: "smooth"
+    });
+  });
+
+  prev.addEventListener("click", () => {
+    carousel.scrollBy({
+      left: -scrollAmount,
+      behavior: "smooth"
+    });
+  });
+});
