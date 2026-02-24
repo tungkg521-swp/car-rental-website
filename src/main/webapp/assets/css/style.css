@@ -11,9 +11,9 @@ html, body {
 }
 
 body {
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  color: #111;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   background: #fff;
+  color: #111;
 }
 
 a {
@@ -21,18 +21,13 @@ a {
   color: inherit;
 }
 
-img {
-  display: block;
-  max-width: 100%;
-}
-
 /* =========================
-   GRID 12 CỘT (FIGMA → CODE)
+   CONTAINER + GRID 12 CỘT
    ========================= */
 .container {
   max-width: 1440px;
   margin: 0 auto;
-  padding: 0 80px;
+  padding: 0 80px; /* đúng Figma */
 }
 
 .grid-12 {
@@ -44,65 +39,108 @@ img {
 .col-12 { grid-column: span 12; }
 .col-6  { grid-column: span 6; }
 .col-4  { grid-column: span 4; }
+.col-3  { grid-column: span 3; }
 
 /* =========================
-   HEADER (Luxury)
+   HEADER (HEIGHT = 102px)
    ========================= */
 .site-header {
+  height: 102px; /* chuẩn Figma */
   background: #000;
-  color: #eaeaea;
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
 .header-inner {
-  height: 96px;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 4fr 4fr 4fr;
   align-items: center;
 }
 
-.nav-left,
-.nav-right {
+/* LEFT MENU */
+.nav-left {
   display: flex;
   gap: 28px;
   font-size: 14px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  color: #fff;
 }
 
-.nav-left {
-  justify-content: flex-start;
-}
-
-.nav-right {
-  justify-content: flex-end;
-}
-
+/* BRAND CENTER */
 .brand {
   text-align: center;
+  color: #fff;
   line-height: 1.1;
 }
 
 .brand .top {
-  font-size: 11px;
-  letter-spacing: 0.28em;
-  opacity: 0.8;
+  font-size: 12px;
+  letter-spacing: 2px;
+  opacity: 0.7;
 }
 
 .brand .bottom {
-  margin-top: 6px;
-  font-size: 24px;
+  font-size: 28px;
   font-style: italic;
-  font-family: Georgia, "Times New Roman", serif;
+}
+
+/* RIGHT (MENU + AUTH) */
+.header-right {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 32px;
+}
+
+/* RIGHT MENU */
+.nav-main {
+  display: flex;
+  gap: 28px;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: #fff;
 }
 
 .nav-left a,
-.nav-right a {
-  opacity: 0.85;
+.nav-main a {
+  opacity: 0.75;
 }
 
 .nav-left a:hover,
-.nav-right a:hover {
+.nav-main a:hover {
   opacity: 1;
+}
+
+/* AUTH */
+.auth {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.auth .login {
+  font-size: 13px;
+  color: #fff;
+  opacity: 0.75;
+}
+
+.auth .login:hover {
+  opacity: 1;
+}
+
+.auth .register {
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: #fff;
+  color: #000;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.auth .register:hover {
+  filter: brightness(0.95);
 }
 
 /* =========================
@@ -115,74 +153,53 @@ img {
 }
 
 .hero-main {
-  align-items: center;
+  align-items: stretch; /* default nhưng ghi rõ cho dễ hiểu */
 }
 
-.hero-left {
+.hero-left,
+.hero-right {
   display: flex;
   flex-direction: column;
-  gap: 28px;
 }
 
+
+/* LEFT */
 .hero-title {
   margin: 0;
   font-size: 72px;
   line-height: 1.05;
-  letter-spacing: -0.02em;
 }
 
-/* 2 xe nhỏ dưới headline */
+/* MINI CARS */
 .mini-cars {
+  margin-top: auto;
   display: flex;
   gap: 20px;
 }
 
 .mini-card {
-  width: 240px;
-  height: 140px;
-  border-radius: 22px;
-  overflow: hidden;
-  position: relative;
-  border: 1px solid rgba(255,255,255,0.1);
+  width: 300px;
+  height: 232px;
+  background: #aaa;
+  border-radius: 30px;
 }
 
-.mini-card img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+/* RIGHT BIG CAR */
+.big-car {
+  flex: 1;
+  min-height: 520px;
+  background: #777;
+  border-radius: 30px;
 }
 
-.mini-card .label {
-  position: absolute;
-  left: 14px;
-  bottom: 12px;
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  background: rgba(0,0,0,0.6);
-  padding: 6px 10px;
-  border-radius: 999px;
-}
 
-/* Xe lớn bên phải */
-.hero-right .big-image {
-  height: 520px;
-  border-radius: 32px;
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.1);
-}
-
-.hero-right .big-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* Row chữ dưới trong hero */
+/* =========================
+   HERO SUMMARY (ROW DƯỚI)
+   ========================= */
 .hero-summary {
   margin-top: 56px;
   padding-top: 32px;
-  border-top: 1px solid rgba(255,255,255,0.08);
+  border-top: 1px solid rgba(255,255,255,0.12);
   align-items: center;
 }
 
@@ -198,28 +215,21 @@ img {
   color: rgba(255,255,255,0.75);
 }
 
-.summary-cta {
+.cta {
   display: flex;
   justify-content: flex-end;
 }
 
-/* =========================
-   BUTTON
-   ========================= */
-.btn {
-  border: none;
-  cursor: pointer;
-  border-radius: 999px;
-  padding: 14px 22px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  font-size: 13px;
-}
-
+/* BUTTON */
 .btn-primary {
+  border: none;
+  border-radius: 999px;
+  padding: 14px 28px;
   background: #fff;
   color: #000;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
 }
 
 .btn-primary:hover {
@@ -227,10 +237,10 @@ img {
 }
 
 /* =========================
-   PROMOTION SECTION
+   PROMOTION
    ========================= */
 .promotion {
-  padding: 88px 0 96px;
+  padding: 96px 0;
   background: #fff;
 }
 
@@ -242,20 +252,24 @@ img {
 
 .promotion-subtitle {
   text-align: center;
-  margin: 14px 0 0;
+  margin-top: 14px;
   font-size: 16px;
   color: rgba(0,0,0,0.65);
 }
 
-/* Carousel */
+
 .promotion-wrapper {
   position: relative;
   margin-top: 56px;
 }
 
+
 .promotion-carousel {
-  display: flex;
-  gap: 24px;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: calc((100% - 40px) / 3); /* 3 card / 12 cột */
+  gap: 20px;
+
   overflow-x: auto;
   scroll-behavior: smooth;
   scrollbar-width: none;
@@ -265,73 +279,42 @@ img {
   display: none;
 }
 
-.promo-card {
-  min-width: 380px;
-  height: 250px;
-  border-radius: 24px;
-  overflow: hidden;
-  position: relative;
-  border: 1px solid rgba(0,0,0,0.08);
-}
 
-.promo-card img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* Logo nhỏ trong card */
-.promo-logo {
-  position: absolute;
-  top: 14px;
-  left: 14px;
-  width: 56px;
-  height: 56px;
-  border-radius: 14px;
-  background: rgba(255,255,255,0.9);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-}
-
-/* Text overlay */
-.promo-text {
-  position: absolute;
-  left: 14px;
-  right: 14px;
-  bottom: 14px;
-  color: #fff;
-  font-weight: 700;
-  padding: 10px 12px;
-  border-radius: 16px;
-  background: linear-gradient(90deg, rgba(0,0,0,0.75), rgba(0,0,0,0.25));
-}
-
-/* Arrow */
-.arrow {
+.promo-arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: #fff;
   border: none;
+  background: #fff;
+  font-size: 22px;
+  font-weight: bold;
   cursor: pointer;
   box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  z-index: 2;
 }
 
-.arrow.left {
-  left: -10px;
+.promo-arrow.left {
+  left: -22px;
 }
 
-.arrow.right {
-  right: -10px;
+.promo-arrow.right {
+  right: -22px;
 }
+
+
+.promo-card {
+  width: 100%;          /* 🔥 QUAN TRỌNG */
+  height: 260px;
+  background: #ccc;
+  border-radius: 24px;
+}
+
 
 /* =========================
-   RESPONSIVE
+   RESPONSIVE (CƠ BẢN)
    ========================= */
 @media (max-width: 1100px) {
   .container {
@@ -342,8 +325,8 @@ img {
     font-size: 56px;
   }
 
-  .hero-right .big-image {
-    height: 420px;
+  .big-car {
+    height: 380px;
   }
 }
 
@@ -353,34 +336,261 @@ img {
     grid-column: span 12;
   }
 
-  .hero-right .big-image {
-    height: 360px;
-    margin-top: 24px;
+  .header-inner {
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 
-  .mini-cars {
-    flex-wrap: wrap;
+  .brand {
+    order: -1;
   }
 
-  .summary-cta {
+  .header-right {
+    justify-content: space-between;
+  }
+
+  .cta {
     justify-content: flex-start;
     margin-top: 16px;
   }
+  
+}
+/* =========================
+   XE DÀNH CHO BẠN
+   ========================= */
+.recommend {
+  padding: 96px 0;
+  background: #fff;
+}
 
-  .promotion-title {
-    font-size: 34px;
-  }
+.recommend-title {
+  text-align: center;
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 48px;
+}
 
-  .promo-card {
-    min-width: 320px;
-    height: 220px;
-  }
+/* grid 4 cột / 2 hàng */
+.recommend-grid {
+  row-gap: 32px;
+}
 
-  .arrow.left {
-    left: 0;
-  }
+/* mỗi khung xe */
+.car-card {
+  grid-column: span 3; /* 12 / 4 = 3 */
+  height: 340px;
+  background: #e0e0e0;
+  border-radius: 18px;
+}
 
-  .arrow.right {
-    right: 0;
-  }
+/* =========================
+   FOOTER
+   ========================= */
+.site-footer {
+  background: #000;
+  color: #fff;
+  padding: 80px 0 40px;
+  border-radius: 48px 48px 0 0;
+}
+
+/* GRID FOOTER */
+.footer-grid {
+  display: grid;
+  grid-template-columns: 3fr 1fr 1fr 1.5fr;
+  gap: 48px;
+}
+
+/* CỘT CHUNG */
+.footer-col h4 {
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+
+.footer-col ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-col ul li {
+  margin-bottom: 12px;
+}
+
+.footer-col a {
+  color: rgba(255,255,255,0.75);
+}
+
+.footer-col a:hover {
+  color: #fff;
+}
+
+/* COMPANY */
+.company h4 {
+  margin-top: 24px;
+  font-size: 15px;
+}
+
+.company .small {
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.7);
+}
+
+/* LOGO */
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-text {
+  font-size: 32px;
+  font-weight: 700;
+  color: #00ff66;
+}
+
+.logo-desc {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* CERT */
+.cert-box {
+  margin-top: 20px;
+  padding: 10px 14px;
+  background: #1e88e5;
+  border-radius: 8px;
+  font-size: 12px;
+  width: fit-content;
+}
+
+/* CONTACT */
+.hotline {
+  color: #00ff66;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+/* BOTTOM */
+.footer-bottom {
+  margin-top: 48px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+}
+
+.footer-bottom a {
+  color: rgba(255,255,255,0.7);
+}
+
+.footer-bottom a:hover {
+  color: #fff;
+}
+
+/* CUSTOMER AUTH (HEADER RIGHT) */
+.customer-auth {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid red;
+}
+
+.customer-auth .auth-link {
+  color: #ffffff;          /* QUAN TRỌNG */
+  font-size: 14px;
+  text-decoration: none;
+  opacity: 0.9;
+}
+
+.customer-auth .auth-link:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+.customer-auth .logout {
+  color: #ff6b6b;          /* Logout nổi hơn */
+}
+
+.customer-auth .divider {
+  color: #888;
+}
+
+
+.customer-auth .logout:hover {
+  color: #ff3b3b;
+}
+
+.customer-auth .divider {
+  color: rgba(255,255,255,0.3);
+}
+
+
+/* ===== ICON BUTTON (My Bookings) ===== */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin-right: 12px;
+  border-radius: 50%;
+  color: #111;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.icon-btn i {
+  font-size: 16px;
+}
+
+.icon-btn:hover {
+  background: #f2f2f2;
+  transform: translateY(-1px);
+}
+
+/* ===== FORCE ICON COLOR IN HEADER ===== */
+.site-header .icon-btn,
+.site-header .icon-btn i {
+  color: #ffffff !important;
+}
+
+.site-header .icon-btn:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+}
+
+
+.profile-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #111;
+    margin-left: 15px;
+}
+
+.header-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #5c6f7c;
+    color: #fff;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+    font-weight: 600;
+}
+
+.profile-link:hover .header-avatar {
+    background: #000;
+}
+
+.profile-link:hover .user-name {
+    text-decoration: underline;
+}
+
+.profile-link,
+.logout,
+.user-name {
+    color: #fff !important;
 }
