@@ -1,0 +1,179 @@
+/* =========================
+   PAGE
+========================= */
+.car-detail-page {
+  padding: 40px 0;
+}
+
+/* =========================
+   TOP LAYOUT
+========================= */
+.car-top {
+  display: grid;
+  grid-template-columns: 7fr 5fr;
+  gap: 40px;
+  align-items: flex-start;
+}
+
+/* =========================
+   GALLERY
+========================= */
+.car-gallery {
+  width: 100%;
+}
+
+.main-image {
+  position: relative;
+  width: 100%;
+}
+
+.main-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 16px;
+}
+
+/* NAV BUTTON */
+.main-image .nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.5);
+  color: #fff;
+  border: none;
+  font-size: 32px;
+  width: 48px;
+  height: 48px;
+  cursor: pointer;
+  border-radius: 50%;
+  z-index: 5;
+}
+
+.main-image .prev { left: 12px; }
+.main-image .next { right: 12px; }
+
+/* THUMBNAILS */
+.thumbs {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* 5 tấm = 5 cột */
+  gap: 12px;
+  margin-top: 14px;
+}
+
+
+.thumbs img {
+  width: 100%;
+  height: 90px;              /* chỉnh cao thấp tùy thích */
+  object-fit: cover;
+  border-radius: 10px;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: all 0.2s ease;
+}
+
+
+.thumbs img:hover,
+.thumbs img.active {
+  opacity: 1;
+  border-color: #22c55e;
+}
+
+/* =========================
+   SUMMARY
+========================= */
+.car-summary h1 {
+  font-size: 28px;
+  margin-top: 0;
+}
+
+.status {
+  font-size: 14px;
+  color: red;
+  margin-left: 8px;
+}
+
+.price {
+  font-size: 32px;
+  font-weight: bold;
+  margin: 16px 0;
+}
+
+.price span {
+  font-size: 16px;
+  font-weight: normal;
+}
+
+.badge {
+  background: #e6f7e6;
+  color: #0a8a0a;
+  padding: 6px 12px;
+  display: inline-block;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.specs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.btn {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  background: #ddd;
+}
+
+.btn.disabled {
+  cursor: not-allowed;
+}
+
+.consult {
+  display: block;
+  margin-top: 12px;
+  text-align: center;
+  color: green;
+}
+
+/* =========================
+   SECTIONS
+========================= */
+.section {
+  margin-top: 50px;
+}
+
+.features {
+  display: flex;
+  gap: 40px;
+}
+
+/* =========================
+   BOTTOM GRID
+========================= */
+.bottom-grid {
+  display: grid;
+  grid-template-columns: 8fr 4fr;
+  gap: 40px;
+  margin-top: 50px;
+}
+
+.box {
+  background: #f9f9f9;
+  padding: 16px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.similar-card img {
+  width: 100%;
+  border-radius: 12px;
+}
+
+.green {
+  color: green;
+}

@@ -1,0 +1,173 @@
+/* =========================
+   GRID 12 (HOME)
+   ========================= */
+.home-page .grid-12 {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 20px;
+}
+
+.home-page .col-12 { grid-column: span 12; }
+.home-page .col-6  { grid-column: span 6; }
+.home-page .col-4  { grid-column: span 4; }
+.home-page .col-3  { grid-column: span 3; }
+
+/* =========================
+   HERO
+   ========================= */
+.home-page .hero {
+  background: #000;
+  color: #fff;
+  padding: 72px 0 56px;
+}
+
+.home-page .hero-main {
+  align-items: stretch;
+}
+
+.home-page .hero-left,
+.home-page .hero-right {
+  display: flex;
+  flex-direction: column;
+}
+
+.home-page .hero-title {
+  margin: 0;
+  font-size: 72px;
+  line-height: 1.05;
+}
+
+.home-page .mini-cars {
+  margin-top: auto;
+  display: flex;
+  gap: 20px;
+}
+
+.home-page .mini-card {
+  width: 300px;
+  height: 232px;
+  background: #aaa;
+  border-radius: 30px;
+}
+
+.home-page .big-car {
+  flex: 1;
+  min-height: 520px;
+  background: #777;
+  border-radius: 30px;
+}
+
+/* =========================
+   HERO SUMMARY
+   ========================= */
+.home-page .hero-summary {
+  margin-top: 56px;
+  padding-top: 32px;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  align-items: center;
+}
+
+.home-page .hero-summary h3 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.home-page .hero-summary p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.75);
+}
+
+/* =========================
+   PROMOTION
+   ========================= */
+.home-page .promotion {
+  padding: 96px 0;
+  background: #fff;
+}
+
+.home-page .promotion-wrapper {
+  position: relative;
+  margin-top: 56px;
+}
+
+.home-page .promotion-carousel {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: calc((100% - 40px) / 3);
+  gap: 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.home-page .promotion-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.home-page .promo-card {
+  width: 100%;
+  height: 260px;
+  background: #ccc;
+  border-radius: 24px;
+}
+
+/* =========================
+   RECOMMEND
+   ========================= */
+.home-page .recommend {
+  padding: 96px 0;
+  background: #fff;
+}
+
+.home-page .recommend-title {
+  text-align: center;
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 48px;
+}
+
+.home-page .recommend-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+}
+
+.home-page .recommend .car-card {
+  height: 340px;
+  background: #e0e0e0;
+  border-radius: 18px;
+}
+
+/* =========================
+   RESPONSIVE (HOME)
+   ========================= */
+@media (max-width: 1100px) {
+  .home-page .container {
+    padding: 0 32px;
+  }
+
+  .home-page .hero-title {
+    font-size: 56px;
+  }
+
+  .home-page .big-car {
+    min-height: 380px;
+  }
+}
+
+@media (max-width: 860px) {
+  .home-page .col-6,
+  .home-page .col-4 {
+    grid-column: span 12;
+  }
+
+  .home-page .header-inner {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .home-page .brand {
+    order: -1;
+  }
+}

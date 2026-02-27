@@ -1,0 +1,83 @@
+body {
+    background-color: #f5f6f8;
+    font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+.back-link {
+    text-decoration: none;
+    font-weight: 500;
+    color: #333;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+.section-title {
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+}
+
+/* Ảnh xe trong booking */
+.car-img {
+    width: 260px;        /* hoặc 280px */
+    height: 170px;
+    object-fit: cover;
+    border-radius: 10px;
+    flex-shrink: 0;
+}
+
+.sticky-summary {
+    position: sticky;
+    top: 20px;
+}
+
+.total {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.btn-primary {
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+/* ===== CAR INFO (FIX IMAGE SIZE) ===== */
+.car-info-wrapper {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.car-info-wrapper .car-img {
+    width: 260px;
+    height: 170px;
+    object-fit: cover;
+    border-radius: 12px;
+    flex-shrink: 0;
+    max-width: none;
+}
+
+.car-info-wrapper .car-meta {
+    flex: 1;
+}
+
+
+/* FIX: ảnh trong card-body không được full width */
+.card-body img.car-img {
+    width: 260px !important;
+    height: 170px !important;
+    max-width: none !important;
+    object-fit: cover;
+    border-radius: 10px;
+    display: block;
+}
+
+

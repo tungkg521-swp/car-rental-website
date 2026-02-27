@@ -1,0 +1,162 @@
+/* =========================
+   BOOKING DETAIL PAGE
+   ========================= */
+
+.booking-detail-page {
+    padding: 60px 0;
+    background: #f5f7fb;
+}
+
+.detail-card {
+    display: flex;
+    gap: 40px;
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+    align-items: center;
+}
+
+/* =========================
+   LEFT IMAGE
+   ========================= */
+
+.detail-left {
+    flex: 1;
+}
+
+.detail-left img {
+    width: 100%;
+    border-radius: 16px;
+    object-fit: cover;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* =========================
+   RIGHT INFO
+   ========================= */
+
+.detail-right {
+    flex: 1.2;
+}
+
+.detail-right h2 {
+    font-size: 26px;
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+/* =========================
+   STATUS BADGE
+   ========================= */
+
+.status {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+/* Dynamic status colors */
+.status.PENDING {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status.APPROVED {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status.REJECTED {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.status.CANCELLED {
+    background: #e2e3e5;
+    color: #383d41;
+}
+
+/* =========================
+   INFO LIST
+   ========================= */
+
+.detail-info {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.detail-info li {
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 15px;
+}
+
+.detail-info strong {
+    width: 130px;
+    display: inline-block;
+    color: #555;
+}
+
+/* =========================
+   NOTE BOX
+   ========================= */
+
+.note-box {
+    margin-top: 20px;
+    padding: 20px;
+    background: #f9fafc;
+    border-left: 4px solid #007bff;
+    border-radius: 10px;
+}
+
+.note-box strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
+@media (max-width: 900px) {
+    .detail-card {
+        flex-direction: column;
+    }
+}
+
+.btn-cancel {
+    background-color: #d9534f;
+    color: white;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-left: 10px;
+    transition: 0.2s ease;
+}
+
+.btn-cancel:hover {
+    background-color: #c9302c;
+}
+
+.status.PENDING {
+    background: #ffc107;
+    color: black;
+}
+
+.status.CANCELED {
+    background: #6c757d;
+    color: white;
+}
+
+.status.COMPLETED {
+    background: #28a745;
+    color: white;
+}
+
