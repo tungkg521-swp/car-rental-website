@@ -19,6 +19,15 @@
         <url-pattern>/</url-pattern>
         <url-pattern>/home</url-pattern>
     </servlet-mapping>
+    <servlet>
+        <servlet-name>CarListServlet</servlet-name>
+        <servlet-class>Controllers.CarListServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CarListServlet</servlet-name>
+        <url-pattern>/cars</url-pattern>
+    </servlet-mapping>
+
     
     
     <session-config>
