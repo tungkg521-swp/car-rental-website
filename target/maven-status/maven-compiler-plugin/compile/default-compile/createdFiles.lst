@@ -1,8 +1,0 @@
-Controllers\CarListServlet.class
-com\jsp\shop\project1\JakartaRestConfiguration.class
-DALs\CarDAO.class
-models\CarModel.class
-service\CarService.class
-com\jsp\shop\project1\resources\JakartaEE91Resource.class
-Utils\DBContext.class
-Controllers\HomeServlet.class
