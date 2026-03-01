@@ -6,7 +6,7 @@ package service;
 
 import DALs.CarDAO;
 import DALs.WishlistDAO;
-import Models.WishlistModel;
+import models.WishlistModel;
 import java.util.List;
 import models.CarModel;
 
