@@ -5,6 +5,7 @@
 package DALs;
 
 
+import Models.WishlistModel;
 import Utils.DBContext;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -14,7 +15,7 @@ import java.sql.Statement;
 
 import java.util.ArrayList;
 import java.util.List;
-import Models.WishlistModel;
+
 
 /**
  *
@@ -77,5 +78,48 @@ public class WishlistDAO extends DBContext{
     }
 
     return list;
+}
+    
+      public boolean exists(int customerId, int carId) {
+        String sql = "SELECT 1 FROM wish_list WHERE customer_id = ? AND car_id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, customerId);
+            ps.setInt(2, carId);
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean create(int customerId,int carId) {
+        String sql = "INSERT INTO wish_list (customer_id, car_id) VALUES(?, ?)";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1,customerId );
+            ps.setInt(2, carId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
+    public boolean delete(int customerId, int carId) {
+
+    String sql = "DELETE FROM wish_list WHERE customer_id = ? AND car_id = ?";
+
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+        ps.setInt(1, customerId);
+        ps.setInt(2, carId);
+
+        return ps.executeUpdate() > 0;
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+
+    return false;
 }
 }
