@@ -22,6 +22,20 @@ public class CarModel {
     private String description;
     private String status;
 
+    public CarModel(int carId, String modelName, int modelYear, BigDecimal pricePerDay, int seatCount, String fuelType, String transmission, String brandName, String typeName, String imageFolder, String status) {
+        this.carId = carId;
+        this.modelName = modelName;
+        this.modelYear = modelYear;
+        this.pricePerDay = pricePerDay;
+        this.seatCount = seatCount;
+        this.fuelType = fuelType;
+        this.transmission = transmission;
+        this.brandName = brandName;
+        this.typeName = typeName;
+        this.imageFolder = imageFolder;
+        this.status = status;
+    }
+
     public CarModel(int carId, String modelName, int modelYear,
                     BigDecimal pricePerDay, int seatCount,
                     String fuelType, String transmission,

@@ -22,4 +22,8 @@ public class CarService {
     return carDAO.findAllCars();
 }
 
+    public List<CarModel> searchCars(String keyword) {
+        return carDAO.searchCars(keyword);
+}
+
 }

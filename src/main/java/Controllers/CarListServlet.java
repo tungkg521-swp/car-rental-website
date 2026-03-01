@@ -5,9 +5,7 @@
 package Controllers;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -33,6 +31,8 @@ public class CarListServlet extends HttpServlet {
             listCars(request, response);
         } else if (action.equals("detail")) {
             showCarDetail(request, response);
+        } else if ("search".equals(action)) {
+            searchCar(request, response);
         }
     }
 
@@ -71,5 +71,18 @@ public class CarListServlet extends HttpServlet {
         request.getRequestDispatcher("/views/car-detail.jsp")
                 .forward(request, response);
     }
+
+  private void searchCar(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+    String keyword = request.getParameter("keyword");
+    List<CarModel> list;
+    if (keyword == null || keyword.trim().isEmpty()) {
+        list = carService.findAllAvailableCars();
+    } else {
+        list = carService.searchCars(keyword);
+    }
+    request.setAttribute("cars", list);  // SỬA: "cars" thay vì "carList"
+    request.getRequestDispatcher("/views/car-list.jsp").forward(request, response);
+}
 
 }
