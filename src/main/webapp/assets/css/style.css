@@ -594,3 +594,182 @@ a {
 .user-name {
     color: #fff !important;
 }
+
+
+/* =============================
+   WISHLIST PAGE
+============================= */
+
+.wishlist-title {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 40px;
+}
+
+.wishlist-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.wishlist-image img {
+    width: 260px;
+    height: 170px;
+    object-fit: cover;
+    border-radius: 15px;
+}
+
+.wishlist-info {
+    flex: 1;
+    margin-left: 35px;
+}
+
+.wishlist-info h3 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.car-specs {
+    display: flex;
+    gap: 20px;
+    color: #666;
+    font-size: 15px;
+}
+
+.wishlist-action {
+    text-align: right;
+}
+
+.wishlist-action .price {
+    font-size: 24px;
+    font-weight: 700;
+    color: #22c55e;
+    margin-bottom: 15px;
+}
+
+.btn-remove {
+    background: #22c55e;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-remove:hover {
+    background: #16a34a;
+}
+
+.detail-link {
+    display: block;
+    margin-top: 10px;
+    color: #000;
+    font-weight: 500;
+}
+
+/* =============================
+   WISHLIST CARD
+============================= */
+
+.wishlist-card {
+    display: flex;
+    align-items: stretch;
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+}
+
+/* IMAGE */
+
+.wishlist-image {
+    width: 300px;
+    height: 170px;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-right: 30px;
+}
+
+.wishlist-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* INFO */
+
+.wishlist-info {
+    flex: 1;
+    padding-right: 40px;
+}
+
+.car-title {
+    margin: 0 0 15px;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.car-specs {
+    display: flex;
+    gap: 20px;
+    color: #555;
+    font-size: 15px;
+}
+
+/* ACTION */
+
+.wishlist-action {
+    width: 220px;
+    padding-left: 40px;
+    border-left: 1px solid #e5e7eb;   /* đường dọc */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 15px;
+}
+
+/* PRICE */
+
+.price-box {
+    text-align: right;
+}
+
+
+
+.new-price {
+    font-size: 24px;
+    font-weight: 700;
+    color: #111;
+}
+
+/* BUTTON */
+
+.btn-remove {
+    background: #22c55e;
+    border: none;
+    padding: 12px;
+    border-radius: 12px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-remove:hover {
+    background: #16a34a;
+}
+
+.detail-link {
+    text-align: center;
+    text-decoration: none;
+    color: #000;
+    font-weight: 600;
+}

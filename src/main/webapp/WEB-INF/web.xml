@@ -27,7 +27,15 @@
         <servlet-name>CarListServlet</servlet-name>
         <url-pattern>/cars</url-pattern>
     </servlet-mapping>
-
+    
+     <servlet>
+        <servlet-name>WishlistController</servlet-name>
+        <servlet-class>Controllers.WishlistController</servlet-class>
+    </servlet>
+  <servlet-mapping>
+        <servlet-name>WishlistController</servlet-name>
+        <url-pattern>/wishlist</url-pattern>
+    </servlet-mapping>
     
     
     <session-config>
