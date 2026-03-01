@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
-   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd"
-   version="5.0">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd"
+         version="5.0">
     
     <servlet-mapping>
         <servlet-name>default</servlet-name>
@@ -28,15 +28,32 @@
         <url-pattern>/cars</url-pattern>
     </servlet-mapping>
     
-     <servlet>
+    <servlet>
         <servlet-name>WishlistController</servlet-name>
         <servlet-class>Controllers.WishlistController</servlet-class>
     </servlet>
-  <servlet-mapping>
+    <servlet-mapping>
         <servlet-name>WishlistController</servlet-name>
         <url-pattern>/wishlist</url-pattern>
     </servlet-mapping>
     
+    <servlet>
+        <servlet-name>LoginServlet</servlet-name>
+        <servlet-class>Controllers.LoginServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>LoginServlet</servlet-name>
+        <url-pattern>/login</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>RegisterServlet</servlet-name>
+        <servlet-class>Controllers.RegisterServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>RegisterServlet</servlet-name>
+        <url-pattern>/register</url-pattern>
+    </servlet-mapping>
     
     <session-config>
         <session-timeout>
@@ -44,7 +61,15 @@
         </session-timeout>
     </session-config>
     
-<!--    <welcome-file-list>
+     <filter>
+        <filter-name>AuthFilter</filter-name>
+        <filter-class>Filters.AuthFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>AuthFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <!--    <welcome-file-list>
         <welcome-file>home</welcome-file>
     </welcome-file-list>-->
 </web-app>
