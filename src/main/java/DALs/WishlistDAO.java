@@ -5,7 +5,7 @@
 package DALs;
 
 
-import Models.WishlistModel;
+import models.WishlistModel;
 import Utils.DBContext;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
