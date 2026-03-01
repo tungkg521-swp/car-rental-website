@@ -25,6 +25,16 @@
 
                 <!-- FILTER SIDEBAR -->
                 <aside class="filter">
+                    <!-- SEARCH BOX -->
+                    <div class="search-box">
+                        <form action="${pageContext.request.contextPath}/cars" method="get">
+                            <input type="hidden" name="action" value="search"/>
+                            <input type="text" name="keyword" 
+                                   placeholder="Search car..." 
+                                   value="${param.keyword}">
+                            <button type="submit">Search</button>
+                        </form>
+                    </div>
                     <div class="filter-header">
                         <h3>Filter by</h3>
                         <button class="reset">Reset all</button>

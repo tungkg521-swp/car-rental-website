@@ -1,0 +1,181 @@
+/* =========================
+   RESET + BASE
+   ========================= */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: #fff;
+  color: #111;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* =========================
+   CONTAINER
+   ========================= */
+.container {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 80px;
+}
+
+/* =========================
+   HEADER
+   ========================= */
+.site-header {
+  height: 102px;
+  background: #000;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.header-inner {
+  height: 100%;
+  display: grid;
+  grid-template-columns: 4fr 4fr 4fr;
+  align-items: center;
+}
+
+/* LEFT MENU */
+.nav-left {
+  display: flex;
+  gap: 28px;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+/* BRAND */
+.brand {
+  text-align: center;
+  color: #fff;
+  line-height: 1.1;
+}
+
+.brand .top {
+  font-size: 12px;
+  letter-spacing: 2px;
+  opacity: 0.7;
+}
+
+.brand .bottom {
+  font-size: 28px;
+  font-style: italic;
+}
+
+/* RIGHT */
+.header-right {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 32px;
+}
+
+.nav-main {
+  display: flex;
+  gap: 28px;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.nav-left a,
+.nav-main a {
+  opacity: 0.75;
+}
+
+.nav-left a:hover,
+.nav-main a:hover {
+  opacity: 1;
+}
+
+/* AUTH */
+.auth {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.auth .login {
+  font-size: 13px;
+  color: #fff;
+  opacity: 0.75;
+}
+
+.auth .register {
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: #fff;
+  color: #000;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* =========================
+   BUTTON
+   ========================= */
+.btn-primary {
+  border: none;
+  border-radius: 999px;
+  padding: 14px 28px;
+  background: #fff;
+  color: #000;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
+/* =========================
+   FOOTER
+   ========================= */
+.site-footer {
+  background: #000;
+  color: #fff;
+  padding: 80px 0 40px;
+  border-radius: 48px 48px 0 0;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 3fr 1fr 1fr 1.5fr;
+  gap: 48px;
+}
+
+.footer-col h4 {
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+
+.footer-col ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-col ul li {
+  margin-bottom: 12px;
+}
+
+.footer-col a {
+  color: rgba(255,255,255,0.75);
+}
+
+.footer-bottom {
+  margin-top: 48px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+}
