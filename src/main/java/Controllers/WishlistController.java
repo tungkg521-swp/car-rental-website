@@ -4,7 +4,7 @@
  */
 package Controllers;
 
-import Models.WishlistModel;
+import models.WishlistModel;
 import service.WishlistService;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -12,7 +12,11 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.util.List;
+import models.CarModel;
+import models.CustomerModel;
+import service.CarService;
 
 /**
  *
@@ -20,7 +24,8 @@ import java.util.List;
  */
 public class WishlistController extends HttpServlet {
 
-   WishlistService service = new WishlistService();
+    WishlistService service = new WishlistService();
+    CarService carService = new CarService();
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
@@ -34,7 +39,7 @@ public class WishlistController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-         viewWishlist(request,response);
+        viewWishlist(request, response);
     }
 
     /**
@@ -48,7 +53,15 @@ public class WishlistController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+        String action = request.getParameter("action");
+        if (action.equals("add")) {
+            addWishlist(request, response);
+        } else if (action.equals("delete")) {
+removeWishlist(request,response);
+        } else {
+            response.sendRedirect(request.getContextPath() + "/home");
+        }
+
     }
 
     /**
@@ -61,23 +74,84 @@ public class WishlistController extends HttpServlet {
         return "Short description";
     }// </editor-fold>
 
-    
     private void viewWishlist(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException{
-        int customerId = Integer.parseInt(request.getParameter("id"));
-        
-       List<WishlistModel> list = service.getWishlist(customerId);
+            throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        CustomerModel customer = (CustomerModel) session.getAttribute("CUSTOMER");
+
+        if (customer == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        int customerId = customer.getCustomerId();
+
+        List<WishlistModel> list = service.getWishlist(customerId);
 
         request.setAttribute("wishlist", list);
-       
-       request.getRequestDispatcher("/views/wishlist.jsp").forward(request,response);
+
+        request.getRequestDispatcher("/views/wishlist.jsp").forward(request, response);
     }
-    
-    
+
     private void addWishlist(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException{
-        
-        
-        
+            throws ServletException, IOException {
+
+        HttpSession session = request.getSession();
+        CustomerModel customer = (CustomerModel) session.getAttribute("CUSTOMER");
+
+        if (customer == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+          int customerId = customer.getCustomerId();
+        int carId = Integer.parseInt(request.getParameter("carId"));
+
+        String message = service.addToWishlist(customerId, carId);
+
+        if (message.equals("Added to wishlist successfully!")) {
+            request.setAttribute("SUCCESS", message);
+        } else {
+            request.setAttribute("ERROR", message);
+        }
+        CarModel car = carService.getCarById(carId);
+        request.setAttribute("car", car);
+
+        request.setAttribute("MESSAGE", message);
+        request.getRequestDispatcher("/views/car-detail.jsp")
+                .forward(request, response);
+
     }
+    
+    
+    private void removeWishlist(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+
+    HttpSession session = request.getSession();
+    CustomerModel customer = (CustomerModel) session.getAttribute("CUSTOMER");
+
+    if (customer == null) {
+        response.sendRedirect(request.getContextPath() + "/login");
+        return;
+    }
+
+    int customerId = customer.getCustomerId();
+
+    String carIdParam = request.getParameter("carId");
+    if (carIdParam == null || carIdParam.isEmpty()) {
+        response.sendRedirect(request.getContextPath() + "/wishlist");
+        return;
+    }
+
+    int carId = Integer.parseInt(carIdParam);
+
+    String message = service.removeFromWishlist(customerId, carId);
+
+    if ("Removed successfully!".equals(message)) {
+        session.setAttribute("SUCCESS", message);
+    } else {
+        session.setAttribute("ERROR", message);
+    }
+
+    response.sendRedirect(request.getContextPath() + "/wishlist");
+}
 }
