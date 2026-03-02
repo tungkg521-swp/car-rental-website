@@ -8,6 +8,7 @@
 
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style-base.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/car-detail.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/wishlist.css">
     </head>
     <body>
 
@@ -71,6 +72,15 @@
                             Đặt xe
                         </a>
 
+                        <form class="wishlist-form"
+                              action="${pageContext.request.contextPath}/wishlist?action=add"
+                              method="POST">
+
+                            <input type="hidden" name="carId" value="${car.carId}">
+                            <button type="submit" class="wishlist-btn">
+                                Thêm vào yêu thích
+                            </button>
+                        </form>
 
 
                         <a href="#" class="consult">Nhận thông tin tư vấn</a>
@@ -126,7 +136,9 @@
         </section>
 
         <script src="${pageContext.request.contextPath}/assets/js/car-detail.js"></script>
-
+        <script src="${pageContext.request.contextPath}/assets/js/wishlist.js"></script>
     </body>
+
+
 </html>
 
