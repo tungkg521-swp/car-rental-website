@@ -60,7 +60,7 @@ public class AuthenticationService extends DBContext {
         AccountModel account = new AccountModel();
         account.setEmail(email);
         account.setPasswordHash(password);
-        account.setRoleId(2);
+        account.setRoleId(1);
         account.setStatus("ACTIVE");
 
         int accountId = accountDAO.insertAccount(account);
