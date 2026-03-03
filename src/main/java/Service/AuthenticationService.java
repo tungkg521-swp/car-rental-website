@@ -60,7 +60,7 @@ public class AuthenticationService extends DBContext {
         AccountModel account = new AccountModel();
         account.setEmail(email);
         account.setPasswordHash(password);
-        account.setRoleId(2);
+        account.setRoleId(1);
         account.setStatus("ACTIVE");
 
         int accountId = accountDAO.insertAccount(account);
@@ -84,5 +84,29 @@ public class AuthenticationService extends DBContext {
         if (result == 0) {
             throw new Exception("Customer creation failed!");
         }
+    }
+
+    public String validateNewPassword(String newPassword) {
+
+        if (newPassword == null) {
+            return "Password cannot be null";
+        }
+
+        // 1. Check length
+        if (newPassword.length() < 8 || newPassword.length() > 12) {
+            return "Password must be between 8 and 12 characters";
+        }
+
+        // 2. Check at least one uppercase letter
+        if (!newPassword.matches(".*[A-Z].*")) {
+            return "Password must contain at least one uppercase letter";
+        }
+
+        // 3. Check at least one number
+        if (!newPassword.matches(".*\\d.*")) {
+            return "Password must contain at least one number";
+        }
+
+        return null; // null nghĩa là hợp lệ
     }
 }
