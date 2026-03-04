@@ -66,16 +66,4 @@ public class AccountDAO extends DBContext {
 
         return -1;
     }
-
-    public int changePassword(String email, String oldPasswordHash, String newPasswordHash) throws SQLException {
-        String sql = "UPDATE account\n"
-                + "SET password_hash = ?\n"
-                + "WHERE email = ? AND password_hash=? ";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, newPasswordHash);
-            ps.setString(2, email);
-            ps.setString(3, oldPasswordHash);
-            return ps.executeUpdate();
-        }
-    }
 }
