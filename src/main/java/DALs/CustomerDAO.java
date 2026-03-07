@@ -62,7 +62,7 @@ public class CustomerDAO extends DBContext {
                address,
                dob
         FROM customer
-        ORDER BY created_at DESC
+     
     """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
@@ -208,4 +208,74 @@ public class CustomerDAO extends DBContext {
             throw new RuntimeException(e);
         }
     }
+
+    public List<CustomerModel> searchCustomer(String fullname, String status) {
+        List<CustomerModel> list = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder("""
+        SELECT customer_id,
+               full_name,
+               email,
+               phone,
+               status,
+               created_at,
+               account_id,
+               address,
+               dob
+        FROM customer
+        WHERE 1=1
+    """);
+
+        List<Object> params = new ArrayList<>();
+
+        // Lọc theo fullname
+        if (fullname != null && !fullname.trim().isEmpty()) {
+            sql.append(" AND LOWER(full_name) LIKE ? ");
+            params.add("%" + fullname.trim().toLowerCase() + "%");
+        }
+
+        // Lọc theo status
+        if (status != null && !status.equalsIgnoreCase("ALL")) {
+            sql.append(" AND status = ? ");
+            params.add(status);
+        }
+
+        try (PreparedStatement ps = connection.prepareStatement(sql.toString());) {
+
+            // Set parameter
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+
+                CustomerModel customer = new CustomerModel();
+
+                customer.setCustomerId(rs.getInt("customer_id"));
+                customer.setFullName(rs.getString("full_name"));
+                customer.setEmail(rs.getString("email"));
+                customer.setPhone(rs.getString("phone"));
+                customer.setStatus(rs.getString("status"));
+
+                customer.setCreatedAt(
+                        rs.getTimestamp("created_at").toLocalDateTime()
+                );
+
+                customer.setAccountId(rs.getInt("account_id"));
+                customer.setAddress(rs.getString("address"));
+
+                if (rs.getDate("dob") != null) {
+                    customer.setDob(rs.getDate("dob").toLocalDate());
+                }
+
+                list.add(customer);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
 }
