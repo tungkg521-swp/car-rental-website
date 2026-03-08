@@ -5,6 +5,7 @@
 package service;
 
 import DALs.CustomerDAO;
+import java.time.LocalDate;
 import java.util.List;
 import models.CustomerModel;
 
@@ -32,7 +33,7 @@ public class CustomerService {
 
     public boolean updateProfile(int accountId,
             String fullName,
-            String dob,
+            LocalDate dob,
             String phone,
             String email) {
 
