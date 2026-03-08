@@ -235,4 +235,40 @@ public List<CarModel> searchCars(String keyword) {
     System.out.println("========================");
     return list;
 }
+
+    // Update existing car
+    public boolean update(CarModel car) {
+        String sql = """
+            UPDATE cars
+            SET model_name = ?,
+                model_year = ?,
+                price_per_day = ?,
+                seat_count = ?,
+                fuel_type = ?,
+                transmission = ?,
+                image_folder = ?,
+                description = ?,
+                status = ?
+            WHERE car_id = ?
+        """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, car.getModelName());
+            ps.setInt(2, car.getModelYear());
+            ps.setBigDecimal(3, car.getPricePerDay());
+            ps.setInt(4, car.getSeatCount());
+            ps.setString(5, car.getFuelType());
+            ps.setString(6, car.getTransmission());
+            ps.setString(7, car.getImageFolder());
+            ps.setString(8, car.getDescription());
+            ps.setString(9, car.getStatus());
+            ps.setInt(10, car.getCarId());
+
+            int result = ps.executeUpdate();
+            return result > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

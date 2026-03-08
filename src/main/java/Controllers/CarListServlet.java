@@ -36,6 +36,17 @@ public class CarListServlet extends HttpServlet {
         }
     }
 
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String action = request.getParameter("action");
+        if ("update".equals(action)) {
+            handleUpdate(request, response);
+        } else {
+            doGet(request, response);
+        }
+    }
+
     private void listCars(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
@@ -84,5 +95,51 @@ public class CarListServlet extends HttpServlet {
     request.setAttribute("cars", list);  // SỬA: "cars" thay vì "carList"
     request.getRequestDispatcher("/views/car-list.jsp").forward(request, response);
 }
+
+    private void handleUpdate(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        try {
+            int carId = Integer.parseInt(request.getParameter("carId"));
+            String modelName = request.getParameter("modelName");
+            int modelYear = Integer.parseInt(request.getParameter("modelYear"));
+            java.math.BigDecimal pricePerDay = new java.math.BigDecimal(request.getParameter("pricePerDay"));
+            int seatCount = Integer.parseInt(request.getParameter("seatCount"));
+            String fuelType = request.getParameter("fuelType");
+            String transmission = request.getParameter("transmission");
+            String imageFolder = request.getParameter("imageFolder");
+            String description = request.getParameter("description");
+            String status = request.getParameter("status");
+
+            models.CarModel car = new models.CarModel(
+                    carId,
+                    modelName,
+                    modelYear,
+                    pricePerDay,
+                    seatCount,
+                    fuelType,
+                    transmission,
+                    null, // brandName (unchanged)
+                    null, // typeName (unchanged)
+                    null, // imageUrl (not used here)
+                    imageFolder,
+                    description,
+                    status
+            );
+
+            boolean ok = carService.updateCar(car);
+            if (ok) {
+                response.sendRedirect(request.getContextPath() + "/cars?action=detail&carId=" + carId);
+            } else {
+                request.setAttribute("error", "Failed to update car");
+                showCarDetail(request, response);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("error", "Invalid input for update");
+            showCarDetail(request, response);
+        }
+    }
 
 }

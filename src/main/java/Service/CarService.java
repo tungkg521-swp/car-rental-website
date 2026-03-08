@@ -26,4 +26,8 @@ public class CarService {
         return carDAO.searchCars(keyword);
 }
 
+    public boolean updateCar(models.CarModel car) {
+        return carDAO.update(car);
+    }
+
 }
