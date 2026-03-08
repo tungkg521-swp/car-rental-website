@@ -16,11 +16,12 @@ public class CustomerModel {
     private String address;
     private LocalDate dob;
 
+    private boolean licenseVerified;
+
     public CustomerModel() {
     }
 
     // ===== GETTERS & SETTERS =====
-
     public int getCustomerId() {
         return customerId;
     }
@@ -91,5 +92,13 @@ public class CustomerModel {
 
     public void setDob(LocalDate dob) {
         this.dob = dob;
+    }
+
+    public boolean isLicenseVerified() {
+        return licenseVerified;
+    }
+
+    public void setLicenseVerified(boolean licenseVerified) {
+        this.licenseVerified = licenseVerified;
     }
 }

@@ -176,8 +176,8 @@
                                         <h4>${car.modelName}</h4>
                                         <p>${car.brandName} • ${car.typeName}</p>
                                         <div class="price">
-                                            <fmt:formatNumber value="${car.pricePerDay}" pattern="#,##0" /> VND / ngày
-                                        </div>
+    <fmt:formatNumber value="${car.pricePerDay}" pattern="#,###"/> VND / day
+</div>
                                     </div>
                                 </div>
                             </a>
