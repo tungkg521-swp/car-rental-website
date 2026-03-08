@@ -14,7 +14,8 @@ public class CustomerDAO extends DBContext {
 
         String sql = """
             SELECT customer_id, full_name, email, phone, status,
-                   created_at, account_id, address, dob
+                   created_at, account_id, address, dob,
+                   is_license_verified
             FROM customer
             WHERE account_id = ?
         """;
@@ -33,6 +34,7 @@ public class CustomerDAO extends DBContext {
                 c.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
                 c.setAccountId(rs.getInt("account_id"));
                 c.setAddress(rs.getString("address"));
+                c.setLicenseVerified(rs.getBoolean("is_license_verified"));
 
                 if (rs.getDate("dob") != null) {
                     c.setDob(rs.getDate("dob").toLocalDate());
@@ -277,5 +279,22 @@ public class CustomerDAO extends DBContext {
 
         return list;
     }
+    
+    
+
+public void updateLicenseVerified(int customerId, boolean value) {
+
+    String sql = "UPDATE customer SET is_license_verified = ? WHERE customer_id = ?";
+
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+        ps.setBoolean(1, value);
+        ps.setInt(2, customerId);
+        ps.executeUpdate();
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
 
 }

@@ -74,6 +74,26 @@
         <url-pattern>/customer/bookings</url-pattern>
     </servlet-mapping>
     
+    <servlet>
+    <servlet-name>ProfileServlet</servlet-name>
+    <servlet-class>Controllers.ProfileServlet</servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>ProfileServlet</servlet-name>
+    <url-pattern>/customer/profile</url-pattern>
+</servlet-mapping>
+
+<servlet>
+    <servlet-name>BookingSuccess</servlet-name>
+    <servlet-class>Controllers.BookingSuccess</servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>BookingSuccess</servlet-name>
+    <url-pattern>/booking-success</url-pattern>
+</servlet-mapping>
+    
     <session-config>
         <session-timeout>
             30

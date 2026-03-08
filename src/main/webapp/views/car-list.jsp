@@ -1,5 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -165,7 +166,9 @@
                                     <div class="car-info">
                                         <h4>${car.modelName}</h4>
                                         <p>${car.brandName} • ${car.typeName}</p>
-                                        <div class="price">$${car.pricePerDay} / day</div>
+                                        <div class="price">
+    <fmt:formatNumber value="${car.pricePerDay}" pattern="#,###"/> VND / day
+</div>
                                     </div>
 
                                 </div>

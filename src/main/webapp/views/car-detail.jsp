@@ -1,5 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <!DOCTYPE html>
 <html>
@@ -53,7 +54,7 @@
                         </h1>
 
                         <div class="price">
-                            ${car.pricePerDay} <span>VND / Ngày</span>
+                            <fmt:formatNumber value="${car.pricePerDay}" pattern="#,###"/> VND / day
                         </div>
 
                         <div class="badge">Miễn phí sạc tới 31/12/2027</div>
@@ -142,9 +143,39 @@
 
             </div>
         </section>
+                
+                <c:if test="${LICENSE_REQUIRED}">
+    <div id="verifyModal" class="verify-modal">
+        <div class="verify-box">
+            <div class="verify-icon">!</div>
+
+            <p>Bạn cần xác thực <b>GPLX</b> mới có thể đặt xe.</p>
+
+            <div class="verify-actions">
+                <a href="${pageContext.request.contextPath}/customer/profile"
+                   class="verify-btn primary">
+                    Đi xác thực ngay
+                </a>
+
+                <button type="button"
+                        onclick="closeVerifyModal()"
+                        class="verify-btn secondary">
+                    Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            openVerifyModal();
+        });
+    </script>
+</c:if>
 
         <script src="${pageContext.request.contextPath}/assets/js/car-detail.js"></script>
         <script src="${pageContext.request.contextPath}/assets/js/wishlist.js"></script>
+        <script src="${pageContext.request.contextPath}/assets/js/verify-license.js"></script>
     </body>
 
 

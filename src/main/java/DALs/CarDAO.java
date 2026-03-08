@@ -235,4 +235,22 @@ public List<CarModel> searchCars(String keyword) {
     System.out.println("========================");
     return list;
 }
+
+public boolean updateStatus(int carId, String status) {
+
+    String sql = "UPDATE cars SET status = ? WHERE car_id = ?";
+
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+        ps.setString(1, status);
+        ps.setInt(2, carId);
+
+        return ps.executeUpdate() > 0;
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return false;
+}
 }

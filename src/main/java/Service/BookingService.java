@@ -4,15 +4,16 @@
  */
 package service;
 
-import DALs.BookingDAO;
-import models.BookingModel;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+
+import DALs.BookingDAO;
+import DALs.CarDAO;
 import models.BookingModel;
-import models.CarModel;
+import models.ContractModel;
 
 /**
  *
@@ -21,6 +22,9 @@ import models.CarModel;
 public class BookingService {
 
     private BookingDAO bookingDAO = new BookingDAO();
+    private final ContractService contractService = new ContractService();
+    private final CarDAO carDAO = new CarDAO();
+
 
     // ===== TÍNH TIỀN =====
     public BigDecimal calculateTotalPrice(
@@ -82,6 +86,61 @@ public class BookingService {
     return bookingDAO.findById(id);
 }
 
+public void approveBooking(int bookingId, int staffId) {
 
+        BookingModel booking = bookingDAO.getBookingForContract(bookingId);
+
+        if (booking == null) {
+            return;
+        }
+
+        if (!"PENDING".equalsIgnoreCase(booking.getStatus())) {
+            return;
+        }
+
+        if (contractService.existsByBookingId(bookingId)) {
+            return;
+        }
+
+        bookingDAO.updateStatus(bookingId, "CONFIRMED");
+
+        ContractModel contract = new ContractModel();
+        contract.setBookingId(booking.getBookingId());
+        contract.setCustomerId(booking.getCustomerId());
+        contract.setStaffId(staffId);
+        contract.setCarId(booking.getCarId());
+        contract.setContractStartDate(booking.getStartDate());
+        contract.setContractEndDate(booking.getEndDate());
+        contract.setContractStatus("CREATED");
+        contract.setDailyPrice(booking.getPricePerDay().doubleValue());
+
+        double total = booking.getTotalEstimatedPrice().doubleValue();
+double deposit = total * 0.3;
+
+contract.setDepositAmount(deposit);
+contract.setTotalAmount(total);
+        contract.setSignedAt(null);
+        contract.setNote("Contract created automatically after staff approved booking.");
+
+        boolean created = contractService.createContract(contract);
+
+        if (created) {
+            carDAO.updateStatus(booking.getCarId(), "RESERVED");
+        }
+    }
+
+public void rejectBooking(int bookingId) {
+        BookingModel booking = bookingDAO.getById(bookingId);
+
+        if (booking == null) {
+            return;
+        }
+
+        if (!"PENDING".equalsIgnoreCase(booking.getStatus())) {
+            return;
+        }
+
+        bookingDAO.updateStatus(bookingId, "REJECTED");
+    }
 
 }
