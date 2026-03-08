@@ -72,6 +72,14 @@
                             Đặt xe
                         </a>
 
+
+                        <c:if test="${not empty SUCCESS}">
+                            <div class="alert success">${SUCCESS}</div>
+                        </c:if>
+
+                        <c:if test="${not empty ERROR}">
+                            <div class="alert error">${ERROR}</div>
+                        </c:if>
                         <form class="wishlist-form"
                               action="${pageContext.request.contextPath}/wishlist?action=add"
                               method="POST">

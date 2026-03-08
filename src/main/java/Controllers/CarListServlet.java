@@ -9,6 +9,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.math.BigDecimal;
 import java.util.List;
 import models.CarModel;
 import service.CarService;
@@ -31,8 +32,10 @@ public class CarListServlet extends HttpServlet {
             listCars(request, response);
         } else if (action.equals("detail")) {
             showCarDetail(request, response);
-        } else if ("search".equals(action)) {
+        } else if (action.equals("search")) {
             searchCar(request, response);
+        } else if (action.equals("filter")) {
+            filterCars(request, response);
         }
     }
 
@@ -83,63 +86,53 @@ public class CarListServlet extends HttpServlet {
                 .forward(request, response);
     }
 
-  private void searchCar(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
-    String keyword = request.getParameter("keyword");
-    List<CarModel> list;
-    if (keyword == null || keyword.trim().isEmpty()) {
-        list = carService.findAllAvailableCars();
-    } else {
-        list = carService.searchCars(keyword);
-    }
-    request.setAttribute("cars", list);  // SỬA: "cars" thay vì "carList"
-    request.getRequestDispatcher("/views/car-list.jsp").forward(request, response);
-}
-
-    private void handleUpdate(HttpServletRequest request, HttpServletResponse response)
+    private void searchCar(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        try {
-            int carId = Integer.parseInt(request.getParameter("carId"));
-            String modelName = request.getParameter("modelName");
-            int modelYear = Integer.parseInt(request.getParameter("modelYear"));
-            java.math.BigDecimal pricePerDay = new java.math.BigDecimal(request.getParameter("pricePerDay"));
-            int seatCount = Integer.parseInt(request.getParameter("seatCount"));
-            String fuelType = request.getParameter("fuelType");
-            String transmission = request.getParameter("transmission");
-            String imageFolder = request.getParameter("imageFolder");
-            String description = request.getParameter("description");
-            String status = request.getParameter("status");
-
-            models.CarModel car = new models.CarModel(
-                    carId,
-                    modelName,
-                    modelYear,
-                    pricePerDay,
-                    seatCount,
-                    fuelType,
-                    transmission,
-                    null, // brandName (unchanged)
-                    null, // typeName (unchanged)
-                    null, // imageUrl (not used here)
-                    imageFolder,
-                    description,
-                    status
-            );
-
-            boolean ok = carService.updateCar(car);
-            if (ok) {
-                response.sendRedirect(request.getContextPath() + "/cars?action=detail&carId=" + carId);
-            } else {
-                request.setAttribute("error", "Failed to update car");
-                showCarDetail(request, response);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            request.setAttribute("error", "Invalid input for update");
-            showCarDetail(request, response);
+        String keyword = request.getParameter("keyword");
+        List<CarModel> list;
+        if (keyword == null || keyword.trim().isEmpty()) {
+            list = carService.findAllAvailableCars();
+        } else {
+            list = carService.searchCars(keyword);
         }
+        request.setAttribute("cars", list);
+        request.setAttribute("keyword", keyword);  // Để giữ giá trị search box
+        request.getRequestDispatcher("/views/car-list.jsp").forward(request, response);
     }
 
+    private void filterCars(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        // Lấy tất cả param như trước
+        String keyword = request.getParameter("keyword");
+        boolean availableOnly = "on".equals(request.getParameter("availableOnly"));
+        String[] brands = request.getParameterValues("brand");
+        String[] types = request.getParameterValues("type");
+        String[] fuels = request.getParameterValues("fuel");
+        String seatsStr = request.getParameter("seats");
+        Integer seats = (seatsStr != null && !seatsStr.isEmpty()) ? Integer.parseInt(seatsStr) : null;
+        String transmission = request.getParameter("transmission");
+        if ("Any".equals(transmission)) {
+            transmission = null;
+        }
+        String yearRange = request.getParameter("yearRange");
+        if ("Any".equals(yearRange)) {
+            yearRange = null;
+        }
+        String maxPriceStr = request.getParameter("maxPrice");
+        BigDecimal maxPrice = (maxPriceStr != null && !maxPriceStr.isEmpty()) ? new BigDecimal(maxPriceStr) : null;
+
+        List<CarModel> list = carService.filterCars(keyword, availableOnly, brands, types, fuels,
+                seats, transmission, yearRange, maxPrice);
+
+        request.setAttribute("cars", list);
+        // Giữ các param để hiển thị trạng thái filter và search box
+        request.setAttribute("keyword", keyword);
+        request.setAttribute("availableOnly", availableOnly);
+        request.setAttribute("seats", seats);
+        request.setAttribute("transmission", transmission);
+        request.setAttribute("yearRange", yearRange);
+        request.setAttribute("maxPrice", maxPrice);
+
+        request.getRequestDispatcher("/views/car-list.jsp").forward(request, response);
+    }
 }
