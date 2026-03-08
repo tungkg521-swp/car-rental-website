@@ -30,6 +30,7 @@ public class LogoutServlet extends HttpServlet {
             session.invalidate(); // xoá toàn bộ session
         }
 
+        
         // quay về home (guest)
         response.sendRedirect(request.getContextPath() + "/home");
     }

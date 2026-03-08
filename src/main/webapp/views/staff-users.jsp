@@ -62,7 +62,8 @@
                             <c:when test="${empty customerList}">
                                 <tr>
                                     <td colspan="7" style="text-align:center; padding:20px;">
-                                        Không có tài khoản nào
+                                        <h2>Không có khách hàng nào</h2>
+                                        
                                     </td>
                                 </tr>
                             </c:when>

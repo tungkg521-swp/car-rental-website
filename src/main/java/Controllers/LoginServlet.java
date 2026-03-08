@@ -46,6 +46,11 @@ public class LoginServlet extends HttpServlet {
             request.getRequestDispatcher("/views/login.jsp")
                     .forward(request, response);
             return;
+        }if (!"ACTIVE".equalsIgnoreCase(account.getStatus())) {
+           request.setAttribute("error", "Tài khoản bị khóa");
+            request.getRequestDispatcher("/views/login.jsp")
+                    .forward(request, response);
+            return;
         }
 
         // LOGIN SUCCESS
