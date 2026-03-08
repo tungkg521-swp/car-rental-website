@@ -32,6 +32,7 @@ if (uri.equals(ctx + "/")
         || uri.startsWith(ctx + "/cars")
         || uri.startsWith(ctx + "/car-detail")
         || uri.startsWith(ctx + "/booking-success")
+        || uri.startsWith(ctx + "/changepassword")
         || uri.contains("/assets/")) {
 
     chain.doFilter(req, res);
