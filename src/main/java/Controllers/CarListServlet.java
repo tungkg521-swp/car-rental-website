@@ -39,6 +39,17 @@ public class CarListServlet extends HttpServlet {
         }
     }
 
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String action = request.getParameter("action");
+        if ("update".equals(action)) {
+            handleUpdate(request, response);
+        } else {
+            doGet(request, response);
+        }
+    }
+
     private void listCars(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
