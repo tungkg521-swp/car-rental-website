@@ -1,32 +1,23 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package Controllers;
 
 import DALs.CustomerDAO;
+import DALs.AccountDAO;
 import java.io.IOException;
-import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import models.AccountModel;
 import models.CustomerModel;
-import models.UserModel;
 import service.AuthenticationService;
 
-/**
- *
- * @author ADMIN
- */
 public class LoginServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         request.getRequestDispatcher("/views/login.jsp")
                 .forward(request, response);
     }
@@ -53,14 +44,17 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-        // LOGIN SUCCESS
         HttpSession session = request.getSession(true);
         session.setAttribute("ACCOUNT", account);
 
-        CustomerModel customer
-                = new CustomerDAO().getByAccountId(account.getAccountId());
+        CustomerDAO customerDAO = new CustomerDAO();
+        CustomerModel customer = customerDAO.getByAccountId(account.getAccountId());
 
         session.setAttribute("CUSTOMER", customer);
+
+        // UPDATE LAST LOGIN TIME
+        AccountDAO accountDAO = new AccountDAO();
+        accountDAO.updateLastLogin(account.getAccountId());
 
         response.sendRedirect(request.getContextPath() + "/home");
     }
