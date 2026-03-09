@@ -96,87 +96,124 @@ public class BookingServlet extends HttpServlet {
     }
 
     private void showCreateBooking(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+        throws ServletException, IOException {
 
-        // 1. Check session
-        HttpSession session = request.getSession(false);
-        if (session == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
 
-        // 2. Lấy account từ session
-        AccountModel account = (AccountModel) session.getAttribute("ACCOUNT");
 
-        if (account == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
+    // 1. Check session
+    HttpSession session = request.getSession(false);
 
-        // 3. Lấy customer theo accountId
-        CustomerDAO customerDAO = new CustomerDAO();
-        CustomerModel customer = customerDAO.getByAccountId(account.getAccountId());
 
-        if (customer == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
+    if (session == null) {
+        response.sendRedirect(request.getContextPath() + "/login");
+        return;
+    }
 
-        // 4. Lấy carId
-        String carIdRaw = request.getParameter("carId");
-        if (carIdRaw == null) {
-            response.sendRedirect(request.getContextPath() + "/cars");
-            return;
-        }
+    // 2. Lấy account từ session
+    AccountModel account = (AccountModel) session.getAttribute("ACCOUNT");
 
-        int carId;
-        try {
-            carId = Integer.parseInt(carIdRaw);
-        } catch (NumberFormatException e) {
-            response.sendRedirect(request.getContextPath() + "/cars");
-            return;
-        }
 
-        // 🚨 CHECK GPLX VERIFIED (PHẢI SAU KHI CÓ carId)
-        if (!customer.isLicenseVerified()) {
+    if (account != null) {
+        System.out.println("ACCOUNT ID = " + account.getAccountId());
+    }
 
-            request.setAttribute("LICENSE_REQUIRED", true);
+    if (account == null) {
+        System.out.println("ACCOUNT NULL -> REDIRECT LOGIN");
+        response.sendRedirect(request.getContextPath() + "/login");
+        return;
+    }
 
-            CarService carService = new CarService();
-            CarModel car = carService.getCarById(carId);
+    // 3. Lấy customer theo accountId
+    CustomerDAO customerDAO = new CustomerDAO();
+    CustomerModel customer = customerDAO.getByAccountId(account.getAccountId());
 
-            request.setAttribute("car", car);
+    System.out.println("CUSTOMER = " + customer);
 
-            request.getRequestDispatcher("/views/car-detail.jsp")
-                    .forward(request, response);
-            return;
-        }
+    if (customer != null) {
+        System.out.println("CUSTOMER ID = " + customer.getCustomerId());
+        System.out.println("LICENSE VERIFIED = " + customer.isLicenseVerified());
+    }
 
-        // 5. Load xe
+    if (customer == null) {
+        System.out.println("CUSTOMER NULL -> REDIRECT LOGIN");
+        response.sendRedirect(request.getContextPath() + "/login");
+        return;
+    }
+
+    // 4. Lấy carId
+    String carIdRaw = request.getParameter("carId");
+    System.out.println("CAR ID RAW = " + carIdRaw);
+
+    if (carIdRaw == null) {
+        System.out.println("CAR ID NULL -> REDIRECT CARS");
+        response.sendRedirect(request.getContextPath() + "/cars");
+        return;
+    }
+
+    int carId;
+    try {
+        carId = Integer.parseInt(carIdRaw);
+        System.out.println("CAR ID PARSED = " + carId);
+    } catch (NumberFormatException e) {
+        System.out.println("CAR ID PARSE ERROR -> REDIRECT CARS");
+        response.sendRedirect(request.getContextPath() + "/cars");
+        return;
+    }
+
+    // 🚨 CHECK GPLX VERIFIED
+    if (!customer.isLicenseVerified()) {
+
+
+        request.setAttribute("LICENSE_REQUIRED", true);
+
         CarService carService = new CarService();
         CarModel car = carService.getCarById(carId);
 
-        if (car == null) {
-            response.sendRedirect(request.getContextPath() + "/cars");
-            return;
-        }
 
-        if (!"AVAILABLE".equalsIgnoreCase(car.getStatus())) {
-            response.sendRedirect(
-                    request.getContextPath() + "/car-detail?carId=" + carId
-            );
-            return;
-        }
-
-        // 6. Set data cho JSP
-        request.setAttribute("account", account);
-        request.setAttribute("customer", customer);
         request.setAttribute("car", car);
 
-        // 7. Forward
-        request.getRequestDispatcher("/views/booking.jsp")
+        request.getRequestDispatcher("/views/car-detail.jsp")
                 .forward(request, response);
+        return;
     }
+
+    // 5. Load xe
+    CarService carService = new CarService();
+    CarModel car = carService.getCarById(carId);
+
+    System.out.println("CAR LOADED = " + car);
+
+    if (car != null) {
+        System.out.println("CAR STATUS = " + car.getStatus());
+    }
+
+    if (car == null) {
+        System.out.println("CAR NULL -> REDIRECT CARS");
+        response.sendRedirect(request.getContextPath() + "/cars");
+        return;
+    }
+
+    if (!"AVAILABLE".equalsIgnoreCase(car.getStatus())) {
+        System.out.println("CAR NOT AVAILABLE -> REDIRECT CAR DETAIL");
+        response.sendRedirect(
+                request.getContextPath() + "/car-detail?carId=" + carId
+        );
+        return;
+    }
+
+    // 6. Set data cho JSP
+    System.out.println("SET ATTRIBUTE ACCOUNT CUSTOMER CAR");
+
+    request.setAttribute("account", account);
+    request.setAttribute("customer", customer);
+    request.setAttribute("car", car);
+
+    // 7. Forward
+    System.out.println("FORWARD -> /views/booking.jsp");
+
+    request.getRequestDispatcher("/views/booking.jsp")
+            .forward(request, response);
+}
 
     private void createBooking(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -444,6 +481,7 @@ public class BookingServlet extends HttpServlet {
     private void showBookingSuccess(HttpServletRequest request,
         HttpServletResponse response)
         throws ServletException, IOException {
+        
 
     HttpSession session = request.getSession(false);
 
@@ -451,9 +489,10 @@ public class BookingServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/home");
         return;
     }
-
+    
     // chỉ xóa session booking nếu có
     session.removeAttribute("LAST_BOOKING");
+    
 
     request.getRequestDispatcher("/views/booking-success.jsp")
             .forward(request, response);

@@ -45,3 +45,17 @@ function enableLicenseEdit() {
         saveBtn.style.display = 'inline-block';
     }
 }
+
+function showChangePassword() {
+
+    document.getElementById("profileInfoSection").style.display = "none";
+    document.getElementById("changePasswordSection").style.display = "block";
+
+}
+
+function showProfile() {
+
+    document.getElementById("profileInfoSection").style.display = "block";
+    document.getElementById("changePasswordSection").style.display = "none";
+
+}

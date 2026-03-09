@@ -23,21 +23,20 @@ public class AuthFilter implements Filter {
         String uri = request.getRequestURI();
         String ctx = request.getContextPath();
 
-       // ===== 1) GUEST URLs =====
-if (uri.equals(ctx + "/")
-        || uri.startsWith(ctx + "/home")
-        || uri.startsWith(ctx + "/login")
-        || uri.startsWith(ctx + "/register")   // ← THÊM DÒNG NÀY
-        || uri.startsWith(ctx + "/logout")
-        || uri.startsWith(ctx + "/cars")
-        || uri.startsWith(ctx + "/car-detail")
-        || uri.startsWith(ctx + "/booking-success")
-        || uri.startsWith(ctx + "/changepassword")
-        || uri.contains("/assets/")) {
+        // ===== 1) GUEST URLs =====
+        if (uri.equals(ctx + "/")
+                || uri.startsWith(ctx + "/home")
+                || uri.startsWith(ctx + "/login")
+                || uri.startsWith(ctx + "/register") // ← THÊM DÒNG NÀY
+                || uri.startsWith(ctx + "/logout")
+                || uri.startsWith(ctx + "/cars")
+                || uri.startsWith(ctx + "/car-detail")
+                || uri.startsWith(ctx + "/booking-success")
+                || uri.contains("/assets/")) {
 
-    chain.doFilter(req, res);
-    return;
-}
+            chain.doFilter(req, res);
+            return;
+        }
         // Cho staff vào trực tiếp (tạm thời)
         if (uri.contains("/staff")) {
             chain.doFilter(req, res);

@@ -21,10 +21,10 @@
         <div class="container my-4">
 
             <c:if test="${not empty errorMessage}">
-    <div id="errorAlert" class="alert alert-danger">
-        ${errorMessage}
-    </div>
-</c:if>
+                <div id="errorAlert" class="alert alert-danger">
+                    ${errorMessage}
+                </div>
+            </c:if>
 
             <!-- BACK LINK -->
             <a href="${pageContext.request.contextPath}/cars?action=detail&id=${car.carId}"
@@ -35,9 +35,9 @@
 
 
             <form action="${pageContext.request.contextPath}/booking"
-      method="post"
-      id="bookingForm"
-      onsubmit="return validateBooking()">
+                  method="post"
+                  id="bookingForm"
+                  onsubmit="return validateBooking()">
 
                 <!-- HIDDEN -->
                 <input type="hidden" name="action" value="create">
@@ -68,37 +68,37 @@
                         <!-- CAR INFO -->
                         <!-- CAR INFO -->
                         <div class="card mb-4">
-    <div class="card-body">
+                            <div class="card-body">
 
-        <h5 class="section-title">🚗 Thông tin xe</h5>
+                                <h5 class="section-title">🚗 Thông tin xe</h5>
 
-        <h6 class="car-title">${car.modelName}</h6>
+                                <h6 class="car-title">${car.modelName}</h6>
 
-        <p class="text-muted mb-2">
-            ${car.brandName} • ${car.typeName}
-        </p>
+                                <p class="text-muted mb-2">
+                                    ${car.brandName} • ${car.typeName}
+                                </p>
 
-        <ul class="car-specs">
-            <li>🚗 ${car.seatCount} chỗ</li>
-            <li>⚡ ${car.fuelType}</li>
-            <li>⚙️ ${car.transmission}</li>
-            <li>📅 ${car.modelYear}</li>
-        </ul>
+                                <ul class="car-specs">
+                                    <li>🚗 ${car.seatCount} chỗ</li>
+                                    <li>⚡ ${car.fuelType}</li>
+                                    <li>⚙️ ${car.transmission}</li>
+                                    <li>📅 ${car.modelYear}</li>
+                                </ul>
 
-        <p class="price-text">
-            Giá thuê:
-            <strong>
-                <fmt:formatNumber value="${car.pricePerDay}" pattern="#,###"/>
-            </strong>
-            VND / ngày
-        </p>
-        
-        <input type="hidden" id="pricePerDayRaw" value="${car.pricePerDay}">
+                                <p class="price-text">
+                                    Giá thuê:
+                                    <strong>
+                                        <fmt:formatNumber value="${car.pricePerDay}" pattern="#,###"/>
+                                    </strong>
+                                    VND / ngày
+                                </p>
 
-        <span class="badge bg-success">Còn xe</span>
+                                <input type="hidden" id="pricePerDayRaw" value="${car.pricePerDay}">
 
-    </div>
-</div>
+                                <span class="badge bg-success">Còn xe</span>
+
+                            </div>
+                        </div>
 
 
                         <!-- RENTAL DATE -->

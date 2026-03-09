@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 
+import service.ProfileService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.HttpServlet;
@@ -32,50 +33,53 @@ public class ProfileServlet extends HttpServlet {
     private CustomerService customerService = new CustomerService();
 
     @Override
-    protected void doGet(HttpServletRequest request,
-            HttpServletResponse response)
-            throws ServletException, IOException {
+protected void doGet(HttpServletRequest request,
+        HttpServletResponse response)
+        throws ServletException, IOException {
 
-        HttpSession session = request.getSession(false);
+    HttpSession session = request.getSession(false);
 
-        if (session == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-
-        AccountModel account
-                = (AccountModel) session.getAttribute("ACCOUNT");
-
-        if (account == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-
-        // Lấy thông tin customer
-        CustomerModel customer
-                = customerService.getProfileByAccountId(
-                        account.getAccountId());
-
-        if (customer == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-
-        request.setAttribute("CUSTOMER_PROFILE", customer);
-
-        // Lấy license
-        DriverLicenseService licenseService
-                = new DriverLicenseService();
-
-        DriverLicenseModel license
-                = licenseService.getByCustomerId(
-                        customer.getCustomerId());
-
-        request.setAttribute("LICENSE", license);
-
-        request.getRequestDispatcher("/views/profile.jsp")
-                .forward(request, response);
+    if (session == null) {
+        response.sendRedirect(request.getContextPath() + "/login");
+        return;
     }
+
+    AccountModel account =
+            (AccountModel) session.getAttribute("ACCOUNT");
+
+    if (account == null) {
+        response.sendRedirect(request.getContextPath() + "/login");
+        return;
+    }
+
+    String action = request.getParameter("action");
+
+    // ===== CHANGE PASSWORD PAGE =====
+    if ("changePassword".equals(action)) {
+        request.getRequestDispatcher("/views/change-password.jsp")
+                .forward(request, response);
+        return;
+    }
+
+    // ===== PROFILE PAGE =====
+    CustomerModel customer =
+            customerService.getProfileByAccountId(
+                    account.getAccountId());
+
+    request.setAttribute("CUSTOMER_PROFILE", customer);
+
+    DriverLicenseService licenseService =
+            new DriverLicenseService();
+
+    DriverLicenseModel license =
+            licenseService.getByCustomerId(
+                    customer.getCustomerId());
+
+    request.setAttribute("LICENSE", license);
+
+    request.getRequestDispatcher("/views/profile.jsp")
+            .forward(request, response);
+}
 
     @Override
     protected void doPost(HttpServletRequest request,
@@ -90,7 +94,10 @@ public class ProfileServlet extends HttpServlet {
             updateLicense(request, response);
         }else if ("requestVerification".equals(action)) {
     requestVerification(request, response);
-}
+}else if ("changePassword".equals(action)) {
+        changePassword(request, response);
+    }
+
     }
 
     /* ================= UPDATE PROFILE ================= */
@@ -109,7 +116,7 @@ public class ProfileServlet extends HttpServlet {
         }
 
         String fullName = request.getParameter("fullName");
-        String dob = request.getParameter("dob");
+        LocalDate dob = LocalDate.parse(request.getParameter("dob"));
 
         String phone = request.getParameter("phone");
         String email = request.getParameter("email");
@@ -281,6 +288,49 @@ public class ProfileServlet extends HttpServlet {
     response.sendRedirect(
             request.getContextPath()
             + "/customer/profile?msg=success");
+}
+
+private void changePassword(HttpServletRequest request,
+        HttpServletResponse response)
+        throws ServletException, IOException {
+
+    HttpSession session = request.getSession(false);
+
+    AccountModel acc =
+            (AccountModel) session.getAttribute("ACCOUNT");
+
+    if (acc == null) {
+        response.sendRedirect(request.getContextPath() + "/login");
+        return;
+    }
+
+    int accountId = acc.getAccountId();
+
+    String oldPassword = request.getParameter("oldPassword");
+    String newPassword = request.getParameter("newPassword");
+    String confirmPassword = request.getParameter("confirmPassword");
+
+    ProfileService service = new ProfileService();
+
+    String result = service.changePassword(
+            accountId,
+            oldPassword,
+            newPassword,
+            confirmPassword
+    );
+
+    if ("SUCCESS".equals(result)) {
+
+        request.setAttribute("success", "Đổi mật khẩu thành công!");
+
+    } else {
+
+        request.setAttribute("error", result);
+
+    }
+
+    request.getRequestDispatcher("/views/change-password.jsp")
+            .forward(request, response);
 }
 
 }

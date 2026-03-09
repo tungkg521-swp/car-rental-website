@@ -25,7 +25,6 @@ public class BookingService {
     private final ContractService contractService = new ContractService();
     private final CarDAO carDAO = new CarDAO();
 
-
     // ===== TÍNH TIỀN =====
     public BigDecimal calculateTotalPrice(
             Date startDate,
@@ -60,33 +59,32 @@ public class BookingService {
     public BookingModel getBookingDetail(int bookingId, int customerId) {
         return bookingDAO.findById(bookingId, customerId);
     }
-    
+
     public boolean cancelBooking(int bookingId, int customerId) {
 
-    BookingModel booking = bookingDAO.findById(bookingId, customerId);
+        BookingModel booking = bookingDAO.findById(bookingId, customerId);
 
-    if (booking == null) {
-        return false;
+        if (booking == null) {
+            return false;
+        }
+
+        // Chỉ cho cancel khi PENDING
+        if (!"PENDING".equalsIgnoreCase(booking.getStatus())) {
+            return false;
+        }
+
+        return bookingDAO.updateStatus(bookingId, "CANCELLED");
     }
 
-    // Chỉ cho cancel khi PENDING
-    if (!"PENDING".equalsIgnoreCase(booking.getStatus())) {
-        return false;
-    }
-
-    return bookingDAO.updateStatus(bookingId, "CANCELLED");
-}
-    
     public List<BookingModel> findAllBookings() {
-    return bookingDAO.findAllBookings();
-}
+        return bookingDAO.findAllBookings();
+    }
 
-    
     public BookingModel getBookingById(int id) {
-    return bookingDAO.findById(id);
-}
+        return bookingDAO.findById(id);
+    }
 
-public void approveBooking(int bookingId, int staffId) {
+    public void approveBooking(int bookingId, int staffId) {
 
         BookingModel booking = bookingDAO.getBookingForContract(bookingId);
 
@@ -115,10 +113,10 @@ public void approveBooking(int bookingId, int staffId) {
         contract.setDailyPrice(booking.getPricePerDay().doubleValue());
 
         double total = booking.getTotalEstimatedPrice().doubleValue();
-double deposit = total * 0.3;
+        double deposit = total * 0.3;
 
-contract.setDepositAmount(deposit);
-contract.setTotalAmount(total);
+        contract.setDepositAmount(deposit);
+        contract.setTotalAmount(total);
         contract.setSignedAt(null);
         contract.setNote("Contract created automatically after staff approved booking.");
 
@@ -129,7 +127,7 @@ contract.setTotalAmount(total);
         }
     }
 
-public void rejectBooking(int bookingId) {
+    public void rejectBooking(int bookingId) {
         BookingModel booking = bookingDAO.getById(bookingId);
 
         if (booking == null) {

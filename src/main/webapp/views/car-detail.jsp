@@ -9,7 +9,6 @@
 
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style-base.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/car-detail.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/wishlist.css">
     </head>
     <body>
 
@@ -74,23 +73,6 @@
                         </a>
 
 
-                        <c:if test="${not empty SUCCESS}">
-                            <div class="alert success">${SUCCESS}</div>
-                        </c:if>
-
-                        <c:if test="${not empty ERROR}">
-                            <div class="alert error">${ERROR}</div>
-                        </c:if>
-                        <form class="wishlist-form"
-                              action="${pageContext.request.contextPath}/wishlist?action=add"
-                              method="POST">
-
-                            <input type="hidden" name="carId" value="${car.carId}">
-                            <button type="submit" class="wishlist-btn">
-                                Thêm vào yêu thích
-                            </button>
-                        </form>
-
 
                         <a href="#" class="consult">Nhận thông tin tư vấn</a>
                     </div>
@@ -143,8 +125,8 @@
 
             </div>
         </section>
-                
-                <c:if test="${LICENSE_REQUIRED}">
+
+        <c:if test="${LICENSE_REQUIRED}">
     <div id="verifyModal" class="verify-modal">
         <div class="verify-box">
             <div class="verify-icon">!</div>
@@ -174,10 +156,8 @@
 </c:if>
 
         <script src="${pageContext.request.contextPath}/assets/js/car-detail.js"></script>
-        <script src="${pageContext.request.contextPath}/assets/js/wishlist.js"></script>
         <script src="${pageContext.request.contextPath}/assets/js/verify-license.js"></script>
+
     </body>
-
-
 </html>
 

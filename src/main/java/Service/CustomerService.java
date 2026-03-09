@@ -46,7 +46,9 @@ public class CustomerService {
         ) > 0;
     }
 
-    public List<CustomerModel> searchCustomer(String fullname, String status) {
-    return customerDAO.searchCustomer(fullname, status);
-}
+//    public List<CustomerModel> searchCustomer(String fullname, String status) {
+//    return customerDAO.searchCustomer(fullname, status);
+//}
+    
+    
 }
