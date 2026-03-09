@@ -12,6 +12,9 @@ public class ReviewModel {
     private String comment;
     private Date createdAt;
 
+    // thêm biến để lưu tên khách hàng
+    private String customerName;
+
     public ReviewModel() {
     }
 
@@ -77,5 +80,14 @@ public class ReviewModel {
 
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
+    }
+
+    // getter setter cho customerName
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
     }
 }

@@ -1,6 +1,7 @@
 package Controllers;
 
 import DALs.ReviewDAO;
+import DALs.BookingDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
 import java.io.IOException;
@@ -11,6 +12,7 @@ import models.ReviewModel;
 public class ReviewServlet extends HttpServlet {
 
     ReviewDAO reviewDAO = new ReviewDAO();
+    BookingDAO bookingDAO = new BookingDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -21,6 +23,7 @@ public class ReviewServlet extends HttpServlet {
         List<ReviewModel> reviews = reviewDAO.getReviewByCar(carId);
 
         request.setAttribute("reviews", reviews);
+        request.setAttribute("carId", carId);
 
         request.getRequestDispatcher("views/review.jsp").forward(request, response);
     }
@@ -32,17 +35,31 @@ public class ReviewServlet extends HttpServlet {
         HttpSession session = request.getSession();
         CustomerModel customer = (CustomerModel) session.getAttribute("CUSTOMER");
 
-        int customerId = customer.getCustomerId();
+        if (customer == null) {
+            response.sendRedirect("login.jsp");
+            return;
+        }
 
+        int customerId = customer.getCustomerId();
         int carId = Integer.parseInt(request.getParameter("carId"));
-        int bookingId = Integer.parseInt(request.getParameter("bookingId"));
         int rating = Integer.parseInt(request.getParameter("rating"));
         String comment = request.getParameter("comment");
 
-        ReviewModel review = new ReviewModel(customerId, carId, bookingId, rating, comment);
+        int bookingId = bookingDAO.getCompletedBooking(customerId, carId);
 
+        //  Customer chưa thuê xe
+        if (bookingId == -1) {
+
+            session.setAttribute("error", "You must rent this car before writing a review.");
+
+            response.sendRedirect("cars?action=detail&carId=" + carId);
+            return;
+        }
+
+        //  Insert review
+        ReviewModel review = new ReviewModel(customerId, carId, bookingId, rating, comment);
         reviewDAO.insertReview(review);
 
-        response.sendRedirect("review?carId=" + carId);
+        response.sendRedirect("cars?action=detail&carId=" + carId);
     }
 }

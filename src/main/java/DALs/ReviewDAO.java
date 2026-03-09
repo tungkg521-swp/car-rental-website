@@ -12,7 +12,14 @@ public class ReviewDAO extends DBContext {
 
         List<ReviewModel> list = new ArrayList<>();
 
-        String sql = "SELECT * FROM reviews WHERE car_id = ? ORDER BY created_at DESC";
+        String sql = """
+                     SELECT r.*, c.full_name
+                     FROM reviews r
+                     JOIN customer c
+                     ON r.customer_id = c.customer_id
+                     WHERE r.car_id = ?
+                     ORDER BY r.created_at DESC
+                     """;
 
         try {
 
@@ -32,6 +39,9 @@ public class ReviewDAO extends DBContext {
                 r.setRating(rs.getInt("rating"));
                 r.setComment(rs.getString("comment"));
                 r.setCreatedAt(rs.getTimestamp("created_at"));
+
+                // lấy tên khách hàng
+                r.setCustomerName(rs.getString("full_name"));
 
                 list.add(r);
             }

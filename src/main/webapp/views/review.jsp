@@ -1,29 +1,37 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <!DOCTYPE html>
 <html>
     <head>
-
+        <meta charset="UTF-8">
         <title>Car Reviews</title>
 
         <style>
 
             body{
-                font-family: Arial;
+                font-family: Arial, Helvetica, sans-serif;
                 margin:40px;
+                background:#f5f5f5;
             }
 
             .review-box{
+                background:white;
                 border:1px solid #ddd;
                 padding:15px;
                 margin-bottom:15px;
                 border-radius:8px;
             }
 
+            .customer-name{
+                font-weight:bold;
+                margin-bottom:5px;
+            }
+
             .rating{
                 color:orange;
                 font-weight:bold;
+                margin-bottom:5px;
             }
 
             textarea{
@@ -40,17 +48,27 @@
                 cursor:pointer;
             }
 
-        </style>
+            button:hover{
+                background:#1a5fd0;
+            }
 
+        </style>
     </head>
 
     <body>
 
         <h2>Customer Reviews</h2>
 
-        <c:forEach var="r" items="${reviews}">
+        <c:if test="${not empty error}">
+            <p style="color:red">${error}</p>
+        </c:if>
 
+        <c:forEach var="r" items="${reviews}">
             <div class="review-box">
+
+                <div class="customer-name">
+                    👤 ${r.customerName}
+                </div>
 
                 <div class="rating">
                     ⭐ ${r.rating}/5
@@ -60,44 +78,48 @@
                     ${r.comment}
                 </div>
 
-                <div>
+                <div style="font-size:12px;color:gray">
                     ${r.createdAt}
                 </div>
 
             </div>
-
         </c:forEach>
 
         <hr>
 
-        <h3>Write Review</h3>
+        <c:if test="${sessionScope.CUSTOMER != null}">
 
-        <form action="review" method="post">
+            <h3>Write Review</h3>
 
-            <input type="hidden" name="carId" value="${param.carId}">
-            <input type="hidden" name="bookingId" value="${param.bookingId}">
+            <form action="${pageContext.request.contextPath}/review" method="post">
 
-            <label>Rating</label>
+                <input type="hidden" name="carId" value="${carId}">
 
-            <select name="rating">
+                <label>Rating</label>
 
-                <option value="5">⭐⭐⭐⭐⭐</option>
-                <option value="4">⭐⭐⭐⭐</option>
-                <option value="3">⭐⭐⭐</option>
-                <option value="2">⭐⭐</option>
-                <option value="1">⭐</option>
+                <select name="rating">
+                    <option value="5">5 - ⭐⭐⭐⭐⭐</option>
+                    <option value="4">4 - ⭐⭐⭐⭐</option>
+                    <option value="3">3 - ⭐⭐⭐</option>
+                    <option value="2">2 - ⭐⭐</option>
+                    <option value="1">1 - ⭐</option>
+                </select>
 
-            </select>
+                <br><br>
 
-            <br><br>
+                <textarea name="comment" placeholder="Write your review"></textarea>
 
-            <textarea name="comment" placeholder="Write your review"></textarea>
+                <br><br>
 
-            <br><br>
+                <button type="submit">Submit Review</button>
 
-            <button type="submit">Submit Review</button>
+            </form>
 
-        </form>
+        </c:if>
+
+        <c:if test="${sessionScope.CUSTOMER == null}">
+            <p>Please <a href="login.jsp">login</a> to write a review.</p>
+        </c:if>
 
     </body>
 </html>

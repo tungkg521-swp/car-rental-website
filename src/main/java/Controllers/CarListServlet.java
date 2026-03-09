@@ -12,6 +12,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import models.CarModel;
 import service.CarService;
+import DALs.ReviewDAO;
+import models.ReviewModel;
 
 /**
  *
@@ -67,22 +69,27 @@ public class CarListServlet extends HttpServlet {
             return;
         }
 
+        ReviewDAO reviewDAO = new ReviewDAO();
+        List<ReviewModel> reviews = reviewDAO.getReviewByCar(carId);
+
         request.setAttribute("car", car);
+        request.setAttribute("reviews", reviews);
+
         request.getRequestDispatcher("/views/car-detail.jsp")
                 .forward(request, response);
     }
 
-  private void searchCar(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
-    String keyword = request.getParameter("keyword");
-    List<CarModel> list;
-    if (keyword == null || keyword.trim().isEmpty()) {
-        list = carService.findAllAvailableCars();
-    } else {
-        list = carService.searchCars(keyword);
+    private void searchCar(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String keyword = request.getParameter("keyword");
+        List<CarModel> list;
+        if (keyword == null || keyword.trim().isEmpty()) {
+            list = carService.findAllAvailableCars();
+        } else {
+            list = carService.searchCars(keyword);
+        }
+        request.setAttribute("cars", list);  // SỬA: "cars" thay vì "carList"
+        request.getRequestDispatcher("/views/car-list.jsp").forward(request, response);
     }
-    request.setAttribute("cars", list);  // SỬA: "cars" thay vì "carList"
-    request.getRequestDispatcher("/views/car-list.jsp").forward(request, response);
-}
 
 }
