@@ -48,4 +48,8 @@ public class CustomerService {
     public List<CustomerModel> searchCustomer(String fullname, String status) {
     return customerDAO.searchCustomer(fullname, status);
 }
+    
+    public boolean updateStatusAccount(int accountId, String status) {
+    return customerDAO.updateStatusAccount(accountId, status) > 0;
+}
 }
