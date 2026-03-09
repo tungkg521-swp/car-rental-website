@@ -5,6 +5,7 @@ import java.util.List;
 import DALs.VoucherDAO;
 import models.VoucherModel;
 
+
 public class VoucherService {
 
     private final VoucherDAO voucherDAO = new VoucherDAO();
@@ -15,12 +16,16 @@ public class VoucherService {
     }
 
     // Get voucher by ID
-    public VoucherModel getVoucherById(int voucherId) {
+
+    public Object getVoucherById(int voucherId) {
+
         return voucherDAO.findById(voucherId);
     }
 
     // Get voucher by code
-    public VoucherModel getVoucherByCode(String code) {
+
+    public Object getVoucherByCode(String code) {
+
         return voucherDAO.findByCode(code);
     }
 

@@ -1,12 +1,17 @@
 package DALs;
 
+
+import models.VoucherModel;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import models.VoucherModel;
+
+
+
 import Utils.DBContext;
 
 public class VoucherDAO extends DBContext {
@@ -16,26 +21,30 @@ public class VoucherDAO extends DBContext {
     }
 
     // Get all vouchers
-    public List<VoucherModel> getAllVouchers() {
-        List<VoucherModel> list = new ArrayList<>();
-        String sql = """
-            SELECT voucher_id, code, discount_type, discount_value, start_date, end_date, 
-                   status, created_at, max_uses, used_count, min_booking_amount
-            FROM voucher
-            ORDER BY voucher_id DESC
-            """;
 
-        try (PreparedStatement ps = connection.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            
-            while (rs.next()) {
-                list.add(mapResultSetToVoucher(rs));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+   public List<VoucherModel> getAllVouchers() {
+    List<VoucherModel> list = new ArrayList<>();
+
+    String sql = """
+        SELECT voucher_id, code, discount_type, discount_value, start_date, end_date, 
+               status, created_at, max_uses, used_count, min_booking_amount
+        FROM voucher
+        ORDER BY voucher_id ASC
+        """;
+
+    try (PreparedStatement ps = connection.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+
+        while (rs.next()) {
+            list.add(mapResultSetToVoucher(rs));
         }
-        return list;
+
+    } catch (SQLException e) {
+        e.printStackTrace();
     }
+
+    return list;
+}
 
     // Find voucher by ID
     public VoucherModel findById(int voucherId) {

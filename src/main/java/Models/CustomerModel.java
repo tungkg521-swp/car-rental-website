@@ -13,6 +13,7 @@ public class CustomerModel {
     private String status;
     private LocalDateTime createdAt;
     private int accountId;
+    private String statusAccount;
     private String address;
     private LocalDate dob;
 
@@ -32,6 +33,14 @@ public class CustomerModel {
 
     public String getFullName() {
         return fullName;
+    }
+
+    public String getStatusAccount() {
+        return statusAccount;
+    }
+
+    public void setStatusAccount(String statusAccount) {
+        this.statusAccount = statusAccount;
     }
 
     public void setFullName(String fullName) {
