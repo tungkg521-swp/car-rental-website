@@ -1,12 +1,13 @@
 package DALs;
 
+import Models.CustomerModel;
 import Utils.DBContext;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
-import models.CustomerModel;
+
 
 public class CustomerDAO extends DBContext {
 

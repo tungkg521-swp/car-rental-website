@@ -1,5 +1,6 @@
-package models;
+package Models;
 
+import DALs.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
