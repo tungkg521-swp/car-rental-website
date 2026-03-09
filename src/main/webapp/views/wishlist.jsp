@@ -14,8 +14,6 @@
               href="${pageContext.request.contextPath}/assets/css/style.css">
         <link rel="stylesheet"
               href="${pageContext.request.contextPath}/assets/css/profile.css?v=4">
-        <link rel="stylesheet"
-              href="${pageContext.request.contextPath}/assets/css/wishlist.css">
     </head>
     <body>
         <jsp:include page="includes/header.jsp"/>
@@ -55,16 +53,7 @@
                 <div class="profile-card">
                     <h1 class="wishlist-title">Xe yêu thích của tôi</h1>
 
-                    <c:choose>
-
-                        <c:when test="${empty wishlist}">
-                            <div class="empty-wishlist">
-                                🚗 Bạn chưa có xe nào trong danh sách yêu thích.
-                            </div>
-                        </c:when>
-
-                        <c:otherwise>
-                            <c:forEach var="w" items="${wishlist}">
+                    <c:forEach var="w" items="${wishlist}">
                         <div class="wishlist-card">
 
                             <!-- IMAGE -->
@@ -86,28 +75,19 @@
                                 </div>
                             </div>
 
-                             <!-- ACTION -->
-                                    <div class="wishlist-action">
-                                        <div class="price-box">
+                            <!-- ACTION -->
+                            <div class="wishlist-action">
+                                <div class="price-box">
 
-                                            <div class="new-price">${w.pricePerDay}K/ngày</div>
-                                        </div>
+                                    <div class="new-price">${w.pricePerDay}K/ngày</div>
+                                </div>
 
-                                        <form action="${pageContext.request.contextPath}/wishlist?action=delete" method="POST">
-                                            <input type="hidden" name="carId" value="${w.carId}">
-                                            <button type="submit" class="btn-remove">
-                                                Bỏ thích
-                                            </button>
-                                        </form>
-                                        <a href="${pageContext.request.contextPath}/cars?action=detail&carId=${w.carId}" class="detail-link">Xem chi tiết</a>
-                                    </div>
+                                <button class="btn-remove">Bỏ thích</button>
+                                <a href="#" class="detail-link">Xem chi tiết</a>
+                            </div>
 
                         </div>
                     </c:forEach>
-                        </c:otherwise>
-
-                    </c:choose>
-                    
 
                 </div>
 

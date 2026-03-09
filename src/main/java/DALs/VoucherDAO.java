@@ -1,11 +1,15 @@
 package DALs;
 
+
 import models.VoucherModel;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+
 
 
 import Utils.DBContext;
@@ -17,6 +21,7 @@ public class VoucherDAO extends DBContext {
     }
 
     // Get all vouchers
+
    public List<VoucherModel> getAllVouchers() {
     List<VoucherModel> list = new ArrayList<>();
 
@@ -40,6 +45,7 @@ public class VoucherDAO extends DBContext {
 
     return list;
 }
+
     // Find voucher by ID
     public VoucherModel findById(int voucherId) {
         String sql = """

@@ -1,10 +1,14 @@
 package Controllers;
 
+
 import models.VoucherModel;
 import service.VoucherService;
+
 import java.io.IOException;
 import java.sql.Date;
 import java.util.List;
+
+
 
 
 import jakarta.servlet.ServletException;
@@ -73,7 +77,9 @@ public class VoucherController extends HttpServlet {
 
         try {
             int voucherId = Integer.parseInt(voucherIdRaw);
+
             Object voucher = voucherService.getVoucherById(voucherId);
+
 
             if (voucher != null) {
                 request.setAttribute("voucher", voucher);
@@ -110,7 +116,9 @@ public class VoucherController extends HttpServlet {
             }
 
             // Kiểm tra code đã tồn tại
+
             Object existingVoucher = voucherService.getVoucherByCode(code);
+
             if (existingVoucher != null) {
                 request.setAttribute("error", "Voucher code already exists. Please use a different code.");
                 request.getRequestDispatcher("/views/voucher.jsp?action=create").forward(request, response);

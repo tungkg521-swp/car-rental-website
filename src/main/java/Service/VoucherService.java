@@ -6,7 +6,6 @@ import DALs.VoucherDAO;
 import models.VoucherModel;
 
 
-
 public class VoucherService {
 
     private final VoucherDAO voucherDAO = new VoucherDAO();
@@ -17,12 +16,16 @@ public class VoucherService {
     }
 
     // Get voucher by ID
+
     public Object getVoucherById(int voucherId) {
+
         return voucherDAO.findById(voucherId);
     }
 
     // Get voucher by code
+
     public Object getVoucherByCode(String code) {
+
         return voucherDAO.findByCode(code);
     }
 
