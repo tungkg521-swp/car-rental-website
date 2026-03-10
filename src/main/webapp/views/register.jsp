@@ -24,27 +24,27 @@
 
             <div class="form-group">
                 <label>Họ và tên</label>
-                <input type="text" name="fullName" placeholder="Nhập họ và tên" required>
+               <input type="text" name="fullName" value="${fullName}" required maxlength="100">
             </div>
 
             <div class="form-group">
                 <label>Email</label>
-                <input type="email" name="email" placeholder="Nhập email" required>
+                <input type="email" name="email" value="${email}" required maxlength="100">
             </div>
 
             <div class="form-group">
                 <label>Số điện thoại</label>
-                <input type="text" name="phone" placeholder="Nhập số điện thoại" required>
+               <input type="text" name="phone" value="${phone}" required pattern="[0-9]{10}">
             </div>
 
             <div class="form-group">
                 <label>Địa chỉ</label>
-                <input type="text" name="address" placeholder="Nhập địa chỉ" required>
+              <input type="text" name="address" value="${address}" required maxlength="200">
             </div>
 
             <div class="form-group">
                 <label>Ngày sinh</label>
-                <input type="date" name="dob" required>
+              <input type="date" name="dob" value="${dob}" required>
             </div>
 
             <div class="form-group">

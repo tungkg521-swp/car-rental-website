@@ -10,6 +10,10 @@ public class ProfileService {
     public String changePassword(int account_id, String oldPassword,
             String newPassword, String confirmPassword) {
 
+        if (oldPassword.equals(newPassword)) {
+            return "New password cannot be the same as current password!";
+        }
+
         if (!newPassword.equals(confirmPassword)) {
             return "Confirm password does not match!";
         }
@@ -40,8 +44,8 @@ public class ProfileService {
             return "Password cannot be null";
         }
 
-        if (newPassword.length() < 8 || newPassword.length() > 12) {
-            return "Password must be between 8 and 12 characters";
+        if (newPassword.length() < 6 ) {
+            return "The password must have at least 6 characters.";
         }
 
         if (!newPassword.matches(".*[A-Z].*")) {
