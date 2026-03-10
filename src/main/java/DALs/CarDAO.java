@@ -41,8 +41,7 @@ public List<CarModel> findAllAvailableCars() {
         WHERE c.status = 'AVAILABLE'
     """;
 
-    try (PreparedStatement ps = connection.prepareStatement(sql);
-         ResultSet rs = ps.executeQuery()) {
+        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
         while (rs.next()) {
             list.add(new CarModel(
@@ -67,11 +66,10 @@ public List<CarModel> findAllAvailableCars() {
     }
 
     System.out.println("CAR LIST SIZE = " + list.size());
-    
+    System.out.println("Connection = " + connection);
     return list;
 }
 
-    
     public CarModel findById(int carId) {
     String sql = """
         SELECT
@@ -180,7 +178,7 @@ public List<CarModel> findAllAvailableCars() {
 
     return list;
 }
-    
+
     public boolean updateStatus(int carId, String status) {
 
     String sql = "UPDATE cars SET status = ? WHERE car_id = ?";
@@ -356,10 +354,8 @@ public List<CarModel> searchCars(String keyword) {
             int paramIndex = 1;
 
             if (keyword != null && !keyword.trim().isEmpty()) {
-                
+                ps.setString(paramIndex++, "%" + keyword.trim() + "%");
             }
-            ps.setString(paramIndex++, "%" + keyword.trim() + "%");
-            
             if (brands != null && brands.length > 0) {
                 for (String brand : brands) {
                     ps.setString(paramIndex++, brand);
@@ -415,4 +411,3 @@ public List<CarModel> searchCars(String keyword) {
         return list;
     }
 }
-
