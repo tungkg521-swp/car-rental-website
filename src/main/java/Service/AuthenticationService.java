@@ -4,8 +4,10 @@ import DALs.AccountDAO;
 import DALs.CustomerDAO;
 import Utils.DBContext;
 import java.sql.Connection;
+import java.time.LocalDate;
 import models.AccountModel;
 import models.CustomerModel;
+import java.time.Period;
 
 public class AuthenticationService extends DBContext {
 
@@ -30,20 +32,36 @@ public class AuthenticationService extends DBContext {
     }
 
     // ================= REGISTER =================
-    public void register(String fullName,
+   public void register(String fullName,
             String email,
             String password,
             String confirmPassword,
             String phone,
             String address,
-            java.time.LocalDate dob) throws Exception {
+            LocalDate dob) throws Exception {
 
-        // 1. Validate
         if (fullName == null || fullName.isBlank()
                 || email == null || email.isBlank()
                 || password == null || password.isBlank()
                 || confirmPassword == null || confirmPassword.isBlank()) {
+
             throw new Exception("All required fields must be filled!");
+        }
+
+        if (!fullName.matches("^[A-Za-zÀ-ỹ\\s]+$")) {
+            throw new Exception("Invalid full name!");
+        }
+
+        if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            throw new Exception("Invalid email format!");
+        }
+
+        if (phone == null || !phone.matches("\\d{10}")) {
+            throw new Exception("Phone number must be 10 digits!");
+        }
+
+        if (password.length() < 6) {
+            throw new Exception("Password must be at least 6 characters!");
         }
 
         if (!password.equals(confirmPassword)) {
@@ -54,11 +72,27 @@ public class AuthenticationService extends DBContext {
             throw new Exception("Email already exists!");
         }
 
-        // 2. Create Account
+        if (customerDAO.findByPhone(phone) != null) {
+            throw new Exception("Phone already exists!");
+        }
+
+        if (dob != null) {
+
+            if (dob.isAfter(LocalDate.now())) {
+                throw new Exception("Date of birth cannot be in the future!");
+            }
+
+            int age = Period.between(dob, LocalDate.now()).getYears();
+
+            if (age < 18) {
+                throw new Exception("You must be at least 18 years old!");
+            }
+        }
+
         AccountModel account = new AccountModel();
         account.setEmail(email);
         account.setPasswordHash(password);
-        account.setRoleId(2);
+        account.setRoleId(1);
         account.setStatus("ACTIVE");
 
         int accountId = accountDAO.insertAccount(account);
@@ -67,8 +101,8 @@ public class AuthenticationService extends DBContext {
             throw new Exception("Account creation failed!");
         }
 
-        // 3. Create Customer
         CustomerModel customer = new CustomerModel();
+
         customer.setFullName(fullName);
         customer.setEmail(email);
         customer.setPhone(phone);
@@ -83,4 +117,5 @@ public class AuthenticationService extends DBContext {
             throw new Exception("Customer creation failed!");
         }
     }
+
 }

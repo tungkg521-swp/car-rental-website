@@ -26,4 +26,5 @@
 
 
     </div>
+            <script src="${pageContext.request.contextPath}/assets/js/profile.js"></script>
 </body>

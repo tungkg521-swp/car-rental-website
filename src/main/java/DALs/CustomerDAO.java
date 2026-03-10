@@ -319,5 +319,57 @@ public class CustomerDAO extends DBContext {
 
         return 0;
     }
+    
+    public CustomerModel findByPhone(String phone) {
 
+        String sql = "SELECT * FROM customer WHERE phone = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            ps.setString(1, phone);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+
+                CustomerModel c = new CustomerModel();
+
+                c.setCustomerId(rs.getInt("customer_id"));
+                c.setFullName(rs.getString("full_name"));
+                c.setEmail(rs.getString("email"));
+                c.setPhone(rs.getString("phone"));
+                c.setStatus(rs.getString("status"));
+                c.setAccountId(rs.getInt("account_id"));
+                c.setAddress(rs.getString("address"));
+
+                if (rs.getDate("dob") != null) {
+                    c.setDob(rs.getDate("dob").toLocalDate());
+                }
+
+                return c;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public int updateStatus(int customerId, String status) {
+
+        String sql = "UPDATE customer SET status = ? WHERE customer_id = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            ps.setString(1, status);
+            ps.setInt(2, customerId);
+
+            return ps.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
 }
