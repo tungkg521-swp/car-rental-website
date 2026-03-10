@@ -47,6 +47,11 @@ public class LoginServlet extends HttpServlet {
             request.getRequestDispatcher("/views/login.jsp")
                     .forward(request, response);
             return;
+        }  else if (!"ACTIVE".equalsIgnoreCase(account.getStatus())) {
+            request.setAttribute("error", "Tài khoản đã bị khóa");
+            request.getRequestDispatcher("/views/login.jsp")
+                    .forward(request, response);
+            return ;
         }
 
         HttpSession session = request.getSession(true);
