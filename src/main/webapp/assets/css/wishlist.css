@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /*
 Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
 Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css to edit this template
@@ -180,3 +181,173 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css
     color: #991b1b;
 }
 
+=======
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : Mar 2, 2026, 8:28:12 AM
+    Author     : Admin
+*/
+
+/* =============================
+   WISHLIST PAGE
+============================= */
+/* TITLE */
+
+.wishlist-title{
+    font-size:28px;
+    font-weight:700;
+    margin-bottom:30px;
+}
+
+/* CONTAINER */
+
+.profile-content{
+    max-width:900px;
+}
+
+/* CARD */
+
+.wishlist-card{
+    display:flex;
+    gap:24px;
+    align-items:center;
+    padding:24px;
+    background:#fff;
+    border-radius:18px;
+    margin-bottom:20px;
+}
+
+/* IMAGE */
+
+.wishlist-image img{
+    width:240px;
+    height:150px;
+    object-fit:cover;
+    border-radius:12px;
+}
+
+/* INFO */
+
+.wishlist-info{
+    flex:1;
+}
+
+.car-title{
+    font-size:20px;
+    margin:0 0 10px;
+}
+
+.car-specs{
+    display:flex;
+    gap:15px;
+    font-size:14px;
+    color:#666;
+}
+
+/* ACTION */
+
+.wishlist-action{
+    text-align:right;
+    min-width:200px;
+    padding-left:30px;
+    border-left:1px solid #e5e7eb;
+}
+/* BUTTON */
+
+.btn-remove{
+    padding:10px 20px;
+    background:#22c55e;   /* xanh lá */
+    color:white;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:600;
+    transition:0.2s;
+}
+
+.btn-remove:hover{
+    background:#16a34a;   /* xanh lá đậm khi hover */
+}
+
+.detail-link{
+    display:block;
+    font-size:14px;
+    color:#2563eb;
+    text-decoration:none;
+}
+
+.detail-link:hover{
+    text-decoration:underline;
+}
+
+/* EMPTY */
+
+.empty-wishlist{
+    padding:40px;
+    text-align:center;
+    background:#fff;
+    border-radius:16px;
+}
+
+/* ALERT MESSAGE */
+
+.alert{
+    padding:14px 18px;
+    border-radius:10px;
+    margin-bottom:20px;
+    font-weight:600;
+    font-size:14px;
+    animation:fadeIn 0.3s ease;
+}
+
+.alert.success{
+    background:#dcfce7;
+    color:#166534;
+    border:1px solid #bbf7d0;
+}
+
+.alert.error{
+    background:#fee2e2;
+    color:#991b1b;
+    border:1px solid #fecaca;
+}
+
+/* WISHLIST BUTTON */
+
+.wishlist-form{
+    margin-top:15px;
+}
+
+.wishlist-btn{
+    padding:12px 24px;
+    background:#22c55e;      /* xanh lá */
+    color:#fff;
+    border:none;
+    border-radius:10px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:0.25s;
+}
+
+.wishlist-btn:hover{
+    background:#16a34a;      /* xanh lá đậm */
+    transform:translateY(-1px);
+}
+
+/* ANIMATION */
+
+@keyframes fadeIn{
+    from{
+        opacity:0;
+        transform:translateY(-5px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+>>>>>>> ff40f09d586c56233d65dc66d84d55a00d91b880

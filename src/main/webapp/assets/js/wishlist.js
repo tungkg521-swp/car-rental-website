@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* 
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/JavaScript.js to edit this template
@@ -11,3 +12,20 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }, 3000);
 });
+=======
+/* 
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/JavaScript.js to edit this template
+ */
+
+document.addEventListener("DOMContentLoaded", function () {
+    setTimeout(function () {
+        const alertBox = document.querySelector(".alert, .alert-message");
+        if (alertBox) {
+            alertBox.style.display = "none";
+        }
+    }, 3000);
+});
+
+
+>>>>>>> ff40f09d586c56233d65dc66d84d55a00d91b880
