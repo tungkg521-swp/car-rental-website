@@ -24,9 +24,7 @@ public class AuthenticationService extends DBContext {
             return null;
         }
 
-        if (!"ACTIVE".equalsIgnoreCase(account.getStatus())) {
-            return null;
-        }
+     
 
         return account;
     }

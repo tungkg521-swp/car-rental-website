@@ -10,8 +10,9 @@ body {
 
 .profile-wrapper {
     display: flex;
-    gap: 60px;
-    margin: 60px 80px;   /* đẩy sát 2 bên hơn */
+    gap: 40px;
+    margin: 60px auto;
+    max-width: 1200px;
 }
 
 /* =============================
@@ -70,9 +71,10 @@ body {
 ============================= */
 
 .profile-content {
-    flex: 1;
+    flex: none;
+    max-width: 900px;
+    width: 100%;
 }
-
 /* 🔥 FIX: đổi về đúng class profile-card */
 
 .profile-card {

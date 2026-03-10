@@ -147,11 +147,15 @@ removeWishlist(request,response);
     String message = service.removeFromWishlist(customerId, carId);
 
     if ("Removed successfully!".equals(message)) {
-        session.setAttribute("SUCCESS", message);
+        request.setAttribute("success", message);
     } else {
-        session.setAttribute("ERROR", message);
+        request.setAttribute("error", message);
     }
 
-    response.sendRedirect(request.getContextPath() + "/wishlist");
+    
+        List<WishlistModel> list = service.getWishlist(customerId);
+
+        request.setAttribute("wishlist", list);
+    request.getRequestDispatcher("/views/wishlist.jsp").forward(request, response);
 }
 }

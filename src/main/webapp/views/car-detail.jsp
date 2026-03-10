@@ -9,6 +9,7 @@
 
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style-base.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/car-detail.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/wishlist.css">
     </head>
     <body>
 
@@ -72,7 +73,23 @@
                             Đặt xe
                         </a>
 
+                       
+                        <form class="wishlist-form"
+                              action="${pageContext.request.contextPath}/wishlist?action=add"
+                              method="POST">
 
+                            <input type="hidden" name="carId" value="${car.carId}">
+                            <button type="submit" class="wishlist-btn">
+                                ❤️ Thêm vào yêu thích
+                            </button>
+                             <c:if test="${not empty SUCCESS}">
+                            <div class="alert success">${SUCCESS}</div>
+                        </c:if>
+
+                        <c:if test="${not empty ERROR}">
+                            <div class="alert error">${ERROR}</div>
+                        </c:if>
+                        </form>
 
                         <a href="#" class="consult">Nhận thông tin tư vấn</a>
                     </div>
@@ -127,37 +144,37 @@
         </section>
 
         <c:if test="${LICENSE_REQUIRED}">
-    <div id="verifyModal" class="verify-modal">
-        <div class="verify-box">
-            <div class="verify-icon">!</div>
+            <div id="verifyModal" class="verify-modal">
+                <div class="verify-box">
+                    <div class="verify-icon">!</div>
 
-            <p>Bạn cần xác thực <b>GPLX</b> mới có thể đặt xe.</p>
+                    <p>Bạn cần xác thực <b>GPLX</b> mới có thể đặt xe.</p>
 
-            <div class="verify-actions">
-                <a href="${pageContext.request.contextPath}/customer/profile"
-                   class="verify-btn primary">
-                    Đi xác thực ngay
-                </a>
+                    <div class="verify-actions">
+                        <a href="${pageContext.request.contextPath}/customer/profile"
+                           class="verify-btn primary">
+                            Đi xác thực ngay
+                        </a>
 
-                <button type="button"
-                        onclick="closeVerifyModal()"
-                        class="verify-btn secondary">
-                    Đóng
-                </button>
+                        <button type="button"
+                                onclick="closeVerifyModal()"
+                                class="verify-btn secondary">
+                            Đóng
+                        </button>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            openVerifyModal();
-        });
-    </script>
-</c:if>
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    openVerifyModal();
+                });
+            </script>
+        </c:if>
 
         <script src="${pageContext.request.contextPath}/assets/js/car-detail.js"></script>
         <script src="${pageContext.request.contextPath}/assets/js/verify-license.js"></script>
-
+        <script src="${pageContext.request.contextPath}/assets/js/wishlist.js"></script>
     </body>
 </html>
 
