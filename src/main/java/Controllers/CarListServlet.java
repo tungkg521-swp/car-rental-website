@@ -78,12 +78,12 @@ public class CarListServlet extends HttpServlet {
     private void searchCar(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String keyword = request.getParameter("keyword");
-        List<CarModel> list;
-        if (keyword == null || keyword.trim().isEmpty()) {
-            list = carService.findAllAvailableCars();
-        } else {
-            list = carService.searchCars(keyword);
-        }
+
+        String cleaned = (keyword == null) ? "" : keyword.trim().replaceAll("\\s+", " ");
+
+        List<CarModel> list = cleaned.isEmpty()
+                ? carService.findAllAvailableCars()
+                : carService.searchCars(cleaned);
         request.setAttribute("cars", list);
         request.setAttribute("keyword", keyword);  // Để giữ giá trị search box
         request.getRequestDispatcher("/views/car-list.jsp").forward(request, response);

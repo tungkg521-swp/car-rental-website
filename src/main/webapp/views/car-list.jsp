@@ -21,7 +21,7 @@
                 <!-- FILTER SIDEBAR -->
                 <aside class="filter">
 
-                    <!-- FORM SEARCH RIÊNG (chỉ keyword) -->
+                    <!-- FORM SEARCH -->
                     <div class="search-box">
                         <form action="${pageContext.request.contextPath}/cars" method="get">
                             <input type="hidden" name="action" value="search"/>
@@ -94,9 +94,7 @@
                         <!-- SEATS -->
                         <div class="filter-group">
                             <label>Số chỗ ngồi</label>
-                            <div class="filter-options">
-                                <button type="button" class="${param.seats == '2' ? 'active' : ''}" 
-                                        onclick="document.getElementById('seats').value = '2'; this.form.submit();">2</button>
+                            <div class="filter-options">                              
                                 <button type="button" class="${param.seats == '4' ? 'active' : ''}" 
                                         onclick="document.getElementById('seats').value = '4'; this.form.submit();">4</button>
                                 <button type="button" class="${param.seats == '5' ? 'active' : ''}" 
