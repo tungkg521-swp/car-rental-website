@@ -19,36 +19,8 @@
         <jsp:include page="includes/header.jsp"/>
 
         <div class="profile-wrapper">
-            <!-- SIDEBAR -->
-            <div class="profile-sidebar">
-                <h2 class="sidebar-title">Xin chào bạn!</h2>
-
-                <ul class="sidebar-menu">
-                    <li class="sidebar-item active">
-                        <a href="${pageContext.request.contextPath}/customer/profile">
-                            👤 Tài khoản của tôi
-                        </a>
-                    </li>
-
-                    <li class="sidebar-item active">
-                        <a href="${pageContext.request.contextPath}/wishlist?id=${sessionScope.CUSTOMER.customerId}">
-                            Xe yêu thích
-                        </a>
-                    </li>
-
-                    <li class="sidebar-item">
-                        <a href="${pageContext.request.contextPath}/">
-                            🔒 Đổi mật khẩu
-                        </a>
-                    </li>
-
-                    <li class="sidebar-item logout">
-                        <a href="${pageContext.request.contextPath}/logout">
-                            ↩ Đăng xuất
-                        </a>
-                    </li>
-                </ul>
-            </div>
+              <jsp:include page="profile-sidebar.jsp"/>
+              
             <div class="profile-content">
                 <div class="profile-card">
                     <h1 class="wishlist-title">Xe yêu thích của tôi</h1>
