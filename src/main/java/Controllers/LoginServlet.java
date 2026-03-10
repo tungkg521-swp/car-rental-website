@@ -46,6 +46,11 @@ public class LoginServlet extends HttpServlet {
             request.getRequestDispatcher("/views/login.jsp")
                     .forward(request, response);
             return;
+        } else if (!"ACTIVE".equalsIgnoreCase(account.getStatus())) {
+            request.setAttribute("error", "Tài khoản đã bị khóa");
+            request.getRequestDispatcher("/views/login.jsp")
+                    .forward(request, response);
+            return ;
         }
 
         // LOGIN SUCCESS
@@ -56,6 +61,8 @@ public class LoginServlet extends HttpServlet {
                 = new CustomerDAO().getByAccountId(account.getAccountId());
 
         session.setAttribute("CUSTOMER", customer);
+        System.out.println("ACCOUNT: " + session.getAttribute("ACCOUNT"));
+        System.out.println("CUSTOMER: " + session.getAttribute("CUSTOMER"));
 
         response.sendRedirect(request.getContextPath() + "/home");
     }

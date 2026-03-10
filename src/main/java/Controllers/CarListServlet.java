@@ -5,11 +5,12 @@
 package Controllers;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.math.BigDecimal;
 import java.util.List;
 import models.CarModel;
 import service.CarService;
@@ -32,10 +33,6 @@ public class CarListServlet extends HttpServlet {
             listCars(request, response);
         } else if (action.equals("detail")) {
             showCarDetail(request, response);
-        } else if (action.equals("search")) {
-            searchCar(request, response);
-        } else if (action.equals("filter")) {
-            filterCars(request, response);
         }
     }
 

@@ -87,8 +87,8 @@
                                class="btn-back">
                                 ← Back to My Bookings
                             </a>
-                               
-                               <!-- CANCEL BUTTON (only when PENDING) -->
+
+                            <!-- CANCEL BUTTON (only when PENDING) -->
                             <c:if test="${booking.status == 'PENDING'}">
                                 <form method="post"
                                       action="${pageContext.request.contextPath}/booking"

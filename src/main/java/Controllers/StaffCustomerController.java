@@ -57,6 +57,8 @@ public class StaffCustomerController extends HttpServlet {
         }
     }
 
+
+
     protected void doPost(HttpServletRequest request,
             HttpServletResponse response)
             throws ServletException, IOException {
@@ -95,4 +97,5 @@ public class StaffCustomerController extends HttpServlet {
         }
             
     }
+
 }
