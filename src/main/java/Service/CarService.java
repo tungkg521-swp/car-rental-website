@@ -1,9 +1,7 @@
 package service;
 
 import DALs.CarDAO;
-import DALs.CarDAO;
 import java.math.BigDecimal;
-import models.CarModel;
 import java.util.List;
 import models.CarModel;
 
