@@ -26,35 +26,42 @@ public class RegisterServlet extends HttpServlet {
         request.getRequestDispatcher("/views/register.jsp").forward(request, response);
     }
 
-  @Override
-protected void doPost(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
-    String fullName = request.getParameter("fullName");
-    String email = request.getParameter("email");
-    String password = request.getParameter("password");
-    String confirmPassword = request.getParameter("confirmPassword");
-    String phone = request.getParameter("phone");
-    String address = request.getParameter("address");
-    String dobStr = request.getParameter("dob");
+        String fullName = request.getParameter("fullName");
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+        String confirmPassword = request.getParameter("confirmPassword");
+        String phone = request.getParameter("phone");
+        String address = request.getParameter("address");
+        String dobStr = request.getParameter("dob");
 
-    java.time.LocalDate dob = null;
-    if (dobStr != null && !dobStr.isEmpty()) {
-        dob = java.time.LocalDate.parse(dobStr);
+        java.time.LocalDate dob = null;
+        if (dobStr != null && !dobStr.isEmpty()) {
+            dob = java.time.LocalDate.parse(dobStr);
+        }
+
+        AuthenticationService service = new AuthenticationService();
+
+        try {
+
+            service.register(fullName, email, password, confirmPassword, phone, address, dob);
+
+            response.sendRedirect("login");
+
+        } catch (Exception e) {
+
+            request.setAttribute("error", e.getMessage());
+
+            request.setAttribute("fullName", fullName);
+            request.setAttribute("email", email);
+            request.setAttribute("phone", phone);
+            request.setAttribute("address", address);
+            request.setAttribute("dob", dobStr);
+
+            request.getRequestDispatcher("/views/register.jsp").forward(request, response);
+        }
     }
-
-    AuthenticationService service = new AuthenticationService();
-
-    try {
-
-        service.register(fullName, email, password, confirmPassword, phone, address, dob);
-
-        response.sendRedirect("login");
-
-    } catch (Exception e) {
-
-        request.setAttribute("error", e.getMessage());
-        request.getRequestDispatcher("/views/register.jsp").forward(request, response);
-    }
-}
 }

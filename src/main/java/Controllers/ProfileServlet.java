@@ -321,8 +321,15 @@ public class ProfileServlet extends HttpServlet {
 
         if ("SUCCESS".equals(result)) {
 
-            request.setAttribute("success", "Đổi mật khẩu thành công!");
+            request.getSession().setAttribute(
+                    "success",
+                    "Đổi mật khẩu thành công!"
+            );
+            response.sendRedirect(
+                    request.getContextPath() + "/customer/profile?action=changePassword"
+            );
 
+            return;
         } else {
 
             request.setAttribute("error", result);
@@ -333,4 +340,6 @@ public class ProfileServlet extends HttpServlet {
                 .forward(request, response);
     }
 
+    
+    
 }

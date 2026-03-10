@@ -34,7 +34,7 @@ public class BookingService {
         long days = ChronoUnit.DAYS.between(
                 startDate.toLocalDate(),
                 endDate.toLocalDate()
-        ) + 1;
+        ) ;
 
         if (days < 1) {
             days = 1;
@@ -120,11 +120,11 @@ public class BookingService {
         contract.setSignedAt(null);
         contract.setNote("Contract created automatically after staff approved booking.");
 
-        boolean created = contractService.createContract(contract);
+          contractService.createContract(contract);
 
-        if (created) {
-            carDAO.updateStatus(booking.getCarId(), "RESERVED");
-        }
+  
+          carDAO.updateStatus(booking.getCarId(), "BOOKED");
+        
     }
 
     public void rejectBooking(int bookingId) {
