@@ -137,5 +137,4 @@ public class AuthenticationService extends DBContext {
             throw new Exception("Customer creation failed!");
         }
     }
-
 }

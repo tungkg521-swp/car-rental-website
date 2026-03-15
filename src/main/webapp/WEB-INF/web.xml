@@ -1,19 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd"
-         version="5.0">
-    
+<web-app version="5.0" xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd">
+    <servlet>
+        <servlet-name>ReviewServlet</servlet-name>
+        <servlet-class>Controllers.ReviewServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>default</servlet-name>
         <url-pattern>/assets/*</url-pattern>
     </servlet-mapping>
-    
     <servlet>
         <servlet-name>HomeServlet</servlet-name>
         <servlet-class>Controllers.HomeServlet</servlet-class>
     </servlet>
-    
     <servlet-mapping>
         <servlet-name>HomeServlet</servlet-name>
         <url-pattern>/</url-pattern>
@@ -28,7 +26,6 @@
         <url-pattern>/cars</url-pattern>
      
     </servlet-mapping>
-    
     <servlet>
         <servlet-name>WishlistController</servlet-name>
         <servlet-class>Controllers.WishlistController</servlet-class>
@@ -37,7 +34,6 @@
         <servlet-name>WishlistController</servlet-name>
         <url-pattern>/wishlist</url-pattern>
     </servlet-mapping>
-    
     <servlet>
         <servlet-name>LoginServlet</servlet-name>
         <servlet-class>Controllers.LoginServlet</servlet-class>
@@ -50,12 +46,10 @@
         <servlet-name>RegisterServlet</servlet-name>
         <servlet-class>Controllers.RegisterServlet</servlet-class>
     </servlet>
-
     <servlet-mapping>
         <servlet-name>RegisterServlet</servlet-name>
         <url-pattern>/register</url-pattern>
     </servlet-mapping>
-    
     <servlet>
         <servlet-name>BookingSuccess</servlet-name>
         <servlet-class>Controllers.BookingSuccess</servlet-class>
@@ -65,17 +59,21 @@
         <servlet-name>BookingSuccess</servlet-name>
         <url-pattern>/booking-success</url-pattern>
     </servlet-mapping>
-    
     <servlet>
         <servlet-name>Booking</servlet-name>
         <servlet-class>Controllers.BookingServlet</servlet-class>
     </servlet>
-
     <servlet-mapping>
         <servlet-name>Booking</servlet-name>
         <url-pattern>/booking</url-pattern>
         <url-pattern>/customer/bookings</url-pattern>
     </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>ReviewServlet</servlet-name>
+        <url-pattern>/review</url-pattern>
+    </servlet-mapping>
+
     
     <!-- PROFILE -->
     <servlet>
@@ -89,13 +87,13 @@
     </servlet-mapping>
 
     
+
     <session-config>
         <session-timeout>
             30
         </session-timeout>
     </session-config>
-    
-     <filter>
+    <filter>
         <filter-name>AuthFilter</filter-name>
         <filter-class>Filters.AuthFilter</filter-class>
     </filter>

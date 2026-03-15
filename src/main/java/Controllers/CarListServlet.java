@@ -13,6 +13,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import models.CarModel;
 import service.CarService;
+import DALs.ReviewDAO;
+import models.ReviewModel;
 
 /**
  *
@@ -70,7 +72,12 @@ public class CarListServlet extends HttpServlet {
             return;
         }
 
+        ReviewDAO reviewDAO = new ReviewDAO();
+        List<ReviewModel> reviews = reviewDAO.getReviewByCar(carId);
+
         request.setAttribute("car", car);
+        request.setAttribute("reviews", reviews);
+
         request.getRequestDispatcher("/views/car-detail.jsp")
                 .forward(request, response);
     }
@@ -78,6 +85,9 @@ public class CarListServlet extends HttpServlet {
     private void searchCar(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String keyword = request.getParameter("keyword");
+
+       
+
 
         String cleaned = (keyword == null) ? "" : keyword.trim().replaceAll("\\s+", " ");
 
@@ -126,3 +136,4 @@ public class CarListServlet extends HttpServlet {
         request.getRequestDispatcher("/views/car-list.jsp").forward(request, response);
     }
 }
+
