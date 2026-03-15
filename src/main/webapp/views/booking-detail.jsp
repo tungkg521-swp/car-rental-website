@@ -35,9 +35,37 @@
                         <h2>Booking #${booking.bookingId}</h2>
 
                         <!-- STATUS BADGE -->
-                        <div class="status ${booking.status}">
-                            ${booking.status}
-                        </div>
+                        <c:choose>
+
+                            <c:when test="${booking.status == 'PENDING'}">
+                                <span class="status pending">Waiting Approval</span>
+                            </c:when>
+
+                            <c:when test="${booking.contractStatus == 'CREATED'}">
+                                <span class="status confirmed">Approved</span>
+                            </c:when>
+
+                            <c:when test="${booking.contractStatus == 'ACTIVE'}">
+                                <span class="status active">Renting</span>
+                            </c:when>
+
+                            <c:when test="${booking.contractStatus == 'COMPLETED'}">
+                                <span class="status completed">Completed</span>
+                            </c:when>
+
+                            <c:when test="${booking.status == 'REJECTED'}">
+                                <span class="status rejected">Rejected</span>
+                            </c:when>
+
+                            <c:when test="${booking.status == 'CANCELLED'}">
+                                <span class="status cancelled">Cancelled</span>
+                            </c:when>
+
+                            <c:otherwise>
+                                <span class="status">${booking.status}</span>
+                            </c:otherwise>
+
+                        </c:choose>
 
                         <!-- BOOKING INFO -->
                         <ul class="detail-info">

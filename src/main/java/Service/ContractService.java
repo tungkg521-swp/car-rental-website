@@ -4,6 +4,8 @@
  */
 package service;
 
+import DALs.BookingDAO;
+import DALs.CarDAO;
 import DALs.ContractDAO;
 import models.ContractModel;
 import java.util.List;
@@ -15,6 +17,8 @@ import java.util.List;
 public class ContractService {
 
     private final ContractDAO contractDAO = new ContractDAO();
+    private final BookingDAO bookingDAO = new BookingDAO();
+    private final CarDAO carDAO = new CarDAO();
 
     public boolean createContract(ContractModel contract) {
         return contractDAO.createContract(contract);
@@ -29,7 +33,40 @@ public class ContractService {
     }
 
     public boolean updateContractStatus(int contractId, String status) {
-        return contractDAO.updateContractStatus(contractId, status);
+
+        ContractModel contract = contractDAO.getContractById(contractId);
+
+        if (contract == null) {
+            return false;
+        }
+
+        boolean updated = contractDAO.updateContractStatus(contractId, status);
+
+        if (!updated) {
+            return false;
+        }
+
+        // CANCEL CONTRACT
+        if ("CANCELLED".equalsIgnoreCase(status)) {
+
+            bookingDAO.updateStatus(contract.getBookingId(), "CANCELLED");
+
+            carDAO.updateStatus(contract.getCarId(), "AVAILABLE");
+        }
+
+        // ACTIVATE CONTRACT (giao xe)
+        if ("ACTIVE".equalsIgnoreCase(status)) {
+
+            carDAO.updateStatus(contract.getCarId(), "BOOKED");
+        }
+
+        // RETURN CAR
+        if ("COMPLETED".equalsIgnoreCase(status)) {
+
+            carDAO.updateStatus(contract.getCarId(), "AVAILABLE");
+        }
+
+        return true;
     }
 
     public boolean existsByBookingId(int bookingId) {
