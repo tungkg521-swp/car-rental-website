@@ -74,6 +74,13 @@
             </a>
         </li>
 
+        <!-- NOTIFICATION -->
+        <li>
+            <a href="${pageContext.request.contextPath}/staff/notification">
+                <i class="icon">🔔</i>
+                <span>Notification</span>
+            </a>
+        </li>
     </ul>
 
     <!-- FOOTER -->

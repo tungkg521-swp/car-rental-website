@@ -29,6 +29,11 @@
                 <a href="${pageContext.request.contextPath}/cars">Thuê xe</a>
                 <a href="#">Khuyến mãi</a>
                 <a href="#">Giới thiệu</a>
+                <c:if test="${not empty sessionScope.ACCOUNT}">
+                    <div class="notification-bell" onclick="toggleNotification()">
+                        🔔
+                    </div>
+                </c:if>
             </nav>
 
             <!-- AUTH -->
@@ -75,3 +80,12 @@
 
     </div>
 </header>
+<% service.NotificationService ns = new service.NotificationService();
+                    models.AccountModel acc = (models.AccountModel) session.getAttribute("ACCOUNT");
+                    if (acc != null) {
+                        java.util.List list = ns.getNotifications(acc.getAccountId());
+                        request.setAttribute("notifications", list);
+                    }%> <jsp:include page="/views/notifications.jsp"/>
+<jsp:include page="/views/notifications.jsp"/>
+
+
