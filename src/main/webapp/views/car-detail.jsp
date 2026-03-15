@@ -9,7 +9,9 @@
 
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style-base.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/car-detail.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/wishlist.css">
     </head>
+
     <body>
 
         <jsp:include page="includes/header.jsp"/>
@@ -18,13 +20,11 @@
             <div class="container">
 
                 <!-- TOP SECTION -->
-                <!-- TOP SECTION -->
                 <div class="car-top">
 
-                    <!-- LEFT: IMAGE -->
+                    <!-- LEFT IMAGE -->
                     <div class="car-gallery">
 
-                        <!-- ẢNH LỚN -->
                         <div class="main-image">
                             <button class="nav prev" onclick="prevImage()">‹</button>
 
@@ -35,7 +35,6 @@
                             <button class="nav next" onclick="nextImage()">›</button>
                         </div>
 
-                        <!-- THUMBNAILS -->
                         <div class="thumbs">
                             <c:forEach var="i" begin="1" end="5">
                                 <img src="${pageContext.request.contextPath}/assets/images/cars/${car.imageFolder}/${car.imageFolder}_${i}.jpg"
@@ -45,8 +44,9 @@
 
                     </div>
 
-                    <!-- RIGHT: INFO -->
+                    <!-- RIGHT INFO -->
                     <div class="car-summary">
+
                         <h1>
                             ${car.modelName}
                             <span class="status">${car.status}</span>
@@ -56,7 +56,9 @@
                             <fmt:formatNumber value="${car.pricePerDay}" pattern="#,###"/> VND / day
                         </div>
 
-                        <div class="badge">Miễn phí sạc tới 31/12/2027</div>
+                        <div class="badge">
+                            Miễn phí sạc tới 31/12/2027
+                        </div>
 
                         <ul class="specs">
                             <li>🚗 ${car.seatCount} chỗ</li>
@@ -73,24 +75,44 @@
                         </a>
 
 
+                        <form class="wishlist-form"
+                              action="${pageContext.request.contextPath}/wishlist?action=add"
+                              method="POST">
+
+                            <input type="hidden" name="carId" value="${car.carId}">
+
+                            <button type="submit" class="wishlist-btn">
+                                ❤️ Thêm vào yêu thích
+                            </button>
+
+                             <c:if test="${not empty SUCCESS}">
+                            <div class="alert success">${SUCCESS}</div>
+                        </c:if>
+
+                        <c:if test="${not empty ERROR}">
+                            <div class="alert error">${ERROR}</div>
+                        </c:if>
+                        </form>
+
 
                         <a href="#" class="consult">Nhận thông tin tư vấn</a>
-                    </div>
 
+                    </div>
                 </div>
 
 
-                <!-- OTHER FEATURES -->
+                <!-- DESCRIPTION -->
                 <div class="section">
                     <h2>Mô tả xe</h2>
                     <p>${car.description}</p>
                 </div>
 
-                <!-- CONDITIONS + SIMILAR -->
+
+                <!-- CONDITIONS -->
                 <div class="bottom-grid">
 
-                    <!-- CONDITIONS -->
                     <div class="conditions">
+
                         <h2>Điều kiện thuê xe</h2>
 
                         <div class="box">
@@ -113,12 +135,115 @@
                             <h4>Chính sách đặt cọc</h4>
                             <p>Đặt cọc theo quy định của chủ xe</p>
                         </div>
+
                     </div>
 
-                    <!-- SIMILAR CAR (để tạm – sẽ làm sau) -->
+
                     <div class="similar">
                         <h2>Xe tương tự</h2>
                         <p>Đang cập nhật...</p>
+                    </div>
+
+                </div>
+
+
+                <!-- REVIEWS -->
+                <div class="section review-section">
+
+                    <h2>Customer Reviews</h2>
+                    <p>Xem đánh giá từ khách hàng đã thuê xe này.</p>
+
+                    <c:if test="${empty reviews}">
+                        <div class="no-review">
+                            No reviews yet. Be the first to review this car.
+                        </div>
+                    </c:if>
+
+                    <c:forEach var="r" items="${reviews}">
+
+                        <div class="review-card">
+
+                            <div class="review-header">
+
+                                <div class="review-user">
+                                    👤 ${r.customerName}
+                                </div>
+
+                                <div class="review-stars">
+                                    <c:forEach begin="1" end="${r.rating}">
+                                        ⭐
+                                    </c:forEach>
+                                </div>
+
+                                <div class="review-date">
+                                    <fmt:formatDate value="${r.createdAt}" pattern="dd/MM/yyyy"/>
+                                </div>
+
+                            </div>
+
+                            <div class="review-comment">
+                                ${r.comment}
+                            </div>
+
+                        </div>
+
+                    </c:forEach>
+
+
+                    <div class="review-form">
+
+                        <h3>Write a Review</h3>
+
+                        <c:if test="${sessionScope.CUSTOMER != null}">
+
+                            <form action="${pageContext.request.contextPath}/review" method="post">
+
+                                <input type="hidden" name="carId" value="${car.carId}">
+
+                                <div class="form-group">
+
+                                    <label>Rating</label>
+
+                                    <select name="rating" class="rating-select">
+                                        <option value="5">⭐⭐⭐⭐⭐</option>
+                                        <option value="4">⭐⭐⭐⭐</option>
+                                        <option value="3">⭐⭐⭐</option>
+                                        <option value="2">⭐⭐</option>
+                                        <option value="1">⭐</option>
+                                    </select>
+
+                                </div>
+
+                                <div class="form-group">
+
+                                    <label>Your Review</label>
+
+                                    <textarea name="comment" rows="3"
+                                              placeholder="Write your review about this car..."></textarea>
+
+                                </div>
+
+                                <button type="submit" class="review-btn">
+                                    Submit Review
+                                </button>
+
+                                <c:if test="${not empty sessionScope.error}">
+                                    <p style="color:red; margin-top:10px;">
+                                        ${sessionScope.error}
+                                    </p>
+                                    <c:remove var="error" scope="session"/>
+                                </c:if>
+
+                            </form>
+
+                        </c:if>
+
+                        <c:if test="${sessionScope.CUSTOMER == null}">
+                            <p class="login-warning">
+                                Please login to write a review.
+                            </p>
+                        </c:if>
+
                     </div>
 
                 </div>
@@ -127,37 +252,39 @@
         </section>
 
         <c:if test="${LICENSE_REQUIRED}">
-    <div id="verifyModal" class="verify-modal">
-        <div class="verify-box">
-            <div class="verify-icon">!</div>
+            <div id="verifyModal" class="verify-modal">
+                <div class="verify-box">
+                    <div class="verify-icon">!</div>
 
-            <p>Bạn cần xác thực <b>GPLX</b> mới có thể đặt xe.</p>
+                    <p>Bạn cần xác thực <b>GPLX</b> mới có thể đặt xe.</p>
 
-            <div class="verify-actions">
-                <a href="${pageContext.request.contextPath}/customer/profile"
-                   class="verify-btn primary">
-                    Đi xác thực ngay
-                </a>
+                    <div class="verify-actions">
+                        <a href="${pageContext.request.contextPath}/customer/profile"
+                           class="verify-btn primary">
+                            Đi xác thực ngay
+                        </a>
 
-                <button type="button"
-                        onclick="closeVerifyModal()"
-                        class="verify-btn secondary">
-                    Đóng
-                </button>
+                        <button type="button"
+                                onclick="closeVerifyModal()"
+                                class="verify-btn secondary">
+                            Đóng
+                        </button>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            openVerifyModal();
-        });
-    </script>
-</c:if>
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    openVerifyModal();
+                });
+            </script>
+        </c:if>
 
         <script src="${pageContext.request.contextPath}/assets/js/car-detail.js"></script>
         <script src="${pageContext.request.contextPath}/assets/js/verify-license.js"></script>
+        <script src="${pageContext.request.contextPath}/assets/js/wishlist.js"></script>
 
     </body>
+
 </html>
 

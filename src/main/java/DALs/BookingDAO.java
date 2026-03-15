@@ -321,7 +321,6 @@ public class BookingDAO extends DBContext {
                 booking.setCarName(rs.getString("model_name"));
                 booking.setPricePerDay(rs.getBigDecimal("price_per_day"));
 
-
                 return booking;
             }
 
@@ -330,6 +329,30 @@ public class BookingDAO extends DBContext {
         }
 
         return null;
+    }
+
+
+    public int getCompletedBooking(int customerId, int carId) {
+
+        String sql = "SELECT booking_id FROM booking "
+                + "WHERE customer_id = ? AND car_id = ? AND status = 'COMPLETED'";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            ps.setInt(1, customerId);
+            ps.setInt(2, carId);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt("booking_id");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return -1;
     }
 
     public BookingModel getBookingForContract(int bookingId) {
@@ -381,6 +404,7 @@ public class BookingDAO extends DBContext {
 
     return null;
 }
+
 
 public boolean hasOverlapConfirmed(int carId, Date startDate, Date endDate) {
 
@@ -439,5 +463,6 @@ public void rejectOverlappingBookings(
         e.printStackTrace();
     }
 }
+
 
 }

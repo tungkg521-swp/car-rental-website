@@ -22,6 +22,12 @@
             </a>
         </li>
 
+         <li class="sidebar-item">
+            <a href="${pageContext.request.contextPath}/wishlist">
+                 Danh sách yêu thích
+            </a>
+        </li>
+        
         <li class="sidebar-item">
             <a href="${pageContext.request.contextPath}/customer/profile?action=changePassword">
                 🔒 Đổi mật khẩu

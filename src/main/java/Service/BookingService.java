@@ -34,7 +34,9 @@ public class BookingService {
         long days = ChronoUnit.DAYS.between(
                 startDate.toLocalDate(),
                 endDate.toLocalDate()
+
         );
+
 
         if (days < 1) {
             days = 1;
@@ -136,9 +138,11 @@ public class BookingService {
         contract.setSignedAt(null);
         contract.setNote("Contract created automatically after staff approved booking.");
 
+
         contractService.createContract(contract);
 
         carDAO.updateStatus(booking.getCarId(), "BOOKED");
+
 
     }
 

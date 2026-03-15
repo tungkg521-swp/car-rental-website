@@ -13,6 +13,7 @@
         <jsp:include page="profile-sidebar.jsp"/>
 
 
+
         <div class="profile-content">
 
 
@@ -27,4 +28,5 @@
 
     </div>
     <script src="${pageContext.request.contextPath}/assets/js/profile.js"></script>
+
 </body>

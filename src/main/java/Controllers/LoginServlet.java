@@ -4,6 +4,7 @@
  */
 package Controllers;
 
+import DALs.AccountDAO;
 import DALs.CustomerDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -46,17 +47,26 @@ public class LoginServlet extends HttpServlet {
             request.getRequestDispatcher("/views/login.jsp")
                     .forward(request, response);
             return;
+        }  else if (!"ACTIVE".equalsIgnoreCase(account.getStatus())) {
+            request.setAttribute("error", "Tài khoản đã bị khóa");
+            request.getRequestDispatcher("/views/login.jsp")
+                    .forward(request, response);
+            return ;
         }
 
-        // LOGIN SUCCESS
         HttpSession session = request.getSession(true);
         session.setAttribute("ACCOUNT", account);
 
-        CustomerModel customer
-                = new CustomerDAO().getByAccountId(account.getAccountId());
-
+        CustomerDAO customerDAO = new CustomerDAO();
+        CustomerModel customer = customerDAO.getByAccountId(account.getAccountId());
+        customerDAO.updateStatus(customer.getCustomerId(), "ACTIVE");
         session.setAttribute("CUSTOMER", customer);
+
+        // UPDATE LAST LOGIN TIME
+        AccountDAO accountDAO = new AccountDAO();
+        accountDAO.updateLastLogin(account.getAccountId());
 
         response.sendRedirect(request.getContextPath() + "/home");
     }
 }
+

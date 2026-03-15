@@ -4,8 +4,10 @@ import DALs.AccountDAO;
 import DALs.CustomerDAO;
 import Utils.DBContext;
 import java.sql.Connection;
+import java.time.LocalDate;
 import models.AccountModel;
 import models.CustomerModel;
+import java.time.Period;
 
 public class AuthenticationService extends DBContext {
 
@@ -24,28 +26,46 @@ public class AuthenticationService extends DBContext {
             return null;
         }
 
-        if (!"ACTIVE".equalsIgnoreCase(account.getStatus())) {
-            return null;
-        }
+     
 
         return account;
     }
 
     // ================= REGISTER =================
-    public void register(String fullName,
+   public void register(String fullName,
             String email,
             String password,
             String confirmPassword,
             String phone,
             String address,
-            java.time.LocalDate dob) throws Exception {
+            LocalDate dob) throws Exception {
 
-        // 1. Validate
-        if (fullName == null || fullName.isBlank()
+       if (fullName == null || fullName.isBlank()
                 || email == null || email.isBlank()
                 || password == null || password.isBlank()
                 || confirmPassword == null || confirmPassword.isBlank()) {
+
             throw new Exception("All required fields must be filled!");
+        }
+
+        if (!fullName.matches("^[A-Za-zÀ-ỹ\\s]+$")) {
+            throw new Exception("Invalid full name!");
+        }
+
+        if (fullName.length() > 36) {
+            throw new Exception("Full name cannot exceed 36 characters!");
+        }
+
+        if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
+            throw new Exception("Invalid email format!");
+        }
+
+        if (phone == null || !phone.matches("^0[98]\\d{8}$")) {
+            throw new Exception("Phone number must start with 09 or 08 and contain 10 digits!");
+        }
+
+        if (!password.matches("^(?=.*[A-Z])(?=.*\\d).{8,16}$")) {
+            throw new Exception("Password must be 8-16 characters and contain at least 1 uppercase letter and 1 number!");
         }
 
         if (!password.equals(confirmPassword)) {
@@ -56,11 +76,43 @@ public class AuthenticationService extends DBContext {
             throw new Exception("Email already exists!");
         }
 
-        // 2. Create Account
+        if (customerDAO.findByPhone(phone) != null) {
+            throw new Exception("Phone already exists!");
+        }
+
+        if (dob != null) {
+
+            int day = dob.getDayOfMonth();
+            int month = dob.getMonthValue();
+            int year = dob.getYear();
+
+            if (day < 1 || day > 31) {
+                throw new Exception("Invalid day!");
+            }
+
+            if (month < 1 || month > 12) {
+                throw new Exception("Invalid month!");
+            }
+
+            if (year < 1900 || year > LocalDate.now().getYear()) {
+                throw new Exception("Invalid year!");
+            }
+
+            if (dob.isAfter(LocalDate.now())) {
+                throw new Exception("Date of birth cannot be in the future!");
+            }
+
+            int age = Period.between(dob, LocalDate.now()).getYears();
+
+            if (age < 18) {
+                throw new Exception("You must be at least 18 years old!");
+            }
+        }
+
         AccountModel account = new AccountModel();
         account.setEmail(email);
         account.setPasswordHash(password);
-        account.setRoleId(2);
+        account.setRoleId(1);
         account.setStatus("ACTIVE");
 
         int accountId = accountDAO.insertAccount(account);
@@ -69,8 +121,8 @@ public class AuthenticationService extends DBContext {
             throw new Exception("Account creation failed!");
         }
 
-        // 3. Create Customer
         CustomerModel customer = new CustomerModel();
+
         customer.setFullName(fullName);
         customer.setEmail(email);
         customer.setPhone(phone);

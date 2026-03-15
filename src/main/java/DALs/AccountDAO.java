@@ -66,4 +66,16 @@ public class AccountDAO extends DBContext {
 
         return -1;
     }
+    public void updateLastLogin(int accountId) {
+
+        String sql = "UPDATE account SET last_login_at = GETDATE() WHERE account_id = ?";
+
+        try {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, accountId);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
