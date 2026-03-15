@@ -53,7 +53,7 @@
                         </h1>
 
                         <div class="price">
-                            ${car.pricePerDay} <span>VND / Ngày</span>
+                            <fmt:formatNumber value="${car.pricePerDay}" pattern="#,###"/> VND / day
                         </div>
 
                         <div class="badge">
@@ -74,13 +74,6 @@
                             Đặt xe
                         </a>
 
-                        <c:if test="${not empty SUCCESS}">
-                            <div class="alert success">${SUCCESS}</div>
-                        </c:if>
-
-                        <c:if test="${not empty ERROR}">
-                            <div class="alert error">${ERROR}</div>
-                        </c:if>
 
                         <form class="wishlist-form"
                               action="${pageContext.request.contextPath}/wishlist?action=add"
@@ -89,10 +82,18 @@
                             <input type="hidden" name="carId" value="${car.carId}">
 
                             <button type="submit" class="wishlist-btn">
-                                Thêm vào yêu thích
+                                ❤️ Thêm vào yêu thích
                             </button>
 
+                             <c:if test="${not empty SUCCESS}">
+                            <div class="alert success">${SUCCESS}</div>
+                        </c:if>
+
+                        <c:if test="${not empty ERROR}">
+                            <div class="alert error">${ERROR}</div>
+                        </c:if>
                         </form>
+
 
                         <a href="#" class="consult">Nhận thông tin tư vấn</a>
 
@@ -250,8 +251,40 @@
             </div>
         </section>
 
+        <c:if test="${LICENSE_REQUIRED}">
+            <div id="verifyModal" class="verify-modal">
+                <div class="verify-box">
+                    <div class="verify-icon">!</div>
+
+                    <p>Bạn cần xác thực <b>GPLX</b> mới có thể đặt xe.</p>
+
+                    <div class="verify-actions">
+                        <a href="${pageContext.request.contextPath}/customer/profile"
+                           class="verify-btn primary">
+                            Đi xác thực ngay
+                        </a>
+
+                        <button type="button"
+                                onclick="closeVerifyModal()"
+                                class="verify-btn secondary">
+                            Đóng
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    openVerifyModal();
+                });
+            </script>
+        </c:if>
+
         <script src="${pageContext.request.contextPath}/assets/js/car-detail.js"></script>
+        <script src="${pageContext.request.contextPath}/assets/js/verify-license.js"></script>
         <script src="${pageContext.request.contextPath}/assets/js/wishlist.js"></script>
 
     </body>
+
 </html>
+

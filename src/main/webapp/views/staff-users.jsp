@@ -9,6 +9,8 @@
 
         <link rel="stylesheet"
               href="${pageContext.request.contextPath}/assets/css/staff.css">
+             <link rel="stylesheet"
+              href="${pageContext.request.contextPath}/assets/css/profile.css">
     </head>
     <body>
 
@@ -33,7 +35,7 @@
                         <select name="status">
                             <option value="ALL">All Status</option>
                             <option value="ACTIVE" ${param.status == 'ACTIVE' ? 'selected' : ''}>ACTIVE</option>
-                            <option value="BLOCKED" ${param.status == 'BLOCKED' ? 'selected' : ''}>BLOCKED</option>
+                            <option value="INACTIVE" ${param.status == 'INACTIVE' ? 'selected' : ''}>INACTIVE</option>
                         </select>
 
                         <button type="submit">Search</button>
@@ -50,7 +52,8 @@
                                 <th>Full Name</th>
                                 <th>Email</th>
                                 <th>Phone</th>
-                                <th>Status</th>
+                                <th>Customer Status</th>
+                                <th>Account Status</th>
                                 <th>Created</th>
                                 <th>Action</th>
                             </tr>
@@ -78,6 +81,11 @@
                                     <td>
                                         <span class="status-badge ${u.status.toLowerCase()}">
                                             ${u.status}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge ${u.statusAccount.toLowerCase()}">
+                                            ${u.statusAccount}
                                         </span>
                                     </td>
                                     <td>${u.createdAt.toLocalDate()}</td>

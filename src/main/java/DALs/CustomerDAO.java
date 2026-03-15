@@ -4,7 +4,6 @@ import Utils.DBContext;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Types;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,25 +11,22 @@ import models.CustomerModel;
 
 public class CustomerDAO extends DBContext {
 
-    // lấy customer theo accountId
     public CustomerModel getByAccountId(int accountId) {
 
         String sql = """
             SELECT customer_id, full_name, email, phone, status,
-                   created_at, account_id, address, dob
-            FROM customer
-            WHERE account_id = ?
+       created_at, account_id, address, dob,
+       is_license_verified
+       FROM customer
+       WHERE account_id = ?
         """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-
             ps.setInt(1, accountId);
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-
                 CustomerModel c = new CustomerModel();
-
                 c.setCustomerId(rs.getInt("customer_id"));
                 c.setFullName(rs.getString("full_name"));
                 c.setEmail(rs.getString("email"));
@@ -39,6 +35,7 @@ public class CustomerDAO extends DBContext {
                 c.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
                 c.setAccountId(rs.getInt("account_id"));
                 c.setAddress(rs.getString("address"));
+                c.setLicenseVerified(rs.getBoolean("is_license_verified"));
 
                 if (rs.getDate("dob") != null) {
                     c.setDob(rs.getDate("dob").toLocalDate());
@@ -54,26 +51,26 @@ public class CustomerDAO extends DBContext {
         return null;
     }
 
-    // lấy toàn bộ customer
     public List<CustomerModel> findAllCustomers() {
-
         List<CustomerModel> list = new ArrayList<>();
 
         String sql = """
-            SELECT customer_id,
-                   full_name,
-                   email,
-                   phone,
-                   status,
-                   created_at,
-                   account_id,
-                   address,
-                   dob
-            FROM customer
-        """;
+                SELECT c.customer_id,
+                       c.full_name,
+                       c.email,
+                       c.phone,
+                       c.status,
+                       c.created_at,
+                       c.account_id,
+                       c.address,
+                       c.dob,
+                       a.status
+                  FROM customer c
+                  LEFT JOIN account a ON a.account_id = c.account_id
+                  ORDER BY created_at DESC
+    """;
 
-        try (PreparedStatement ps = connection.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
 
@@ -91,7 +88,7 @@ public class CustomerDAO extends DBContext {
 
                 customer.setAccountId(rs.getInt("account_id"));
                 customer.setAddress(rs.getString("address"));
-
+                customer.setStatusAccount(rs.getString(10));
                 if (rs.getDate("dob") != null) {
                     customer.setDob(rs.getDate("dob").toLocalDate());
                 }
@@ -106,21 +103,22 @@ public class CustomerDAO extends DBContext {
         return list;
     }
 
-    // tìm customer theo id
     public CustomerModel findById(int id) {
 
         String sql = """
-            SELECT customer_id,
-                   full_name,
-                   email,
-                   phone,
-                   status,
-                   created_at,
-                   account_id,
-                   address,
-                   dob
-            FROM customer
-            WHERE customer_id = ?
+           SELECT c.customer_id,
+                               c.full_name,
+                               c.email,
+                               c.phone,
+                               c.status,
+                               c.created_at,
+                               c.account_id,
+                               c.address,
+                               c.dob,
+                               a.status
+                        FROM customer c
+            			LEFT JOIN account a ON a.account_id = c.account_id
+            			WHERE c.customer_id = ?
         """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -141,9 +139,9 @@ public class CustomerDAO extends DBContext {
                 c.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
                 c.setAccountId(rs.getInt("account_id"));
                 c.setAddress(rs.getString("address"));
+                c.setStatusAccount(rs.getString(10));
 
                 Date dob = rs.getDate("dob");
-
                 if (dob != null) {
                     c.setDob(dob.toLocalDate());
                 }
@@ -158,32 +156,23 @@ public class CustomerDAO extends DBContext {
         return null;
     }
 
-    // update profile
     public int updateProfile(int accountId,
-                             String fullName,
-                             LocalDate dob,
-                             String phone,
-                             String email) {
+            String fullName,
+            LocalDate dob,
+            String phone,
+            String email) {
 
-        String sql = """
-            UPDATE customer
-            SET full_name = ?,
-                dob = ?,
-                phone = ?,
-                email = ?
-            WHERE account_id = ?
-        """;
+        String sql = "UPDATE customer "
+                + "SET full_name = ?, "
+                + "dob = ?, "
+                + "phone = ?, "
+                + "email = ? "
+                + "WHERE account_id = ?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
             ps.setString(1, fullName);
-
-            if (dob != null) {
-                ps.setDate(2, Date.valueOf(dob));
-            } else {
-                ps.setNull(2, Types.DATE);
-            }
-
+            ps.setDate(2, Date.valueOf(dob));
             ps.setString(3, phone);
             ps.setString(4, email);
             ps.setInt(5, accountId);
@@ -197,140 +186,92 @@ public class CustomerDAO extends DBContext {
         return 0;
     }
 
-    // insert customer
     public int insertCustomer(CustomerModel customer) {
 
         String sql = """
-            INSERT INTO customer
-            (full_name, email, phone, status, created_at, account_id, address, dob)
-            VALUES (?, ?, ?, ?, GETDATE(), ?, ?, ?)
-        """;
+        INSERT INTO customer
+        (full_name, email, phone, status, created_at, account_id, address, dob)
+        VALUES (?, ?, ?, ?, GETDATE(), ?, ?, ?)
+    """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
             ps.setString(1, customer.getFullName());
             ps.setString(2, customer.getEmail());
             ps.setString(3, customer.getPhone());
-
-            ps.setString(4,
-                    customer.getStatus() == null ? "ACTIVE" : customer.getStatus());
-
+            ps.setString(4, customer.getStatus());
             ps.setInt(5, customer.getAccountId());
             ps.setString(6, customer.getAddress());
 
             if (customer.getDob() != null) {
-                ps.setDate(7, Date.valueOf(customer.getDob()));
+                ps.setDate(7, java.sql.Date.valueOf(customer.getDob()));
             } else {
-                ps.setNull(7, Types.DATE);
+                ps.setNull(7, java.sql.Types.DATE);
             }
 
             return ps.executeUpdate();
 
         } catch (Exception e) {
             e.printStackTrace();
+            throw new RuntimeException(e);
         }
-
-        return 0;
     }
 
-    // update status
-    public int updateStatus(int customerId, String status) {
+    public void updateLicenseVerified(int customerId, boolean value) {
 
-        String sql = "UPDATE customer SET status = ? WHERE customer_id = ?";
+        String sql = "UPDATE customer SET is_license_verified = ? WHERE customer_id = ?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
-            ps.setString(1, status);
+            ps.setBoolean(1, value);
             ps.setInt(2, customerId);
-
-            return ps.executeUpdate();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return 0;
-    }
-
-    // delete customer
-    public int deleteCustomer(int customerId) {
-
-        String sql = "DELETE FROM customer WHERE customer_id = ?";
-
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-
-            ps.setInt(1, customerId);
-
-            return ps.executeUpdate();
+            ps.executeUpdate();
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        return 0;
     }
 
-    // check email tồn tại
-    public boolean existsByEmail(String email) {
-
-        String sql = "SELECT 1 FROM customer WHERE email = ?";
-
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-
-            ps.setString(1, email);
-
-            ResultSet rs = ps.executeQuery();
-
-            return rs.next();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-
-    // search customer
     public List<CustomerModel> searchCustomer(String fullname, String status) {
-
         List<CustomerModel> list = new ArrayList<>();
 
         StringBuilder sql = new StringBuilder("""
-            SELECT customer_id,
-                   full_name,
-                   email,
-                   phone,
-                   status,
-                   created_at,
-                   account_id,
-                   address,
-                   dob
-            FROM customer
-            WHERE 1=1
-        """);
+       SELECT c.customer_id,
+                                       c.full_name,
+                                       c.email,
+                                       c.phone,
+                                       c.status,
+                                       c.created_at,
+                                       c.account_id,
+                                       c.address,
+                                       c.dob,
+                                       a.status
+                                FROM customer c
+                    	        LEFT JOIN account a ON a.account_id = c.account_id
+                                 WHERE 1=1
+    """);
 
         List<Object> params = new ArrayList<>();
 
+        // Lọc theo fullname
         if (fullname != null && !fullname.trim().isEmpty()) {
-
-            sql.append(" AND LOWER(full_name) LIKE ? ");
+            sql.append(" AND LOWER(c.full_name) LIKE ? ");
             params.add("%" + fullname.trim().toLowerCase() + "%");
         }
 
+        // Lọc theo status
         if (status != null && !status.equalsIgnoreCase("ALL")) {
-
-            sql.append(" AND status = ? ");
+            sql.append(" AND c.status = ? ");
             params.add(status);
         }
 
-        try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+        try (PreparedStatement ps = connection.prepareStatement(sql.toString());) {
 
+            // Set parameter
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
             }
-
             ResultSet rs = ps.executeQuery();
-
             while (rs.next()) {
 
                 CustomerModel customer = new CustomerModel();
@@ -347,7 +288,7 @@ public class CustomerDAO extends DBContext {
 
                 customer.setAccountId(rs.getInt("account_id"));
                 customer.setAddress(rs.getString("address"));
-
+                customer.setStatusAccount(rs.getString(10));
                 if (rs.getDate("dob") != null) {
                     customer.setDob(rs.getDate("dob").toLocalDate());
                 }
@@ -362,8 +303,23 @@ public class CustomerDAO extends DBContext {
         return list;
     }
 
-    // ===== FIX LỖI REGISTER =====
-    // check phone tồn tại
+    public int updateStatusAccount(int accountId, String status) {
+        String sql = "UPDATE account SET status = ? WHERE account_id = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql.toString());) {
+
+            ps.setString(1, status);
+            ps.setInt(2, accountId);
+
+            return ps.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+    
     public CustomerModel findByPhone(String phone) {
 
         String sql = "SELECT * FROM customer WHERE phone = ?";
@@ -396,8 +352,24 @@ public class CustomerDAO extends DBContext {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return null;
     }
 
+    public int updateStatus(int customerId, String status) {
+
+        String sql = "UPDATE customer SET status = ? WHERE customer_id = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            ps.setString(1, status);
+            ps.setInt(2, customerId);
+
+            return ps.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
 }

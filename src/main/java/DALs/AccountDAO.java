@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package DALs;
 
 import Utils.DBContext;
@@ -42,7 +46,7 @@ public class AccountDAO extends DBContext {
             ps.setString(1, acc.getEmail());
             ps.setString(2, acc.getPasswordHash());
             ps.setInt(3, acc.getRoleId());
-            ps.setString(4, "ACTIVE");
+            ps.setString(4, "ACTIVE");   // thêm dòng này
 
             int affectedRows = ps.executeUpdate();
 
@@ -62,25 +66,6 @@ public class AccountDAO extends DBContext {
 
         return -1;
     }
-
-    // UPDATE STATUS
-    public void updateStatus(int accountId, String status) {
-
-        String sql = "UPDATE account SET status = ? WHERE account_id = ?";
-
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-
-            ps.setString(1, status);
-            ps.setInt(2, accountId);
-
-            ps.executeUpdate();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    // UPDATE LAST LOGIN TIME
     public void updateLastLogin(int accountId) {
 
         String sql = "UPDATE account SET last_login_at = GETDATE() WHERE account_id = ?";

@@ -1,23 +1,33 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
+ */
 package Controllers;
 
-import DALs.CustomerDAO;
 import DALs.AccountDAO;
+import DALs.CustomerDAO;
 import java.io.IOException;
+import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import models.AccountModel;
 import models.CustomerModel;
+import models.UserModel;
 import service.AuthenticationService;
 
+/**
+ *
+ * @author ADMIN
+ */
 public class LoginServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
         request.getRequestDispatcher("/views/login.jsp")
                 .forward(request, response);
     }
@@ -37,6 +47,11 @@ public class LoginServlet extends HttpServlet {
             request.getRequestDispatcher("/views/login.jsp")
                     .forward(request, response);
             return;
+        }  else if (!"ACTIVE".equalsIgnoreCase(account.getStatus())) {
+            request.setAttribute("error", "Tài khoản đã bị khóa");
+            request.getRequestDispatcher("/views/login.jsp")
+                    .forward(request, response);
+            return ;
         }
 
         HttpSession session = request.getSession(true);
@@ -54,3 +69,4 @@ public class LoginServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/home");
     }
 }
+

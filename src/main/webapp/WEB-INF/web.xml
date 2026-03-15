@@ -24,6 +24,7 @@
     <servlet-mapping>
         <servlet-name>CarListServlet</servlet-name>
         <url-pattern>/cars</url-pattern>
+     
     </servlet-mapping>
     <servlet>
         <servlet-name>WishlistController</servlet-name>
@@ -50,12 +51,13 @@
         <url-pattern>/register</url-pattern>
     </servlet-mapping>
     <servlet>
-        <servlet-name>BookingServlet</servlet-name>
-        <servlet-class>Controllers.BookingServlet</servlet-class>
+        <servlet-name>BookingSuccess</servlet-name>
+        <servlet-class>Controllers.BookingSuccess</servlet-class>
     </servlet>
+
     <servlet-mapping>
-        <servlet-name>BookingServlet</servlet-name>
-        <url-pattern>/booking</url-pattern>
+        <servlet-name>BookingSuccess</servlet-name>
+        <url-pattern>/booking-success</url-pattern>
     </servlet-mapping>
     <servlet>
         <servlet-name>Booking</servlet-name>
@@ -63,12 +65,29 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>Booking</servlet-name>
+        <url-pattern>/booking</url-pattern>
         <url-pattern>/customer/bookings</url-pattern>
     </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>ReviewServlet</servlet-name>
         <url-pattern>/review</url-pattern>
     </servlet-mapping>
+
+    
+    <!-- PROFILE -->
+    <servlet>
+        <servlet-name>ProfileServlet</servlet-name>
+        <servlet-class>Controllers.ProfileServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>ProfileServlet</servlet-name>
+        <url-pattern>/customer/profile</url-pattern>
+    </servlet-mapping>
+
+    
+
     <session-config>
         <session-timeout>
             30

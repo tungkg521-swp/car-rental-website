@@ -57,6 +57,8 @@ public class StaffCustomerController extends HttpServlet {
         }
     }
 
+
+
     protected void doPost(HttpServletRequest request,
             HttpServletResponse response)
             throws ServletException, IOException {
@@ -71,6 +73,29 @@ public class StaffCustomerController extends HttpServlet {
 
             request.getRequestDispatcher("/views/staff-users.jsp")
                     .forward(request, response);
+        }else if(action.equals("edit")){
+             int idCustomer = Integer.parseInt(request.getParameter("idCus"));
+
+          
+            int idAccount = Integer.parseInt(request.getParameter("idAcc"));
+            String status = request.getParameter("status");
+           
+            boolean success = service.updateStatusAccount(idAccount, status);
+           
+
+        if (success) {
+            response.sendRedirect(
+                    request.getContextPath()
+                    + "/staff/users?action=detail&msg=success&id="+idCustomer
+            );
+        } else {
+            response.sendRedirect(
+                    request.getContextPath()
+                    + "/staff/users?action=detail&msg=error&id="+idCustomer
+            );
         }
+        }
+            
     }
+
 }

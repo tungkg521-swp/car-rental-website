@@ -2,49 +2,37 @@ package service;
 
 import DALs.AccountDAO;
 import DALs.CustomerDAO;
+import Utils.DBContext;
+import java.sql.Connection;
 import java.time.LocalDate;
-import java.time.Period;
 import models.AccountModel;
 import models.CustomerModel;
+import java.time.Period;
 
-public class AuthenticationService {
+public class AuthenticationService extends DBContext {
 
     private AccountDAO accountDAO = new AccountDAO();
     private CustomerDAO customerDAO = new CustomerDAO();
 
-    // LOGIN
     public AccountModel authenticate(String email, String password) {
 
-        AccountModel acc = accountDAO.findByEmail(email);
+        AccountModel account = accountDAO.findByEmail(email);
 
-        if (acc == null) {
+        if (account == null) {
             return null;
         }
 
-        if (!acc.getPasswordHash().equals(password)) {
+        if (!account.getPasswordHash().equals(password)) {
             return null;
         }
 
-        // CHECK STATUS ONLY
-        if (!"ACTIVE".equalsIgnoreCase(acc.getStatus())) {
-            return null;
-        }
+     
 
-        // UPDATE LAST LOGIN
-        accountDAO.updateLastLogin(acc.getAccountId());
-
-        // SET CUSTOMER STATUS = ACTIVE
-        CustomerModel customer = customerDAO.getByAccountId(acc.getAccountId());
-
-        if (customer != null) {
-            customerDAO.updateStatus(customer.getCustomerId(), "ACTIVE");
-        }
-
-        return acc;
+        return account;
     }
 
-    // REGISTER
-    public void register(String fullName,
+    // ================= REGISTER =================
+   public void register(String fullName,
             String email,
             String password,
             String confirmPassword,
@@ -52,7 +40,7 @@ public class AuthenticationService {
             String address,
             LocalDate dob) throws Exception {
 
-        if (fullName == null || fullName.isBlank()
+       if (fullName == null || fullName.isBlank()
                 || email == null || email.isBlank()
                 || password == null || password.isBlank()
                 || confirmPassword == null || confirmPassword.isBlank()) {
@@ -122,7 +110,6 @@ public class AuthenticationService {
         }
 
         AccountModel account = new AccountModel();
-
         account.setEmail(email);
         account.setPasswordHash(password);
         account.setRoleId(1);
