@@ -45,6 +45,13 @@ public class RegisterServlet extends HttpServlet {
         } catch (Exception e) {
 
             request.setAttribute("error", e.getMessage());
+
+            request.setAttribute("fullName", fullName);
+            request.setAttribute("email", email);
+            request.setAttribute("phone", phone);
+            request.setAttribute("address", address);
+            request.setAttribute("dob", dobStr);
+
             request.getRequestDispatcher("/views/register.jsp").forward(request, response);
         }
     }

@@ -64,16 +64,20 @@ public class AuthenticationService {
             throw new Exception("Invalid full name!");
         }
 
-        if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+        if (fullName.length() > 36) {
+            throw new Exception("Full name cannot exceed 36 characters!");
+        }
+
+        if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
             throw new Exception("Invalid email format!");
         }
 
-        if (phone == null || !phone.matches("\\d{10}")) {
-            throw new Exception("Phone number must be 10 digits!");
+        if (phone == null || !phone.matches("^0[98]\\d{8}$")) {
+            throw new Exception("Phone number must start with 09 or 08 and contain 10 digits!");
         }
 
-        if (password.length() < 6) {
-            throw new Exception("Password must be at least 6 characters!");
+        if (!password.matches("^(?=.*[A-Z])(?=.*\\d).{8,16}$")) {
+            throw new Exception("Password must be 8-16 characters and contain at least 1 uppercase letter and 1 number!");
         }
 
         if (!password.equals(confirmPassword)) {
@@ -89,6 +93,22 @@ public class AuthenticationService {
         }
 
         if (dob != null) {
+
+            int day = dob.getDayOfMonth();
+            int month = dob.getMonthValue();
+            int year = dob.getYear();
+
+            if (day < 1 || day > 31) {
+                throw new Exception("Invalid day!");
+            }
+
+            if (month < 1 || month > 12) {
+                throw new Exception("Invalid month!");
+            }
+
+            if (year < 1900 || year > LocalDate.now().getYear()) {
+                throw new Exception("Invalid year!");
+            }
 
             if (dob.isAfter(LocalDate.now())) {
                 throw new Exception("Date of birth cannot be in the future!");

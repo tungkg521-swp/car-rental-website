@@ -44,7 +44,7 @@ public class LoginServlet extends HttpServlet {
 
         CustomerDAO customerDAO = new CustomerDAO();
         CustomerModel customer = customerDAO.getByAccountId(account.getAccountId());
-
+        customerDAO.updateStatus(customer.getCustomerId(), "ACTIVE");
         session.setAttribute("CUSTOMER", customer);
 
         // UPDATE LAST LOGIN TIME
