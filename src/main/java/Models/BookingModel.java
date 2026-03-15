@@ -28,6 +28,8 @@ public class BookingModel {
     private String customerPhone;
 
     private BigDecimal pricePerDay;
+    
+    private String contractStatus;
 
 // getter + setter
     // ===== CONSTRUCTOR =====
@@ -169,6 +171,14 @@ public class BookingModel {
 
     public void setPricePerDay(BigDecimal pricePerDay) {
         this.pricePerDay = pricePerDay;
+    }
+
+    public String getContractStatus() {
+        return contractStatus;
+    }
+
+    public void setContractStatus(String contractStatus) {
+        this.contractStatus = contractStatus;
     }
 
     

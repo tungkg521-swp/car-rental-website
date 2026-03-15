@@ -34,7 +34,9 @@ public class BookingService {
         long days = ChronoUnit.DAYS.between(
                 startDate.toLocalDate(),
                 endDate.toLocalDate()
-        ) ;
+
+        );
+
 
         if (days < 1) {
             days = 1;
@@ -100,7 +102,23 @@ public class BookingService {
             return;
         }
 
+        if (bookingDAO.hasOverlapConfirmed(
+                booking.getCarId(),
+                booking.getStartDate(),
+                booking.getEndDate())) {
+
+            bookingDAO.updateStatus(bookingId, "REJECTED");
+            return;
+        }
+
         bookingDAO.updateStatus(bookingId, "CONFIRMED");
+
+        bookingDAO.rejectOverlappingBookings(
+                booking.getCarId(),
+                booking.getStartDate(),
+                booking.getEndDate(),
+                bookingId
+        );
 
         ContractModel contract = new ContractModel();
         contract.setBookingId(booking.getBookingId());
@@ -120,11 +138,12 @@ public class BookingService {
         contract.setSignedAt(null);
         contract.setNote("Contract created automatically after staff approved booking.");
 
-          contractService.createContract(contract);
 
-  
-          carDAO.updateStatus(booking.getCarId(), "BOOKED");
-        
+        contractService.createContract(contract);
+
+        carDAO.updateStatus(booking.getCarId(), "BOOKED");
+
+
     }
 
     public void rejectBooking(int bookingId) {
@@ -141,4 +160,7 @@ public class BookingService {
         bookingDAO.updateStatus(bookingId, "REJECTED");
     }
 
+    public boolean hasOverlapConfirmed(int carId, Date startDate, Date endDate) {
+    return bookingDAO.hasOverlapConfirmed(carId, startDate, endDate);
+}
 }
