@@ -15,6 +15,7 @@
         <!-- CSS riêng cho booking -->
         <link rel="stylesheet"
               href="${pageContext.request.contextPath}/assets/css/booking.css">
+
     </head>
     <body>
 
@@ -86,11 +87,17 @@
                                 </ul>
 
                                 <p class="price-text">
-                                    Giá thuê:
-                                    <strong>
-                                        <fmt:formatNumber value="${car.pricePerDay}" pattern="#,###"/>
-                                    </strong>
-                                    VND / ngày
+                                    <span >
+                                        Đơn giá thuê
+                                        <i class="info-icon" onclick="openModal()">?</i>
+                                    </span>
+
+                                    <span >
+                                        <strong>
+                                            <fmt:formatNumber value="${car.pricePerDay}" pattern="#,###"/>
+                                        </strong>
+                                        <span >/ngày</span>
+                                    </span>
                                 </p>
 
                                 <input type="hidden" id="pricePerDayRaw" value="${car.pricePerDay}">
@@ -214,6 +221,42 @@
             </form>
         </div>
 
+        <div id="priceModal" class="modal">
+            <div class="modal-content">
+
+                <button class="modal-close" onclick="closeModal()">×</button>
+
+                <h2 class="modal-title">Đơn giá thuê</h2>
+
+                <div class="modal-body">
+
+                    <ul>
+                        <li>
+                            Giá thuê xe được tính theo ngày, thời gian thuê xe ít hơn
+                            24 giờ sẽ được tính tròn 1 ngày.
+                        </li>
+
+                        <li>
+                            Giá thuê xe không bao gồm tiền xăng/tiền sạc pin. Khi kết thúc chuyến đi,
+                            bạn vui lòng đổ xăng/sạc pin về lại mức ban đầu như khi nhận xe,
+                            hoặc thanh toán lại chi phí xăng xe sạc pin cho chủ xe.
+                        </li>
+
+                        <li>
+                            Giá thuê xe đã bao gồm phí dịch vụ của Mioto. Phí dịch vụ giúp duy trì
+                            ứng dụng & chăm sóc khách hàng, bao gồm:
+                        </li>
+                    </ul>
+
+                    <ul class="sub-list">
+                        <li>Dịch vụ tổng đài hỗ trợ khách hàng đặt xe.</li>
+                        <li>Tìm xe thay thế / hoàn tiền nếu chuyến bị huỷ.</li>
+                        <li>Hỗ trợ tranh chấp phát sinh với chủ xe.</li>
+                    </ul>
+
+                </div>
+            </div>
+        </div>
         <!-- JS -->
         <script src="assets/js/booking.js?v=3"></script>
 
