@@ -13,30 +13,28 @@
         Mới
     </div>
 
-    <c:if test="${empty notifications}">
-        <div class="notification-empty">
-            Không có thông báo
-        </div>
-    </c:if>
+    <div class="notification-list">   <!-- thêm div này -->
 
-    <c:forEach var="n" items="${notifications}">
-        <div class="notification-item">
-            <div class="notification-icon">
-                🔔
+        <c:if test="${empty notifications}">
+            <div class="notification-empty">
+                Không có thông báo
             </div>
-            <div class="notification-content">
-                <div class="notification-title">
-                    ${n.title}
+        </c:if>
+
+        <c:forEach var="n" items="${notifications}">
+            <div class="notification-item">
+                <div class="notification-icon">🔔</div>
+
+                <div class="notification-content">
+                    <div class="notification-title">${n.title}</div>
+                    <div class="notification-text">${n.content}</div>
+                    <div class="notification-time">${n.createdAt}</div>
                 </div>
-                <div class="notification-text">
-                    ${n.content}
-                </div>
-                <div class="notification-time">
-                    ${n.createdAt}
-                </div>
+
+                <div class="notification-dot"></div>
             </div>
-            <div class="notification-dot"></div>
-        </div>
-    </c:forEach>
+        </c:forEach>
+
+    </div>
 
 </div>

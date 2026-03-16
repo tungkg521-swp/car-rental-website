@@ -1,5 +1,5 @@
 .notification-popup{
-    position:absolute;
+    position:fixed;
     top:70px;
     right:120px;
     width:420px;
@@ -7,6 +7,11 @@
     border-radius:12px;
     box-shadow:0 10px 30px rgba(0,0,0,0.2);
     display:none;
+}
+
+.notification-list{
+    max-height:300px;   
+    overflow-y:auto;
 }
 
 .notification-popup.show{
@@ -106,3 +111,52 @@
     padding:20px;
     color:gray;
 }
+
+/* Notification Page */
+
+/* ================= SEND NOTIFICATION PAGE ================= */
+
+.noti-form{
+    background:#fff;
+    padding:25px;
+    border-radius:8px;
+    width:600px;
+    margin:20px auto;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+.noti-group{
+    margin-bottom:18px;
+    display:flex;
+    flex-direction:column;
+}
+
+.noti-input,
+.noti-textarea,
+.noti-select{
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:6px;
+    width:100%;
+}
+
+.noti-radio-group{
+    display:flex;
+    gap:30px;
+}
+
+.noti-btn{
+    margin-top:10px;
+    margin-left:25px;
+    background:#2563eb;
+    color:white;
+    border:none;
+    padding:10px 20px;
+    border-radius:20px;
+    cursor:pointer;
+}
+
+.noti-btn:hover{
+    background:#1d4ed8;
+}
+

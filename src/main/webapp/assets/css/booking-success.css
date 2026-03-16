@@ -1,0 +1,31 @@
+body{
+    background:#f5f6fa;
+}
+
+.success-card{
+    max-width:650px;
+    margin:80px auto;
+    padding:40px;
+    background:white;
+    border-radius:12px;
+    box-shadow:0 4px 15px rgba(0,0,0,0.1);
+    text-align:center;
+}
+
+.success-title{
+    color:#28a745;
+    font-weight:600;
+    margin-bottom:20px;
+}
+
+.info-row{
+    display:flex;
+    justify-content:space-between;
+    margin:10px 0;
+}
+
+.total{
+    font-size:20px;
+    font-weight:bold;
+    color:#e53935;
+}

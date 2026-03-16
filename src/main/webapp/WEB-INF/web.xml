@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="5.0" xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd">
+
+    <servlet>
+        <servlet-name>ReviewServlet</servlet-name>
+        <servlet-class>Controllers.ReviewServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>default</servlet-name>
         <url-pattern>/assets/*</url-pattern>
@@ -20,6 +25,7 @@
     <servlet-mapping>
         <servlet-name>CarListServlet</servlet-name>
         <url-pattern>/cars</url-pattern>
+     
     </servlet-mapping>
     <servlet>
         <servlet-name>WishlistController</servlet-name>
@@ -29,7 +35,6 @@
         <servlet-name>WishlistController</servlet-name>
         <url-pattern>/wishlist</url-pattern>
     </servlet-mapping>
-    
     <servlet>
         <servlet-name>NotificationController</servlet-name>
         <servlet-class>Controllers.NotificationController</servlet-class>
@@ -57,12 +62,13 @@
         <url-pattern>/register</url-pattern>
     </servlet-mapping>
     <servlet>
-        <servlet-name>BookingServlet</servlet-name>
-        <servlet-class>Controllers.BookingServlet</servlet-class>
+
+        <servlet-name>BookingSuccess</servlet-name>
+        <servlet-class>Controllers.BookingSuccess</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>BookingServlet</servlet-name>
-        <url-pattern>/booking</url-pattern>
+        <servlet-name>BookingSuccess</servlet-name>
+        <url-pattern>/booking-success</url-pattern>
     </servlet-mapping>
     <servlet>
         <servlet-name>Booking</servlet-name>
@@ -70,12 +76,32 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>Booking</servlet-name>
+        <url-pattern>/booking</url-pattern>
         <url-pattern>/customer/bookings</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>NotificationController</servlet-name>
         <url-pattern>/customer/notification</url-pattern>
     </servlet-mapping>
+
+
+    <servlet-mapping>
+        <servlet-name>ReviewServlet</servlet-name>
+        <url-pattern>/review</url-pattern>
+    </servlet-mapping>
+
+    
+    <!-- PROFILE -->
+    <servlet>
+        <servlet-name>ProfileServlet</servlet-name>
+        <servlet-class>Controllers.ProfileServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>ProfileServlet</servlet-name>
+        <url-pattern>/customer/profile</url-pattern>
+    </servlet-mapping>
+
     <session-config>
         <session-timeout>
             30

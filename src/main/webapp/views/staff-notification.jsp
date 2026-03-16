@@ -13,6 +13,7 @@
         <title>staff notification</title>
         <link rel="stylesheet"
               href="${pageContext.request.contextPath}/assets/css/staff.css">
+        <link href="${pageContext.request.contextPath}/assets/css/profile.css" rel="stylesheet" type="text/css"/>
     </head>
     <body>
 
@@ -21,6 +22,8 @@
             <div class="staff-content">
 
                 <h1 class="dashboard-title">Staff Notifications</h1>
+                <button type="submit" class="save-btn" > <a href="${pageContext.request.contextPath}/SendNotificationController">Send Notification</a>     
+                </button>
                 <!-- TABLE -->
                 <div class="dashboard-table">
                     <table>

@@ -4,7 +4,6 @@
 <!-- Font Awesome (nếu project đã có thì có thể bỏ) -->
 <link rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
 <header class="site-header">
     <div class="container header-inner">
 
@@ -78,14 +77,20 @@
             </div>
         </div>
 
+        <script>
+function toggleNotification() {
+    const popup = document.querySelector(".notification-popup");
+    popup.classList.toggle("show");
+}
+</script>
     </div>
 </header>
 <% service.NotificationService ns = new service.NotificationService();
-                    models.AccountModel acc = (models.AccountModel) session.getAttribute("ACCOUNT");
-                    if (acc != null) {
-                        java.util.List list = ns.getNotifications(acc.getAccountId());
-                        request.setAttribute("notifications", list);
-                    }%> <jsp:include page="/views/notifications.jsp"/>
+    models.AccountModel acc = (models.AccountModel) session.getAttribute("ACCOUNT");
+    if (acc != null) {
+        java.util.List list = ns.getNotificationsByAccount(acc.getAccountId());
+        request.setAttribute("notifications", list);
+    }%>
 <jsp:include page="/views/notifications.jsp"/>
 
 

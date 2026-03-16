@@ -20,8 +20,8 @@ public class NotificationController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
-        int customerId = acc.getAccountId();
-        List<NotificationModel> list = service.getNotifications(customerId);
+      int accountId = acc.getAccountId();
+List<NotificationModel> list = service.getNotificationsByAccount(accountId);
         request.setAttribute("notifications", list);
         request.getRequestDispatcher("/views/notifications.jsp")
                 .forward(request, response);

@@ -4,14 +4,13 @@
  */
 package DALs;
 
-import models.BookingModel;
-import Utils.DBContext;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import Utils.DBContext;
 import models.BookingModel;
 
 /**
@@ -279,7 +278,6 @@ public class BookingDAO extends DBContext {
                 booking.setCarName(rs.getString("model_name"));
                 booking.setPricePerDay(rs.getBigDecimal("price_per_day"));
 
-
                 return booking;
             }
 
@@ -289,5 +287,80 @@ public class BookingDAO extends DBContext {
 
         return null;
     }
+
+
+    public int getCompletedBooking(int customerId, int carId) {
+
+        String sql = "SELECT booking_id FROM booking "
+                + "WHERE customer_id = ? AND car_id = ? AND status = 'COMPLETED'";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            ps.setInt(1, customerId);
+            ps.setInt(2, carId);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt("booking_id");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return -1;
+    }
+
+    public BookingModel getBookingForContract(int bookingId) {
+
+    String sql = """
+        SELECT 
+            b.booking_id,
+            b.customer_id,
+            b.car_id,
+            b.start_date,
+            b.end_date,
+            b.total_estimated_price,
+            b.status,
+            car.price_per_day
+        FROM booking b
+        JOIN cars car ON b.car_id = car.car_id
+        WHERE b.booking_id = ?
+    """;
+
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+        ps.setInt(1, bookingId);
+
+        ResultSet rs = ps.executeQuery();
+
+        if (rs.next()) {
+
+            BookingModel booking = new BookingModel();
+
+            booking.setBookingId(rs.getInt("booking_id"));
+            booking.setCustomerId(rs.getInt("customer_id"));
+            booking.setCarId(rs.getInt("car_id"));
+            booking.setStartDate(rs.getDate("start_date"));
+            booking.setEndDate(rs.getDate("end_date"));
+            booking.setStatus(rs.getString("status"));
+
+            booking.setTotalEstimatedPrice(
+                    rs.getBigDecimal("total_estimated_price"));
+
+            booking.setPricePerDay(
+                    rs.getBigDecimal("price_per_day"));
+
+            return booking;
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return null;
+}
+
 
 }
