@@ -91,7 +91,103 @@ body {
 }
 
 .price-text{
+     display:flex;
+    justify-content:space-between;
+    align-items:center;
     font-size:16px;
     margin-top:10px;
 }
 
+
+/* modal giá thuê trong booking */
+.info-icon{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+
+    width:16px;
+    height:16px;
+
+    border-radius:50%;
+    border:1px solid #999;
+
+    font-size:11px;
+    color:#555;
+    background:#fff;
+
+    margin-left:4px;
+
+    font-style:normal;
+    cursor:pointer; /* hiện bàn tay khi hover */
+}
+
+.modal{
+    display:none;           /* ban đầu ẩn */
+    position:fixed;
+    z-index:1000;
+
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+
+    background:rgba(0,0,0,0.45);
+
+    align-items:center;
+    justify-content:center;
+}
+
+.modal-content{
+    background:#fff;
+
+    width:650px;        /* giảm lại */
+    max-width:90%;      /* responsive cho màn nhỏ */
+
+    max-height:90vh;
+
+    border-radius:12px;
+    position:relative;
+
+    padding:0;
+}
+
+/* tiêu đề */
+.modal-title{
+    text-align:center;
+    font-size:28px;
+    font-weight:700;
+
+    padding:20px;
+
+    border-bottom:1px solid #e5e5e5; /* đường gạch dưới */
+}
+
+/* nội dung */
+.modal-body{
+    padding:20px 25px;
+
+    max-height:55vh;
+    overflow-y:auto;
+}
+
+/* nút đóng */
+.modal-close{
+    position:absolute;
+    right:15px;
+    top:15px;
+
+    width:36px;
+    height:36px;
+
+    border-radius:50%;
+    border:1px solid #ddd;
+
+    background:#fff;
+    font-size:20px;
+    cursor:pointer;
+}
+
+.sub-list{
+    list-style-type: "- ";
+    margin-left:20px;
+}

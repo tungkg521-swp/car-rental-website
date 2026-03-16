@@ -116,3 +116,12 @@ if (endDate <= startDate) {
 }
 
 });
+
+
+function openModal(){
+    document.getElementById("priceModal").style.display = "flex";
+}
+
+function closeModal(){
+    document.getElementById("priceModal").style.display = "none";
+}
