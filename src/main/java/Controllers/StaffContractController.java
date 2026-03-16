@@ -26,7 +26,7 @@ public class StaffContractController extends HttpServlet {
     // ================= GET =================
     @Override
     protected void doGet(HttpServletRequest request,
-                         HttpServletResponse response)
+            HttpServletResponse response)
             throws ServletException, IOException {
 
         String action = request.getParameter("action");
@@ -40,17 +40,15 @@ public class StaffContractController extends HttpServlet {
 
             request.getRequestDispatcher("/views/staff-contracts.jsp")
                     .forward(request, response);
-        }
-
-        // ===== CONTRACT DETAIL =====
+        } // ===== CONTRACT DETAIL =====
         else if ("detail".equals(action)) {
 
             try {
 
                 int id = Integer.parseInt(request.getParameter("id"));
 
-                ContractModel contract =
-                        contractService.getContractById(id);
+                ContractModel contract
+                        = contractService.getContractById(id);
 
                 if (contract == null) {
 
@@ -61,12 +59,12 @@ public class StaffContractController extends HttpServlet {
                 }
 
                 // ===== LOAD CUSTOMER =====
-                CustomerModel customer =
-                        customerDAO.findById(contract.getCustomerId());
+                CustomerModel customer
+                        = customerDAO.findById(contract.getCustomerId());
 
                 // ===== LOAD CAR =====
-                CarModel car =
-                        carDAO.findById(contract.getCarId());
+                CarModel car
+                        = carDAO.findById(contract.getCarId());
 
                 // ===== CALCULATE RENTAL DAYS =====
                 long days = ChronoUnit.DAYS.between(
@@ -90,9 +88,7 @@ public class StaffContractController extends HttpServlet {
                 response.sendRedirect(
                         request.getContextPath() + "/staff/contracts");
             }
-        }
-
-        else {
+        } else {
 
             response.sendRedirect(
                     request.getContextPath() + "/staff/contracts");
@@ -102,24 +98,30 @@ public class StaffContractController extends HttpServlet {
     // ================= POST =================
     @Override
     protected void doPost(HttpServletRequest request,
-                          HttpServletResponse response)
+            HttpServletResponse response)
             throws ServletException, IOException {
 
         String action = request.getParameter("action");
 
         try {
 
-            int contractId =
-                    Integer.parseInt(request.getParameter("contractId"));
+            int contractId
+                    = Integer.parseInt(request.getParameter("contractId"));
 
             if ("activate".equals(action)) {
 
                 contractService.updateContractStatus(contractId, "ACTIVE");
 
+                ContractModel contract = contractService.getContractById(contractId);
+
+                carDAO.updateStatus(contract.getCarId(), "RENTED");
             } else if ("complete".equals(action)) {
 
                 contractService.updateContractStatus(contractId, "COMPLETED");
 
+                ContractModel contract = contractService.getContractById(contractId);
+
+                carDAO.updateStatus(contract.getCarId(), "AVAILABLE");
             } else if ("cancel".equals(action)) {
 
                 contractService.updateContractStatus(contractId, "CANCELLED");

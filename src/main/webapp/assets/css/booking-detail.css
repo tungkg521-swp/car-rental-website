@@ -50,35 +50,7 @@
    STATUS BADGE
    ========================= */
 
-.status {
-    display: inline-block;
-    padding: 6px 14px;
-    border-radius: 50px;
-    font-size: 13px;
-    font-weight: 600;
-    margin-bottom: 20px;
-}
 
-/* Dynamic status colors */
-.status.PENDING {
-    background: #fff3cd;
-    color: #856404;
-}
-
-.status.APPROVED {
-    background: #d4edda;
-    color: #155724;
-}
-
-.status.REJECTED {
-    background: #f8d7da;
-    color: #721c24;
-}
-
-.status.CANCELLED {
-    background: #e2e3e5;
-    color: #383d41;
-}
 
 /* =========================
    INFO LIST
@@ -145,18 +117,52 @@
     background-color: #c9302c;
 }
 
-.status.PENDING {
-    background: #ffc107;
-    color: black;
+/* =========================
+   STATUS BADGE
+   ========================= */
+
+.booking-detail-page .status {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 20px;
 }
 
-.status.CANCELED {
-    background: #6c757d;
+/* waiting approval */
+.booking-detail-page .status.pending {
+    background-color: #f39c12;
     color: white;
 }
 
-.status.COMPLETED {
-    background: #28a745;
+/* approved */
+.booking-detail-page .status.confirmed {
+    background-color: #3498db;
+    color: white;
+}
+
+/* renting */
+.booking-detail-page .status.active {
+    background-color: #27ae60;
+    color: white;
+}
+
+/* completed */
+.booking-detail-page .status.completed {
+    background-color: #7f8c8d;
+    color: white;
+}
+
+/* rejected */
+.booking-detail-page .status.rejected {
+    background-color: #e74c3c;
+    color: white;
+}
+
+/* cancelled */
+.booking-detail-page .status.cancelled {
+    background-color: #2c3e50;
     color: white;
 }
 

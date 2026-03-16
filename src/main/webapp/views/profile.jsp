@@ -18,17 +18,19 @@
 
 
 
-
-
         <div class="profile-content">
 
-            <jsp:include page="profile-info.jsp"/>
+
+            <div class="profile-content">
+
+                <jsp:include page="profile-info.jsp"/>
+
+            </div>
 
         </div>
 
 
-
-
     </div>
-            <script src="${pageContext.request.contextPath}/assets/js/profile.js"></script>
+    <script src="${pageContext.request.contextPath}/assets/js/profile.js"></script>
+
 </body>
