@@ -152,3 +152,28 @@ body {
     color: #000;
     transform: translateX(-3px);
 }
+
+
+.status.pending {
+    background: orange;
+}
+
+.status.confirmed {
+    background: #3498db;
+}
+
+.status.active {
+    background: green;
+}
+
+.status.completed {
+    background: gray;
+}
+
+.status.rejected {
+    background: red;
+}
+
+.status.cancelled {
+    background: #555;
+}

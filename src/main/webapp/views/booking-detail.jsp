@@ -7,10 +7,7 @@
     <head>
         <title>Booking Detail</title>
 
-        <!-- Global CSS -->
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style-base.css">
-
-        <!-- Booking Detail CSS -->
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/booking-detail.css">
     </head>
 
@@ -18,103 +15,198 @@
 
         <jsp:include page="includes/header.jsp"/>
 
-        <section class="booking-detail-page">
+        <section class="booking-detail-page"
+                 data-cancel-status="${requestScope.cancelStatus}">
             <div class="container">
 
-                <div class="detail-card">
+                <div class="booking-detail-shell">
 
-                    <!-- LEFT IMAGE -->
-                    <div class="detail-left">
-                        <img src="${pageContext.request.contextPath}/assets/images/cars/${booking.imageFolder}/${booking.imageFolder}_1.jpg"
-                             alt="${booking.carName}">
+                    <!-- TOP BAR -->
+                    <div class="detail-topbar">
+                        <div class="topbar-left">
+                            <p class="page-kicker">Customer Booking</p>
+                            <h1>Booking Detail</h1>
+                           
+                        </div>
+
+                        <div class="topbar-right">
+                            <div class="booking-code-card">
+                                <span class="booking-code-label">Booking ID</span>
+                                <strong>#${booking.bookingId}</strong>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- RIGHT INFO -->
-                    <div class="detail-right">
+                    <!-- MAIN CARD -->
+                    <div class="detail-card">
 
-                        <h2>Booking #${booking.bookingId}</h2>
+                        <!-- LEFT -->
+                        <div class="detail-left">
+                            <div class="car-image-wrap">
+                                <img src="${pageContext.request.contextPath}/assets/images/cars/${booking.imageFolder}/${booking.imageFolder}_1.jpg"
+                                     alt="${booking.carName}">
+                            </div>
 
-                        <!-- STATUS BADGE -->
-                        <div class="status ${booking.status}">
-                            ${booking.status}
+                            <div class="car-quick-info">
+                                <div class="quick-item">
+                                    <span class="quick-label">Car Name</span>
+                                    <strong>${booking.carName}</strong>
+                                </div>
+
+                                <div class="quick-item">
+                                    <span class="quick-label">Rental Period</span>
+                                    <strong>
+                                        <fmt:formatDate value="${booking.startDate}" pattern="dd/MM/yyyy"/>
+                                        -
+                                        <fmt:formatDate value="${booking.endDate}" pattern="dd/MM/yyyy"/>
+                                    </strong>
+                                </div>
+
+                                <div class="quick-item price-box">
+                                    <span class="quick-label">Estimated Total</span>
+                                    <strong class="price">
+                                        <fmt:formatNumber value="${booking.totalEstimatedPrice}" type="number" groupingUsed="true"/>
+                                        VND
+                                    </strong>
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- BOOKING INFO -->
-                        <ul class="detail-info">
-                            <li><strong>Car:</strong> ${booking.carName}</li>
+                        <!-- RIGHT -->
+                        <div class="detail-right">
 
-                            <li><strong>Customer:</strong> ${booking.customerName}</li>
-                            <li><strong>Email:</strong> ${booking.customerEmail}</li>
-                            <li><strong>Phone:</strong> ${booking.customerPhone}</li>
+                            <div class="detail-header">
+                                <div>
+                                    <h2>${booking.carName}</h2>
+                                   
+                                    
+                                </div>
 
-                            <li>
-                                <strong>Booking date:</strong>
-                                <fmt:formatDate value="${booking.bookingDate}" pattern="dd/MM/yyyy HH:mm"/>
-                            </li>
+                                <!-- STATUS BADGE -->
+                                <c:choose>
+                                    <c:when test="${booking.status == 'PENDING'}">
+                                        <span class="status-badge pending">Waiting Approval</span>
+                                    </c:when>
 
-                            <li>
-                                <strong>Start date:</strong>
-                                <fmt:formatDate value="${booking.startDate}" pattern="dd/MM/yyyy"/>
-                            </li>
+                                    <c:when test="${booking.contractStatus == 'CREATED'}">
+                                        <span class="status-badge confirmed">Approved</span>
+                                    </c:when>
 
-                            <li>
-                                <strong>End date:</strong>
-                                <fmt:formatDate value="${booking.endDate}" pattern="dd/MM/yyyy"/>
-                            </li>
+                                    <c:when test="${booking.contractStatus == 'ACTIVE'}">
+                                        <span class="status-badge active">Renting</span>
+                                    </c:when>
 
-                            <li>
-                                <strong>Total price:</strong>
-                                <span class="price">
-                                    <fmt:formatNumber value="${booking.totalEstimatedPrice}" type="number" groupingUsed="true"/>
-                                    VND
-                                </span>
-                            </li>
-                        </ul>
+                                    <c:when test="${booking.contractStatus == 'COMPLETED'}">
+                                        <span class="status-badge completed">Completed</span>
+                                    </c:when>
 
-                        <!-- NOTE -->
-                        <c:if test="${not empty booking.note}">
-                            <div class="note-box">
-                                <strong>Note:</strong>
-                                <p>${booking.note}</p>
+                                    <c:when test="${booking.status == 'REJECTED'}">
+                                        <span class="status-badge rejected">Rejected</span>
+                                    </c:when>
+
+                                    <c:when test="${booking.status == 'CANCELLED'}">
+                                        <span class="status-badge cancelled">Cancelled</span>
+                                    </c:when>
+
+                                    <c:otherwise>
+                                        <span class="status-badge default">${booking.status}</span>
+                                    </c:otherwise>
+                                </c:choose>
                             </div>
-                        </c:if>
 
-                        <!-- ACTION BUTTON -->
-                        <div class="action-buttons">
+                            <!-- INFO GRID -->
+                            <div class="info-card">
+                                <div class="info-row">
+                                    <span class="info-label">Customer</span>
+                                    <span class="info-value">${booking.customerName}</span>
+                                </div>
 
-                            <!-- BACK BUTTON -->
-                            <a href="${pageContext.request.contextPath}/customer/bookings?action=list"
-                               class="btn-back">
-                                ← Back to My Bookings
-                            </a>
+                                <div class="info-row">
+                                    <span class="info-label">Email</span>
+                                    <span class="info-value">${booking.customerEmail}</span>
+                                </div>
 
-                            <!-- CANCEL BUTTON (only when PENDING) -->
-                            <c:if test="${booking.status == 'PENDING'}">
-                                <form method="post"
-                                      action="${pageContext.request.contextPath}/booking"
-                                      style="display:inline-block;">
+                                <div class="info-row">
+                                    <span class="info-label">Phone</span>
+                                    <span class="info-value">${booking.customerPhone}</span>
+                                </div>
 
-                                    <input type="hidden" name="action" value="cancel"/>
-                                    <input type="hidden" name="bookingId"
-                                           value="${booking.bookingId}"/>
+                                <div class="info-row">
+                                    <span class="info-label">Booking Date</span>
+                                    <span class="info-value">
+                                        <fmt:formatDate value="${booking.bookingDate}" pattern="dd/MM/yyyy HH:mm"/>
+                                    </span>
+                                </div>
 
-                                    <button type="submit"
-                                            class="btn-cancel"
-                                            onclick="return confirm('Are you sure you want to cancel this booking?');">
-                                        Cancel Booking
-                                    </button>
-                                </form>
+                                <div class="info-row">
+                                    <span class="info-label">Start Date</span>
+                                    <span class="info-value">
+                                        <fmt:formatDate value="${booking.startDate}" pattern="dd/MM/yyyy"/>
+                                    </span>
+                                </div>
+
+                                <div class="info-row">
+                                    <span class="info-label">End Date</span>
+                                    <span class="info-value">
+                                        <fmt:formatDate value="${booking.endDate}" pattern="dd/MM/yyyy"/>
+                                    </span>
+                                </div>
+
+                                <div class="info-row total-row">
+                                    <span class="info-label">Total Price</span>
+                                    <span class="info-value total-price">
+                                        <fmt:formatNumber value="${booking.totalEstimatedPrice}" type="number" groupingUsed="true"/>
+                                        VND
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- NOTE -->
+                            <c:if test="${not empty booking.note}">
+                                <div class="note-box">
+                                    <div class="note-title">Customer Note</div>
+                                    <p>${booking.note}</p>
+                                </div>
                             </c:if>
 
+                            <!-- ACTIONS -->
+                            <div class="action-buttons">
+                                <a href="${pageContext.request.contextPath}/customer/bookings?action=list"
+                                   class="btn btn-secondary">
+                                    ← Back to My Bookings
+                                </a>
+
+                                <c:if test="${booking.status == 'PENDING'}">
+                                    <form method="post"
+                                          action="${pageContext.request.contextPath}/booking"
+                                          class="inline-form">
+
+                                        <input type="hidden" name="action" value="cancel"/>
+                                        <input type="hidden" name="bookingId" value="${booking.bookingId}"/>
+
+                                        <button type="submit"
+                                                class="btn btn-danger"
+                                                onclick="return confirm('Are you sure you want to cancel this booking?');">
+                                            Cancel Booking
+                                        </button>
+                                    </form>
+                                </c:if>
+                            </div>
+
                         </div>
-
-
                     </div>
 
                 </div>
-
             </div>
         </section>
-
+        <div id="popupOverlay" class="popup-overlay">
+            <div class="popup-box" id="popupBox">
+                <div class="popup-icon" id="popupIcon">✓</div>
+                <h3 id="popupTitle">Notification</h3>
+                <p id="popupMessage">Message here</p>
+                <button type="button" class="popup-btn" onclick="closePopup()">OK</button>
+            </div>
+        </div>
+        <script src="${pageContext.request.contextPath}/assets/js/booking-detail.js?v=1"></script>
     </body>
 </html>
