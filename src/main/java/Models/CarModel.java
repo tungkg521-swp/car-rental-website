@@ -13,6 +13,7 @@ public class CarModel {
     private String transmission;
     private String brandName;
     private String typeName;
+    private String plateNumber;
 
     // IMAGE
     private String imageUrl;      // list
@@ -74,4 +75,13 @@ public class CarModel {
 
     public String getDescription() { return description; }
     public String getStatus() { return status; }
+
+    public String getPlateNumber() {
+        return plateNumber;
+    }
+
+    public void setPlateNumber(String plateNumber) {
+        this.plateNumber = plateNumber;
+    }
+    
 }
