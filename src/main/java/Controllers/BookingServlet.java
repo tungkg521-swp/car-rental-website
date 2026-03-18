@@ -248,6 +248,9 @@ public class BookingServlet extends HttpServlet {
         String endDateRaw = request.getParameter("endDate");
         String note = request.getParameter("note");
 
+        System.out.println("carId = " + carIdRaw);
+        System.out.println("startDate = " + startDateRaw);
+        System.out.println("endDate = " + endDateRaw);
         if (carIdRaw == null || startDateRaw == null || endDateRaw == null) {
             response.sendRedirect(request.getContextPath() + "/cars");
             return;
@@ -271,7 +274,6 @@ public class BookingServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/booking?carId=" + carId);
             return;
         }
-
 
         // Không cho thuê ngày trong quá khứ
         Date today = new Date(System.currentTimeMillis());
@@ -309,7 +311,6 @@ public class BookingServlet extends HttpServlet {
 
         CarService carService = new CarService();
         CarModel car = carService.getCarById(carId);
-        
 
         if (car == null || !"AVAILABLE".equalsIgnoreCase(car.getStatus())) {
             response.sendRedirect(request.getContextPath() + "/cars");
@@ -428,6 +429,9 @@ public class BookingServlet extends HttpServlet {
             return;
         }
 
+         String cancelStatus = request.getParameter("cancelStatus");
+    request.setAttribute("cancelStatus", cancelStatus);
+    
         request.setAttribute("booking", booking);
         request.getRequestDispatcher("/views/booking-detail.jsp")
                 .forward(request, response);
@@ -465,16 +469,19 @@ public class BookingServlet extends HttpServlet {
                         customer.getCustomerId()
                 );
 
-        if (!success) {
-            request.setAttribute("error", "Cannot cancel this booking");
-            viewBookingDetail(request, response);
-            return;
+        if (success) {
+            response.sendRedirect(
+                    request.getContextPath()
+                    + "/booking?action=detail&bookingId=" + bookingId
+                    + "&cancelStatus=success"
+            );
+        } else {
+            response.sendRedirect(
+                    request.getContextPath()
+                    + "/booking?action=detail&bookingId=" + bookingId
+                    + "&cancelStatus=fail"
+            );
         }
-
-        response.sendRedirect(
-                request.getContextPath()
-                + "/booking?action=detail&bookingId=" + bookingId
-        );
     }
 
     private void showBookingSuccess(HttpServletRequest request,
