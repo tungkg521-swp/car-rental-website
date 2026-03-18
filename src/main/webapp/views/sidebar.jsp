@@ -20,7 +20,7 @@
 
         <!-- DASHBOARD -->
         <li>
-            <a href="${pageContext.request.contextPath}/staff/dashboard">
+            <a href="${pageContext.request.contextPath}/dashboard/staff">
                 <i class="icon">📊</i>
                 <span>Dashboard</span>
             </a>

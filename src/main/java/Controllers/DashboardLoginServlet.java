@@ -1,24 +1,26 @@
 package Controllers;
 
 import DALs.AccountDAO;
-import DALs.CustomerDAO;
+import DALs.StaffDAO;
 import Utils.RoleConstants;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import models.AccountModel;
-import models.CustomerModel;
+import models.StaffModel;
 import service.AuthenticationService;
 
-public class LoginServlet extends HttpServlet {
+@WebServlet("/dashboard")
+public class DashboardLoginServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.getRequestDispatcher("/views/login.jsp")
+        request.getRequestDispatcher("/views/dashboard-login.jsp")
                 .forward(request, response);
     }
 
@@ -34,45 +36,54 @@ public class LoginServlet extends HttpServlet {
 
         if (account == null) {
             request.setAttribute("error", "Email hoặc mật khẩu không đúng");
-            request.getRequestDispatcher("/views/login.jsp")
+            request.getRequestDispatcher("/views/dashboard-login.jsp")
                     .forward(request, response);
             return;
         }
 
         if (!"ACTIVE".equalsIgnoreCase(account.getStatus())) {
             request.setAttribute("error", "Tài khoản đã bị khóa");
-            request.getRequestDispatcher("/views/login.jsp")
+            request.getRequestDispatcher("/views/dashboard-login.jsp")
                     .forward(request, response);
             return;
         }
 
-        // Chỉ cho CUSTOMER login ở trang này
-        if (account.getRoleId() != RoleConstants.CUSTOMER) {
-            request.setAttribute("error", "Tài khoản Staff/Admin vui lòng đăng nhập tại Dashboard Login");
-            request.getRequestDispatcher("/views/login.jsp")
-                    .forward(request, response);
-            return;
-        }
-
-        CustomerDAO customerDAO = new CustomerDAO();
-        CustomerModel customer = customerDAO.getByAccountId(account.getAccountId());
-
-        if (customer == null) {
-            request.setAttribute("error", "Không tìm thấy hồ sơ khách hàng");
-            request.getRequestDispatcher("/views/login.jsp")
+        if (account.getRoleId() == RoleConstants.CUSTOMER) {
+            request.setAttribute("error", "Tài khoản khách hàng không được phép đăng nhập Dashboard");
+            request.getRequestDispatcher("/views/dashboard-login.jsp")
                     .forward(request, response);
             return;
         }
 
         HttpSession session = request.getSession(true);
         session.setAttribute("ACCOUNT", account);
-        session.setAttribute("CUSTOMER", customer);
-
-        customerDAO.updateStatus(customer.getCustomerId(), "ACTIVE");
 
         AccountDAO accountDAO = new AccountDAO();
         accountDAO.updateLastLogin(account.getAccountId());
 
-        response.sendRedirect(request.getContextPath() + "/home");
+        if (account.getRoleId() == RoleConstants.STAFF) {
+            StaffDAO staffDAO = new StaffDAO();
+            StaffModel staff = staffDAO.findByAccountId(account.getAccountId());
+
+            if (staff == null) {
+                request.setAttribute("error", "Không tìm thấy hồ sơ nhân viên");
+                request.getRequestDispatcher("/views/dashboard-login.jsp")
+                        .forward(request, response);
+                return;
+            }
+
+            session.setAttribute("STAFF", staff);
+            response.sendRedirect(request.getContextPath() + "/dashboard/staff");
+            return;
+        }
+
+        if (account.getRoleId() == RoleConstants.ADMIN) {
+            response.sendRedirect(request.getContextPath() + "/dashboard/admin");
+            return;
+        }
+
+        request.setAttribute("error", "Vai trò tài khoản không hợp lệ");
+        request.getRequestDispatcher("/views/dashboard-login.jsp")
+                .forward(request, response);
     }
 }
