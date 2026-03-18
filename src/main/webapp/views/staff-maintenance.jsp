@@ -5,17 +5,22 @@
 <head>
     <title>Maintenance Schedule</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/staff.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/maintenance.css">
 </head>
 <body>
     <div class="staff-layout">
         <%@ include file="sidebar.jsp" %>
 
         <div class="staff-content">
-            <h1>Maintenance Schedule</h1>
+            <div class="maintenance-header">
+                <h1 class="maintenance-title">Maintenance Schedule</h1>
+                <a href="${pageContext.request.contextPath}/staff/maintenance?action=add" 
+                   class="btn-add-maintenance">
+                    + Add New Maintenance
+                </a>
+            </div>
 
-            <a href="${pageContext.request.contextPath}/staff/maintenance?action=add" class="btn-add">+ Add New Maintenance</a>
-
-            <table class="table">
+            <table class="maintenance-table">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -29,17 +34,28 @@
                 <tbody>
                     <c:forEach var="m" items="${maintenances}">
                         <tr>
-                            <td>${m.maintenanceId}</td>
-                            <td>${m.modelName}</td>
+                            <td>#${m.maintenanceId}</td>
+                            <td>${m.modelName} - ${m.licensePlate}</td>
                             <td>${m.maintenanceType}</td>
                             <td>${m.scheduledDate}</td>
-                            <td class="status-${m.status.toLowerCase()}">${m.status}</td>
                             <td>
-                                <a href="?action=detail&id=${m.maintenanceId}">Detail</a> |
-                                <a href="?action=edit&id=${m.maintenanceId}">Edit</a>
+                                <span class="status-badge status-${m.status.toLowerCase()}">
+                                    ${m.status}
+                                </span>
+                            </td>
+                            <td class="action-cell">
+                                <a href="?action=detail&id=${m.maintenanceId}" class="detail-link">View</a>
+                                <a href="?action=edit&id=${m.maintenanceId}" class="edit-link">Edit</a>
                             </td>
                         </tr>
                     </c:forEach>
+                    <c:if test="${empty maintenances}">
+                        <tr>
+                            <td colspan="6" style="text-align:center; padding:50px;">
+                                Chưa có lịch bảo dưỡng nào
+                            </td>
+                        </tr>
+                    </c:if>
                 </tbody>
             </table>
         </div>
