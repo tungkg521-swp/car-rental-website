@@ -29,7 +29,8 @@ public class NotificationDAO {
                 n.setContent(rs.getString("content"));
                 n.setIsRead(rs.getBoolean("is_read"));
                 n.setCreatedAt(rs.getTimestamp("created_at"));
-
+                n.setReferenceId(rs.getInt("reference_id"));
+                n.setReferenceType(rs.getString("reference_type"));
                 list.add(n);
             }
 
@@ -60,7 +61,8 @@ public class NotificationDAO {
                 n.setContent(rs.getString("content"));
                 n.setIsRead(rs.getBoolean("is_read"));
                 n.setCreatedAt(rs.getTimestamp("created_at"));
-
+                n.setReferenceId(rs.getInt("reference_id"));
+                n.setReferenceType(rs.getString("reference_type"));
                 list.add(n);
             }
 

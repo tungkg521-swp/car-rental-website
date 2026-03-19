@@ -13,10 +13,10 @@ public class CarDAO extends DBContext {
         super();
     }
 
-public List<CarModel> findAllAvailableCars() {
-    List<CarModel> list = new ArrayList<>();
+    public List<CarModel> findAllAvailableCars() {
+        List<CarModel> list = new ArrayList<>();
 
-    String sql = """
+        String sql = """
         SELECT
             c.car_id,
             c.model_name,
@@ -43,35 +43,35 @@ public List<CarModel> findAllAvailableCars() {
 
         try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
-        while (rs.next()) {
-            list.add(new CarModel(
-                rs.getInt("car_id"),
-                rs.getString("model_name"),
-                rs.getInt("model_year"),
-                rs.getBigDecimal("price_per_day"),
-                rs.getInt("seat_count"),
-                rs.getString("fuel_type"),
-                rs.getString("transmission"),
-                rs.getString("brand_name"),
-                rs.getString("type_name"),
-                rs.getString("image_url"),
-                rs.getString("image_folder"),
-                null,
-                rs.getString("status")
-            ));
+            while (rs.next()) {
+                list.add(new CarModel(
+                        rs.getInt("car_id"),
+                        rs.getString("model_name"),
+                        rs.getInt("model_year"),
+                        rs.getBigDecimal("price_per_day"),
+                        rs.getInt("seat_count"),
+                        rs.getString("fuel_type"),
+                        rs.getString("transmission"),
+                        rs.getString("brand_name"),
+                        rs.getString("type_name"),
+                        rs.getString("image_url"),
+                        rs.getString("image_folder"),
+                        null,
+                        rs.getString("status")
+                ));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-    } catch (Exception e) {
-        e.printStackTrace();
+        System.out.println("CAR LIST SIZE = " + list.size());
+        System.out.println("Connection = " + connection);
+        return list;
     }
 
-    System.out.println("CAR LIST SIZE = " + list.size());
-    System.out.println("Connection = " + connection);
-    return list;
-}
-
     public CarModel findById(int carId) {
-    String sql = """
+        String sql = """
         SELECT
             c.car_id,
             c.model_name,
@@ -82,51 +82,49 @@ public List<CarModel> findAllAvailableCars() {
             c.transmission,
             b.brand_name,
             t.type_name,
+            i.image_url,       -- thêm ảnh chính
             c.image_folder,
             c.description,
             c.status
         FROM cars c
-        JOIN brand b 
-            ON c.brand_id = b.brand_id
-        JOIN cars_type t 
-            ON c.type_id = t.type_id
+        JOIN brand b ON c.brand_id = b.brand_id
+        JOIN cars_type t ON c.type_id = t.type_id
+        LEFT JOIN cars_image i ON c.car_id = i.car_id AND i.is_primary = 1
         WHERE c.car_id = ?
     """;
 
-    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, carId);
+            ResultSet rs = ps.executeQuery();
 
-        ps.setInt(1, carId);
-        ResultSet rs = ps.executeQuery();
-
-        if (rs.next()) {
-            return new CarModel(
-                rs.getInt("car_id"),
-                rs.getString("model_name"),
-                rs.getInt("model_year"),
-                rs.getBigDecimal("price_per_day"),
-                rs.getInt("seat_count"),
-                rs.getString("fuel_type"),
-                rs.getString("transmission"),
-                rs.getString("brand_name"),
-                rs.getString("type_name"),
-                null,
-                rs.getString("image_folder"),
-                rs.getString("description"),
-                rs.getString("status")
-            );
+            if (rs.next()) {
+                return new CarModel(
+                        rs.getInt("car_id"),
+                        rs.getString("model_name"),
+                        rs.getInt("model_year"),
+                        rs.getBigDecimal("price_per_day"),
+                        rs.getInt("seat_count"),
+                        rs.getString("fuel_type"),
+                        rs.getString("transmission"),
+                        rs.getString("brand_name"),
+                        rs.getString("type_name"),
+                        rs.getString("image_url"), // lấy từ rs
+                        rs.getString("image_folder"),
+                        rs.getString("description"),
+                        rs.getString("status")
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-    } catch (Exception e) {
-        e.printStackTrace();
+        return null;
     }
-    return null;
-}
-    
+
     public List<CarModel> findAllCars() {
 
-    List<CarModel> list = new ArrayList<>();
+        List<CarModel> list = new ArrayList<>();
 
-    String sql = """
+        String sql = """
         SELECT
             c.car_id,
             c.model_name,
@@ -151,57 +149,56 @@ public List<CarModel> findAllAvailableCars() {
            AND i.is_primary = 1
     """;
 
-    try (PreparedStatement ps = connection.prepareStatement(sql);
-         ResultSet rs = ps.executeQuery()) {
+        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
-        while (rs.next()) {
-            list.add(new CarModel(
-                rs.getInt("car_id"),
-                rs.getString("model_name"),
-                rs.getInt("model_year"),
-                rs.getBigDecimal("price_per_day"),
-                rs.getInt("seat_count"),
-                rs.getString("fuel_type"),
-                rs.getString("transmission"),
-                rs.getString("brand_name"),
-                rs.getString("type_name"),
-                rs.getString("image_url"),
-                rs.getString("image_folder"),
-                rs.getString("description"),
-                rs.getString("status")
-            ));
+            while (rs.next()) {
+                list.add(new CarModel(
+                        rs.getInt("car_id"),
+                        rs.getString("model_name"),
+                        rs.getInt("model_year"),
+                        rs.getBigDecimal("price_per_day"),
+                        rs.getInt("seat_count"),
+                        rs.getString("fuel_type"),
+                        rs.getString("transmission"),
+                        rs.getString("brand_name"),
+                        rs.getString("type_name"),
+                        rs.getString("image_url"),
+                        rs.getString("image_folder"),
+                        rs.getString("description"),
+                        rs.getString("status")
+                ));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-    } catch (Exception e) {
-        e.printStackTrace();
+        return list;
     }
-
-    return list;
-}
 
     public boolean updateStatus(int carId, String status) {
 
-    String sql = "UPDATE cars SET status = ? WHERE car_id = ?";
+        String sql = "UPDATE cars SET status = ? WHERE car_id = ?";
 
-    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
-        ps.setString(1, status);
-        ps.setInt(2, carId);
+            ps.setString(1, status);
+            ps.setInt(2, carId);
 
-        return ps.executeUpdate() > 0;
+            return ps.executeUpdate() > 0;
 
-    } catch (Exception e) {
-        e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 
-    return false;
-}
+    public List<CarModel> searchCars(String keyword) {
+        List<CarModel> list = new ArrayList<>();
 
-public List<CarModel> searchCars(String keyword) {
-    List<CarModel> list = new ArrayList<>();
-
-    System.out.println("Connection = " + connection);
-    String sql = """
+        System.out.println("Connection = " + connection);
+        String sql = """
         SELECT
             c.car_id,
             c.model_name,
@@ -223,33 +220,33 @@ public List<CarModel> searchCars(String keyword) {
         WHERE c.model_name LIKE ? 
           AND c.status = 'AVAILABLE'  -- THÊM: Filter available
     """;
-    try (PreparedStatement ps = connection.prepareStatement(sql)) {
-        ps.setString(1, "%" + keyword + "%");
-        System.out.println("SQL param = %" + keyword + "%");
-        ResultSet rs = ps.executeQuery();
-        while (rs.next()) {
-            list.add(new CarModel(
-                    rs.getInt("car_id"),
-                    rs.getString("model_name"),
-                    rs.getInt("model_year"),
-                    rs.getBigDecimal("price_per_day"),
-                    rs.getInt("seat_count"),
-                    rs.getString("fuel_type"),
-                    rs.getString("transmission"),
-                    rs.getString("brand_name"),
-                    rs.getString("type_name"),
-                    rs.getString("image_url"),  // SỬA: Lấy từ rs thay null
-                    rs.getString("image_folder"),
-                    rs.getString("description"),  // SỬA: Lấy từ rs thay null (nếu không cần, bỏ select và dùng constructor khác)
-                    rs.getString("status")
-            ));
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, "%" + keyword + "%");
+            System.out.println("SQL param = %" + keyword + "%");
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(new CarModel(
+                        rs.getInt("car_id"),
+                        rs.getString("model_name"),
+                        rs.getInt("model_year"),
+                        rs.getBigDecimal("price_per_day"),
+                        rs.getInt("seat_count"),
+                        rs.getString("fuel_type"),
+                        rs.getString("transmission"),
+                        rs.getString("brand_name"),
+                        rs.getString("type_name"),
+                        rs.getString("image_url"), // SỬA: Lấy từ rs thay null
+                        rs.getString("image_folder"),
+                        rs.getString("description"), // SỬA: Lấy từ rs thay null (nếu không cần, bỏ select và dùng constructor khác)
+                        rs.getString("status")
+                ));
+            }
+            System.out.println("Result size = " + list.size());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        System.out.println("Result size = " + list.size());
-    } catch (Exception e) {
-        e.printStackTrace();
+        return list;
     }
-    return list;
-}
 
     public List<CarModel> filterCars(
             String keyword,
@@ -291,7 +288,7 @@ public List<CarModel> searchCars(String keyword) {
         // Chuẩn bị các điều kiện động
         if (keyword != null && !keyword.trim().isEmpty()) {
             sql += " AND c.model_name LIKE ?";
-}
+        }
         if (availableOnly) {
             sql += " AND c.status = 'AVAILABLE'";
         }

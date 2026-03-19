@@ -31,8 +31,12 @@
                     <input type="hidden" name="action" value="sendNotification">
 
                     <div class="noti-group">
-                        <label>Title</label>
-                        <input class="noti-input" type="text" name="title" required>
+                        <label>Type:</label>
+                        <select name="title" required class="noti-input">
+                            <option value="">-- Select Type --</option>
+                            <option value="Staff">Staff</option>
+                            <option value="System">System</option>
+                        </select>
                     </div>
 
                     <div class="noti-group">
@@ -62,6 +66,7 @@
                         <label>Select Customer</label>
 
                         <select class="noti-select" name="customerId">
+                            <option value="">-- Select Customer --</option>
                             <c:forEach items="${customerList}" var="c">
                                 <option value="${c.customerId}">
                                     ${c.fullName}
@@ -84,14 +89,14 @@
 
         <c:if test="${not empty success}">
             <script>
-                                                       Swal.fire({
-                                                           icon: 'success',
-                                                           title: '${success}',
-                                                           showConfirmButton: false,
-                                                           timer: 1500
-                                                       }).then(() => {
-                                                           window.location.href = '${pageContext.request.contextPath}/SendNotificationController';
-                                                       });
+                                           Swal.fire({
+                                               icon: 'success',
+                                               title: '${success}',
+                                               showConfirmButton: false,
+                                               timer: 1500
+                                           }).then(() => {
+                                               window.location.href = '${pageContext.request.contextPath}/SendNotificationController';
+                                           });
             </script>
         </c:if>
 

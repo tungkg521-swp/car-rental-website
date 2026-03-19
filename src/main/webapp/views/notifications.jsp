@@ -22,19 +22,37 @@
         </c:if>
 
         <c:forEach var="n" items="${notifications}">
-            <div class="notification-item">
-                <div class="notification-icon">🔔</div>
+            <c:choose>
 
-                <div class="notification-content">
-                    <div class="notification-title">${n.title}</div>
-                    <div class="notification-text">${n.content}</div>
-                    <div class="notification-time">${n.createdAt}</div>
+                <c:when test="${n.referenceType == 'REVIEW'}">
+                    <div class="notification-item"
+                         onclick="handleNotificationClick(${n.referenceId})"
+                         style="cursor: pointer; background: #f0f8ff;">
+                    </c:when>
+
+                    <c:otherwise>
+                        <div class="notification-item">
+                        </c:otherwise>
+
+                    </c:choose>
+
+                    <div class="notification-icon">🔔</div>
+
+                    <div class="notification-content">
+                        <div class="notification-title">${n.title}</div>
+                        <div class="notification-text">${n.content}</div>
+                        <div class="notification-time">${n.createdAt}</div>
+                    </div>
+
+                    <div class="notification-dot"></div>
                 </div>
+            </c:forEach>
 
-                <div class="notification-dot"></div>
-            </div>
-        </c:forEach>
+        </div>
 
     </div>
-
-</div>
+    <script>
+        function handleNotificationClick(contractId) {
+            window.location.href = 'review?contractId=' + contractId;
+        }
+    </script>
