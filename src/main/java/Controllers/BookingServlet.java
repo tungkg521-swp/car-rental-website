@@ -5,6 +5,7 @@
  */
 package Controllers;
 
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -23,7 +24,12 @@ import models.AccountModel;
 import models.BookingModel;
 import models.CarModel;
 import models.CustomerModel;
+
+
+import models.UserModel;
+
 import service.BookingService;
+
 import service.CarService;
 
 /**
@@ -90,7 +96,9 @@ public class BookingServlet extends HttpServlet {
             case "cancel":
                 cancelBooking(request, response);
                 break;
-
+            case "delete":
+                deleteBooking(request, response);
+                break;
             default:
                 response.sendRedirect(request.getContextPath() + "/cars");
                 break;
@@ -248,6 +256,9 @@ public class BookingServlet extends HttpServlet {
         String endDateRaw = request.getParameter("endDate");
         String note = request.getParameter("note");
 
+        System.out.println("carId = " + carIdRaw);
+        System.out.println("startDate = " + startDateRaw);
+        System.out.println("endDate = " + endDateRaw);
         if (carIdRaw == null || startDateRaw == null || endDateRaw == null) {
             response.sendRedirect(request.getContextPath() + "/cars");
             return;
@@ -271,7 +282,6 @@ public class BookingServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/booking?carId=" + carId);
             return;
         }
-
 
         // Không cho thuê ngày trong quá khứ
         Date today = new Date(System.currentTimeMillis());
@@ -309,7 +319,6 @@ public class BookingServlet extends HttpServlet {
 
         CarService carService = new CarService();
         CarModel car = carService.getCarById(carId);
-        
 
         if (car == null || !"AVAILABLE".equalsIgnoreCase(car.getStatus())) {
             response.sendRedirect(request.getContextPath() + "/cars");
@@ -428,6 +437,9 @@ public class BookingServlet extends HttpServlet {
             return;
         }
 
+        String cancelStatus = request.getParameter("cancelStatus");
+        request.setAttribute("cancelStatus", cancelStatus);
+
         request.setAttribute("booking", booking);
         request.getRequestDispatcher("/views/booking-detail.jsp")
                 .forward(request, response);
@@ -465,16 +477,19 @@ public class BookingServlet extends HttpServlet {
                         customer.getCustomerId()
                 );
 
-        if (!success) {
-            request.setAttribute("error", "Cannot cancel this booking");
-            viewBookingDetail(request, response);
-            return;
+        if (success) {
+            response.sendRedirect(
+                    request.getContextPath()
+                    + "/booking?action=detail&bookingId=" + bookingId
+                    + "&cancelStatus=success"
+            );
+        } else {
+            response.sendRedirect(
+                    request.getContextPath()
+                    + "/booking?action=detail&bookingId=" + bookingId
+                    + "&cancelStatus=fail"
+            );
         }
-
-        response.sendRedirect(
-                request.getContextPath()
-                + "/booking?action=detail&bookingId=" + bookingId
-        );
     }
 
     private void showBookingSuccess(HttpServletRequest request,
@@ -493,6 +508,61 @@ public class BookingServlet extends HttpServlet {
 
         request.getRequestDispatcher("/views/booking-success.jsp")
                 .forward(request, response);
+    }
+
+    private void deleteBooking(HttpServletRequest request,
+            HttpServletResponse response)
+            throws ServletException, IOException {
+
+        HttpSession session = request.getSession(false);
+
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        AccountModel account = (AccountModel) session.getAttribute("ACCOUNT");
+
+        if (account == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        CustomerModel customer = new CustomerDAO().getByAccountId(account.getAccountId());
+
+        if (customer == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        String bookingIdRaw = request.getParameter("bookingId");
+
+        if (bookingIdRaw == null) {
+            response.sendRedirect(request.getContextPath() + "/booking?action=list");
+            return;
+        }
+
+        int bookingId;
+        try {
+            bookingId = Integer.parseInt(bookingIdRaw);
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/booking?action=list");
+            return;
+        }
+
+        boolean success = bookingService.deleteCancelledBooking(
+                bookingId,
+                customer.getCustomerId()
+        );
+
+        if (success) {
+            response.sendRedirect(request.getContextPath()
+                    + "/booking?action=list");
+        } else {
+            response.sendRedirect(request.getContextPath()
+                    + "/booking?action=detail&bookingId=" + bookingId
+            );
+        }
     }
 
 }

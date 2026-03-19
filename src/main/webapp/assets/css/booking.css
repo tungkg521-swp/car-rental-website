@@ -1,97 +1,247 @@
+/* ===== GLOBAL ===== */
 body {
-    background-color: #f5f6f8;
+    background: linear-gradient(180deg, #f5f7fa, #eef2f7);
     font-family: "Inter", "Segoe UI", sans-serif;
 }
 
+/* ===== BACK LINK ===== */
 .back-link {
-    text-decoration: none;
+    display: inline-block;
+    margin-bottom: 20px;
+    color: #1677ff;
     font-weight: 500;
-    color: #333;
+    text-decoration: none;
 }
 
 .back-link:hover {
     text-decoration: underline;
 }
 
-.section-title {
-    font-weight: 600;
-    margin-bottom: 16px;
-}
-
+/* ===== CARD ===== */
 .card {
     border: none;
-    border-radius: 12px;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    transition: 0.25s;
 }
 
-/* Ảnh xe trong booking */
-.car-img {
-    width: 260px;        /* hoặc 280px */
-    height: 170px;
-    object-fit: cover;
-    border-radius: 10px;
-    flex-shrink: 0;
+.card:hover {
+    transform: translateY(-4px);
 }
 
-.sticky-summary {
-    position: sticky;
-    top: 20px;
-}
-
-.total {
-    font-size: 18px;
+/* ===== SECTION TITLE ===== */
+.section-title {
     font-weight: 600;
+    font-size: 18px;
+    margin-bottom: 16px;
+    color: #1677ff;
 }
 
-.btn-primary {
-    padding: 12px;
-    border-radius: 8px;
-    font-weight: 500;
+/* ===== CAR IMAGE (UPGRADE) ===== */
+.car-image-wrapper {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
 }
 
-/* ===== CAR INFO (FIX IMAGE SIZE) ===== */
-.car-info-wrapper {
-    display: flex;
-    gap: 16px;
-    align-items: flex-start;
-}
-
-.car-info-wrapper .car-img {
-    width: 260px;
-    height: 170px;
+.car-img {
+    width: 100%;
+    height: 220px;
     object-fit: cover;
-    border-radius: 12px;
-    flex-shrink: 0;
-    max-width: none;
-}
-
-.car-info-wrapper .car-meta {
-    flex: 1;
-}
-
-
-/* FIX: ảnh trong card-body không được full width */
-.card-body img.car-img {
-    width: 260px !important;
-    height: 170px !important;
-    max-width: none !important;
-    object-fit: cover;
-    border-radius: 10px;
     display: block;
 }
 
-
-.car-specs{
-    list-style:none;
-    padding:0;
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:6px;
-    font-size:14px;
+/* overlay gradient */
+.car-overlay {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(to top, rgba(0,0,0,0.65), transparent);
 }
 
-.price-text{
-    font-size:16px;
-    margin-top:10px;
+/* giá nổi trên ảnh */
+.car-price {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
 }
 
+/* ===== CAR INFO ===== */
+.car-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #111;
+}
+
+.car-specs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.car-specs span {
+    background: #e7f0ff;
+    color: #1677ff;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+/* ===== PRICE ===== */
+.price-box {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 12px;
+    font-size: 16px;
+}
+
+.price-box strong {
+    color: #1677ff;
+    font-weight: 700;
+    font-size: 18px;
+}
+
+/* ===== FORM INPUT ===== */
+input,
+textarea {
+    border-radius: 10px !important;
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+input:focus,
+textarea:focus {
+    border-color: #1677ff;
+    box-shadow: 0 0 0 2px rgba(22,119,255,0.15);
+}
+
+/* ===== SUMMARY ===== */
+.summary {
+    position: sticky;
+    top: 20px;
+    background: #ffffff;
+    border: 1px solid #eef2f7;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 15px;
+}
+
+.summary-total {
+    display: flex;
+    justify-content: space-between;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1677ff;
+}
+
+/* ===== BUTTON ===== */
+.btn-primary {
+    background: linear-gradient(135deg, #1677ff, #0044cc);
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-weight: 600;
+    font-size: 16px;
+    box-shadow: 0 6px 15px rgba(22,119,255,0.3);
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+}
+
+/* ===== MODAL ===== */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+
+    background: rgba(0,0,0,0.5);
+
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: #fff;
+    width: 650px;
+    max-width: 90%;
+    max-height: 90vh;
+
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+/* TITLE */
+.modal-title {
+    text-align: center;
+    font-size: 24px;
+    font-weight: 700;
+
+    padding: 18px;
+    border-bottom: 1px solid #eee;
+}
+
+/* BODY */
+.modal-body {
+    padding: 20px 25px;
+    max-height: 60vh;
+    overflow-y: auto;
+    line-height: 1.6;
+}
+
+/* CLOSE BUTTON */
+.modal-close {
+    position: absolute;
+    right: 15px;
+    top: 15px;
+
+    width: 36px;
+    height: 36px;
+
+    border-radius: 50%;
+    border: 1px solid #ddd;
+
+    background: #fff;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+/* ICON (?) */
+.info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-style: normal;
+    width: 16px;
+    height: 16px;
+
+    border-radius: 50%;
+    border: 1px solid #999;
+
+    font-size: 11px;
+    color: #555;
+    background: #fff;
+
+    margin-left: 4px;
+    cursor: pointer;
+}
+
+/* SUB LIST */
+.sub-list {
+    list-style-type: "- ";
+    margin-left: 20px;
+}

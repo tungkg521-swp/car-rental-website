@@ -1,31 +1,30 @@
-package DALs;
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package models;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-public class CustomerModel {
+public class StaffModel {
 
-    private int customerId;
+    private int staffId;
     private String fullName;
     private String email;
     private String phone;
     private String status;
     private LocalDateTime createdAt;
     private int accountId;
-    private String address;
-    private LocalDate dob;
 
-    public CustomerModel() {
+    public StaffModel() {
     }
 
-    // ===== GETTERS & SETTERS =====
-
-    public int getCustomerId() {
-        return customerId;
+    public int getStaffId() {
+        return staffId;
     }
 
-    public void setCustomerId(int customerId) {
-        this.customerId = customerId;
+    public void setStaffId(int staffId) {
+        this.staffId = staffId;
     }
 
     public String getFullName() {
@@ -74,21 +73,5 @@ public class CustomerModel {
 
     public void setAccountId(int accountId) {
         this.accountId = accountId;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public LocalDate getDob() {
-        return dob;
-    }
-
-    public void setDob(LocalDate dob) {
-        this.dob = dob;
     }
 }

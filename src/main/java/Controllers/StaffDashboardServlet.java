@@ -16,7 +16,7 @@ import jakarta.servlet.http.HttpServletResponse;
  *
  * @author ADMIN
  */
-@WebServlet("/staff/dashboard")
+@WebServlet("/dashboard/staff")
 public class StaffDashboardServlet extends HttpServlet {
 
     @Override

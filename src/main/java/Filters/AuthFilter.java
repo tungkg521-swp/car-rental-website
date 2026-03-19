@@ -1,17 +1,40 @@
 package Filters;
 
+import Utils.RoleConstants;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
+import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.Set;
 import models.AccountModel;
 
 public class AuthFilter implements Filter {
+
+    private static final Set<String> STAFF_ALLOWED_PATHS = Set.of(
+            "/dashboard/staff",
+            "/staff/bookings",
+            "/staff/booking-detail",
+            "/staff/cars",
+            "/staff/car-detail",
+            "/staff/contracts",
+            "/staff/contract-detail",
+            "/staff/users",
+            "/staff/user-detail",
+            "/staff/licenses",
+            "/staff/license-detail",
+            "/staff/maintenance",
+            "/staff/vouchers"
+    );
+
+    private static final Set<String> ADMIN_ALLOWED_PATHS = Set.of(
+            "/dashboard/admin"
+    );
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
@@ -22,39 +45,147 @@ public class AuthFilter implements Filter {
 
         String uri = request.getRequestURI();
         String ctx = request.getContextPath();
+        String path = uri.substring(ctx.length());
 
-        // ===== 1) GUEST URLs =====
-        if (uri.equals(ctx + "/")
-                || uri.startsWith(ctx + "/home")
-                || uri.startsWith(ctx + "/login")
-                || uri.startsWith(ctx + "/register") // ← THÊM DÒNG NÀY
-                || uri.startsWith(ctx + "/logout")
-                || uri.startsWith(ctx + "/cars")
-                || uri.startsWith(ctx + "/car-detail")
-                || uri.startsWith(ctx + "/booking-success")
-                || uri.contains("/assets/")) {
-
-            chain.doFilter(req, res);
-            return;
-        }
-        // Cho staff vào trực tiếp (tạm thời)
-        if (uri.contains("/staff")) {
-            chain.doFilter(req, res);
-            return;
-        }
-
-        // ===== 2) CHECK LOGIN =====
         HttpSession session = request.getSession(false);
         AccountModel account = (session == null)
                 ? null
                 : (AccountModel) session.getAttribute("ACCOUNT");
 
-        if (account == null) {
-            response.sendRedirect(ctx + "/login");
+        // Public paths
+        if (path.equals("/")
+                || path.equals("/home")
+                || path.equals("/login")
+                || path.equals("/register")
+                || path.equals("/forgot-password")
+                || path.equals("/verify-otp")
+                || path.equals("/reset-password")
+                || path.equals("/dashboard")
+                || path.equals("/logout")
+                || path.equals("/guest-home")
+                || path.equals("/cars")
+                || path.startsWith("/car-detail")
+                || path.startsWith("/booking-success")
+                || path.startsWith("/license-image")
+                || path.startsWith("/assets/")) {
+
+            chain.doFilter(req, res);
             return;
         }
 
-        // ===== 3) LOGIN OK =====
-        chain.doFilter(req, res);
+        // Validate staff path list
+        if (path.equals("/dashboard/staff") || path.startsWith("/staff/")) {
+            if (!STAFF_ALLOWED_PATHS.contains(path)) {
+                if (account != null
+                        && (account.getRoleId() == RoleConstants.STAFF
+                        || account.getRoleId() == RoleConstants.ADMIN)) {
+                    response.sendRedirect(ctx + "/dashboard");
+                } else {
+                    response.sendRedirect(ctx + "/home");
+                }
+                return;
+            }
+        }
+
+        // Validate admin path list
+        if (path.equals("/dashboard/admin") || path.startsWith("/admin/")) {
+            if (!ADMIN_ALLOWED_PATHS.contains(path)) {
+                if (account != null
+                        && (account.getRoleId() == RoleConstants.STAFF
+                        || account.getRoleId() == RoleConstants.ADMIN)) {
+                    response.sendRedirect(ctx + "/dashboard");
+                } else {
+                    response.sendRedirect(ctx + "/home");
+                }
+                return;
+            }
+        }
+
+        // Not logged in
+        if (account == null) {
+            if (path.equals("/dashboard/staff")
+                    || path.equals("/dashboard/admin")
+                    || path.startsWith("/staff/")
+                    || path.startsWith("/admin/")) {
+                response.sendRedirect(ctx + "/dashboard");
+                return;
+            }
+
+            if (path.startsWith("/booking")
+                    || path.startsWith("/wishlist")
+                    || path.startsWith("/review")
+                    || path.startsWith("/customer/")) {
+                response.sendRedirect(ctx + "/login");
+                return;
+            }
+
+            response.sendRedirect(ctx + "/home");
+            return;
+        }
+
+        int roleId = account.getRoleId();
+
+        // Customer area
+        if (path.startsWith("/booking")
+                || path.startsWith("/wishlist")
+                || path.startsWith("/review")
+                || path.startsWith("/customer/")) {
+
+            if (roleId != RoleConstants.CUSTOMER) {
+                denyAccess(request, response, "Bạn không có quyền truy cập khu vực khách hàng.");
+                return;
+            }
+
+            chain.doFilter(req, res);
+            return;
+        }
+
+        // Staff area
+        if (path.equals("/dashboard/staff") || path.startsWith("/staff/")) {
+            if (roleId != RoleConstants.STAFF && roleId != RoleConstants.ADMIN) {
+                showNotFound(request, response);
+                return;
+            }
+
+            chain.doFilter(req, res);
+            return;
+        }
+
+        // Admin area
+        if (path.equals("/dashboard/admin") || path.startsWith("/admin/")) {
+            if (roleId != RoleConstants.ADMIN) {
+                showNotFound(request, response);
+                return;
+            }
+
+            chain.doFilter(req, res);
+            return;
+        }
+
+        // Other private paths
+        if (roleId == RoleConstants.STAFF || roleId == RoleConstants.ADMIN) {
+            response.sendRedirect(ctx + "/dashboard");
+        } else {
+            response.sendRedirect(ctx + "/home");
+        }
+    }
+
+    private void denyAccess(HttpServletRequest request,
+            HttpServletResponse response,
+            String message) throws ServletException, IOException {
+
+        request.setAttribute("pageTitle", "Access Denied");
+        request.setAttribute("message", message);
+        RequestDispatcher rd = request.getRequestDispatcher("/views/access-denied.jsp");
+        rd.forward(request, response);
+    }
+
+    private void showNotFound(HttpServletRequest request,
+            HttpServletResponse response) throws ServletException, IOException {
+
+        request.setAttribute("pageTitle", "Trang không tồn tại");
+        request.setAttribute("message", "Trang bạn đang tìm kiếm không tồn tại hoặc bạn không thể truy cập đường dẫn này.");
+        RequestDispatcher rd = request.getRequestDispatcher("/views/access-denied.jsp");
+        rd.forward(request, response);
     }
 }
