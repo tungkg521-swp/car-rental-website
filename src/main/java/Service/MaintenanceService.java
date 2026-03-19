@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package service;
 
 import DALs.MaintenanceDAO;
@@ -23,11 +19,34 @@ public class MaintenanceService {
     }
 
     public boolean addMaintenance(MaintenanceModel m) {
-        return maintenanceDAO.add(m);
+        boolean success = maintenanceDAO.add(m);
+        if (success) {
+            carDAO.updateCarStatus(m.getCarId(), "MAINTENANCE");
+        }
+        return success;
     }
 
     public boolean updateMaintenance(MaintenanceModel m) {
-        return maintenanceDAO.update(m);
+        boolean success = maintenanceDAO.update(m);
+        if (success) {
+            if ("COMPLETED".equalsIgnoreCase(m.getStatus()) || "CANCELLED".equalsIgnoreCase(m.getStatus())) {
+                carDAO.updateCarStatus(m.getCarId(), "AVAILABLE");
+            } else {
+                carDAO.updateCarStatus(m.getCarId(), "MAINTENANCE");
+            }
+        }
+        return success;
     }
 
+    // ===== THÊM DELETE =====
+        public boolean deleteMaintenance(int maintenanceId) {
+        MaintenanceModel m = maintenanceDAO.findById(maintenanceId);
+        if (m == null) return false;
+
+        boolean success = maintenanceDAO.delete(maintenanceId);
+        if (success) {
+            carDAO.updateCarStatus(m.getCarId(), "AVAILABLE");   // ← Trả xe về AVAILABLE khi xóa
+        }
+        return success;
+    }
 }

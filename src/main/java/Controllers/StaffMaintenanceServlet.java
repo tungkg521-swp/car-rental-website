@@ -29,7 +29,6 @@ public class StaffMaintenanceServlet extends HttpServlet {
             request.getRequestDispatcher("/views/staff-maintenance.jsp").forward(request, response);
 
         } else if (action.equals("detail")) {
-            // giữ nguyên code cũ của bạn (đã ổn)
             String idStr = request.getParameter("id");
             if (idStr == null || idStr.trim().isEmpty()) {
                 response.sendRedirect(request.getContextPath() + "/staff/maintenance?error=missing_id");
@@ -56,7 +55,6 @@ public class StaffMaintenanceServlet extends HttpServlet {
                 return;
             }
             int id = Integer.parseInt(idStr);
-
             MaintenanceModel maintenance = maintenanceService.getMaintenanceById(id);
             if (maintenance != null) {
                 request.setAttribute("maintenance", maintenance);
@@ -66,6 +64,19 @@ public class StaffMaintenanceServlet extends HttpServlet {
             } else {
                 response.sendRedirect(request.getContextPath() + "/staff/maintenance?error=notfound");
             }
+
+        } else if (action.equals("delete")) {
+            String idStr = request.getParameter("id");
+            if (idStr != null && !idStr.trim().isEmpty()) {
+                int id = Integer.parseInt(idStr);
+                boolean success = maintenanceService.deleteMaintenance(id);
+                if (success) {
+                    request.getSession().setAttribute("message", "Xóa lịch bảo dưỡng thành công!");
+                } else {
+                    request.getSession().setAttribute("error", "Không thể xóa lịch bảo dưỡng.");
+                }
+            }
+            response.sendRedirect(request.getContextPath() + "/staff/maintenance");
         }
     }
 
@@ -76,7 +87,6 @@ public class StaffMaintenanceServlet extends HttpServlet {
         String action = request.getParameter("action");
 
         if ("add".equals(action)) {
-            // giữ nguyên code add cũ của bạn (chỉ thay DAO → Service)
             try {
                 MaintenanceModel m = new MaintenanceModel();
                 m.setCarId(Integer.parseInt(request.getParameter("carId")));
@@ -85,24 +95,21 @@ public class StaffMaintenanceServlet extends HttpServlet {
                 m.setMileageScheduled(Integer.parseInt(request.getParameter("mileageScheduled")));
                 m.setDescription(request.getParameter("description"));
                 m.setEstimatedCost(new java.math.BigDecimal(request.getParameter("estimatedCost")));
+                m.setStatus("SCHEDULED");
 
                 Integer staffId = (Integer) request.getSession().getAttribute("staffId");
                 if (staffId == null) {
                     staffId = 1;
                 }
                 m.setCreatedBy(staffId);
-                m.setStatus("SCHEDULED");
 
                 boolean success = maintenanceService.addMaintenance(m);
-
                 if (success) {
-                    request.getSession().setAttribute("message", "Tạo lịch bảo dưỡng thành công!");
-                } else {
-                    request.getSession().setAttribute("error", "Lỗi khi tạo lịch bảo dưỡng.");
+                    request.getSession().setAttribute("message", "Tạo lịch bảo dưỡng thành công! Xe đã chuyển sang MAINTENANCE.");
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                request.getSession().setAttribute("error", "Dữ liệu không hợp lệ hoặc lỗi hệ thống.");
+                request.getSession().setAttribute("error", "Dữ liệu không hợp lệ.");
             }
             response.sendRedirect(request.getContextPath() + "/staff/maintenance");
 
@@ -116,14 +123,11 @@ public class StaffMaintenanceServlet extends HttpServlet {
                 m.setMileageScheduled(Integer.parseInt(request.getParameter("mileageScheduled")));
                 m.setDescription(request.getParameter("description"));
                 m.setEstimatedCost(new java.math.BigDecimal(request.getParameter("estimatedCost")));
-                m.setStatus(request.getParameter("status"));   // cho phép thay đổi status
+                m.setStatus(request.getParameter("status"));
 
                 boolean success = maintenanceService.updateMaintenance(m);
-
                 if (success) {
                     request.getSession().setAttribute("message", "Cập nhật lịch bảo dưỡng thành công!");
-                } else {
-                    request.getSession().setAttribute("error", "Lỗi khi cập nhật.");
                 }
             } catch (Exception e) {
                 e.printStackTrace();

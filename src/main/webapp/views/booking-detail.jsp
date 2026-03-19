@@ -26,7 +26,7 @@
                         <div class="topbar-left">
                             <p class="page-kicker">Customer Booking</p>
                             <h1>Booking Detail</h1>
-                           
+
                         </div>
 
                         <div class="topbar-right">
@@ -42,44 +42,55 @@
 
                         <!-- LEFT -->
                         <div class="detail-left">
-                            <div class="car-image-wrap">
-                                <img src="${pageContext.request.contextPath}/assets/images/cars/${booking.imageFolder}/${booking.imageFolder}_1.jpg"
-                                     alt="${booking.carName}">
-                            </div>
+                            <div class="car-gallery">
 
-                            <div class="car-quick-info">
-                                <div class="quick-item">
-                                    <span class="quick-label">Car Name</span>
-                                    <strong>${booking.carName}</strong>
+                                <div class="main-image-box">
+                                    <button type="button" class="gallery-nav prev" onclick="changeImage(-1)">‹</button>
+
+                                    <img id="mainCarImage"
+                                         src="${pageContext.request.contextPath}/assets/images/cars/${booking.imageFolder}/${booking.imageFolder}_1.jpg"
+                                         alt="${booking.carName}">
+
+                                    <button type="button" class="gallery-nav next" onclick="changeImage(1)">›</button>
                                 </div>
 
-                                <div class="quick-item">
-                                    <span class="quick-label">Rental Period</span>
-                                    <strong>
-                                        <fmt:formatDate value="${booking.startDate}" pattern="dd/MM/yyyy"/>
-                                        -
-                                        <fmt:formatDate value="${booking.endDate}" pattern="dd/MM/yyyy"/>
-                                    </strong>
+                                <div class="thumbnail-list">
+                                    <img class="thumb active-thumb"
+                                         src="${pageContext.request.contextPath}/assets/images/cars/${booking.imageFolder}/${booking.imageFolder}_1.jpg"
+                                         alt="Thumbnail 1"
+                                         onclick="setMainImage(this, 0)">
+
+                                    <img class="thumb"
+                                         src="${pageContext.request.contextPath}/assets/images/cars/${booking.imageFolder}/${booking.imageFolder}_2.jpg"
+                                         alt="Thumbnail 2"
+                                         onclick="setMainImage(this, 1)">
+
+                                    <img class="thumb"
+                                         src="${pageContext.request.contextPath}/assets/images/cars/${booking.imageFolder}/${booking.imageFolder}_3.jpg"
+                                         alt="Thumbnail 3"
+                                         onclick="setMainImage(this, 2)">
+
+                                    <img class="thumb"
+                                         src="${pageContext.request.contextPath}/assets/images/cars/${booking.imageFolder}/${booking.imageFolder}_4.jpg"
+                                         alt="Thumbnail 4"
+                                         onclick="setMainImage(this, 3)">
+
+                                    <img class="thumb"
+                                         src="${pageContext.request.contextPath}/assets/images/cars/${booking.imageFolder}/${booking.imageFolder}_5.jpg"
+                                         alt="Thumbnail 5"
+                                         onclick="setMainImage(this, 4)">
                                 </div>
 
-                                <div class="quick-item price-box">
-                                    <span class="quick-label">Estimated Total</span>
-                                    <strong class="price">
-                                        <fmt:formatNumber value="${booking.totalEstimatedPrice}" type="number" groupingUsed="true"/>
-                                        VND
-                                    </strong>
-                                </div>
                             </div>
                         </div>
-
                         <!-- RIGHT -->
                         <div class="detail-right">
 
                             <div class="detail-header">
                                 <div>
                                     <h2>${booking.carName}</h2>
-                                   
-                                    
+
+
                                 </div>
 
                                 <!-- STATUS BADGE -->
@@ -176,6 +187,7 @@
                                     ← Back to My Bookings
                                 </a>
 
+
                                 <c:if test="${booking.status == 'PENDING'}">
                                     <form method="post"
                                           action="${pageContext.request.contextPath}/booking"
@@ -188,6 +200,22 @@
                                                 class="btn btn-danger"
                                                 onclick="return confirm('Are you sure you want to cancel this booking?');">
                                             Cancel Booking
+                                        </button>
+                                    </form>
+                                </c:if>
+
+                                <c:if test="${booking.status == 'CANCELLED'}">
+                                    <form method="post"
+                                          action="${pageContext.request.contextPath}/booking"
+                                          class="inline-form">
+
+                                        <input type="hidden" name="action" value="delete"/>
+                                        <input type="hidden" name="bookingId" value="${booking.bookingId}"/>
+
+                                        <button type="submit"
+                                                class="btn btn-delete"
+                                                onclick="return confirm('Are you sure you want to delete this cancelled booking?');">
+                                            Delete Booking
                                         </button>
                                     </form>
                                 </c:if>

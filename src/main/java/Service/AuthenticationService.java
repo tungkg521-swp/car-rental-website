@@ -10,6 +10,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import models.AccountModel;
 import models.CustomerModel;
 
+
 public class AuthenticationService extends DBContext {
 
     private static final String OTP_REGEX = "^\\d{6}$";

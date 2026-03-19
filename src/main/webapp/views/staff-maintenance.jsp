@@ -15,9 +15,7 @@
             <div class="maintenance-header">
                 <h1 class="maintenance-title">Maintenance Schedule</h1>
                 <a href="${pageContext.request.contextPath}/staff/maintenance?action=add" 
-                   class="btn-add-maintenance">
-                    + Add New Maintenance
-                </a>
+                   class="btn-add-maintenance">+ Add New Maintenance</a>
             </div>
 
             <table class="maintenance-table">
@@ -44,21 +42,26 @@
                                 </span>
                             </td>
                             <td class="action-cell">
-                                <a href="?action=detail&id=${m.maintenanceId}" class="detail-link">View</a>
-                                <a href="?action=edit&id=${m.maintenanceId}" class="edit-link">Edit</a>
+                                <a href="?action=detail&id=${m.maintenanceId}" class="btn-view">View</a>
+                                <a href="#" onclick="confirmDelete(${m.maintenanceId})" 
+                                   class="btn-delete">Delete</a>
                             </td>
                         </tr>
                     </c:forEach>
                     <c:if test="${empty maintenances}">
-                        <tr>
-                            <td colspan="6" style="text-align:center; padding:50px;">
-                                Chưa có lịch bảo dưỡng nào
-                            </td>
-                        </tr>
+                        <tr><td colspan="6" style="text-align:center;padding:50px;">Chưa có lịch bảo dưỡng nào</td></tr>
                     </c:if>
                 </tbody>
             </table>
         </div>
     </div>
+
+    <script>
+        function confirmDelete(id) {
+            if (confirm("XÓA lịch bảo dưỡng #" + id + "?\nXe sẽ tự động về AVAILABLE.")) {
+                window.location.href = "${pageContext.request.contextPath}/staff/maintenance?action=delete&id=" + id;
+            }
+        }
+    </script>
 </body>
 </html>
