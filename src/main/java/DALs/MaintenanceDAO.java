@@ -48,10 +48,10 @@ public class MaintenanceDAO extends DBContext {
                 list.add(m);
             }
 //         System.out.println("findAll() found " + list.size() + " maintenances");  // ← DEBUG
-        }catch (SQLException e) {
-        //System.err.println("Error in findAll: " + e.getMessage());
-        e.printStackTrace();
-    }
+        } catch (SQLException e) {
+            //System.err.println("Error in findAll: " + e.getMessage());
+            e.printStackTrace();
+        }
         return list;
     }
 
@@ -152,5 +152,16 @@ public class MaintenanceDAO extends DBContext {
         }
     }
 
+    public boolean delete(int maintenanceId) {
+        String sql = "DELETE FROM car_maintenance WHERE maintenance_id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, maintenanceId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
     // Nếu sau này cần thêm hàm findOverdue, cancel, etc. thì bổ sung ở đây
+
 }
