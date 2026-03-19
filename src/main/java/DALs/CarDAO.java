@@ -127,11 +127,11 @@ public class CarDAO extends DBContext {
         return null;
     }
 
-    public List<CarModel> findAllCars() {
+     public List<CarModel> findAllCars() {
 
-        List<CarModel> list = new ArrayList<>();
+    List<CarModel> list = new ArrayList<>();
 
-        String sql = """
+    String sql = """
         SELECT
             c.car_id,
             c.model_name,
@@ -154,64 +154,83 @@ public class CarDAO extends DBContext {
         LEFT JOIN cars_image i
             ON c.car_id = i.car_id
            AND i.is_primary = 1
-        ORDER BY c.car_id DESC
     """;
 
-        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+    try (PreparedStatement ps = connection.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
 
-            while (rs.next()) {
-                list.add(new CarModel(
-                        rs.getInt("car_id"),
-                        rs.getString("model_name"),
-                        rs.getInt("model_year"),
-                        rs.getBigDecimal("price_per_day"),
-                        rs.getInt("seat_count"),
-                        rs.getString("fuel_type"),
-                        rs.getString("transmission"),
-                        rs.getString("brand_name"),
-                        rs.getString("type_name"),
-                        rs.getString("image_url"),
-                        rs.getString("image_folder"),
-                        rs.getString("description"),
-                        rs.getString("status")
-                ));
-            }
+        while (rs.next()) {
+            list.add(new CarModel(
+                rs.getInt("car_id"),
+                rs.getString("model_name"),
+                rs.getInt("model_year"),
+                rs.getBigDecimal("price_per_day"),
+                rs.getInt("seat_count"),
+                rs.getString("fuel_type"),
+                rs.getString("transmission"),
+                rs.getString("brand_name"),
+                rs.getString("type_name"),
+                rs.getString("image_url"),
+                rs.getString("image_folder"),
+                rs.getString("description"),
+                rs.getString("status")
+            ));
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return list;
+}
+
+    public boolean updateStatus(int carId, String status) {
+
+        String sql = "UPDATE cars SET status = ? WHERE car_id = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            ps.setString(1, status);
+            ps.setInt(2, carId);
+
+            return ps.executeUpdate() > 0;
 
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return list;
+        return false;
     }
 
     public List<CarModel> searchCars(String keyword) {
         List<CarModel> list = new ArrayList<>();
 
+        System.out.println("Connection = " + connection);
         String sql = """
-    SELECT
-        c.car_id,
-        c.model_name,
-        c.model_year,
-        c.price_per_day,
-        c.seat_count,
-        c.fuel_type,
-        c.transmission,
-        b.brand_name,
-        ct.type_name,
-        i.image_url,
-        c.image_folder,
-        c.description,
-        c.status
-    FROM cars c
-    JOIN brand b ON c.brand_id = b.brand_id
-    JOIN cars_type ct ON c.type_id = ct.type_id
-    LEFT JOIN cars_image i ON c.car_id = i.car_id AND i.is_primary = 1
-    WHERE c.model_name LIKE ? 
-    ORDER BY c.car_id DESC
+        SELECT
+            c.car_id,
+            c.model_name,
+            c.model_year,
+            c.price_per_day,
+            c.seat_count,
+            c.fuel_type,
+            c.transmission,
+            b.brand_name,
+            ct.type_name,
+            i.image_url,  -- THÊM: Lấy image_url
+            c.image_folder,
+            c.description,  -- THÊM: Nếu cần description (optional, nhưng constructor có)
+            c.status
+        FROM cars c  -- SỬA: cars lowercase để nhất quán
+        JOIN brand b ON c.brand_id = b.brand_id
+        JOIN cars_type ct ON c.type_id = ct.type_id
+        LEFT JOIN cars_image i ON c.car_id = i.car_id AND i.is_primary = 1  -- THÊM: Join image giống findAll
+        WHERE c.model_name LIKE ? 
+          AND c.status = 'AVAILABLE'  -- THÊM: Filter available
     """;
-
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, "%" + keyword + "%");
+            System.out.println("SQL param = %" + keyword + "%");
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 list.add(new CarModel(
@@ -224,13 +243,13 @@ public class CarDAO extends DBContext {
                         rs.getString("transmission"),
                         rs.getString("brand_name"),
                         rs.getString("type_name"),
-                        rs.getString("image_url"),
+                        rs.getString("image_url"), // SỬA: Lấy từ rs thay null
                         rs.getString("image_folder"),
-                        rs.getString("description"),
+                        rs.getString("description"), // SỬA: Lấy từ rs thay null (nếu không cần, bỏ select và dùng constructor khác)
                         rs.getString("status")
                 ));
             }
-            System.out.println("Search found: " + list.size() + " results");
+            System.out.println("Result size = " + list.size());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -606,21 +625,21 @@ public class CarDAO extends DBContext {
         }
     }
 
-   public boolean addCarWithImages(CarModel car, List<String> imageUrls) {
-    Connection conn = null;
-    PreparedStatement ps = null;
-    ResultSet rs = null;
+    public boolean addCarWithImages(CarModel car, List<String> imageUrls) {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
 
-    try {
-        conn = getConnection();
-        conn.setAutoCommit(false);
+        try {
+            conn = getConnection();
+            conn.setAutoCommit(false);
 
-        int brandId = getBrandId(conn, car.getBrandName());
-        int typeId = getTypeId(conn, car.getTypeName());
+            int brandId = getBrandId(conn, car.getBrandName());
+            int typeId = getTypeId(conn, car.getTypeName());
 
-        String plateNumber = "TEMP-" + System.currentTimeMillis();
+            String plateNumber = "TEMP-" + System.currentTimeMillis();
 
-        String sql = """
+            String sql = """
         INSERT INTO cars (
             brand_id, type_id, plate_number, model_name, model_year,
             price_per_day, status, created_at, seat_count, fuel_type,
@@ -629,94 +648,94 @@ public class CarDAO extends DBContext {
         VALUES (?, ?, ?, ?, ?, ?, ?, GETDATE(), ?, ?, ?, ?, ?)
     """;
 
-        ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-        ps.setInt(1, brandId);
-        ps.setInt(2, typeId);
-        ps.setString(3, plateNumber);
-        ps.setString(4, car.getModelName());
-        ps.setInt(5, car.getModelYear());
-        ps.setBigDecimal(6, car.getPricePerDay());
-        ps.setString(7, car.getStatus() != null ? car.getStatus() : "AVAILABLE");
-        ps.setInt(8, car.getSeatCount());
-        ps.setString(9, car.getFuelType());
-        ps.setString(10, car.getTransmission());
-        ps.setString(11, car.getDescription() != null ? car.getDescription() : "");
-        ps.setString(12, car.getImageFolder());
+            ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ps.setInt(1, brandId);
+            ps.setInt(2, typeId);
+            ps.setString(3, plateNumber);
+            ps.setString(4, car.getModelName());
+            ps.setInt(5, car.getModelYear());
+            ps.setBigDecimal(6, car.getPricePerDay());
+            ps.setString(7, car.getStatus() != null ? car.getStatus() : "AVAILABLE");
+            ps.setInt(8, car.getSeatCount());
+            ps.setString(9, car.getFuelType());
+            ps.setString(10, car.getTransmission());
+            ps.setString(11, car.getDescription() != null ? car.getDescription() : "");
+            ps.setString(12, car.getImageFolder());
 
-        int affectedRows = ps.executeUpdate();
-        if (affectedRows == 0) {
-            conn.rollback();
-            return false;
-        }
+            int affectedRows = ps.executeUpdate();
+            if (affectedRows == 0) {
+                conn.rollback();
+                return false;
+            }
 
-        rs = ps.getGeneratedKeys();
-        int carId = 0;
-        if (rs.next()) {
-            carId = rs.getInt(1);
-        }
+            rs = ps.getGeneratedKeys();
+            int carId = 0;
+            if (rs.next()) {
+                carId = rs.getInt(1);
+            }
 
-        if (carId <= 0) {
-            conn.rollback();
-            return false;
-        }
+            if (carId <= 0) {
+                conn.rollback();
+                return false;
+            }
 
-        if (imageUrls != null && !imageUrls.isEmpty()) {
-            String imageSql = """
+            if (imageUrls != null && !imageUrls.isEmpty()) {
+                String imageSql = """
             INSERT INTO cars_image (car_id, image_url, is_primary, created_at)
             VALUES (?, ?, ?, GETDATE())
         """;
 
-            try (PreparedStatement imagePs = conn.prepareStatement(imageSql)) {
-                for (int i = 0; i < imageUrls.size(); i++) {
-                    imagePs.setInt(1, carId);
-                    
-                    // QUAN TRỌNG: Đảm bảo đường dẫn ảnh đúng format
-                    String imagePath = imageUrls.get(i);
-                    
-                    // Nếu imageUrls đã là đường dẫn đầy đủ từ controller thì giữ nguyên
-                    // Nếu chỉ là tên file, cần tạo đường dẫn đầy đủ
-                    if (!imagePath.startsWith("assets/")) {
-                        imagePath = "assets/images/cars/" + car.getImageFolder() + "/" + imagePath;
+                try (PreparedStatement imagePs = conn.prepareStatement(imageSql)) {
+                    for (int i = 0; i < imageUrls.size(); i++) {
+                        imagePs.setInt(1, carId);
+
+                        // QUAN TRỌNG: Đảm bảo đường dẫn ảnh đúng format
+                        String imagePath = imageUrls.get(i);
+
+                        // Nếu imageUrls đã là đường dẫn đầy đủ từ controller thì giữ nguyên
+                        // Nếu chỉ là tên file, cần tạo đường dẫn đầy đủ
+                        if (!imagePath.startsWith("assets/")) {
+                            imagePath = "assets/images/cars/" + car.getImageFolder() + "/" + imagePath;
+                        }
+
+                        imagePs.setString(2, imagePath);
+                        imagePs.setBoolean(3, i == 0);
+                        imagePs.addBatch();
                     }
-                    
-                    imagePs.setString(2, imagePath);
-                    imagePs.setBoolean(3, i == 0);
-                    imagePs.addBatch();
+                    imagePs.executeBatch();
                 }
-                imagePs.executeBatch();
             }
-        }
 
-        conn.commit();
-        return true;
+            conn.commit();
+            return true;
 
-    } catch (Exception e) {
-        try {
-            if (conn != null) {
-                conn.rollback();
+        } catch (Exception e) {
+            try {
+                if (conn != null) {
+                    conn.rollback();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
             }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-        e.printStackTrace();
-        return false;
-    } finally {
-        try {
-            if (rs != null) {
-                rs.close();
-            }
-            if (ps != null) {
-                ps.close();
-            }
-            if (conn != null) {
-                conn.setAutoCommit(true);
-                conn.close();
-            }
-        } catch (SQLException e) {
             e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (ps != null) {
+                    ps.close();
+                }
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
-}
 
     public boolean updateCarWithNewImages(CarModel car, List<String> newImageUrls) {
         Connection conn = null;
@@ -880,4 +899,19 @@ public class CarDAO extends DBContext {
 
         return false;
     }
+
+    public boolean updateCarStatus(int carId, String status) {
+        String sql = "UPDATE cars SET status = ? WHERE car_id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setInt(2, carId);
+            int rows = ps.executeUpdate();
+            System.out.println("Updated car " + carId + " status to " + status + " → " + rows + " row(s)");
+            return rows > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 }

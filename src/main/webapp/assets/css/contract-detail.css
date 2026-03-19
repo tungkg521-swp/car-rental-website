@@ -1,0 +1,170 @@
+.contract-page{
+    padding:40px;
+}
+
+.contract-container{
+    max-width:950px;
+    margin:auto;
+    background:white;
+    padding:40px;
+    border-radius:14px;
+    box-shadow:0 5px 20px rgba(0,0,0,0.05);
+}
+
+.contract-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+}
+
+.contract-header h1{
+    margin-bottom:8px;
+}
+
+.contract-status{
+    padding:6px 16px;
+    border-radius:20px;
+    font-size:13px;
+    font-weight:600;
+}
+
+/* STATUS COLORS */
+
+.contract-status.CREATED{
+    background:#e6e6e6;
+}
+
+.contract-status.ACTIVE{
+    background:#4a90e2;
+    color:white;
+}
+
+.contract-status.COMPLETED{
+    background:#2ecc71;
+    color:white;
+}
+
+.contract-status.CANCELLED{
+    background:#e74c3c;
+    color:white;
+}
+
+.contract-meta p{
+    margin:4px 0;
+}
+
+.contract-section{
+    margin-top:20px;
+}
+
+.contract-section h2{
+    font-size:20px;
+    margin-bottom:15px;
+}
+
+.contract-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px 50px;
+}
+
+.payment-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.label{
+    font-size:13px;
+    color:#666;
+}
+
+.price{
+    font-weight:600;
+}
+
+.total p{
+    font-size:18px;
+    color:#27ae60;
+    font-weight:700;
+}
+
+.note{
+    background:#f7f7f7;
+    padding:15px;
+    border-radius:8px;
+}
+
+.contract-actions{
+    margin-top:30px;
+}
+
+.btn{
+    padding:10px 20px;
+    border-radius:6px;
+    border:none;
+    cursor:pointer;
+}
+
+.btn-success{
+    background:#27ae60;
+    color:white;
+}
+
+.btn-danger{
+    background:#e74c3c;
+    color:white;
+}
+
+.btn-back{
+    background:#6c7a89;
+    color:white;
+    text-decoration:none;
+    padding:10px 20px;
+}
+
+.total p{
+    font-size:20px;
+    font-weight:700;
+    color:#2ecc71;
+}
+
+.contract-actions{
+    margin-top:20px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.action-form{
+    display:flex;
+    gap:10px;
+}
+
+.btn{
+    padding:8px 16px;
+    border-radius:6px;
+    text-decoration:none;
+    border:none;
+    cursor:pointer;
+}
+
+.btn-back{
+    background:#6c757d;
+    color:white;
+}
+
+.btn-success{
+    background:#28a745;
+    color:white;
+}
+
+.btn-danger{
+    background:#dc3545;
+    color:white;
+}
+
+.btn-primary{
+    background:#007bff;
+    color:white;
+}

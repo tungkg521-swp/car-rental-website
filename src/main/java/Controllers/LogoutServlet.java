@@ -1,22 +1,14 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package Controllers;
 
-import java.io.IOException;
-import java.io.PrintWriter;
+import DALs.CustomerDAO;
+import Utils.RoleConstants;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.*;
+import java.io.IOException;
+import models.AccountModel;
+import models.CustomerModel;
 
-/**
- *
- * @author ADMIN
- */
 @WebServlet("/logout")
 public class LogoutServlet extends HttpServlet {
 
@@ -25,12 +17,28 @@ public class LogoutServlet extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
+        String redirectUrl = request.getContextPath() + "/home";
 
         if (session != null) {
-            session.invalidate(); // xoá toàn bộ session
+
+            AccountModel account = (AccountModel) session.getAttribute("ACCOUNT");
+            CustomerModel customer = (CustomerModel) session.getAttribute("CUSTOMER");
+
+            if (customer != null) {
+                CustomerDAO dao = new CustomerDAO();
+                dao.updateStatus(customer.getCustomerId(), "INACTIVE");
+            }
+
+            if (account != null) {
+                if (account.getRoleId() == RoleConstants.STAFF
+                        || account.getRoleId() == RoleConstants.ADMIN) {
+                    redirectUrl = request.getContextPath() + "/dashboard";
+                }
+            }
+
+            session.invalidate();
         }
 
-        // quay về home (guest)
-        response.sendRedirect(request.getContextPath() + "/home");
+        response.sendRedirect(redirectUrl);
     }
 }

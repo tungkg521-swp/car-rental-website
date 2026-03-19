@@ -4,6 +4,7 @@
  */
 package Controllers;
 
+
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -12,13 +13,22 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import jakarta.servlet.ServletException;
+
 import jakarta.servlet.annotation.MultipartConfig;
+
+
+import java.io.PrintWriter;
+import jakarta.servlet.ServletException;
+
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import jakarta.servlet.http.Part;
+
+import java.util.List;
+
 import models.CarModel;
 import service.CarService;
 
@@ -27,6 +37,7 @@ import service.CarService;
  * @author ADMIN
  */
 @WebServlet("/staff/cars")
+
 @MultipartConfig(
         fileSizeThreshold = 1024 * 1024, // 1 MB
         maxFileSize = 1024 * 1024 * 10, // 10 MB
@@ -39,9 +50,11 @@ public class StaffCarController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request,
             HttpServletResponse response)
+
             throws ServletException, IOException {
 
         String action = request.getParameter("action");
+
 
         // ===== FIX: API trả về JSON list ảnh =====
         if ("getImages".equals(action)) {
@@ -73,10 +86,15 @@ public class StaffCarController extends HttpServlet {
         }
 
         // ===== CODE CŨ =====
+
+        CarService carService = new CarService();
+
+
         if (action == null || action.equals("list")) {
 
             List<CarModel> carList = carService.findAllCars();
             request.setAttribute("carList", carList);
+
 
             request.getRequestDispatcher("/views/staff-cars-manager.jsp")
                     .forward(request, response);
@@ -104,9 +122,11 @@ public class StaffCarController extends HttpServlet {
             request.getRequestDispatcher("/views/staff-cars-manager.jsp")
                     .forward(request, response);
 
+
         } else if (action.equals("detail")) {
 
             int carId = Integer.parseInt(request.getParameter("id"));
+
             CarModel car = carService.getCarById(carId);
 
             request.setAttribute("car", car);
@@ -393,6 +413,7 @@ public class StaffCarController extends HttpServlet {
             e.printStackTrace();
             request.getSession().setAttribute("error", "Error: " + e.getMessage());
             response.sendRedirect(request.getContextPath() + "/staff/cars?action=list");
+
         }
     }
 }

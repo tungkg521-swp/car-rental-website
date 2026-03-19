@@ -1,3 +1,6 @@
+
+
+
 package models;
 
 import DALs.*;
@@ -13,8 +16,17 @@ public class CustomerModel {
     private String status;
     private LocalDateTime createdAt;
     private int accountId;
+
     private String address;
     private LocalDate dob;
+
+
+    private String statusAccount;
+   
+    
+
+    private boolean licenseVerified;
+
 
     public CustomerModel() {
     }
@@ -32,6 +44,16 @@ public class CustomerModel {
     public String getFullName() {
         return fullName;
     }
+
+
+    public String getStatusAccount() {
+        return statusAccount;
+    }
+
+    public void setStatusAccount(String statusAccount) {
+        this.statusAccount = statusAccount;
+    }
+
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
@@ -92,4 +114,13 @@ public class CustomerModel {
     public void setDob(LocalDate dob) {
         this.dob = dob;
     }
+
+    public boolean isLicenseVerified() {
+        return licenseVerified;
+    }
+
+    public void setLicenseVerified(boolean licenseVerified) {
+        this.licenseVerified = licenseVerified;
+    }
+
 }

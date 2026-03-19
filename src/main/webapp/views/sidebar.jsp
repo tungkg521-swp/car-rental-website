@@ -20,7 +20,7 @@
 
         <!-- DASHBOARD -->
         <li>
-            <a href="${pageContext.request.contextPath}/staff/dashboard">
+            <a href="${pageContext.request.contextPath}/dashboard/staff">
                 <i class="icon">📊</i>
                 <span>Dashboard</span>
             </a>
@@ -73,6 +73,12 @@
                 <span>Manage Driver Licenses</span>
             </a>
         </li>
+
+        <li class="sidebar-item">
+    <a href="${pageContext.request.contextPath}/staff/contracts">
+        📄 Manage Contracts
+    </a>
+</li>
 
     </ul>
 

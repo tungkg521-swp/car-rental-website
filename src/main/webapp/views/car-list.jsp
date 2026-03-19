@@ -95,14 +95,12 @@
                         <div class="filter-group">
                             <label>Số chỗ ngồi</label>
                             <div class="filter-options">
-                                <button type="button" class="${param.seats == '2' ? 'active' : ''}" 
-                                        onclick="document.getElementById('seats').value = '2'; this.form.submit();">2</button>
                                 <button type="button" class="${param.seats == '4' ? 'active' : ''}" 
                                         onclick="document.getElementById('seats').value = '4'; this.form.submit();">4</button>
                                 <button type="button" class="${param.seats == '5' ? 'active' : ''}" 
                                         onclick="document.getElementById('seats').value = '5'; this.form.submit();">5</button>
                                 <button type="button" class="${param.seats == '7' ? 'active' : ''}" 
-                                        onclick="document.getElementById('seats').value = '7'; this.form.submit();">7+</button>
+                                        onclick="document.getElementById('seats').value = '7'; this.form.submit();">7</button>
                             </div>
                             <input type="hidden" id="seats" name="seats" value="${param.seats}">
                         </div>

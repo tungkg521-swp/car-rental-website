@@ -1,10 +1,8 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package Controllers;
 
+import DALs.AccountDAO;
 import DALs.CustomerDAO;
+import Utils.RoleConstants;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -16,10 +14,6 @@ import models.CustomerModel;
 
 import service.AuthenticationService;
 
-/**
- *
- * @author ADMIN
- */
 public class LoginServlet extends HttpServlet {
 
     @Override
@@ -46,14 +40,39 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-        // LOGIN SUCCESS
+        if (!"ACTIVE".equalsIgnoreCase(account.getStatus())) {
+            request.setAttribute("error", "Tài khoản đã bị khóa");
+            request.getRequestDispatcher("/views/login.jsp")
+                    .forward(request, response);
+            return;
+        }
+
+        // Chỉ cho CUSTOMER login ở trang này
+        if (account.getRoleId() != RoleConstants.CUSTOMER) {
+            request.setAttribute("error", "Tài khoản Staff/Admin vui lòng đăng nhập tại Dashboard Login");
+            request.getRequestDispatcher("/views/login.jsp")
+                    .forward(request, response);
+            return;
+        }
+
+        CustomerDAO customerDAO = new CustomerDAO();
+        CustomerModel customer = customerDAO.getByAccountId(account.getAccountId());
+
+        if (customer == null) {
+            request.setAttribute("error", "Không tìm thấy hồ sơ khách hàng");
+            request.getRequestDispatcher("/views/login.jsp")
+                    .forward(request, response);
+            return;
+        }
+
         HttpSession session = request.getSession(true);
         session.setAttribute("ACCOUNT", account);
-
-        CustomerModel customer
-                = new CustomerDAO().getByAccountId(account.getAccountId());
-
         session.setAttribute("CUSTOMER", customer);
+
+        customerDAO.updateStatus(customer.getCustomerId(), "ACTIVE");
+
+        AccountDAO accountDAO = new AccountDAO();
+        accountDAO.updateLastLogin(account.getAccountId());
 
         response.sendRedirect(request.getContextPath() + "/home");
     }
