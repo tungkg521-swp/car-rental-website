@@ -6,7 +6,7 @@
 package Controllers;
 
 import DALs.CustomerDAO;
-import Models.CustomerModel;
+
 import service.BookingService;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -23,6 +23,7 @@ import java.util.List;
 import models.AccountModel;
 import models.BookingModel;
 import models.CarModel;
+import models.CustomerModel;
 
 import models.UserModel;
 import service.CarService;

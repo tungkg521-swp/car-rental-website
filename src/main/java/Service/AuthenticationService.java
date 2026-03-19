@@ -2,10 +2,10 @@ package service;
 
 import DALs.AccountDAO;
 import DALs.CustomerDAO;
-import Models.CustomerModel;
 import Utils.DBContext;
 import java.sql.Connection;
 import models.AccountModel;
+import models.CustomerModel;
 
 
 public class AuthenticationService extends DBContext {
