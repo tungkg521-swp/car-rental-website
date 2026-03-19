@@ -410,4 +410,18 @@ public List<CarModel> searchCars(String keyword) {
         System.out.println("========================\n");
         return list;
     }
+
+     public boolean updateCarStatus(int carId, String status) {
+        String sql = "UPDATE cars SET status = ? WHERE car_id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setInt(2, carId);
+            int rows = ps.executeUpdate();
+            System.out.println("Updated car " + carId + " status to " + status + " → " + rows + " row(s)");
+            return rows > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
