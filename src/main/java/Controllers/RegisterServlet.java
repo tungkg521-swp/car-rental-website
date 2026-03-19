@@ -4,16 +4,11 @@
  */
 package Controllers;
 
-import DALs.AccountDAO;
-import DALs.CustomerDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.time.LocalDate;
-import models.AccountModel;
-import models.CustomerModel;
 import service.AuthenticationService;
 
 public class RegisterServlet extends HttpServlet {
