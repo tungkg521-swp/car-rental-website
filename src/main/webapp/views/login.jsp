@@ -29,16 +29,15 @@
 
         </form>
 
-        <!-- Hiển thị lỗi nếu có -->
         <c:if test="${not empty error}">
             <p class="error-message">${error}</p>
         </c:if>
 
-        <!-- Phần bổ sung thêm -->
         <div style="margin-top: 15px; text-align: center; font-size: 14px;">
 
             <div style="margin-bottom: 8px;">
-                <a href="#" style="color: #0d6efd; text-decoration: none;">
+                <a href="${pageContext.request.contextPath}/forgot-password"
+                   style="color: #0d6efd; text-decoration: none;">
                     Quên mật khẩu?
                 </a>
             </div>
