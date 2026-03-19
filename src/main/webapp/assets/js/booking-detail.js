@@ -1,8 +1,3 @@
-/* 
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/JavaScript.js to edit this template
- */
-
 function showPopup(type, title, message) {
     const overlay = document.getElementById("popupOverlay");
     const box = document.getElementById("popupBox");
@@ -40,6 +35,57 @@ function closePopup() {
     }
 }
 
+/* GALLERY */
+let galleryImages = [];
+let currentImageIndex = 0;
+
+function setMainImage(element, index) {
+    const mainImage = document.getElementById("mainCarImage");
+    const thumbs = document.querySelectorAll(".thumb");
+
+    if (!mainImage || !element) {
+        return;
+    }
+
+    mainImage.src = element.src;
+    currentImageIndex = index;
+
+    thumbs.forEach(function (thumb) {
+        thumb.classList.remove("active-thumb");
+    });
+
+    element.classList.add("active-thumb");
+}
+
+function changeImage(step) {
+    const mainImage = document.getElementById("mainCarImage");
+    const thumbs = document.querySelectorAll(".thumb");
+
+    if (!mainImage || galleryImages.length === 0) {
+        return;
+    }
+
+    currentImageIndex += step;
+
+    if (currentImageIndex < 0) {
+        currentImageIndex = galleryImages.length - 1;
+    }
+
+    if (currentImageIndex >= galleryImages.length) {
+        currentImageIndex = 0;
+    }
+
+    mainImage.src = galleryImages[currentImageIndex];
+
+    thumbs.forEach(function (thumb) {
+        thumb.classList.remove("active-thumb");
+    });
+
+    if (thumbs[currentImageIndex]) {
+        thumbs[currentImageIndex].classList.add("active-thumb");
+    }
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     const bookingPage = document.querySelector(".booking-detail-page");
 
@@ -47,6 +93,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
+    /* POPUP CANCEL */
     const cancelStatus = bookingPage.dataset.cancelStatus;
 
     if (cancelStatus === "success") {
@@ -76,5 +123,32 @@ document.addEventListener("DOMContentLoaded", function () {
                 closePopup();
             }
         });
+    }
+
+    /* GALLERY INIT */
+    const thumbs = document.querySelectorAll(".thumb");
+    const mainImage = document.getElementById("mainCarImage");
+
+    if (thumbs.length > 0 && mainImage) {
+        galleryImages = [];
+
+        thumbs.forEach(function (thumb, index) {
+            galleryImages.push(thumb.src);
+
+            thumb.addEventListener("click", function () {
+                setMainImage(thumb, index);
+            });
+        });
+
+        const activeThumb = document.querySelector(".thumb.active-thumb");
+
+        if (activeThumb) {
+            currentImageIndex = Array.from(thumbs).indexOf(activeThumb);
+            mainImage.src = activeThumb.src;
+        } else {
+            currentImageIndex = 0;
+            mainImage.src = thumbs[0].src;
+            thumbs[0].classList.add("active-thumb");
+        }
     }
 });

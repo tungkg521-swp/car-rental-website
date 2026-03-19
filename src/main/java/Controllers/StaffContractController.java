@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import models.CarModel;
 import models.ContractModel;
 import models.CustomerModel;
+import service.BookingService;
 import service.ContractService;
 
 @WebServlet("/staff/contracts")
@@ -22,6 +23,7 @@ public class StaffContractController extends HttpServlet {
     private final ContractService contractService = new ContractService();
     private final CustomerDAO customerDAO = new CustomerDAO();
     private final CarDAO carDAO = new CarDAO();
+    private final BookingService bookingService = new BookingService();
 
     // ================= GET =================
     @Override
@@ -117,8 +119,10 @@ public class StaffContractController extends HttpServlet {
                 carDAO.updateStatus(contract.getCarId(), "RENTED");
             } else if ("complete".equals(action)) {
 
+                int bookingId
+                        = Integer.parseInt(request.getParameter("bookingId"));
                 contractService.updateContractStatus(contractId, "COMPLETED");
-
+                bookingService.updateBookingStatus(bookingId, "COMPLETED");
                 ContractModel contract = contractService.getContractById(contractId);
 
                 carDAO.updateStatus(contract.getCarId(), "AVAILABLE");

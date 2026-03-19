@@ -79,9 +79,9 @@ public class BookingDAO extends DBContext {
 
     public List<BookingModel> findByCustomerId(int customerId) {
 
-    List<BookingModel> list = new ArrayList<>();
+        List<BookingModel> list = new ArrayList<>();
 
-    String sql = """
+        String sql = """
         SELECT 
             b.booking_id,
             b.start_date,
@@ -104,43 +104,43 @@ public class BookingDAO extends DBContext {
         ORDER BY b.booking_date DESC
     """;
 
-    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
-        ps.setInt(1, customerId);
+            ps.setInt(1, customerId);
 
-        ResultSet rs = ps.executeQuery();
+            ResultSet rs = ps.executeQuery();
 
-        while (rs.next()) {
+            while (rs.next()) {
 
-            BookingModel booking = new BookingModel();
+                BookingModel booking = new BookingModel();
 
-            booking.setBookingId(rs.getInt("booking_id"));
-            booking.setStartDate(rs.getDate("start_date"));
-            booking.setEndDate(rs.getDate("end_date"));
-            booking.setStatus(rs.getString("status"));
+                booking.setBookingId(rs.getInt("booking_id"));
+                booking.setStartDate(rs.getDate("start_date"));
+                booking.setEndDate(rs.getDate("end_date"));
+                booking.setStatus(rs.getString("status"));
 
-            booking.setTotalEstimatedPrice(
-                    rs.getBigDecimal("total_estimated_price"));
+                booking.setTotalEstimatedPrice(
+                        rs.getBigDecimal("total_estimated_price"));
 
-            booking.setCarName(rs.getString("car_name"));
-            booking.setImageFolder(rs.getString("image_folder"));
+                booking.setCarName(rs.getString("car_name"));
+                booking.setImageFolder(rs.getString("image_folder"));
 
-            booking.setContractStatus(
-                    rs.getString("contract_status"));
+                booking.setContractStatus(
+                        rs.getString("contract_status"));
 
-            list.add(booking);
+                list.add(booking);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-    } catch (Exception e) {
-        e.printStackTrace();
+        return list;
     }
 
-    return list;
-}
+    public BookingModel findById(int bookingId, int customerId) {
 
-        public BookingModel findById(int bookingId, int customerId) {
-
-    String sql = """
+        String sql = """
         SELECT 
             b.booking_id,
             b.booking_date,
@@ -170,46 +170,46 @@ public class BookingDAO extends DBContext {
         AND b.customer_id = ?
     """;
 
-    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
-        ps.setInt(1, bookingId);
-        ps.setInt(2, customerId);
+            ps.setInt(1, bookingId);
+            ps.setInt(2, customerId);
 
-        ResultSet rs = ps.executeQuery();
+            ResultSet rs = ps.executeQuery();
 
-        if (rs.next()) {
+            if (rs.next()) {
 
-            BookingModel booking = new BookingModel();
+                BookingModel booking = new BookingModel();
 
-            booking.setBookingId(rs.getInt("booking_id"));
-            booking.setBookingDate(rs.getTimestamp("booking_date"));
-            booking.setStartDate(rs.getDate("start_date"));
-            booking.setEndDate(rs.getDate("end_date"));
-            booking.setStatus(rs.getString("status"));
-            booking.setNote(rs.getString("note"));
+                booking.setBookingId(rs.getInt("booking_id"));
+                booking.setBookingDate(rs.getTimestamp("booking_date"));
+                booking.setStartDate(rs.getDate("start_date"));
+                booking.setEndDate(rs.getDate("end_date"));
+                booking.setStatus(rs.getString("status"));
+                booking.setNote(rs.getString("note"));
 
-            booking.setTotalEstimatedPrice(
-                    rs.getBigDecimal("total_estimated_price"));
+                booking.setTotalEstimatedPrice(
+                        rs.getBigDecimal("total_estimated_price"));
 
-            booking.setCarName(rs.getString("model_name"));
-            booking.setImageFolder(rs.getString("image_folder"));
+                booking.setCarName(rs.getString("model_name"));
+                booking.setImageFolder(rs.getString("image_folder"));
 
-            booking.setCustomerName(rs.getString("customer_name"));
-            booking.setCustomerEmail(rs.getString("email"));
-            booking.setCustomerPhone(rs.getString("phone"));
+                booking.setCustomerName(rs.getString("customer_name"));
+                booking.setCustomerEmail(rs.getString("email"));
+                booking.setCustomerPhone(rs.getString("phone"));
 
-            booking.setContractStatus(
-                    rs.getString("contract_status"));
+                booking.setContractStatus(
+                        rs.getString("contract_status"));
 
-            return booking;
+                return booking;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-    } catch (Exception e) {
-        e.printStackTrace();
+        return null;
     }
-
-    return null;
-}
 
     public boolean updateStatus(int bookingId, String status) {
 
@@ -331,7 +331,6 @@ public class BookingDAO extends DBContext {
         return null;
     }
 
-
     public int getCompletedBooking(int customerId, int carId) {
 
         String sql = "SELECT booking_id FROM booking "
@@ -357,7 +356,7 @@ public class BookingDAO extends DBContext {
 
     public BookingModel getBookingForContract(int bookingId) {
 
-    String sql = """
+        String sql = """
         SELECT 
             b.booking_id,
             b.customer_id,
@@ -372,43 +371,42 @@ public class BookingDAO extends DBContext {
         WHERE b.booking_id = ?
     """;
 
-    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
-        ps.setInt(1, bookingId);
+            ps.setInt(1, bookingId);
 
-        ResultSet rs = ps.executeQuery();
+            ResultSet rs = ps.executeQuery();
 
-        if (rs.next()) {
+            if (rs.next()) {
 
-            BookingModel booking = new BookingModel();
+                BookingModel booking = new BookingModel();
 
-            booking.setBookingId(rs.getInt("booking_id"));
-            booking.setCustomerId(rs.getInt("customer_id"));
-            booking.setCarId(rs.getInt("car_id"));
-            booking.setStartDate(rs.getDate("start_date"));
-            booking.setEndDate(rs.getDate("end_date"));
-            booking.setStatus(rs.getString("status"));
+                booking.setBookingId(rs.getInt("booking_id"));
+                booking.setCustomerId(rs.getInt("customer_id"));
+                booking.setCarId(rs.getInt("car_id"));
+                booking.setStartDate(rs.getDate("start_date"));
+                booking.setEndDate(rs.getDate("end_date"));
+                booking.setStatus(rs.getString("status"));
 
-            booking.setTotalEstimatedPrice(
-                    rs.getBigDecimal("total_estimated_price"));
+                booking.setTotalEstimatedPrice(
+                        rs.getBigDecimal("total_estimated_price"));
 
-            booking.setPricePerDay(
-                    rs.getBigDecimal("price_per_day"));
+                booking.setPricePerDay(
+                        rs.getBigDecimal("price_per_day"));
 
-            return booking;
+                return booking;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-    } catch (Exception e) {
-        e.printStackTrace();
+        return null;
     }
 
-    return null;
-}
+    public boolean hasOverlapConfirmed(int carId, Date startDate, Date endDate) {
 
-
-public boolean hasOverlapConfirmed(int carId, Date startDate, Date endDate) {
-
-    String sql = """
+        String sql = """
         SELECT 1
         FROM booking
         WHERE car_id = ?
@@ -417,30 +415,30 @@ public boolean hasOverlapConfirmed(int carId, Date startDate, Date endDate) {
         AND end_date >= ?
     """;
 
-    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
-        ps.setInt(1, carId);
-        ps.setDate(2, endDate);
-        ps.setDate(3, startDate);
+            ps.setInt(1, carId);
+            ps.setDate(2, endDate);
+            ps.setDate(3, startDate);
 
-        ResultSet rs = ps.executeQuery();
+            ResultSet rs = ps.executeQuery();
 
-        return rs.next(); // true = bị overlap
+            return rs.next(); // true = bị overlap
 
-    } catch (Exception e) {
-        e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 
-    return false;
-}
+    public void rejectOverlappingBookings(
+            int carId,
+            Date startDate,
+            Date endDate,
+            int confirmedBookingId) {
 
-public void rejectOverlappingBookings(
-        int carId,
-        Date startDate,
-        Date endDate,
-        int confirmedBookingId) {
-
-    String sql = """
+        String sql = """
         UPDATE booking
         SET status = 'REJECTED'
         WHERE car_id = ?
@@ -450,19 +448,32 @@ public void rejectOverlappingBookings(
         AND end_date >= ?
     """;
 
-    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
-        ps.setInt(1, carId);
-        ps.setInt(2, confirmedBookingId);
-        ps.setDate(3, endDate);
-        ps.setDate(4, startDate);
+            ps.setInt(1, carId);
+            ps.setInt(2, confirmedBookingId);
+            ps.setDate(3, endDate);
+            ps.setDate(4, startDate);
 
-        ps.executeUpdate();
+            ps.executeUpdate();
 
-    } catch (Exception e) {
-        e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
-}
 
+    public boolean deleteBooking(int bookingId, int customerId) {
+        String sql = "DELETE FROM booking WHERE booking_id = ? AND customer_id = ? AND status = 'CANCELLED'";
 
+        try {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, bookingId);
+            ps.setInt(2, customerId);
+
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }
