@@ -34,9 +34,7 @@ public class BookingService {
         long days = ChronoUnit.DAYS.between(
                 startDate.toLocalDate(),
                 endDate.toLocalDate()
-
-        );
-
+        ) + 1;
 
         if (days < 1) {
             days = 1;
@@ -138,11 +136,9 @@ public class BookingService {
         contract.setSignedAt(null);
         contract.setNote("Contract created automatically after staff approved booking.");
 
-
         contractService.createContract(contract);
 
         carDAO.updateStatus(booking.getCarId(), "BOOKED");
-
 
     }
 
@@ -161,27 +157,26 @@ public class BookingService {
     }
 
     public boolean hasOverlapConfirmed(int carId, Date startDate, Date endDate) {
-    return bookingDAO.hasOverlapConfirmed(carId, startDate, endDate);
-}
-    
+        return bookingDAO.hasOverlapConfirmed(carId, startDate, endDate);
+    }
+
     public boolean deleteCancelledBooking(int bookingId, int customerId) {
-    BookingModel booking = bookingDAO.findById(bookingId, customerId);
+        BookingModel booking = bookingDAO.findById(bookingId, customerId);
 
-    if (booking == null) {
-        return false;
+        if (booking == null) {
+            return false;
+        }
+
+        if (!"CANCELLED".equalsIgnoreCase(booking.getStatus())) {
+            return false;
+        }
+
+        return bookingDAO.deleteBooking(bookingId, customerId);
     }
 
-    if (!"CANCELLED".equalsIgnoreCase(booking.getStatus())) {
-        return false;
-    }
+    public void updateBookingStatus(int bookingId, String status) {
 
-    return bookingDAO.deleteBooking(bookingId, customerId);
-}
-    
-    public void updateBookingStatus(int bookingId,String status){
-        
         bookingDAO.updateStatus(bookingId, status);
-        
-        
+
     }
 }
