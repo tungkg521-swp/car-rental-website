@@ -25,7 +25,7 @@
 
 
                 <form class="noti-form"
-                      action="${pageContext.request.contextPath}/SendNotificationController"
+                      action="${pageContext.request.contextPath}/staff/send-notification"
                       method="post">
 
                     <input type="hidden" name="action" value="sendNotification">
@@ -95,7 +95,7 @@
                                                showConfirmButton: false,
                                                timer: 1500
                                            }).then(() => {
-                                               window.location.href = '${pageContext.request.contextPath}/SendNotificationController';
+                                               window.location.href = '${pageContext.request.contextPath}/staff/send-notification';
                                            });
             </script>
         </c:if>

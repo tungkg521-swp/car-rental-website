@@ -5,6 +5,10 @@
         <servlet-name>ReviewServlet</servlet-name>
         <servlet-class>Controllers.ReviewServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>GuestHomeServlet</servlet-name>
+        <servlet-class>Controllers.GuestHomeServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>default</servlet-name>
         <url-pattern>/assets/*</url-pattern>
@@ -63,14 +67,6 @@
     </servlet-mapping>
     <servlet>
 
-        <servlet-name>BookingSuccess</servlet-name>
-        <servlet-class>Controllers.BookingSuccess</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>BookingSuccess</servlet-name>
-        <url-pattern>/booking-success</url-pattern>
-    </servlet-mapping>
-    <servlet>
         <servlet-name>Booking</servlet-name>
         <servlet-class>Controllers.BookingServlet</servlet-class>
     </servlet>
@@ -83,29 +79,38 @@
         <servlet-name>NotificationController</servlet-name>
         <url-pattern>/customer/notification</url-pattern>
     </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>SendNotificationController</servlet-name>
+        <url-pattern>/staff/send-notification</url-pattern>
+    </servlet-mapping>
+<servlet-mapping>
+        <servlet-name>AdminReviewServlet</servlet-name>
+        <url-pattern>/admin/review</url-pattern>
+    </servlet-mapping>
 
 
     <servlet-mapping>
         <servlet-name>ReviewServlet</servlet-name>
         <url-pattern>/review</url-pattern>
     </servlet-mapping>
-
-    
     <!-- PROFILE -->
     <servlet>
         <servlet-name>ProfileServlet</servlet-name>
         <servlet-class>Controllers.ProfileServlet</servlet-class>
     </servlet>
-
     <servlet-mapping>
         <servlet-name>ProfileServlet</servlet-name>
         <url-pattern>/customer/profile</url-pattern>
     </servlet-mapping>
 
+    <servlet-mapping>
+        <servlet-name>GuestHomeServlet</servlet-name>
+        <url-pattern>/GuestHomeServlet</url-pattern>
+    </servlet-mapping>
+
     <session-config>
-        <session-timeout>
-            30
-        </session-timeout>
+        <session-timeout>30</session-timeout>
     </session-config>
     <filter>
         <filter-name>AuthFilter</filter-name>
@@ -115,7 +120,4 @@
         <filter-name>AuthFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-    <!--    <welcome-file-list>
-        <welcome-file>home</welcome-file>
-    </welcome-file-list>-->
 </web-app>

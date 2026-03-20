@@ -1,5 +1,6 @@
 package service;
 
+import DALs.AccountDAO;
 import DALs.NotificationDAO;
 import models.NotificationModel;
 import java.util.List;
@@ -7,6 +8,7 @@ import models.CustomerModel;
 
 public class NotificationService {
 
+    AccountDAO accountDAO = new AccountDAO();
     NotificationDAO dao = new NotificationDAO();
 
     public List<NotificationModel> getNotificationsByAccount(int accountId) {
@@ -20,7 +22,12 @@ public class NotificationService {
         return dao.findByCustomerId(customerId);
     }
 
-    public List<NotificationModel> getStaffNotifications() {
+    public List<NotificationModel> getStaffNotifications(int accountId) {
+
+        if (!accountDAO.isStaff(accountId)) {
+            return List.of();
+        }
+
         return dao.findForStaff();
     }
 

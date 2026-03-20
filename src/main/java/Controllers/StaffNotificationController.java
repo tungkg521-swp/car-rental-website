@@ -10,6 +10,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import models.NotificationModel;
 import service.NotificationService;
@@ -27,14 +28,27 @@ public class StaffNotificationController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        List<NotificationModel> list = service.getStaffNotifications();
+        HttpSession session = request.getSession();
+        models.AccountModel acc = (models.AccountModel) session.getAttribute("ACCOUNT");
+
+        if (acc == null) {
+            response.sendRedirect("login.jsp");
+            return;
+        }
+
+        int accountId = acc.getAccountId();
+
+        List<NotificationModel> list = service.getStaffNotifications(accountId);
+        if (list.isEmpty()) {
+            response.sendRedirect("home.jsp");
+            return;
+        }
 
         request.setAttribute("notifications", list);
 
         request.getRequestDispatcher("/views/staff-notification.jsp")
                 .forward(request, response);
     }
-
 
     /**
      * Handles the HTTP <code>POST</code> method.

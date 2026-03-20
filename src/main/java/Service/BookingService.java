@@ -163,4 +163,25 @@ public class BookingService {
     public boolean hasOverlapConfirmed(int carId, Date startDate, Date endDate) {
     return bookingDAO.hasOverlapConfirmed(carId, startDate, endDate);
 }
+    
+    public boolean deleteCancelledBooking(int bookingId, int customerId) {
+    BookingModel booking = bookingDAO.findById(bookingId, customerId);
+
+    if (booking == null) {
+        return false;
+    }
+
+    if (!"CANCELLED".equalsIgnoreCase(booking.getStatus())) {
+        return false;
+    }
+
+    return bookingDAO.deleteBooking(bookingId, customerId);
+}
+    
+    public void updateBookingStatus(int bookingId,String status){
+        
+        bookingDAO.updateStatus(bookingId, status);
+        
+        
+    }
 }

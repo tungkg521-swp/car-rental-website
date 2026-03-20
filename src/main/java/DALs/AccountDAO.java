@@ -66,6 +66,7 @@ public class AccountDAO extends DBContext {
 
         return -1;
     }
+
     public void updateLastLogin(int accountId) {
 
         String sql = "UPDATE account SET last_login_at = GETDATE() WHERE account_id = ?";
@@ -77,5 +78,26 @@ public class AccountDAO extends DBContext {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public boolean isStaff(int accountId) {
+        String sql = "SELECT role_id FROM account WHERE account_id = ?";
+
+        try {
+            DBContext db = new DBContext();
+            PreparedStatement ps = db.connection.prepareStatement(sql);
+            ps.setInt(1, accountId);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt("role_id") == 2;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 }

@@ -218,6 +218,10 @@
                                 <input type="hidden"
                                        name="contractId"
                                        value="${contract.contractId}"/>
+                                
+                                <input type="hidden"
+                                       name="bookingId"
+                                       value="${contract.bookingId}"/>
 
                                 <button class="btn btn-primary"
                                         type="submit"

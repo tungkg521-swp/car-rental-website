@@ -22,7 +22,7 @@
             <div class="staff-content">
 
                 <h1 class="dashboard-title">Staff Notifications</h1>
-                <button type="submit" class="save-btn" > <a href="${pageContext.request.contextPath}/SendNotificationController">Send Notification</a>     
+                <button type="submit" class="save-btn" > <a href="${pageContext.request.contextPath}/staff/send-notification">Send Notification</a>     
                 </button>
                 <!-- TABLE -->
                 <div class="dashboard-table">
