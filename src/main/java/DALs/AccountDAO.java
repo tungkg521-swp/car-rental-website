@@ -76,6 +76,26 @@ public class AccountDAO extends DBContext {
         }
     }
 
+    public boolean isStaff(int accountId) {
+        String sql = "SELECT role_id FROM account WHERE account_id = ?";
+
+        try {
+
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, accountId);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt("role_id") == 2;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public AccountModel findById(int accountId) {
         String sql = "SELECT * FROM account WHERE account_id = ?";
 
@@ -91,6 +111,7 @@ public class AccountDAO extends DBContext {
                 acc.setRoleId(rs.getInt("role_id"));
                 acc.setStatus(rs.getString("status"));
                 return acc;
+
             }
 
         } catch (Exception e) {

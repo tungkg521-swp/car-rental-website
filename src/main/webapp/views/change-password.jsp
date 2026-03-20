@@ -2,34 +2,10 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<link rel="stylesheet"
+      href="${pageContext.request.contextPath}/assets/css/profile.css">
 <body>
     <jsp:include page="includes/header.jsp"/>
-    <style>
-        .profile-card .save-btn{
-            background:#0d6efd;
-            color:white;
-            border:none;
-            padding:12px 28px;
-            border-radius:25px;
-            font-size:15px;
-            font-weight:600;
-            cursor:pointer;
-            transition:0.25s;
-        }
-
-        .profile-card .save-btn:hover{
-            background:#0b5ed7;
-        }
-
-        .error-message{
-            color:#e53935;
-            background:#fdecea;
-            padding:10px;
-            border-radius:6px;
-            margin-top:12px;
-            font-size:14px;
-        }
-    </style>
     <div class="profile-wrapper">
 
         <jsp:include page="profile-sidebar.jsp"/>

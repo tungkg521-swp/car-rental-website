@@ -164,4 +164,20 @@ public class ContractDAO extends DBContext{
 
         return false;
     }
+    public int getCarIdByContractId(int contractId) {
+    String sql = "SELECT car_id FROM rental_contract WHERE contract_id = ?";
+
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setInt(1, contractId);
+        ResultSet rs = ps.executeQuery();
+
+        if (rs.next()) {
+            return rs.getInt("car_id");
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return -1;
+}
 }

@@ -85,13 +85,13 @@
                                 ❤️ Thêm vào yêu thích
                             </button>
 
-                             <c:if test="${not empty SUCCESS}">
-                            <div class="alert success">${SUCCESS}</div>
-                        </c:if>
+                            <c:if test="${not empty SUCCESS}">
+                                <div class="alert success">${SUCCESS}</div>
+                            </c:if>
 
-                        <c:if test="${not empty ERROR}">
-                            <div class="alert error">${ERROR}</div>
-                        </c:if>
+                            <c:if test="${not empty ERROR}">
+                                <div class="alert error">${ERROR}</div>
+                            </c:if>
                         </form>
 
 
@@ -168,6 +168,12 @@
                                 <div class="review-user">
                                     👤 ${r.customerName}
                                 </div>
+                                <c:if test="${not empty sessionScope.CUSTOMER and sessionScope.CUSTOMER.customerId == r.customerId}">
+    <a class="review-edit"
+       href="${pageContext.request.contextPath}/review?action=edit&reviewId=${r.reviewId}&carId=${car.carId}">
+        ✏
+    </a>
+</c:if>
 
                                 <div class="review-stars">
                                     <c:forEach begin="1" end="${r.rating}">
@@ -189,68 +195,10 @@
 
                     </c:forEach>
 
-
-                    <div class="review-form">
-
-                        <h3>Write a Review</h3>
-
-                        <c:if test="${sessionScope.CUSTOMER != null}">
-
-                            <form action="${pageContext.request.contextPath}/review" method="post">
-
-                                <input type="hidden" name="carId" value="${car.carId}">
-
-                                <div class="form-group">
-
-                                    <label>Rating</label>
-
-                                    <select name="rating" class="rating-select">
-                                        <option value="5">⭐⭐⭐⭐⭐</option>
-                                        <option value="4">⭐⭐⭐⭐</option>
-                                        <option value="3">⭐⭐⭐</option>
-                                        <option value="2">⭐⭐</option>
-                                        <option value="1">⭐</option>
-                                    </select>
-
-                                </div>
-
-                                <div class="form-group">
-
-                                    <label>Your Review</label>
-
-                                    <textarea name="comment" rows="3"
-                                              placeholder="Write your review about this car..."></textarea>
-
-                                </div>
-
-                                <button type="submit" class="review-btn">
-                                    Submit Review
-                                </button>
-
-                                <c:if test="${not empty sessionScope.error}">
-                                    <p style="color:red; margin-top:10px;">
-                                        ${sessionScope.error}
-                                    </p>
-                                    <c:remove var="error" scope="session"/>
-                                </c:if>
-
-                            </form>
-
-                        </c:if>
-
-                        <c:if test="${sessionScope.CUSTOMER == null}">
-                            <p class="login-warning">
-                                Please login to write a review.
-                            </p>
-                        </c:if>
-
-                    </div>
-
                 </div>
 
             </div>
         </section>
-
         <c:if test="${LICENSE_REQUIRED}">
             <div id="verifyModal" class="verify-modal">
                 <div class="verify-box">

@@ -6,120 +6,59 @@
     <head>
         <meta charset="UTF-8">
         <title>Car Reviews</title>
-
-        <style>
-
-            body{
-                font-family: Arial, Helvetica, sans-serif;
-                margin:40px;
-                background:#f5f5f5;
-            }
-
-            .review-box{
-                background:white;
-                border:1px solid #ddd;
-                padding:15px;
-                margin-bottom:15px;
-                border-radius:8px;
-            }
-
-            .customer-name{
-                font-weight:bold;
-                margin-bottom:5px;
-            }
-
-            .rating{
-                color:orange;
-                font-weight:bold;
-                margin-bottom:5px;
-            }
-
-            textarea{
-                width:100%;
-                height:100px;
-            }
-
-            button{
-                background:#2c7be5;
-                color:white;
-                border:none;
-                padding:10px 15px;
-                border-radius:5px;
-                cursor:pointer;
-            }
-
-            button:hover{
-                background:#1a5fd0;
-            }
-
-        </style>
+        <link href="${pageContext.request.contextPath}/assets/css/review.css" rel="stylesheet" type="text/css"/>
     </head>
 
     <body>
+        <div class="container">
 
-        <h2>Customer Reviews</h2>
+            <h2>Customer Feedback ⭐</h2>
 
-        <c:if test="${not empty error}">
-            <p style="color:red">${error}</p>
-        </c:if>
-
-        <c:forEach var="r" items="${reviews}">
-            <div class="review-box">
-
-                <div class="customer-name">
-                    👤 ${r.customerName}
+            <!-- CAR INFO -->
+            <c:if test="${not empty car}">
+                <div class="car-info" style="display:flex; gap:15px; align-items:flex-start;">
+                    <div style="flex:7;">
+                        <img src="${pageContext.request.contextPath}/${car.imageUrl}" 
+                             alt="${car.modelName}" style="width:100%; border-radius:8px; height: 220px">
+                    </div>
+                    <div class="car-detail" style="flex:3;">
+                        <h3>${car.modelName} (${car.modelYear})</h3>
+                        <p>Brand: ${car.brandName}</p>
+                        <p>Type: ${car.typeName}</p>
+                        <p>Seats: ${car.seatCount}</p>
+                        <p>Fuel: ${car.fuelType}</p>
+                        <p>Transmission: ${car.transmission}</p>
+                        <p><strong>Total Price: $${car.pricePerDay}</strong></p>
+                    </div>
                 </div>
+            </c:if>
 
-                <div class="rating">
-                    ⭐ ${r.rating}/5
+            <hr style="margin:30px 0;">
+
+            <!-- FORM REVIEW -->
+            <c:if test="${sessionScope.CUSTOMER != null}">
+                <div class="form-box">
+                    <form action="${pageContext.request.contextPath}/review" method="post">
+                        <input type="hidden" name="action" value="add"/>
+                        <input type="hidden" name="carId" value="${carId}">
+                        <label>Rating</label> <br>
+                        <select name="rating">
+                            <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+                            <option value="4">⭐⭐⭐⭐ (4)</option>
+                            <option value="3">⭐⭐⭐ (3)</option>
+                            <option value="2">⭐⭐ (2)</option>
+                            <option value="1">⭐ (1)</option>
+                        </select>
+
+                        <br><br>
+                        <label>Write Feedback</label>
+                        <textarea name="comment" placeholder="Write your feedback..."></textarea>
+                        <br><br>
+                        <button type="submit">Submit</button>
+                    </form>
                 </div>
+            </c:if>
 
-                <div>
-                    ${r.comment}
-                </div>
-
-                <div style="font-size:12px;color:gray">
-                    ${r.createdAt}
-                </div>
-
-            </div>
-        </c:forEach>
-
-        <hr>
-
-        <c:if test="${sessionScope.CUSTOMER != null}">
-
-            <h3>Write Review</h3>
-
-            <form action="${pageContext.request.contextPath}/review" method="post">
-
-                <input type="hidden" name="carId" value="${carId}">
-
-                <label>Rating</label>
-
-                <select name="rating">
-                    <option value="5">5 - ⭐⭐⭐⭐⭐</option>
-                    <option value="4">4 - ⭐⭐⭐⭐</option>
-                    <option value="3">3 - ⭐⭐⭐</option>
-                    <option value="2">2 - ⭐⭐</option>
-                    <option value="1">1 - ⭐</option>
-                </select>
-
-                <br><br>
-
-                <textarea name="comment" placeholder="Write your review"></textarea>
-
-                <br><br>
-
-                <button type="submit">Submit Review</button>
-
-            </form>
-
-        </c:if>
-
-        <c:if test="${sessionScope.CUSTOMER == null}">
-            <p>Please <a href="login.jsp">login</a> to write a review.</p>
-        </c:if>
-
+        </div>
     </body>
 </html>
