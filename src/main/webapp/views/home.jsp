@@ -4,9 +4,9 @@
     <head>
         <title>Car Rental</title>
         <meta charset="UTF-8">
-        
+
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css">
-        
+
     </head>
     <body>
 
@@ -178,7 +178,12 @@
         </footer>
 
 
-
+        <script>
+            function toggleNotification() {
+                const popup = document.querySelector(".notification-popup");
+                popup.classList.toggle("show");
+            }
+        </script>
         <script src="assets/js/main.js"></script>
     </body>
 </html>

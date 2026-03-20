@@ -74,12 +74,18 @@
             </a>
         </li>
 
+        <!-- NOTIFICATION -->
+        <li>
+            <a href="${pageContext.request.contextPath}/staff/notification">
+                <i class="icon">🔔</i>
+                <span>Notification</span>
+            </a>
+        </li>
         <li class="sidebar-item">
     <a href="${pageContext.request.contextPath}/staff/contracts">
         📄 Manage Contracts
     </a>
 </li>
-
     </ul>
 
     <!-- FOOTER -->

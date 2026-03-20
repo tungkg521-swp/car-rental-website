@@ -29,11 +29,13 @@ public class AuthFilter implements Filter {
             "/staff/licenses",
             "/staff/license-detail",
             "/staff/maintenance",
-            "/staff/vouchers"
+            "/staff/vouchers",
+            "/admin/rental-report"  // giữ nguyên như bạn có
     );
 
     private static final Set<String> ADMIN_ALLOWED_PATHS = Set.of(
             "/dashboard/admin"
+            // không cần thêm /admin/... vào đây vì ta xử lý bằng startsWith("/admin/")
     );
 
     @Override
@@ -52,11 +54,14 @@ public class AuthFilter implements Filter {
                 ? null
                 : (AccountModel) session.getAttribute("ACCOUNT");
 
-        // PUBLIC URLS
+        // === PUBLIC PATHS (không cần login) ===
         if (path.equals("/")
                 || path.equals("/home")
                 || path.equals("/login")
                 || path.equals("/register")
+                || path.equals("/forgot-password")
+                || path.equals("/verify-otp")
+                || path.equals("/reset-password")
                 || path.equals("/dashboard")
                 || path.equals("/logout")
                 || path.equals("/guest-home")
@@ -65,11 +70,11 @@ public class AuthFilter implements Filter {
                 || path.startsWith("/booking-success")
                 || path.startsWith("/license-image")
                 || path.startsWith("/assets/")) {
-
             chain.doFilter(req, res);
             return;
         }
 
+        // === STAFF AREA (giữ nguyên như cũ của bạn) ===
         if (path.equals("/dashboard/staff") || path.startsWith("/staff/")) {
             if (!STAFF_ALLOWED_PATHS.contains(path)) {
                 if (account != null
@@ -81,25 +86,55 @@ public class AuthFilter implements Filter {
                 }
                 return;
             }
-        }
 
-        if (path.equals("/dashboard/admin") || path.startsWith("/admin/")) {
-            if (!ADMIN_ALLOWED_PATHS.contains(path)) {
-                if (account != null
-                        && (account.getRoleId() == RoleConstants.STAFF
-                        || account.getRoleId() == RoleConstants.ADMIN)) {
-                    response.sendRedirect(ctx + "/dashboard");
-                } else {
-                    response.sendRedirect(ctx + "/home");
-                }
+            if (account == null) {
+                response.sendRedirect(ctx + "/login");
                 return;
             }
+
+            int roleId = account.getRoleId();
+            if (roleId != RoleConstants.STAFF && roleId != RoleConstants.ADMIN) {
+                showNotFound(request, response);
+                return;
+            }
+            chain.doFilter(req, res);
+            return;
         }
 
-        // Chưa login
-        if (account == null) {
+        // === ADMIN AREA (đã sửa để fix lỗi AJAX report bị redirect login) ===
+        if (path.equals("/dashboard/admin") 
+                || path.startsWith("/admin/")
+                || path.startsWith("/dashboard/admin/")) {
 
-            // Khu dashboard staff/admin
+            // Cho phép tất cả các endpoint nội bộ/fragment (AJAX) đi qua mà KHÔNG check session/role
+            // Vì chúng được gọi từ trang admin đã được bảo vệ rồi
+            if (path.endsWith("-content") 
+                    || path.contains("report-content")
+                    || path.equals("/admin/rental-report-content")
+                    || path.equals("/admin/revenue-report-content")
+                    || path.equals("/admin/usage-report-content")) {
+                chain.doFilter(req, res);
+                return;
+            }
+
+            // Từ đây mới check quyền ADMIN nghiêm ngặt (cho các trang chính)
+            if (account == null) {
+                response.sendRedirect(ctx + "/login");
+                return;
+            }
+
+            int roleId = account.getRoleId();
+            if (roleId != RoleConstants.ADMIN) {
+                showNotFound(request, response);
+                return;
+            }
+
+            chain.doFilter(req, res);
+            return;
+        }
+
+        // === Not logged in ===
+        if (account == null) {
             if (path.equals("/dashboard/staff")
                     || path.equals("/dashboard/admin")
                     || path.startsWith("/staff/")
@@ -108,7 +143,6 @@ public class AuthFilter implements Filter {
                 return;
             }
 
-            // Khu bắt buộc customer phải login
             if (path.startsWith("/booking")
                     || path.startsWith("/wishlist")
                     || path.startsWith("/review")
@@ -117,51 +151,26 @@ public class AuthFilter implements Filter {
                 return;
             }
 
-            // URL lạ còn lại
             response.sendRedirect(ctx + "/home");
             return;
         }
 
         int roleId = account.getRoleId();
 
-        // CUSTOMER URLS
+        // === Customer area ===
         if (path.startsWith("/booking")
                 || path.startsWith("/wishlist")
                 || path.startsWith("/review")
                 || path.startsWith("/customer/")) {
-
             if (roleId != RoleConstants.CUSTOMER) {
                 denyAccess(request, response, "Bạn không có quyền truy cập khu vực khách hàng.");
                 return;
             }
-
             chain.doFilter(req, res);
             return;
         }
 
-        // STAFF URLS
-        if (path.equals("/dashboard/staff") || path.startsWith("/staff/")) {
-            if (roleId != RoleConstants.STAFF && roleId != RoleConstants.ADMIN) {
-                denyAccess(request, response, "Bạn không có quyền truy cập khu vực nhân viên.");
-                return;
-            }
-
-            chain.doFilter(req, res);
-            return;
-        }
-
-        // ADMIN URLS
-        if (path.equals("/dashboard/admin") || path.startsWith("/admin/")) {
-            if (roleId != RoleConstants.ADMIN) {
-                denyAccess(request, response, "Bạn không có quyền truy cập khu vực quản trị.");
-                return;
-            }
-
-            chain.doFilter(req, res);
-            return;
-        }
-
-        // URL lạ còn lại
+        // === Other private paths ===
         if (roleId == RoleConstants.STAFF || roleId == RoleConstants.ADMIN) {
             response.sendRedirect(ctx + "/dashboard");
         } else {
@@ -172,8 +181,16 @@ public class AuthFilter implements Filter {
     private void denyAccess(HttpServletRequest request,
             HttpServletResponse response,
             String message) throws ServletException, IOException {
-
+        request.setAttribute("pageTitle", "Access Denied");
         request.setAttribute("message", message);
+        RequestDispatcher rd = request.getRequestDispatcher("/views/access-denied.jsp");
+        rd.forward(request, response);
+    }
+
+    private void showNotFound(HttpServletRequest request,
+            HttpServletResponse response) throws ServletException, IOException {
+        request.setAttribute("pageTitle", "Trang không tồn tại");
+        request.setAttribute("message", "Trang bạn đang tìm kiếm không tồn tại hoặc bạn không thể truy cập đường dẫn này.");
         RequestDispatcher rd = request.getRequestDispatcher("/views/access-denied.jsp");
         rd.forward(request, response);
     }
