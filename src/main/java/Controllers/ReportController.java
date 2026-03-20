@@ -11,7 +11,11 @@ import service.ReportService;
 import java.io.IOException;
 import java.util.List;
 
-@WebServlet(name = "ReportController", urlPatterns = {"/admin/rental-report"})
+@WebServlet(name = "ReportController", 
+            urlPatterns = {
+                "/admin/rental-report",           // nếu ai đó truy cập trực tiếp (full page)
+                "/admin/rental-report-content"    // AJAX gọi từ JS
+            })
 public class ReportController extends HttpServlet {
 
     private ReportService reportService = new ReportService();
@@ -20,11 +24,13 @@ public class ReportController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        // Lấy dữ liệu
         List<RentalReportModel> list = reportService.getAllRentalReports();
-
         request.setAttribute("rentalList", list);
 
-        request.getRequestDispatcher("/admin/rental-report.jsp").forward(request, response);
+        // Luôn forward về file fragment JSP (nội dung bảng)
+        // Đảm bảo đường dẫn JSP đúng: /admin-rental-report.jsp (không có /admin/ ở đầu nếu file nằm ở root views)
+        request.getRequestDispatcher("/views/admin-rental-report.jsp").forward(request, response);
     }
 
     @Override

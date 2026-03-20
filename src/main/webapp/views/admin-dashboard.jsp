@@ -11,8 +11,14 @@
         <meta charset="UTF-8">
         <title>Admin Dashboard</title>
 
-        <link rel="stylesheet"
-              href="${pageContext.request.contextPath}/assets/css/staff.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/staff.css">
+        <!-- DÒNG NÀY LÀ BẮT BUỘC - để report.js biết contextPath -->
+        <script>
+    window.contextPath = '${pageContext.request.contextPath}';
+        </script>
+
+        <script src="${pageContext.request.contextPath}/assets/js/report.js"></script>
+
     </head>
     <body>
 
@@ -57,12 +63,11 @@
                     </li>
 
                     <li>
-                        <a href="#">
+                        <a href="#" onclick="loadReportsOverview(); return false;">
                             <i class="icon">📈</i>
-                            <span>System Reports</span>
+                            <span>Reports</span>
                         </a>
                     </li>
-
                     <!-- ===== STAFF FEATURES ===== -->
                     <li class="menu-section">STAFF FEATURES</li>
 
