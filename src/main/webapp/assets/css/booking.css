@@ -245,3 +245,29 @@ textarea:focus {
     list-style-type: "- ";
     margin-left: 20px;
 }
+
+select.form-select {
+    border-radius: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+select.form-select:focus {
+    border-color: #1677ff;
+    box-shadow: 0 0 0 2px rgba(22,119,255,0.15);
+}
+
+#discountText {
+    color: #16a34a;
+    font-weight: 700;
+}
+
+#voucherCodeText {
+    color: #1677ff;
+    font-weight: 600;
+}
+
+#voucherHint {
+    font-size: 13px;
+    margin-top: 8px;
+}

@@ -212,8 +212,13 @@ public class CarDAO extends DBContext {
         return false;
     }
 
+
+ 
+    
+
     public List<CarModel> searchCars(String keyword) {
         List<CarModel> list = new ArrayList<>();
+
 
         System.out.println("Connection = " + connection);
         String sql = """
