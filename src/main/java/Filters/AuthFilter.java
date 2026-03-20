@@ -55,11 +55,14 @@ public class AuthFilter implements Filter {
                 ? null
                 : (AccountModel) session.getAttribute("ACCOUNT");
 
-        // PUBLIC URLS
+        // Public paths
         if (path.equals("/")
                 || path.equals("/home")
                 || path.equals("/login")
                 || path.equals("/register")
+                || path.equals("/forgot-password")
+                || path.equals("/verify-otp")
+                || path.equals("/reset-password")
                 || path.equals("/dashboard")
                 || path.equals("/logout")
                 || path.equals("/guest-home")
@@ -73,6 +76,7 @@ public class AuthFilter implements Filter {
             return;
         }
 
+        // Validate staff path list
         if (path.equals("/dashboard/staff") || path.startsWith("/staff/")) {
             if (!STAFF_ALLOWED_PATHS.contains(path)) {
                 if (account != null
@@ -86,6 +90,7 @@ public class AuthFilter implements Filter {
             }
         }
 
+        // Validate admin path list
         if (path.equals("/dashboard/admin") || path.startsWith("/admin/")) {
             if (!ADMIN_ALLOWED_PATHS.contains(path)) {
                 if (account != null
@@ -99,10 +104,8 @@ public class AuthFilter implements Filter {
             }
         }
 
-        // Chưa login
+        // Not logged in
         if (account == null) {
-
-            // Khu dashboard staff/admin
             if (path.equals("/dashboard/staff")
                     || path.equals("/dashboard/admin")
                     || path.startsWith("/staff/")
@@ -111,7 +114,6 @@ public class AuthFilter implements Filter {
                 return;
             }
 
-            // Khu bắt buộc customer phải login
             if (path.startsWith("/booking")
                     || path.startsWith("/wishlist")
                     || path.startsWith("/review")
@@ -120,14 +122,13 @@ public class AuthFilter implements Filter {
                 return;
             }
 
-            // URL lạ còn lại
             response.sendRedirect(ctx + "/home");
             return;
         }
 
         int roleId = account.getRoleId();
 
-        // CUSTOMER URLS
+        // Customer area
         if (path.startsWith("/booking")
                 || path.startsWith("/wishlist")
                 || path.startsWith("/review")
@@ -142,10 +143,10 @@ public class AuthFilter implements Filter {
             return;
         }
 
-        // STAFF URLS
+        // Staff area
         if (path.equals("/dashboard/staff") || path.startsWith("/staff/")) {
             if (roleId != RoleConstants.STAFF && roleId != RoleConstants.ADMIN) {
-                denyAccess(request, response, "Bạn không có quyền truy cập khu vực nhân viên.");
+                showNotFound(request, response);
                 return;
             }
 
@@ -153,10 +154,10 @@ public class AuthFilter implements Filter {
             return;
         }
 
-        // ADMIN URLS
+        // Admin area
         if (path.equals("/dashboard/admin") || path.startsWith("/admin/")) {
             if (roleId != RoleConstants.ADMIN) {
-                denyAccess(request, response, "Bạn không có quyền truy cập khu vực quản trị.");
+                showNotFound(request, response);
                 return;
             }
 
@@ -164,7 +165,7 @@ public class AuthFilter implements Filter {
             return;
         }
 
-        // URL lạ còn lại
+        // Other private paths
         if (roleId == RoleConstants.STAFF || roleId == RoleConstants.ADMIN) {
             response.sendRedirect(ctx + "/dashboard");
         } else {
@@ -176,7 +177,17 @@ public class AuthFilter implements Filter {
             HttpServletResponse response,
             String message) throws ServletException, IOException {
 
+        request.setAttribute("pageTitle", "Access Denied");
         request.setAttribute("message", message);
+        RequestDispatcher rd = request.getRequestDispatcher("/views/access-denied.jsp");
+        rd.forward(request, response);
+    }
+
+    private void showNotFound(HttpServletRequest request,
+            HttpServletResponse response) throws ServletException, IOException {
+
+        request.setAttribute("pageTitle", "Trang không tồn tại");
+        request.setAttribute("message", "Trang bạn đang tìm kiếm không tồn tại hoặc bạn không thể truy cập đường dẫn này.");
         RequestDispatcher rd = request.getRequestDispatcher("/views/access-denied.jsp");
         rd.forward(request, response);
     }
