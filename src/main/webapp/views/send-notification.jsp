@@ -33,9 +33,15 @@
                     <div class="noti-group">
                         <label>Type:</label>
                         <select name="title" required class="noti-input">
-                            <option value="">-- Select Type --</option>
-                            <option value="Staff">Staff</option>
-                            <option value="System">System</option>
+                            <option value="">-- Select Title --</option>
+                            <option value="Booking Update">Booking Update</option>
+                            <option value="Payment Reminder">Payment Reminder</option>
+                            <option value="Contract Update">Contract Update</option>
+                            <option value="Driver License Notice">Driver License Notice</option>
+                            <option value="Rental Reminder">Rental Reminder</option>
+                            <option value="Promotion Notice">Promotion Notice</option>
+                            <option value="System Notice">System Notice</option>
+                            <option value="Customer Support">Customer Support</option>
                         </select>
                     </div>
 

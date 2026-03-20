@@ -14,7 +14,7 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/staff.css">
         <!-- DÒNG NÀY LÀ BẮT BUỘC - để report.js biết contextPath -->
         <script>
-    window.contextPath = '${pageContext.request.contextPath}';
+            window.contextPath = '${pageContext.request.contextPath}';
         </script>
 
         <script src="${pageContext.request.contextPath}/assets/js/report.js"></script>
@@ -55,12 +55,7 @@
                         </a>
                     </li>
 
-                    <li>
-                        <a href="#">
-                            <i class="icon">🔐</i>
-                            <span>Roles & Permissions</span>
-                        </a>
-                    </li>
+                    <li> <a href="${pageContext.request.contextPath}/admin/review"> <i class="icon">💬</i> <span>Manage Reviews</span> </a> </li>
 
                     <li>
                         <a href="#" onclick="loadReportsOverview(); return false;">
