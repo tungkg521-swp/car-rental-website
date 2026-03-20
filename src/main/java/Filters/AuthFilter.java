@@ -29,11 +29,14 @@ public class AuthFilter implements Filter {
             "/staff/licenses",
             "/staff/license-detail",
             "/staff/maintenance",
+            "/staff/notification",
+            "/staff/send-notification",
             "/staff/vouchers"
     );
 
     private static final Set<String> ADMIN_ALLOWED_PATHS = Set.of(
-            "/dashboard/admin"
+            "/dashboard/admin",
+            "/admin/review"
     );
 
     @Override

@@ -1,32 +1,58 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-
 
 <div class="staff-sidebar">
 
-    <!-- LOGO / TITLE -->
     <div class="sidebar-header">
-        <div class="brand">
-            <span class="top">AUTOMOBILI</span>
-            <span class="bottom">Rental Car</span>
-        </div>
+        <a href="${pageContext.request.contextPath}/guest-home"
+           style="text-decoration:none; color:inherit;">
+            <div class="brand">
+                <span class="top">AUTOMOBILI</span>
+                <span class="bottom">Admin Panel</span>
+            </div>
+        </a>
     </div>
 
-
-    <!-- MENU -->
     <ul class="sidebar-menu">
 
-        <!-- DASHBOARD -->
+        <li class="menu-section">ADMIN ONLY</li>
+
         <li>
-            <a href="${pageContext.request.contextPath}/dashboard/staff">
-                <i class="icon">📊</i>
-                <span>Dashboard</span>
+            <a href="${pageContext.request.contextPath}/dashboard/admin">
+                <i class="icon">🛡</i>
+                <span>Admin Dashboard</span>
             </a>
         </li>
 
-        <!-- USERS -->
+        <li>
+            <a href="#">
+                <i class="icon">👨‍💼</i>
+                <span>Manage Staff Accounts</span>
+            </a>
+        </li>
+
+        <li>
+            <a href="#">
+                <i class="icon">🔐</i>
+                <span>Roles & Permissions</span>
+            </a>
+        </li>
+
+        <li>
+            <a href="#">
+                <i class="icon">📈</i>
+                <span>System Reports</span>
+            </a>
+        </li>
+
+        <li>
+            <a href="${pageContext.request.contextPath}/admin/review?action=list">
+                <i class="icon">💬</i>
+                <span>Manage Reviews</span>
+            </a>
+        </li>
+
+        <li class="menu-section">STAFF FEATURES</li>
+
         <li>
             <a href="${pageContext.request.contextPath}/staff/users">
                 <i class="icon">👥</i>
@@ -34,7 +60,6 @@
             </a>
         </li>
 
-        <!-- CARS -->
         <li>
             <a href="${pageContext.request.contextPath}/staff/cars">
                 <i class="icon">🚗</i>
@@ -42,7 +67,6 @@
             </a>
         </li>
 
-        <!-- MAINTENANCE -->
         <li>
             <a href="${pageContext.request.contextPath}/staff/maintenance">
                 <i class="icon">🛠</i>
@@ -50,7 +74,6 @@
             </a>
         </li>
 
-        <!-- VOUCHERS -->
         <li>
             <a href="${pageContext.request.contextPath}/staff/vouchers">
                 <i class="icon">🎟</i>
@@ -58,7 +81,6 @@
             </a>
         </li>
 
-        <!-- BOOKINGS -->
         <li>
             <a href="${pageContext.request.contextPath}/staff/bookings">
                 <i class="icon">📅</i>
@@ -66,7 +88,6 @@
             </a>
         </li>
 
-        <!-- DRIVER LICENSES (NEW) -->
         <li>
             <a href="${pageContext.request.contextPath}/staff/licenses">
                 <i class="icon">🪪</i>
@@ -74,25 +95,18 @@
             </a>
         </li>
 
-        <!-- NOTIFICATION -->
         <li>
-            <a href="${pageContext.request.contextPath}/staff/notification">
-                <i class="icon">🔔</i>
-                <span>Notification</span>
+            <a href="${pageContext.request.contextPath}/staff/contracts">
+                <i class="icon">📄</i>
+                <span>Manage Contracts</span>
             </a>
         </li>
-        <li class="sidebar-item">
-    <a href="${pageContext.request.contextPath}/staff/contracts">
-        📄 Manage Contracts
-    </a>
-</li>
+
     </ul>
 
-    <!-- FOOTER -->
     <div class="sidebar-footer">
         <a href="${pageContext.request.contextPath}/logout">
             🚪 Logout
         </a>
     </div>
-
 </div>
