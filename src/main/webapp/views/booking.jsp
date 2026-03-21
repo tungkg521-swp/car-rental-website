@@ -8,31 +8,36 @@
         <meta charset="UTF-8">
         <title>Đặt xe</title>
 
-        <!-- Bootstrap LOCAL -->
         <link rel="stylesheet"
               href="${pageContext.request.contextPath}/assets/css/bootstrap.min.css">
 
-        <!-- CSS riêng cho booking -->
         <link rel="stylesheet"
               href="${pageContext.request.contextPath}/assets/css/booking.css">
+
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     </head>
     <body>
 
         <div class="container my-4">
-
             <div class="container my-5">
+
                 <c:if test="${not empty errorMessage}">
                     <div id="errorAlert" class="alert alert-danger">
                         ${errorMessage}
                     </div>
                 </c:if>
 
-                <!-- BACK -->
+
+                <c:if test="${not empty errorMessage}">
+                    <div id="errorAlert" class="alert alert-danger">
+                        ${errorMessage}
+                    </div>
+                </c:if>
+
                 <a href="${pageContext.request.contextPath}/cars?action=detail&carId=${car.carId}"
                    class="back-link">
-                    <span class="bi bi-arrow-left">Quay lại</span> 
+                    <span class="bi bi-arrow-left">Quay lại</span>
                 </a>
 
                 <form action="${pageContext.request.contextPath}/booking"
@@ -57,7 +62,7 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <p><strong>Họ tên:</strong> ${customer.fullName}</p>
-                                        <p ><strong>Email:</strong><span class="text-muted"> ${customer.email}</span></p>
+                                        <p><strong>Email:</strong><span class="text-muted"> ${customer.email}</span></p>
                                     </div>
                                     <div class="col-md-6">
                                         <p><strong>Số điện thoại:</strong> ${customer.phone}</p>
@@ -67,7 +72,6 @@
 
                             <!-- CAR -->
                             <div class="card p-4 mt-4">
-
                                 <img src="${pageContext.request.contextPath}/assets/images/cars/${car.imageFolder}/${car.imageFolder}_1.jpg"
                                      class="car-img mb-3">
                                 <h1>${car.imageFolder}</h1>
@@ -85,7 +89,9 @@
                                 </div>
 
                                 <div class="price-box mt-3">
+
                                     <span >
+
                                         Đơn giá thuê
                                         <i class="info-icon" onclick="openModal()">?</i>
                                     </span>
@@ -106,13 +112,54 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <label>Từ ngày</label>
-                                        <input type="date" name="startDate"id="startDate" class="form-control" required>
+                                        <input type="date" name="startDate" id="startDate" class="form-control" required>
                                     </div>
                                     <div class="col-md-6">
                                         <label>Đến ngày</label>
                                         <input type="date" name="endDate" id="endDate" class="form-control" required>
                                     </div>
                                 </div>
+                            </div>
+
+                            <!-- VOUCHER -->
+
+                            <div class="card p-4 mt-4">
+                                <h5 class="section-title">
+                                    <i class="bi bi-ticket-perforated"></i> Voucher
+                                </h5>
+
+                                <label for="voucherSelect" class="form-label">Chọn mã giảm giá</label>
+                                <select class="form-select" id="voucherSelect" name="voucherId" disabled>
+                                    <option value="">-- Không sử dụng voucher --</option>
+
+                                    <c:forEach var="v" items="${vouchers}">
+                                        <option value="${v.voucherId}"
+                                                data-code="${v.code}"
+                                                data-type="${v.type}"
+                                                data-value="${v.discount}"
+                                                data-min="${v.minBookingAmount}"
+                                                data-maxuses="${v.maxUses}"
+                                                data-usedcount="${v.usedCount}">
+                                            ${v.code}
+                                            -
+                                            <c:choose>
+                                                <c:when test="${v.type eq 'PERCENT'}">
+                                                    Giảm ${v.discount}%
+                                                </c:when>
+                                                <c:otherwise>
+                                                    Giảm <fmt:formatNumber value="${v.discount}" pattern="#,###"/> VND
+                                                </c:otherwise>
+                                            </c:choose>
+                                            <c:if test="${v.minBookingAmount != null}">
+                                                (Tối thiểu <fmt:formatNumber value="${v.minBookingAmount}" pattern="#,###"/> VND)
+                                            </c:if>
+                                        </option>
+                                    </c:forEach>
+                                </select>
+
+                                <small id="voucherHint" class="text-muted d-block mt-2">
+                                    Vui lòng chọn thời gian thuê trước để kiểm tra voucher khả dụng.
+                                </small>
                             </div>
 
                             <!-- NOTE -->
@@ -122,7 +169,9 @@
                                 </h5>
 
                                 <textarea class="form-control"
+
                                           id="bookingNote"
+
                                           name="note"
                                           rows="3"
                                           placeholder="Ghi chú thêm..."></textarea>
@@ -132,7 +181,6 @@
 
                         <!-- RIGHT -->
                         <div class="col-lg-4">
-
                             <div class="card summary p-4">
 
                                 <h5 class="section-title">
@@ -149,6 +197,21 @@
                                     <span id="daysText">0 ngày</span>
                                 </div>
 
+                                <div class="summary-row">
+                                    <span>Tạm tính</span>
+                                    <span id="subtotalText">0 VND</span>
+                                </div>
+
+                                <div class="summary-row">
+                                    <span>Giảm giá</span>
+                                    <span id="discountText">0 VND</span>
+                                </div>
+
+                                <div class="summary-row">
+                                    <span>Mã áp dụng</span>
+                                    <span id="voucherCodeText">Không có</span>
+                                </div>
+
                                 <hr>
 
                                 <div class="summary-total">
@@ -156,12 +219,12 @@
                                     <span id="totalText">0 VND</span>
                                 </div>
 
+
                                 <button type="button" id="openConfirmBtn" class="btn btn-primary w-100 mt-3">
+
                                     Xác nhận đặt xe
                                 </button>
-
                             </div>
-
                         </div>
 
                     </div>
@@ -169,11 +232,14 @@
             </div>
         </div>
 
+
         <!-- ================= CONFIRM BOOKING MODAL ================= -->
         <div id="confirmBookingModal" class="confirm-modal-overlay">
             <div class="confirm-modal-box">
 
+
                 <button type="button" class="confirm-close" onclick="closeConfirmModal()">×</button>
+
 
                 <div class="confirm-topbar">
                     <div>
@@ -207,6 +273,7 @@
                                 <strong id="confirmEndDate">--/--/----</strong>
                             </div>
                         </div>
+
 
                         <div class="price-highlight-card">
                             <div class="price-highlight-top">Tổng thanh toán</div>
@@ -336,5 +403,7 @@
         <!-- JS -->
         <script src="${pageContext.request.contextPath}/assets/js/booking.js?v=4"></script>
 
+
+        <script src="${pageContext.request.contextPath}/assets/js/booking.js?v=4"></script>
     </body>
 </html>

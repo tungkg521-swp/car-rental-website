@@ -10,7 +10,6 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import models.AccountModel;
 
-@WebServlet("/guest-home")
 public class GuestHomeServlet extends HttpServlet {
 
     @Override

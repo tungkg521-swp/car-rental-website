@@ -246,6 +246,7 @@ textarea:focus {
     margin-left: 20px;
 }
 
+
 /* ================= MODERN CONFIRM BOOKING MODAL ================= */
 .confirm-modal-overlay {
     position: fixed;
@@ -735,4 +736,5 @@ textarea:focus {
         flex-direction: column;
         align-items: flex-start;
     }
+
 }

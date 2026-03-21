@@ -400,3 +400,34 @@ body {
     border-radius: 6px;
     cursor: pointer;
 }
+
+/* ===== PROFILE CHANGE PASSWORD ===== */
+
+.save-btn{
+    background:#0d6efd;
+    color:white;
+    border:none;
+    padding:12px 28px;
+    border-radius:25px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:0.25s;
+}
+
+.save-btn:hover{
+    background:#0b5ed7;
+}
+
+.error-message{
+    color:#e53935;
+    background:#fdecea;
+    padding:10px;
+    border-radius:6px;
+    margin-top:12px;
+    font-size:14px;
+}
+.save-btn a{
+    text-decoration:none;
+    color:white;
+}

@@ -5,6 +5,7 @@
  */
 package Controllers;
 
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -12,6 +13,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import DALs.CustomerDAO;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,8 +25,18 @@ import models.AccountModel;
 import models.BookingModel;
 import models.CarModel;
 import models.CustomerModel;
+
+import models.VoucherModel;
+
+
+
+
+
+
 import service.BookingService;
+
 import service.CarService;
+import service.VoucherService;
 
 /**
  *
@@ -198,6 +210,9 @@ public class BookingServlet extends HttpServlet {
             );
             return;
         }
+        // 6. Load voucher hợp lệ
+        VoucherService voucherService = new VoucherService();
+        List<VoucherModel> validVouchers = voucherService.getAvailableVouchers();
 
         // 6. Set data cho JSP
         System.out.println("SET ATTRIBUTE ACCOUNT CUSTOMER CAR");
@@ -205,6 +220,9 @@ public class BookingServlet extends HttpServlet {
         request.setAttribute("account", account);
         request.setAttribute("customer", customer);
         request.setAttribute("car", car);
+        request.setAttribute("vouchers", validVouchers);
+        System.out.println("VOUCHER SIZE = " + (validVouchers == null ? 0 : validVouchers.size()));
+        System.out.println("VOUCHERS = " + validVouchers);
 
         // 7. Forward
         System.out.println("FORWARD -> /views/booking.jsp");
@@ -233,6 +251,11 @@ public class BookingServlet extends HttpServlet {
         CustomerModel customer = customerDAO.getByAccountId(account.getAccountId());
 
         // 🚨 DOUBLE CHECK GPLX
+        if (customer == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
         if (!customer.isLicenseVerified()) {
             response.sendRedirect(
                     request.getContextPath() + "/cars"
@@ -240,16 +263,13 @@ public class BookingServlet extends HttpServlet {
             return;
         }
 
-        if (customer == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-
         String carIdRaw = request.getParameter("carId");
         String startDateRaw = request.getParameter("startDate");
         String endDateRaw = request.getParameter("endDate");
         String note = request.getParameter("note");
-
+        String voucherIdRaw = request.getParameter("voucherId");
+        
+        
         System.out.println("carId = " + carIdRaw);
         System.out.println("startDate = " + startDateRaw);
         System.out.println("endDate = " + endDateRaw);
@@ -265,6 +285,14 @@ public class BookingServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/cars");
             return;
         }
+        
+        int voucherId;
+        try {
+            voucherId = Integer.parseInt(voucherIdRaw);
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/cars");
+            return;
+        }
 
         Date startDate;
         Date endDate;
@@ -276,9 +304,11 @@ public class BookingServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/booking?carId=" + carId);
             return;
         }
+        
+        
 
-        // Không cho thuê ngày trong quá khứ
-        Date today = new Date(System.currentTimeMillis());
+        // Không cho thuê ngày trong quá khứSystem.currentTimeMillis()
+        Date today = Date.valueOf(LocalDate.now());
 
         if (startDate.before(today)) {
 
@@ -295,8 +325,8 @@ public class BookingServlet extends HttpServlet {
             return;
         }
 
-        // Ngày trả phải sau ngày thuê
-        if (!endDate.after(startDate)) {
+        // Ngày trả không được nhỏ hơn ngày thuê
+        if (endDate.before(startDate)) {
 
             request.setAttribute("errorMessage", "Ngày trả xe phải sau ngày thuê");
 
@@ -313,18 +343,17 @@ public class BookingServlet extends HttpServlet {
 
         CarService carService = new CarService();
         CarModel car = carService.getCarById(carId);
-
+        carService.updateCarStatus(carId, "BOOKED");
         if (car == null || !"AVAILABLE".equalsIgnoreCase(car.getStatus())) {
             response.sendRedirect(request.getContextPath() + "/cars");
             return;
         }
+        
+        VoucherService voucherService = new VoucherService();
+        voucherService.updateVoucherQuantity(voucherId);
 
-        BookingService bookingService = new BookingService();
-        BigDecimal totalPrice = bookingService.calculateTotalPrice(
-                startDate,
-                endDate,
-                car.getPricePerDay()
-        );
+        String totalPriceRaw = request.getParameter("totalEstimatedPrice");
+        BigDecimal totalPrice = new BigDecimal(totalPriceRaw);
 
         BookingModel booking = new BookingModel();
         booking.setCustomerId(customer.getCustomerId());
