@@ -68,10 +68,80 @@ public class CarDAO extends DBContext {
             e.printStackTrace();
         }
 
+
+
         return list;
     }
 
     public CarModel findById(int carId) {
+        String sql = """
+        SELECT
+            c.car_id,
+            c.model_name,
+            c.model_year,
+            c.price_per_day,
+            c.seat_count,
+            c.fuel_type,
+            c.transmission,
+            b.brand_name,
+            t.type_name,
+
+            i.image_url,
+
+            c.image_folder,
+            c.description,
+            c.status
+        FROM cars c
+
+        LEFT JOIN brand b 
+            ON c.brand_id = b.brand_id
+        LEFT JOIN cars_type t 
+            ON c.type_id = t.type_id
+        LEFT JOIN cars_image i
+            ON c.car_id = i.car_id
+           AND i.is_primary = 1
+        WHERE c.car_id = ?
+    """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+
+            ps.setInt(1, carId);
+            ResultSet rs = ps.executeQuery();
+
+
+            if (rs.next()) {
+                return new CarModel(
+                        rs.getInt("car_id"),
+                        rs.getString("model_name"),
+                        rs.getInt("model_year"),
+                        rs.getBigDecimal("price_per_day"),
+                        rs.getInt("seat_count"),
+                        rs.getString("fuel_type"),
+                        rs.getString("transmission"),
+                        rs.getString("brand_name"),
+                        rs.getString("type_name"),
+
+                        rs.getString("image_url"),
+
+                        rs.getString("image_folder"),
+                        rs.getString("description"),
+                        rs.getString("status")
+                );
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+     public List<CarModel> findAllCars() {
+
+
+        List<CarModel> list = new ArrayList<>();
+
         String sql = """
         SELECT
             c.car_id,
@@ -95,16 +165,12 @@ public class CarDAO extends DBContext {
         LEFT JOIN cars_image i
             ON c.car_id = i.car_id
            AND i.is_primary = 1
-        WHERE c.car_id = ?
     """;
 
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
-            ps.setInt(1, carId);
-            ResultSet rs = ps.executeQuery();
-
-            if (rs.next()) {
-                return new CarModel(
+            while (rs.next()) {
+                list.add(new CarModel(
                         rs.getInt("car_id"),
                         rs.getString("model_name"),
                         rs.getInt("model_year"),
@@ -118,71 +184,15 @@ public class CarDAO extends DBContext {
                         rs.getString("image_folder"),
                         rs.getString("description"),
                         rs.getString("status")
-                );
+                ));
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+
+        return list;
     }
-
-     public List<CarModel> findAllCars() {
-
-    List<CarModel> list = new ArrayList<>();
-
-    String sql = """
-        SELECT
-            c.car_id,
-            c.model_name,
-            c.model_year,
-            c.price_per_day,
-            c.seat_count,
-            c.fuel_type,
-            c.transmission,
-            b.brand_name,
-            t.type_name,
-            i.image_url,
-            c.image_folder,
-            c.description,
-            c.status
-        FROM cars c
-        LEFT JOIN brand b 
-            ON c.brand_id = b.brand_id
-        LEFT JOIN cars_type t 
-            ON c.type_id = t.type_id
-        LEFT JOIN cars_image i
-            ON c.car_id = i.car_id
-           AND i.is_primary = 1
-    """;
-
-    try (PreparedStatement ps = connection.prepareStatement(sql);
-         ResultSet rs = ps.executeQuery()) {
-
-        while (rs.next()) {
-            list.add(new CarModel(
-                rs.getInt("car_id"),
-                rs.getString("model_name"),
-                rs.getInt("model_year"),
-                rs.getBigDecimal("price_per_day"),
-                rs.getInt("seat_count"),
-                rs.getString("fuel_type"),
-                rs.getString("transmission"),
-                rs.getString("brand_name"),
-                rs.getString("type_name"),
-                rs.getString("image_url"),
-                rs.getString("image_folder"),
-                rs.getString("description"),
-                rs.getString("status")
-            ));
-        }
-
-    } catch (Exception e) {
-        e.printStackTrace();
-    }
-
-    return list;
-}
 
     public boolean updateStatus(int carId, String status) {
 
@@ -202,8 +212,13 @@ public class CarDAO extends DBContext {
         return false;
     }
 
+
+ 
+    
+
     public List<CarModel> searchCars(String keyword) {
         List<CarModel> list = new ArrayList<>();
+
 
         System.out.println("Connection = " + connection);
         String sql = """
@@ -285,10 +300,11 @@ public class CarDAO extends DBContext {
 
         // Thêm điều kiện động
         if (keyword != null && !keyword.trim().isEmpty()) {
+
             sql.append(" AND c.model_name LIKE ?");
             params.add("%" + keyword.trim() + "%");
         }
-
+        
         if (availableOnly) {
             sql.append(" AND c.status = 'AVAILABLE'");
         }

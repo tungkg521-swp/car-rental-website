@@ -1,6 +1,10 @@
 <head>
     <title>My Profile</title>
+  <link rel="stylesheet"
+          href="${pageContext.request.contextPath}/assets/css/notification.css">
 
+    <link rel="stylesheet"
+          href="${pageContext.request.contextPath}/assets/css/profile.css">
 
 </head>
 
