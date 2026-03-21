@@ -8,13 +8,12 @@
         <meta charset="UTF-8">
         <title>Manage Reviews</title>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/staff.css">
-        <link href="${pageContext.request.contextPath}/assets/css/admin.css" rel="stylesheet" type="text/css"/>
     </head>
     <body>
 
         <div class="staff-layout">
 
-            <jsp:include page="admin-sidebar.jsp"/>
+            <%@ include file="sidebar.jsp" %>
 
             <div class="staff-content">
                 <h1 class="dashboard-title">Manage Reviews</h1>
@@ -29,8 +28,8 @@
                     <c:remove var="error" scope="session"/>
                 </c:if>
 
-                <div class="table-wrapper">
-                    <table class="data-table">
+                <div class="dashboard-table">
+                    <table>
                         <thead>
                             <tr>
                                 <th>Review ID</th>
@@ -51,7 +50,7 @@
                                     <td>${r.carId}</td>
                                     <td>${r.bookingId}</td>
                                     <td>${r.rating}</td>
-                                    <td class="comment-cell">${r.comment}</td>
+                                    <td style="max-width: 320px; white-space: normal;">${r.comment}</td>
                                     <td>
                                         <fmt:formatDate value="${r.createdAt}" pattern="dd/MM/yyyy HH:mm:ss"/>
                                     </td>
