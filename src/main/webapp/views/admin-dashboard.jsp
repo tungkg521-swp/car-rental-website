@@ -11,14 +11,22 @@
         <meta charset="UTF-8">
         <title>Admin Dashboard</title>
 
-        <link rel="stylesheet"
-              href="${pageContext.request.contextPath}/assets/css/staff.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/staff.css">
+        <!-- DÒNG NÀY LÀ BẮT BUỘC - để report.js biết contextPath -->
+        <script>
+            window.contextPath = '${pageContext.request.contextPath}';
+        </script>
+
+        <script src="${pageContext.request.contextPath}/assets/js/report.js"></script>
+
     </head>
     <body>
 
         <div class="staff-layout">
 
+
             <%@ include file="sidebar.jsp" %>
+
 
             <div class="staff-content">
 

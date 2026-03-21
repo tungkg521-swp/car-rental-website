@@ -18,6 +18,9 @@ public class CarService {
         return carDAO.findById(carId);
     }
 
+      public void updateCarStatus(int carId,String status) {
+         carDAO.updateStatus(carId, status);
+    }
     public List<CarModel> findAllCars() {
         return carDAO.findAllCars();
     }

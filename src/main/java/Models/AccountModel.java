@@ -7,7 +7,7 @@ public class AccountModel {
     private int accountId;
     private String email;
     private String passwordHash;
-    private int roleId;
+    public int roleId;
     private String status;
     private LocalDateTime createdAt;
     private LocalDateTime lastLoginAt;

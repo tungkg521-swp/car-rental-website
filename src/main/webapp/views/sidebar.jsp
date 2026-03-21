@@ -135,6 +135,7 @@
             </a>
         </li>
 
+
         <li>
             <a href="<%= contextPath %>/staff/contracts" class="<%= activeClassContracts %>">
                 <i class="icon">📄</i>

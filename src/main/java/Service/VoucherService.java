@@ -15,6 +15,9 @@ public class VoucherService {
         return voucherDAO.getAllVouchers();
     }
 
+    public List<VoucherModel> getAvailableVouchers() {
+        return voucherDAO.getActiveVouchers();
+    }
     // Get voucher by ID
 
     public Object getVoucherById(int voucherId) {
@@ -42,5 +45,9 @@ public class VoucherService {
     // Delete voucher
     public boolean deleteVoucher(int voucherId) {
         return voucherDAO.delete(voucherId);
+    }
+    
+    public boolean updateVoucherQuantity(int voucher) {
+        return voucherDAO.updateVoucherQuantity(voucher);
     }
 }

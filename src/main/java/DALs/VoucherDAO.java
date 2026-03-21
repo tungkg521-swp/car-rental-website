@@ -45,6 +45,43 @@ public class VoucherDAO extends DBContext {
 
     return list;
 }
+   
+   public List<VoucherModel> getActiveVouchers() {
+    List<VoucherModel> list = new ArrayList<>();
+
+    String sql = "SELECT voucher_id, code, discount_value, discount_type, "
+            + "start_date, end_date, status, "
+            + "max_uses, used_count, min_booking_amount "
+            + "FROM voucher "
+            + "WHERE LOWER(status) = 'ACTIVE' "
+            + "AND max_uses > 0"
+            + "ORDER BY voucher_id DESC";
+
+    try (PreparedStatement ps = connection.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+
+        while (rs.next()) {
+            VoucherModel voucher = new VoucherModel(
+                    rs.getInt("voucher_id"),
+                    rs.getString("code"),
+                    rs.getBigDecimal("discount_value"),
+                    rs.getString("discount_type"),
+                    rs.getDate("start_date"),
+                    rs.getDate("end_date"),
+                    rs.getString("status"),
+                   null,
+                    rs.getInt("max_uses"),
+                    rs.getInt("used_count"),
+                    rs.getBigDecimal("min_booking_amount")
+            );
+            list.add(voucher);
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return list;
+}
 
     // Find voucher by ID
     public VoucherModel findById(int voucherId) {
@@ -162,6 +199,24 @@ public class VoucherDAO extends DBContext {
     return false;
 }
 
+    public boolean updateVoucherQuantity(int voucherId) {
+
+    String sql = "UPDATE voucher SET max_uses = max_uses -1 , used_count = used_count+1 WHERE voucher_id = ?";
+
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+     
+        ps.setInt(1, voucherId);
+
+        return ps.executeUpdate() > 0;
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return false;
+}
+    
     // Delete voucher
     public boolean delete(int voucherId) {
         String sql = "DELETE FROM voucher WHERE voucher_id = ?";
