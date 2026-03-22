@@ -30,11 +30,14 @@ public class AuthFilter implements Filter {
             "/staff/license-detail",
             "/staff/maintenance",
             "/staff/vouchers",
+            "/staff/notification",
+            "/staff/send-notification",
             "/admin/rental-report"  // giữ nguyên như bạn có
     );
 
     private static final Set<String> ADMIN_ALLOWED_PATHS = Set.of(
-            "/dashboard/admin"
+            "/dashboard/admin",
+            "/admin/review"
             // không cần thêm /admin/... vào đây vì ta xử lý bằng startsWith("/admin/")
     );
 
