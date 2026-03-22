@@ -331,54 +331,36 @@ function fillConfirmModal() {
     const startValue = document.getElementById("startDate")?.value || "";
     const endValue = document.getElementById("endDate")?.value || "";
     const noteValue = document.getElementById("bookingNote")?.value?.trim() || "";
-    const pricePerDayRaw = parseFloat(document.getElementById("pricePerDayRaw")?.value) || 0;
-    const totalEstimatedPrice = parseFloat(document.getElementById("totalEstimatedPrice")?.value) || 0;
+
+    const pricePerDay = parseFloat(document.getElementById("pricePerDayRaw")?.value) || 0;
+    const total = parseFloat(document.getElementById("totalEstimatedPrice")?.value) || 0;
+
+    const subtotalText = document.getElementById("subtotalText")?.innerText || "0 VND";
+    const discountText = document.getElementById("discountText")?.innerText || "-0 VND";
+    const voucherCodeText = document.getElementById("voucherCodeText")?.innerText || "Không có";
+
     const days = calculateRentalDays(startValue, endValue);
 
     if (!startValue || !endValue || days <= 0) {
         return;
     }
 
-    const confirmStartDate = document.getElementById("confirmStartDate");
-    const confirmEndDate = document.getElementById("confirmEndDate");
-    const confirmPricePerDay = document.getElementById("confirmPricePerDay");
-    const confirmDays = document.getElementById("confirmDays");
-    const confirmTotal = document.getElementById("confirmTotal");
+    document.getElementById("confirmStartDate").innerText = formatDateVN(startValue);
+    document.getElementById("confirmEndDate").innerText = formatDateVN(endValue);
 
-    const confirmPricePerDay2 = document.getElementById("confirmPricePerDay2");
-    const confirmDays2 = document.getElementById("confirmDays2");
-    const confirmTotal2 = document.getElementById("confirmTotal2");
-    const confirmNoteBox = document.getElementById("confirmNoteBox");
+    document.getElementById("confirmPricePerDay").innerText = formatMoney(pricePerDay) + " VND";
+    document.getElementById("confirmDays").innerText = days + " ngày";
+    document.getElementById("confirmTotal").innerText = formatMoney(total) + " VND";
 
-    if (confirmStartDate) {
-        confirmStartDate.innerText = formatDateVN(startValue);
-    }
-    if (confirmEndDate) {
-        confirmEndDate.innerText = formatDateVN(endValue);
-    }
-    if (confirmPricePerDay) {
-        confirmPricePerDay.innerText = formatMoney(pricePerDayRaw) + " VND";
-    }
-    if (confirmDays) {
-        confirmDays.innerText = days + " ngày";
-    }
-    if (confirmTotal) {
-        confirmTotal.innerText = formatMoney(totalEstimatedPrice) + " VND";
-    }
+    document.getElementById("confirmPricePerDay2").innerText = formatMoney(pricePerDay) + " VND";
+    document.getElementById("confirmDays2").innerText = days + " ngày";
 
-    if (confirmPricePerDay2) {
-        confirmPricePerDay2.innerText = formatMoney(pricePerDayRaw) + " VND";
-    }
-    if (confirmDays2) {
-        confirmDays2.innerText = days + " ngày";
-    }
-    if (confirmTotal2) {
-        confirmTotal2.innerText = formatMoney(totalEstimatedPrice) + " VND";
-    }
+    document.getElementById("confirmSubtotal").innerText = subtotalText;
+    document.getElementById("confirmDiscount").innerText = discountText;
+    document.getElementById("confirmVoucherCode").innerText = voucherCodeText;
 
-    if (confirmNoteBox) {
-        confirmNoteBox.innerText = noteValue || "Không có ghi chú";
-    }
+    document.getElementById("confirmTotal2").innerText = formatMoney(total) + " VND";
+    document.getElementById("confirmNoteBox").innerText = noteValue || "Không có ghi chú";
 }
 
 // ================= MAIN =================

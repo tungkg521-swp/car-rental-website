@@ -29,11 +29,7 @@
                 </c:if>
 
 
-                <c:if test="${not empty errorMessage}">
-                    <div id="errorAlert" class="alert alert-danger">
-                        ${errorMessage}
-                    </div>
-                </c:if>
+
 
                 <a href="${pageContext.request.contextPath}/cars?action=detail&carId=${car.carId}"
                    class="back-link">
@@ -47,7 +43,7 @@
 
                     <input type="hidden" name="action" value="create">
                     <input type="hidden" name="carId" value="${car.carId}">
-
+                    <input type="hidden" id="totalEstimatedPrice" name="totalEstimatedPrice" value="0">
                     <div class="row g-4">
 
                         <!-- LEFT -->
@@ -276,12 +272,17 @@
 
 
                         <div class="price-highlight-card">
+                            
+
                             <div class="price-highlight-top">Tổng thanh toán</div>
+                            
                             <div class="price-highlight-main" id="confirmTotal">0 VND</div>
+
                             <div class="price-highlight-sub">
                                 <span id="confirmDays">0 ngày</span>
                                 <span>•</span>
                                 <span id="confirmPricePerDay">0 VND</span>
+                                <span class="discount-corner" id="confirmDiscount"> -0 VND</span>
                             </div>
                         </div>
                     </div>
@@ -332,10 +333,27 @@
                                     <span>Giá thuê mỗi ngày</span>
                                     <strong id="confirmPricePerDay2">0 VND</strong>
                                 </div>
+
                                 <div class="summary-modern-row">
                                     <span>Số ngày thuê</span>
                                     <strong id="confirmDays2">0 ngày</strong>
                                 </div>
+
+                                <div class="summary-modern-row">
+                                    <span>Tạm tính</span>
+                                    <strong id="confirmSubtotal">0 VND</strong>
+                                </div>
+
+                                <div class="summary-modern-row">
+                                    <span>Giảm giá</span>
+                                    <strong id="confirmDiscount">-0 VND</strong>
+                                </div>
+
+                                <div class="summary-modern-row">
+                                    <span>Mã áp dụng</span>
+                                    <strong id="confirmVoucherCode">Không có</strong>
+                                </div>
+
                                 <div class="summary-modern-row total">
                                     <span>Tổng cộng</span>
                                     <strong id="confirmTotal2">0 VND</strong>
@@ -404,6 +422,6 @@
         <script src="${pageContext.request.contextPath}/assets/js/booking.js?v=4"></script>
 
 
-        <script src="${pageContext.request.contextPath}/assets/js/booking.js?v=4"></script>
+
     </body>
 </html>
