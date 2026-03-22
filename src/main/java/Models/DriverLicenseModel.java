@@ -28,6 +28,10 @@ public class DriverLicenseModel {
 
     private String status;
 
+    private String selfieImage;
+    private String nationalIdFront;
+    private String nationalIdBack;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -35,40 +39,123 @@ public class DriverLicenseModel {
     }
 
     // ===== GETTER SETTER =====
+    public int getLicenseId() {
+        return licenseId;
+    }
 
-    public int getLicenseId() { return licenseId; }
-    public void setLicenseId(int licenseId) { this.licenseId = licenseId; }
+    public void setLicenseId(int licenseId) {
+        this.licenseId = licenseId;
+    }
 
-    public int getCustomerId() { return customerId; }
-    public void setCustomerId(int customerId) { this.customerId = customerId; }
+    public int getCustomerId() {
+        return customerId;
+    }
 
-    public String getLicenseNumber() { return licenseNumber; }
-    public void setLicenseNumber(String licenseNumber) { this.licenseNumber = licenseNumber; }
+    public void setCustomerId(int customerId) {
+        this.customerId = customerId;
+    }
 
-    public String getFullName() { return fullName; }
-    public void setFullName(String fullName) { this.fullName = fullName; }
+    public String getLicenseNumber() {
+        return licenseNumber;
+    }
 
-    public LocalDate getDob() { return dob; }
-    public void setDob(LocalDate dob) { this.dob = dob; }
+    public void setLicenseNumber(String licenseNumber) {
+        this.licenseNumber = licenseNumber;
+    }
 
-    public LocalDate getIssueDate() { return issueDate; }
-    public void setIssueDate(LocalDate issueDate) { this.issueDate = issueDate; }
+    public String getFullName() {
+        return fullName;
+    }
 
-    public LocalDate getExpiryDate() { return expiryDate; }
-    public void setExpiryDate(LocalDate expiryDate) { this.expiryDate = expiryDate; }
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
 
-    public String getImageFront() { return imageFront; }
-    public void setImageFront(String imageFront) { this.imageFront = imageFront; }
+    public LocalDate getDob() {
+        return dob;
+    }
 
-    public String getImageBack() { return imageBack; }
-    public void setImageBack(String imageBack) { this.imageBack = imageBack; }
+    public void setDob(LocalDate dob) {
+        this.dob = dob;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public LocalDate getIssueDate() {
+        return issueDate;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public void setIssueDate(LocalDate issueDate) {
+        this.issueDate = issueDate;
+    }
 
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public LocalDate getExpiryDate() {
+        return expiryDate;
+    }
+
+    public void setExpiryDate(LocalDate expiryDate) {
+        this.expiryDate = expiryDate;
+    }
+
+    public String getImageFront() {
+        return imageFront;
+    }
+
+    public void setImageFront(String imageFront) {
+        this.imageFront = imageFront;
+    }
+
+    public String getImageBack() {
+        return imageBack;
+    }
+
+    public void setImageBack(String imageBack) {
+        this.imageBack = imageBack;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getSelfieImage() {
+        return selfieImage;
+    }
+
+    public void setSelfieImage(String selfieImage) {
+        this.selfieImage = selfieImage;
+    }
+
+    public String getNationalIdFront() {
+        return nationalIdFront;
+    }
+
+    public void setNationalIdFront(String nationalIdFront) {
+        this.nationalIdFront = nationalIdFront;
+    }
+
+    public String getNationalIdBack() {
+        return nationalIdBack;
+    }
+
+    public void setNationalIdBack(String nationalIdBack) {
+        this.nationalIdBack = nationalIdBack;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }
