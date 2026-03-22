@@ -1,29 +1,33 @@
 package Controllers;
 
-
+import models.AccountModel;
 import models.VoucherModel;
 import service.VoucherService;
+import Utils.RoleConstants;
 
 import java.io.IOException;
 import java.sql.Date;
 import java.util.List;
-
-
-
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
-/**
- * Servlet for handling voucher operations
- */
 @WebServlet(name = "VoucherController", urlPatterns = {"/staff/vouchers"})
 public class VoucherController extends HttpServlet {
 
     private final VoucherService voucherService = new VoucherService();
+
+    // Kiểm tra admin
+    private boolean isAdmin(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) return false;
+        AccountModel account = (AccountModel) session.getAttribute("ACCOUNT");
+        return account != null && account.getRoleId() == RoleConstants.ADMIN;
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -34,10 +38,16 @@ public class VoucherController extends HttpServlet {
         if (action == null || action.equals("list")) {
             listVouchers(request, response);
         } else if (action.equals("create")) {
-            // Chuyển đến cùng 1 file JSP đã gộp
+            if (!isAdmin(request)) {
+                request.getSession().setAttribute("error", "Only admin can create vouchers.");
+                response.sendRedirect(request.getContextPath() + "/staff/vouchers?action=list");
+                return;
+            }
             request.getRequestDispatcher("/views/voucher.jsp").forward(request, response);
         } else if (action.equals("detail")) {
             showVoucherDetail(request, response);
+        } else {
+            listVouchers(request, response);
         }
     }
 
@@ -48,10 +58,25 @@ public class VoucherController extends HttpServlet {
         String action = request.getParameter("action");
 
         if (action != null && action.equals("create")) {
+            if (!isAdmin(request)) {
+                request.getSession().setAttribute("error", "Only admin can create vouchers.");
+                response.sendRedirect(request.getContextPath() + "/staff/vouchers?action=list");
+                return;
+            }
             createVoucher(request, response);
         } else if (action != null && action.equals("update")) {
+            if (!isAdmin(request)) {
+                request.getSession().setAttribute("error", "Only admin can update vouchers.");
+                response.sendRedirect(request.getContextPath() + "/staff/vouchers?action=list");
+                return;
+            }
             updateVoucher(request, response);
         } else if (action != null && action.equals("delete")) {
+            if (!isAdmin(request)) {
+                request.getSession().setAttribute("error", "Only admin can delete vouchers.");
+                response.sendRedirect(request.getContextPath() + "/staff/vouchers?action=list");
+                return;
+            }
             deleteVoucher(request, response);
         }
     }
@@ -59,7 +84,6 @@ public class VoucherController extends HttpServlet {
     // List all vouchers
     private void listVouchers(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
         List<VoucherModel> vouchers = voucherService.getVoucher();
         request.setAttribute("vouchers", vouchers);
         request.getRequestDispatcher("/views/voucher.jsp").forward(request, response);
@@ -92,7 +116,6 @@ public class VoucherController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/staff/vouchers?action=list");
         }
     }
-
     // Create new voucher
     private void createVoucher(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

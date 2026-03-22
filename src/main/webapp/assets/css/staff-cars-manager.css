@@ -349,10 +349,17 @@ tr:hover {
     border-radius: 4px;
 }
 
-.action-buttons {
-    display: flex;
+/* Căn giữa cột Actions - override staff.css */
+.dashboard-table td:last-child {
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+.dashboard-table .action-buttons {
+    display: inline-flex !important;
+    justify-content: center;
+    align-items: center;
     gap: 5px;
-    flex-wrap: wrap;
 }
 
 .delete-form {

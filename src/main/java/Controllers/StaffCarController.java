@@ -159,9 +159,15 @@ public class StaffCarController extends HttpServlet {
             return;
         }
 
-        if ("delete".equals(action)) {
-            deleteCar(request, response);
-        }
+       if ("delete".equals(action)) {
+    if (!isAdmin(request)) {
+        request.getSession().setAttribute("error", "Only admin can delete cars.");
+        response.sendRedirect(request.getContextPath() + "/staff/cars?action=list");
+        return;
+    }
+    deleteCar(request, response);
+    return;
+}
     }
 
     private boolean isAdmin(HttpServletRequest request) {
