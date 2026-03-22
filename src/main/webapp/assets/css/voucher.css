@@ -324,4 +324,75 @@ td .btn {
 .empty-state p {
     color: #666;
     margin-bottom: 20px;
+    
+    
+}
+/* Voucher Detail Info */
+.voucher-detail-info {
+    background: #f9fafb;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 30px;
+    border: 1px solid #e5e7eb;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px 30px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.voucher-detail-info p {
+    margin: 0;
+    padding: 8px 0;
+    border-bottom: 1px dashed #e2e8f0;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.voucher-detail-info p strong {
+    color: #2c3e50;
+    font-weight: 600;
+    min-width: 140px;
+}
+
+.voucher-detail-info .status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+.voucher-detail-info .status-badge.active {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.voucher-detail-info .status-badge.inactive {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* Để phần status nằm cùng hàng với strong */
+.voucher-detail-info p:last-child strong {
+    align-self: center;
+}
+
+/* Responsive cho voucher detail */
+@media (max-width: 768px) {
+    .voucher-detail-info {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    .voucher-detail-info p {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+    .voucher-detail-info p strong {
+        min-width: auto;
+    }
 }
