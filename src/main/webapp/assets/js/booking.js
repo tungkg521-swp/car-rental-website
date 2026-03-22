@@ -49,6 +49,14 @@ function formatDateVN(dateStr) {
     return `${d}/${m}/${y}`;
 }
 
+function calculateDepositAmount(total) {
+    return Number(total || 0) * 0.3;
+}
+
+function calculateRemainingAmount(total) {
+    return Number(total || 0) - calculateDepositAmount(total);
+}
+
 function calculateRentalDays(startValue, endValue) {
     if (!startValue || !endValue) {
         return 0;
@@ -345,22 +353,73 @@ function fillConfirmModal() {
         return;
     }
 
-    document.getElementById("confirmStartDate").innerText = formatDateVN(startValue);
-    document.getElementById("confirmEndDate").innerText = formatDateVN(endValue);
+    const deposit = calculateDepositAmount(total);
+    const remaining = calculateRemainingAmount(total);
 
-    document.getElementById("confirmPricePerDay").innerText = formatMoney(pricePerDay) + " VND";
-    document.getElementById("confirmDays").innerText = days + " ngày";
-    document.getElementById("confirmTotal").innerText = formatMoney(total) + " VND";
+    const confirmStartDate = document.getElementById("confirmStartDate");
+    const confirmEndDate = document.getElementById("confirmEndDate");
+    const confirmPricePerDay = document.getElementById("confirmPricePerDay");
+    const confirmDays = document.getElementById("confirmDays");
+    const confirmTotal = document.getElementById("confirmTotal");
 
-    document.getElementById("confirmPricePerDay2").innerText = formatMoney(pricePerDay) + " VND";
-    document.getElementById("confirmDays2").innerText = days + " ngày";
+    const confirmPricePerDay2 = document.getElementById("confirmPricePerDay2");
+    const confirmDays2 = document.getElementById("confirmDays2");
+    const confirmSubtotal = document.getElementById("confirmSubtotal");
+    const confirmDiscount = document.getElementById("confirmDiscount");
+    const confirmVoucherCode = document.getElementById("confirmVoucherCode");
+    const confirmTotal2 = document.getElementById("confirmTotal2");
+    const confirmDeposit = document.getElementById("confirmDeposit");
+    const confirmRemaining = document.getElementById("confirmRemaining");
+    const confirmDiscountCorner = document.getElementById("confirmDiscountCorner");
+    const confirmNoteBox = document.getElementById("confirmNoteBox");
 
-    document.getElementById("confirmSubtotal").innerText = subtotalText;
-    document.getElementById("confirmDiscount").innerText = discountText;
-    document.getElementById("confirmVoucherCode").innerText = voucherCodeText;
+    if (confirmStartDate) {
+        confirmStartDate.innerText = formatDateVN(startValue);
+    }
+    if (confirmEndDate) {
+        confirmEndDate.innerText = formatDateVN(endValue);
+    }
 
-    document.getElementById("confirmTotal2").innerText = formatMoney(total) + " VND";
-    document.getElementById("confirmNoteBox").innerText = noteValue || "Không có ghi chú";
+    if (confirmPricePerDay) {
+        confirmPricePerDay.innerText = formatMoney(pricePerDay) + " VND";
+    }
+    if (confirmDays) {
+        confirmDays.innerText = days + " ngày";
+    }
+    if (confirmTotal) {
+        confirmTotal.innerText = formatMoney(total) + " VND";
+    }
+
+    if (confirmPricePerDay2) {
+        confirmPricePerDay2.innerText = formatMoney(pricePerDay) + " VND";
+    }
+    if (confirmDays2) {
+        confirmDays2.innerText = days + " ngày";
+    }
+    if (confirmSubtotal) {
+        confirmSubtotal.innerText = subtotalText;
+    }
+    if (confirmDiscount) {
+        confirmDiscount.innerText = discountText;
+    }
+    if (confirmVoucherCode) {
+        confirmVoucherCode.innerText = voucherCodeText;
+    }
+    if (confirmTotal2) {
+        confirmTotal2.innerText = formatMoney(total) + " VND";
+    }
+    if (confirmDeposit) {
+        confirmDeposit.innerText = formatMoney(deposit) + " VND";
+    }
+    if (confirmRemaining) {
+        confirmRemaining.innerText = formatMoney(remaining) + " VND";
+    }
+    if (confirmDiscountCorner) {
+        confirmDiscountCorner.innerText = discountText;
+    }
+    if (confirmNoteBox) {
+        confirmNoteBox.innerText = noteValue || "Không có ghi chú";
+    }
 }
 
 // ================= MAIN =================
