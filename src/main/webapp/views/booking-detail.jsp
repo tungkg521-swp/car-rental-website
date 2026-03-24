@@ -205,6 +205,21 @@
                                     </form>
                                 </c:if>
 
+                                <c:if test="${booking.status == 'DEPOSIT_PAID'}">
+                                    <form method="post"
+                                          action="${pageContext.request.contextPath}/booking"
+                                          class="inline-form">
+
+                                        <input type="hidden" name="action" value="cancel"/>
+                                        <input type="hidden" name="bookingId" value="${booking.bookingId}"/>
+
+                                        <button type="submit"
+                                                class="btn btn-danger"
+                                                onclick="return confirm('Are you sure you want to cancel this booking?');">
+                                            Cancel Booking
+                                        </button>
+                                    </form>
+                                </c:if>
                                 <c:if test="${booking.status == 'CANCELLED'}">
                                     <form method="post"
                                           action="${pageContext.request.contextPath}/booking"
