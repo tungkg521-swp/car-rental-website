@@ -5,7 +5,6 @@
  */
 package Controllers;
 
-
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -27,11 +26,6 @@ import models.CarModel;
 import models.CustomerModel;
 
 import models.VoucherModel;
-
-
-
-
-
 
 import service.BookingService;
 
@@ -267,9 +261,8 @@ public class BookingServlet extends HttpServlet {
         String startDateRaw = request.getParameter("startDate");
         String endDateRaw = request.getParameter("endDate");
         String note = request.getParameter("note");
-        String voucherIdRaw = request.getParameter("voucherId");
-        
-        
+        //String voucherIdRaw = request.getParameter("voucherId");
+
         System.out.println("carId = " + carIdRaw);
         System.out.println("startDate = " + startDateRaw);
         System.out.println("endDate = " + endDateRaw);
@@ -285,15 +278,18 @@ public class BookingServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/cars");
             return;
         }
-        
-        int voucherId;
-        try {
-            voucherId = Integer.parseInt(voucherIdRaw);
-        } catch (NumberFormatException e) {
-            response.sendRedirect(request.getContextPath() + "/cars");
-            return;
-        }
 
+        Integer voucherId = null;
+        String voucherIdRaw = request.getParameter("voucherId");
+
+        if (voucherIdRaw != null && !voucherIdRaw.trim().isEmpty()) {
+            try {
+                voucherId = Integer.parseInt(voucherIdRaw);
+            } catch (NumberFormatException e) {
+                response.sendRedirect(request.getContextPath() + "/cars");
+                return;
+            }
+        }
         Date startDate;
         Date endDate;
 
@@ -304,8 +300,6 @@ public class BookingServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/booking?carId=" + carId);
             return;
         }
-        
-        
 
         // Không cho thuê ngày trong quá khứSystem.currentTimeMillis()
         Date today = Date.valueOf(LocalDate.now());
@@ -342,18 +336,23 @@ public class BookingServlet extends HttpServlet {
         }
 
         CarService carService = new CarService();
+
         CarModel car = carService.getCarById(carId);
-        carService.updateCarStatus(carId, "BOOKED");
+        //carService.updateCarStatus(carId, "BOOKED");
         if (car == null || !"AVAILABLE".equalsIgnoreCase(car.getStatus())) {
             response.sendRedirect(request.getContextPath() + "/cars");
             return;
         }
-        
-        VoucherService voucherService = new VoucherService();
-        voucherService.updateVoucherQuantity(voucherId);
 
         String totalPriceRaw = request.getParameter("totalEstimatedPrice");
-        BigDecimal totalPrice = new BigDecimal(totalPriceRaw);
+        BigDecimal totalPrice;
+
+        try {
+            totalPrice = new BigDecimal(totalPriceRaw);
+        } catch (Exception e) {
+            response.sendRedirect(request.getContextPath() + "/booking?carId=" + carId);
+            return;
+        }
 
         BookingModel booking = new BookingModel();
         booking.setCustomerId(customer.getCustomerId());
@@ -364,9 +363,15 @@ public class BookingServlet extends HttpServlet {
         booking.setStatus("PENDING");
         booking.setNote(note);
         booking.setTotalEstimatedPrice(totalPrice);
+        booking.setVoucherId(voucherId);
 
         try {
             bookingService.createBooking(booking);
+
+            if (voucherId != null) {
+                VoucherService voucherService = new VoucherService();
+                voucherService.updateVoucherQuantity(voucherId);
+            }
 
             session.setAttribute("LAST_BOOKING", booking.getBookingId());
             response.sendRedirect(
