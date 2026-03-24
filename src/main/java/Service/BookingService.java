@@ -60,21 +60,36 @@ public class BookingService {
         return bookingDAO.findById(bookingId, customerId);
     }
 
-    public boolean cancelBooking(int bookingId, int customerId) {
+public boolean cancelBooking(int bookingId, int customerId) {
 
-        BookingModel booking = bookingDAO.findById(bookingId, customerId);
+    BookingModel booking = bookingDAO.findById(bookingId, customerId);
 
-        if (booking == null) {
-            return false;
-        }
-
-        // Chỉ cho cancel khi PENDING
-        if (!"PENDING".equalsIgnoreCase(booking.getStatus())) {
-            return false;
-        }
-
-        return bookingDAO.updateStatus(bookingId, "CANCELLED");
+    if (booking == null) {
+        return false;
     }
+
+    // Chỉ cho customer cancel khi booking còn PENDING
+    if (!"PENDING".equalsIgnoreCase(booking.getStatus())) {
+        return false;
+    }
+
+    boolean updated = bookingDAO.updateStatus(bookingId, "CANCELLED");
+
+    if (!updated) {
+        return false;
+    }
+
+    // Vì booking PENDING chưa khóa xe nên thường không cần mở lại xe
+    // Nhưng nếu sau này flow thay đổi thì có thể bật dòng dưới:
+     carDAO.updateStatus(booking.getCarId(), "AVAILABLE");
+
+    // Nếu sau này có tăng used_count khi tạo booking thì hoàn lại voucher ở đây
+    // if (booking.getVoucherId() != null) {
+    //     voucherDAO.decreaseUsedCount(booking.getVoucherId());
+    // }
+
+    return true;
+}
 
     public List<BookingModel> findAllBookings() {
         return bookingDAO.findAllBookings();

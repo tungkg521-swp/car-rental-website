@@ -35,6 +35,8 @@ public class BookingModel {
     // ===== CONSTRUCTOR =====
     public BookingModel() {
     }
+    
+    
 
     // ===== GETTERS & SETTERS =====
     public int getBookingId() {

@@ -111,23 +111,12 @@ public class StaffContractController extends HttpServlet {
                     = Integer.parseInt(request.getParameter("contractId"));
 
             if ("activate".equals(action)) {
-
                 contractService.updateContractStatus(contractId, "ACTIVE");
 
-                ContractModel contract = contractService.getContractById(contractId);
-
-                carDAO.updateStatus(contract.getCarId(), "RENTED");
             } else if ("complete".equals(action)) {
-
-                int bookingId
-                        = Integer.parseInt(request.getParameter("bookingId"));
                 contractService.updateContractStatus(contractId, "COMPLETED");
-                bookingService.updateBookingStatus(bookingId, "COMPLETED");
-                ContractModel contract = contractService.getContractById(contractId);
 
-                carDAO.updateStatus(contract.getCarId(), "AVAILABLE");
             } else if ("cancel".equals(action)) {
-
                 contractService.updateContractStatus(contractId, "CANCELLED");
             }
 
