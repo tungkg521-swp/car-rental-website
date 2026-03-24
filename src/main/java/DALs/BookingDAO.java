@@ -20,27 +20,34 @@ import models.BookingModel;
  */
 public class BookingDAO extends DBContext {
 
-    public void insert(BookingModel booking) throws SQLException {
+public void insert(BookingModel booking) throws SQLException {
 
-        String sql = """
-            INSERT INTO booking
-            (customer_id, car_id, booking_date, start_date, end_date, status, note, total_estimated_price)
-            VALUES (?, ?, GETDATE(), ?, ?, ?, ?, ?)
-        """;
+    String sql = """
+        INSERT INTO booking
+        (customer_id, car_id, voucher_id, booking_date, start_date, end_date, status, note, total_estimated_price)
+        VALUES (?, ?, ?, GETDATE(), ?, ?, ?, ?, ?)
+    """;
 
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
-            ps.setInt(1, booking.getCustomerId());
-            ps.setInt(2, booking.getCarId());
-            ps.setDate(3, booking.getStartDate());
-            ps.setDate(4, booking.getEndDate());
-            ps.setString(5, booking.getStatus());
-            ps.setString(6, booking.getNote());
-            ps.setBigDecimal(7, booking.getTotalEstimatedPrice());
+        ps.setInt(1, booking.getCustomerId());
+        ps.setInt(2, booking.getCarId());
 
-            ps.executeUpdate();
+        if (booking.getVoucherId() != null) {
+            ps.setInt(3, booking.getVoucherId());
+        } else {
+            ps.setNull(3, java.sql.Types.INTEGER);
         }
+
+        ps.setDate(4, booking.getStartDate());
+        ps.setDate(5, booking.getEndDate());
+        ps.setString(6, booking.getStatus());
+        ps.setString(7, booking.getNote());
+        ps.setBigDecimal(8, booking.getTotalEstimatedPrice());
+
+        ps.executeUpdate();
     }
+}
 
     public BookingModel getById(int bookingId) {
         String sql = """
@@ -275,27 +282,28 @@ public class BookingDAO extends DBContext {
     public BookingModel findById(int bookingId) {
 
         String sql = """
-        SELECT 
-            b.booking_id,
-            b.booking_date,
-            b.start_date,
-            b.end_date,
-            b.status,
-            b.note,
-            b.total_estimated_price,
+    SELECT 
+        b.booking_id,
+        b.booking_date,
+        b.start_date,
+        b.end_date,
+        b.status,
+        b.note,
+        b.total_estimated_price,
 
-            c.full_name,
-            c.email,
-            c.phone,
+        c.full_name,
+        c.email,
+        c.phone,
 
-            car.model_name,
-            car.price_per_day
+        car.model_name,
+        car.price_per_day,
+        car.image_folder
 
-        FROM booking b
-        JOIN customer c ON b.customer_id = c.customer_id
-        JOIN cars car ON b.car_id = car.car_id
-        WHERE b.booking_id = ?
-    """;
+    FROM booking b
+    JOIN customer c ON b.customer_id = c.customer_id
+    JOIN cars car ON b.car_id = car.car_id
+    WHERE b.booking_id = ?
+""";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
@@ -320,6 +328,7 @@ public class BookingDAO extends DBContext {
 
                 booking.setCarName(rs.getString("model_name"));
                 booking.setPricePerDay(rs.getBigDecimal("price_per_day"));
+                booking.setImageFolder(rs.getString("image_folder"));
 
                 return booking;
             }
