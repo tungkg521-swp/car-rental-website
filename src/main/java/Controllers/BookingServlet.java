@@ -1,5 +1,9 @@
 package Controllers;
 
+
+
+
+
 import DALs.CustomerDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -17,6 +21,7 @@ import models.BookingModel;
 import models.CarModel;
 import models.CustomerModel;
 import models.VoucherModel;
+
 import service.BookingService;
 import service.CarService;
 import service.VoucherService;
@@ -190,10 +195,14 @@ public class BookingServlet extends HttpServlet {
         String startDateRaw = request.getParameter("startDate");
         String endDateRaw = request.getParameter("endDate");
         String note = request.getParameter("note");
-        String voucherIdRaw = request.getParameter("voucherId");
-        String totalPriceRaw = request.getParameter("totalEstimatedPrice");
 
-        if (carIdRaw == null || startDateRaw == null || endDateRaw == null || totalPriceRaw == null) {
+        //String voucherIdRaw = request.getParameter("voucherId");
+
+        System.out.println("carId = " + carIdRaw);
+        System.out.println("startDate = " + startDateRaw);
+        System.out.println("endDate = " + endDateRaw);
+        if (carIdRaw == null || startDateRaw == null || endDateRaw == null) {
+
             response.sendRedirect(request.getContextPath() + "/cars");
             return;
         }
@@ -206,15 +215,18 @@ public class BookingServlet extends HttpServlet {
             return;
         }
 
+
         Integer voucherId = null;
+        String voucherIdRaw = request.getParameter("voucherId");
+
         if (voucherIdRaw != null && !voucherIdRaw.trim().isEmpty()) {
             try {
                 voucherId = Integer.parseInt(voucherIdRaw);
             } catch (NumberFormatException e) {
-                voucherId = null;
+                response.sendRedirect(request.getContextPath() + "/cars");
+                return;
             }
         }
-
         Date startDate;
         Date endDate;
 
@@ -259,23 +271,25 @@ public class BookingServlet extends HttpServlet {
         }
 
         CarService carService = new CarService();
+
         CarModel car = carService.getCarById(carId);
+
+        //carService.updateCarStatus(carId, "BOOKED");
 
         if (car == null || !"AVAILABLE".equalsIgnoreCase(car.getStatus())) {
             response.sendRedirect(request.getContextPath() + "/cars");
             return;
         }
 
+
+        String totalPriceRaw = request.getParameter("totalEstimatedPrice");
         BigDecimal totalPrice;
+
         try {
             totalPrice = new BigDecimal(totalPriceRaw);
-        } catch (NumberFormatException e) {
-            response.sendRedirect(request.getContextPath() + "/booking?action=create&carId=" + carId);
-            return;
-        }
+        } catch (Exception e) {
+            response.sendRedirect(request.getContextPath() + "/booking?carId=" + carId);
 
-        if (totalPrice.compareTo(BigDecimal.ZERO) <= 0) {
-            response.sendRedirect(request.getContextPath() + "/booking?action=create&carId=" + carId);
             return;
         }
 
@@ -289,15 +303,19 @@ public class BookingServlet extends HttpServlet {
         booking.setStatus("PENDING_PAYMENT");
         booking.setNote(note);
         booking.setTotalEstimatedPrice(totalPrice);
+        booking.setVoucherId(voucherId);
 
         try {
             int bookingId = bookingService.createBooking(booking);
 
-            // Giữ xe ngay khi khách xác nhận đặt
-            carService.updateCarStatus(carId, "BOOKED");
-            System.out.println("Redirect payment URL = "
-                    + request.getContextPath()
-                    + "/payment?action=create&bookingId=" + bookingId);
+
+            if (voucherId != null) {
+                VoucherService voucherService = new VoucherService();
+                voucherService.updateVoucherQuantity(voucherId);
+            }
+
+            session.setAttribute("LAST_BOOKING", booking.getBookingId());
+
             response.sendRedirect(
                     request.getContextPath()
                     + "/payment?action=create&bookingId=" + bookingId

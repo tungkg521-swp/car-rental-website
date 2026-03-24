@@ -14,6 +14,7 @@ import models.BookingModel;
 
 public class BookingDAO extends DBContext {
 
+
     public int insert(BookingModel booking) throws SQLException {
 
         String sql = """
@@ -52,6 +53,7 @@ public class BookingDAO extends DBContext {
 
         throw new SQLException("Không lấy được booking_id sau khi tạo booking.");
     }
+
 
     public BookingModel getById(int bookingId) {
         String sql = """
@@ -140,31 +142,36 @@ public class BookingDAO extends DBContext {
         return list;
     }
 
-    public BookingModel findById(int bookingId, int customerId) {
+     public BookingModel findById(int bookingId, int customerId) {
 
         String sql = """
         SELECT 
             b.booking_id,
-            b.car_id,
             b.booking_date,
             b.start_date,
             b.end_date,
             b.status,
             b.note,
             b.total_estimated_price,
-            b.voucher_id,
+
             c.model_name,
             c.image_folder,
+
             cus.full_name AS customer_name,
             cus.email,
             cus.phone,
+
             rc.contract_status
+
         FROM booking b
         JOIN cars c ON b.car_id = c.car_id
         JOIN customer cus ON b.customer_id = cus.customer_id
-        LEFT JOIN rental_contract rc ON b.booking_id = rc.booking_id
+
+        LEFT JOIN rental_contract rc
+        ON b.booking_id = rc.booking_id
+
         WHERE b.booking_id = ?
-          AND b.customer_id = ?
+        AND b.customer_id = ?
     """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -175,6 +182,7 @@ public class BookingDAO extends DBContext {
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
+
                 BookingModel booking = new BookingModel();
 
                 booking.setBookingId(rs.getInt("booking_id"));
@@ -183,19 +191,19 @@ public class BookingDAO extends DBContext {
                 booking.setEndDate(rs.getDate("end_date"));
                 booking.setStatus(rs.getString("status"));
                 booking.setNote(rs.getString("note"));
-                booking.setTotalEstimatedPrice(rs.getBigDecimal("total_estimated_price"));
-                booking.setCarId(rs.getInt("car_id"));
-                int voucherId = rs.getInt("voucher_id");
-                if (!rs.wasNull()) {
-                    booking.setVoucherId(voucherId);
-                }
+
+                booking.setTotalEstimatedPrice(
+                        rs.getBigDecimal("total_estimated_price"));
 
                 booking.setCarName(rs.getString("model_name"));
                 booking.setImageFolder(rs.getString("image_folder"));
+
                 booking.setCustomerName(rs.getString("customer_name"));
                 booking.setCustomerEmail(rs.getString("email"));
                 booking.setCustomerPhone(rs.getString("phone"));
-                booking.setContractStatus(rs.getString("contract_status"));
+
+                booking.setContractStatus(
+                        rs.getString("contract_status"));
 
                 return booking;
             }
@@ -206,6 +214,7 @@ public class BookingDAO extends DBContext {
 
         return null;
     }
+
 
     public boolean updateStatus(int bookingId, String status) {
 
@@ -264,29 +273,31 @@ public class BookingDAO extends DBContext {
         return list;
     }
 
-    public BookingModel findById(int bookingId) {
+      public BookingModel findById(int bookingId) {
 
         String sql = """
-        SELECT 
-            b.booking_id,
-            b.car_id,
-            b.booking_date,
-            b.start_date,
-            b.end_date,
-            b.status,
-            b.note,
-            b.total_estimated_price,
-            b.voucher_id,
-            c.full_name,
-            c.email,
-            c.phone,
-            car.model_name,
-            car.price_per_day
-        FROM booking b
-        JOIN customer c ON b.customer_id = c.customer_id
-        JOIN cars car ON b.car_id = car.car_id
-        WHERE b.booking_id = ?
-    """;
+    SELECT 
+        b.booking_id,
+        b.booking_date,
+        b.start_date,
+        b.end_date,
+        b.status,
+        b.note,
+        b.total_estimated_price,
+
+        c.full_name,
+        c.email,
+        c.phone,
+
+        car.model_name,
+        car.price_per_day,
+        car.image_folder
+
+    FROM booking b
+    JOIN customer c ON b.customer_id = c.customer_id
+    JOIN cars car ON b.car_id = car.car_id
+    WHERE b.booking_id = ?
+""";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
@@ -294,6 +305,7 @@ public class BookingDAO extends DBContext {
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
+
                 BookingModel booking = new BookingModel();
 
                 booking.setBookingId(rs.getInt("booking_id"));
@@ -303,17 +315,14 @@ public class BookingDAO extends DBContext {
                 booking.setStatus(rs.getString("status"));
                 booking.setNote(rs.getString("note"));
                 booking.setTotalEstimatedPrice(rs.getBigDecimal("total_estimated_price"));
-                booking.setCarId(rs.getInt("car_id"));
-                int voucherId = rs.getInt("voucher_id");
-                if (!rs.wasNull()) {
-                    booking.setVoucherId(voucherId);
-                }
 
                 booking.setCustomerName(rs.getString("full_name"));
                 booking.setCustomerEmail(rs.getString("email"));
                 booking.setCustomerPhone(rs.getString("phone"));
+
                 booking.setCarName(rs.getString("model_name"));
                 booking.setPricePerDay(rs.getBigDecimal("price_per_day"));
+                booking.setImageFolder(rs.getString("image_folder"));
 
                 return booking;
             }
@@ -324,6 +333,7 @@ public class BookingDAO extends DBContext {
 
         return null;
     }
+
 
     public int getCompletedBooking(int customerId, int carId) {
 

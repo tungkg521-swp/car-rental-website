@@ -8,12 +8,20 @@
         <meta charset="UTF-8">
         <title>Manage Reviews</title>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/staff.css">
+
+        <link href="${pageContext.request.contextPath}/assets/css/admin.css" rel="stylesheet" type="text/css"/>
+        <script>
+            window.contextPath = '${pageContext.request.contextPath}';
+        </script>
+        <script src="${pageContext.request.contextPath}/assets/js/report.js"></script>
+
     </head>
     <body>
 
         <div class="staff-layout">
 
             <%@ include file="sidebar.jsp" %>
+
 
             <div class="staff-content">
                 <h1 class="dashboard-title">Manage Reviews</h1>

@@ -141,7 +141,7 @@
 
                     <div class="detail-actions">
 
-                        <c:if test="${booking.status == 'PENDING'}">
+                        <c:if test="${booking.status == 'DEPOSIT_PAID'}">
                             <form action="${pageContext.request.contextPath}/staff/bookings" method="post">
                                 <input type="hidden" name="bookingId" value="${booking.bookingId}">
 
