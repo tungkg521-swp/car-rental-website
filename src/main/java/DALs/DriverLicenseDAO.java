@@ -3,10 +3,7 @@ package DALs;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-
 import Utils.DBContext;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import models.DriverLicenseModel;
@@ -28,23 +25,20 @@ public class DriverLicenseDAO extends DBContext {
                 DriverLicenseModel dl = new DriverLicenseModel();
 
                 dl.setLicenseId(rs.getInt("license_id"));
-                dl.setCustomerId(customerId);
+                dl.setCustomerId(rs.getInt("customer_id"));
                 dl.setLicenseNumber(rs.getString("license_number"));
                 dl.setFullName(rs.getString("full_name"));
 
-                // ===== DOB =====
                 Date dob = rs.getDate("dob");
                 if (dob != null) {
                     dl.setDob(dob.toLocalDate());
                 }
 
-                // ===== ISSUE DATE =====
                 Date issue = rs.getDate("issue_date");
                 if (issue != null) {
                     dl.setIssueDate(issue.toLocalDate());
                 }
 
-                // ===== EXPIRY DATE =====
                 Date expiry = rs.getDate("expiry_date");
                 if (expiry != null) {
                     dl.setExpiryDate(expiry.toLocalDate());
@@ -53,6 +47,21 @@ public class DriverLicenseDAO extends DBContext {
                 dl.setImageFront(rs.getString("image_front"));
                 dl.setImageBack(rs.getString("image_back"));
                 dl.setStatus(rs.getString("status"));
+
+                // ===== NEW VERIFY IMAGES =====
+                dl.setSelfieImage(rs.getString("selfie_img"));
+                dl.setNationalIdFront(rs.getString("id_front_img"));
+                dl.setNationalIdBack(rs.getString("id_back_img"));
+
+                java.sql.Timestamp created = rs.getTimestamp("created_at");
+                if (created != null) {
+                    dl.setCreatedAt(created.toLocalDateTime());
+                }
+
+                java.sql.Timestamp updated = rs.getTimestamp("updated_at");
+                if (updated != null) {
+                    dl.setUpdatedAt(updated.toLocalDateTime());
+                }
 
                 return dl;
             }
@@ -67,10 +76,10 @@ public class DriverLicenseDAO extends DBContext {
     // ================= INSERT =================
     public int insert(DriverLicenseModel dl) throws Exception {
 
-        // ❌ BỎ status='PENDING'
         String sql = "INSERT INTO driver_license "
-                + "(customer_id, license_number, full_name, dob, issue_date, expiry_date, image_front, image_back) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                + "(customer_id, license_number, full_name, dob, issue_date, expiry_date, "
+                + "image_front, image_back, selfie_img, id_front_img, id_back_img) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         PreparedStatement ps = connection.prepareStatement(sql);
 
@@ -78,21 +87,18 @@ public class DriverLicenseDAO extends DBContext {
         ps.setString(2, dl.getLicenseNumber());
         ps.setString(3, dl.getFullName());
 
-        // ===== DOB =====
         if (dl.getDob() != null) {
             ps.setDate(4, Date.valueOf(dl.getDob()));
         } else {
             ps.setNull(4, java.sql.Types.DATE);
         }
 
-        // ===== ISSUE DATE =====
         if (dl.getIssueDate() != null) {
             ps.setDate(5, Date.valueOf(dl.getIssueDate()));
         } else {
             ps.setNull(5, java.sql.Types.DATE);
         }
 
-        // ===== EXPIRY DATE =====
         if (dl.getExpiryDate() != null) {
             ps.setDate(6, Date.valueOf(dl.getExpiryDate()));
         } else {
@@ -101,6 +107,9 @@ public class DriverLicenseDAO extends DBContext {
 
         ps.setString(7, dl.getImageFront());
         ps.setString(8, dl.getImageBack());
+        ps.setString(9, dl.getSelfieImage());
+        ps.setString(10, dl.getNationalIdFront());
+        ps.setString(11, dl.getNationalIdBack());
 
         return ps.executeUpdate();
     }
@@ -108,10 +117,10 @@ public class DriverLicenseDAO extends DBContext {
     // ================= UPDATE =================
     public int update(DriverLicenseModel dl) throws Exception {
 
-        // ❌ BỎ status='PENDING'
         String sql = "UPDATE driver_license SET "
                 + "license_number=?, full_name=?, dob=?, issue_date=?, expiry_date=?, "
-                + "image_front=?, image_back=?, updated_at=GETDATE() "
+                + "image_front=?, image_back=?, selfie_img=?, id_front_img=?, id_back_img=?, "
+                + "updated_at=GETDATE() "
                 + "WHERE customer_id=?";
 
         PreparedStatement ps = connection.prepareStatement(sql);
@@ -119,21 +128,18 @@ public class DriverLicenseDAO extends DBContext {
         ps.setString(1, dl.getLicenseNumber());
         ps.setString(2, dl.getFullName());
 
-        // ===== DOB =====
         if (dl.getDob() != null) {
             ps.setDate(3, Date.valueOf(dl.getDob()));
         } else {
             ps.setNull(3, java.sql.Types.DATE);
         }
 
-        // ===== ISSUE DATE =====
         if (dl.getIssueDate() != null) {
             ps.setDate(4, Date.valueOf(dl.getIssueDate()));
         } else {
             ps.setNull(4, java.sql.Types.DATE);
         }
 
-        // ===== EXPIRY DATE =====
         if (dl.getExpiryDate() != null) {
             ps.setDate(5, Date.valueOf(dl.getExpiryDate()));
         } else {
@@ -142,12 +148,15 @@ public class DriverLicenseDAO extends DBContext {
 
         ps.setString(6, dl.getImageFront());
         ps.setString(7, dl.getImageBack());
-        ps.setInt(8, dl.getCustomerId());
+        ps.setString(8, dl.getSelfieImage());
+        ps.setString(9, dl.getNationalIdFront());
+        ps.setString(10, dl.getNationalIdBack());
+        ps.setInt(11, dl.getCustomerId());
 
         return ps.executeUpdate();
     }
 
-    // ================= UPDATE STATUS (NEW) =================
+    // ================= UPDATE STATUS BY CUSTOMER =================
     public void updateStatusCus(int customerId, String status) throws Exception {
 
         String sql = "UPDATE driver_license "
@@ -155,111 +164,115 @@ public class DriverLicenseDAO extends DBContext {
                 + "WHERE customer_id=?";
 
         PreparedStatement ps = connection.prepareStatement(sql);
-
         ps.setString(1, status);
         ps.setInt(2, customerId);
-
         ps.executeUpdate();
     }
-    
-    // 1) List all REQUESTED
+
+    // ================= LIST REQUESTED =================
     public List<DriverLicenseModel> getRequestedLicenses() {
 
-    List<DriverLicenseModel> list = new ArrayList<>();
+        List<DriverLicenseModel> list = new ArrayList<>();
 
-    String sql = "SELECT license_id, customer_id, license_number, full_name, status, created_at "
-            + "FROM driver_license "
-            + "WHERE status = 'REQUESTED' "
-            + "ORDER BY created_at DESC";
+        String sql = "SELECT license_id, customer_id, license_number, full_name, status, created_at "
+                + "FROM driver_license "
+                + "WHERE status = 'REQUESTED' "
+                + "ORDER BY created_at DESC";
 
-    try {
-        PreparedStatement ps = connection.prepareStatement(sql);
-        ResultSet rs = ps.executeQuery();
+        try {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
 
-        while (rs.next()) {
+            while (rs.next()) {
 
-            DriverLicenseModel dl = new DriverLicenseModel();
-            dl.setLicenseId(rs.getInt("license_id"));
-            dl.setCustomerId(rs.getInt("customer_id"));
-            dl.setLicenseNumber(rs.getString("license_number"));
-            dl.setFullName(rs.getString("full_name"));
-            dl.setStatus(rs.getString("status"));
-            java.sql.Timestamp ts = rs.getTimestamp("created_at");
-if (ts != null) {
-    dl.setCreatedAt(ts.toLocalDateTime());
-}
+                DriverLicenseModel dl = new DriverLicenseModel();
+                dl.setLicenseId(rs.getInt("license_id"));
+                dl.setCustomerId(rs.getInt("customer_id"));
+                dl.setLicenseNumber(rs.getString("license_number"));
+                dl.setFullName(rs.getString("full_name"));
+                dl.setStatus(rs.getString("status"));
 
-            list.add(dl);
+                java.sql.Timestamp ts = rs.getTimestamp("created_at");
+                if (ts != null) {
+                    dl.setCreatedAt(ts.toLocalDateTime());
+                }
+
+                list.add(dl);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-    } catch (Exception e) {
-        e.printStackTrace();
+        return list;
     }
 
-    return list;
-}
-
-    // 2) Get by id (detail)
-    // 2) Get by id (detail)
+    // ================= GET BY ID =================
     public DriverLicenseModel getById(int licenseId) {
 
-    String sql = "SELECT * FROM driver_license WHERE license_id = ?";
+        String sql = "SELECT * FROM driver_license WHERE license_id = ?";
 
-    try {
+        try {
 
-        PreparedStatement ps = connection.prepareStatement(sql);
-        ps.setInt(1, licenseId);
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, licenseId);
 
-        ResultSet rs = ps.executeQuery();
+            ResultSet rs = ps.executeQuery();
 
-        if (rs.next()) {
+            if (rs.next()) {
 
-            DriverLicenseModel dl = new DriverLicenseModel();
+                DriverLicenseModel dl = new DriverLicenseModel();
 
-            dl.setLicenseId(rs.getInt("license_id"));
-            dl.setCustomerId(rs.getInt("customer_id"));
-            dl.setLicenseNumber(rs.getString("license_number"));
-            dl.setFullName(rs.getString("full_name"));
+                dl.setLicenseId(rs.getInt("license_id"));
+                dl.setCustomerId(rs.getInt("customer_id"));
+                dl.setLicenseNumber(rs.getString("license_number"));
+                dl.setFullName(rs.getString("full_name"));
 
-            Date dob = rs.getDate("dob");
-            if (dob != null) {
-                dl.setDob(dob.toLocalDate());
+                Date dob = rs.getDate("dob");
+                if (dob != null) {
+                    dl.setDob(dob.toLocalDate());
+                }
+
+                Date issue = rs.getDate("issue_date");
+                if (issue != null) {
+                    dl.setIssueDate(issue.toLocalDate());
+                }
+
+                Date expiry = rs.getDate("expiry_date");
+                if (expiry != null) {
+                    dl.setExpiryDate(expiry.toLocalDate());
+                }
+
+                dl.setImageFront(rs.getString("image_front"));
+                dl.setImageBack(rs.getString("image_back"));
+                dl.setStatus(rs.getString("status"));
+
+                // ===== NEW VERIFY IMAGES =====
+                dl.setSelfieImage(rs.getString("selfie_img"));
+                dl.setNationalIdFront(rs.getString("id_front_img"));
+                dl.setNationalIdBack(rs.getString("id_back_img"));
+
+                java.sql.Timestamp created = rs.getTimestamp("created_at");
+                if (created != null) {
+                    dl.setCreatedAt(created.toLocalDateTime());
+                }
+
+                java.sql.Timestamp updated = rs.getTimestamp("updated_at");
+                if (updated != null) {
+                    dl.setUpdatedAt(updated.toLocalDateTime());
+                }
+
+                return dl;
             }
 
-            Date issue = rs.getDate("issue_date");
-            if (issue != null) {
-                dl.setIssueDate(issue.toLocalDate());
-            }
-
-            Date expiry = rs.getDate("expiry_date");
-            if (expiry != null) {
-                dl.setExpiryDate(expiry.toLocalDate());
-            }
-
-            dl.setImageFront(rs.getString("image_front"));
-            dl.setImageBack(rs.getString("image_back"));
-            dl.setStatus(rs.getString("status"));
-            java.sql.Timestamp created = rs.getTimestamp("created_at");
-if (created != null) {
-    dl.setCreatedAt(created.toLocalDateTime());
-}
-
-java.sql.Timestamp updated = rs.getTimestamp("updated_at");
-if (updated != null) {
-    dl.setUpdatedAt(updated.toLocalDateTime());
-}
-
-            return dl;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-    } catch (Exception e) {
-        e.printStackTrace();
+        return null;
     }
 
-    return null;
-}
-
-    // 3) Update status (Approve / Reject)
+    // ================= UPDATE STATUS BY LICENSE =================
     public boolean updateStatus(int licenseId, String status) {
         String sql = """
             UPDATE driver_license

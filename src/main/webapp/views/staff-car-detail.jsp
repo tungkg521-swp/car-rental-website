@@ -10,60 +10,64 @@
           href="${pageContext.request.contextPath}/assets/css/staff.css">
 </head>
 
-<body class="detail-body">
+<body>
 
-<div class="car-detail-wrapper">
+<div class="staff-layout">
 
-    <div class="car-detail-container">
+    <%@ include file="sidebar.jsp" %>
 
-        <!-- IMAGE -->
-        <div class="car-detail-image">
-            <img src="${pageContext.request.contextPath}/assets/images/cars/${car.imageFolder}/${car.imageFolder}_1.jpg"
-                 alt="${car.modelName}">
-        </div>
+    <div class="staff-content">
 
-        <!-- INFO -->
-        <div class="car-detail-info">
+        <div class="car-detail-wrapper">
 
-            <h1>${car.brandName} ${car.modelName}</h1>
+            <div class="car-detail-container">
 
-            <span class="status-badge ${car.status.toLowerCase()}">
-                ${car.status}
-            </span>
+                <div class="car-detail-image">
+                    <img src="${pageContext.request.contextPath}/assets/images/cars/${car.imageFolder}/${car.imageFolder}_1.jpg"
+                         alt="${car.modelName}">
+                </div>
 
-            <div class="price">
-                $${car.pricePerDay} / day
+                <div class="car-detail-info">
+
+                    <h1>${car.brandName} ${car.modelName}</h1>
+
+                    <span class="status-badge ${car.status.toLowerCase()}">
+                        ${car.status}
+                    </span>
+
+                    <div class="price">
+                        $${car.pricePerDay} / day
+                    </div>
+
+                    <div class="specs">
+                        <div><strong>Year:</strong> ${car.modelYear}</div>
+                        <div><strong>Seats:</strong> ${car.seatCount}</div>
+                        <div><strong>Fuel:</strong> ${car.fuelType}</div>
+                        <div><strong>Transmission:</strong> ${car.transmission}</div>
+                        <div><strong>Type:</strong> ${car.typeName}</div>
+                    </div>
+
+                    <div class="detail-actions">
+                        <a href="${pageContext.request.contextPath}/staff/cars"
+                           class="btn-back">Back</a>
+
+                        <a href="${pageContext.request.contextPath}/staff/cars?action=edit&id=${car.carId}"
+                           class="btn-edit">Edit</a>
+                    </div>
+
+                </div>
+
             </div>
 
-            <div class="specs">
-                <div><strong>Year:</strong> ${car.modelYear}</div>
-                <div><strong>Seats:</strong> ${car.seatCount}</div>
-                <div><strong>Fuel:</strong> ${car.fuelType}</div>
-                <div><strong>Transmission:</strong> ${car.transmission}</div>
-                <div><strong>Type:</strong> ${car.typeName}</div>
-            </div>
-
-            <div class="detail-actions">
-                <a href="${pageContext.request.contextPath}/staff/cars"
-                   class="btn-back">Back</a>
-
-                <a href="${pageContext.request.contextPath}/staff/cars?action=edit&id=${car.carId}"
-                   class="btn-edit">Edit</a>
+            <div class="car-detail-description">
+                <h2>Description</h2>
+                <p>${car.description}</p>
             </div>
 
         </div>
 
     </div>
-
-    <!-- DESCRIPTION -->
-    <div class="car-detail-description">
-        <h2>Description</h2>
-        <p>${car.description}</p>
-    </div>
-
 </div>
 
 </body>
-
-
 </html>

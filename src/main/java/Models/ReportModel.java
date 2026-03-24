@@ -3,7 +3,8 @@ package models;
 import java.math.BigDecimal;
 import java.sql.Date;
 
-public class RentalReportModel {
+public class ReportModel {
+
     private Integer contractId;       // từ rental_contract
     private Integer bookingId;        // fallback nếu chưa có contract
     private Integer carId;
@@ -21,13 +22,19 @@ public class RentalReportModel {
     private BigDecimal totalPrice;
     private String staffName;
     private String note;
+    private Long rentalCount;       // số lần thuê
+    private Integer totalRentalDays; // tổng số ngày đã thuê
+    private BigDecimal totalRevenue; // tổng doanh thu từ xe đó (tùy chọn)
+    private Date lastRentalDate;    // lần thuê gần nhất
+    private Integer currentMileage; // mileage hiện tại
+    private Date lastMaintenanceDate;
+    private Date revenueDate;
 
     // Constructor rỗng + full constructor + getters/setters
-
-    public RentalReportModel() {}
+    public ReportModel() {
+    }
 
     // getters & setters (tạo bằng NetBeans: Right-click → Insert Code → Getter and Setter)
-
     public Integer getContractId() {
         return contractId;
     }
@@ -163,5 +170,62 @@ public class RentalReportModel {
     public void setNote(String note) {
         this.note = note;
     }
+
+    public Long getRentalCount() {
+        return rentalCount;
+    }
+
+    public void setRentalCount(Long rentalCount) {
+        this.rentalCount = rentalCount;
+    }
+
+    public Integer getTotalRentalDays() {
+        return totalRentalDays;
+    }
+
+    public void setTotalRentalDays(Integer totalRentalDays) {
+        this.totalRentalDays = totalRentalDays;
+    }
+
+    public BigDecimal getTotalRevenue() {
+        return totalRevenue;
+    }
+
+    public void setTotalRevenue(BigDecimal totalRevenue) {
+        this.totalRevenue = totalRevenue;
+    }
+
+    public Date getLastRentalDate() {
+        return lastRentalDate;
+    }
+
+    public void setLastRentalDate(Date lastRentalDate) {
+        this.lastRentalDate = lastRentalDate;
+    }
+
+    public Integer getCurrentMileage() {
+        return currentMileage;
+    }
+
+    public void setCurrentMileage(Integer currentMileage) {
+        this.currentMileage = currentMileage;
+    }
+
+    public Date getLastMaintenanceDate() {
+        return lastMaintenanceDate;
+    }
+
+    public void setLastMaintenanceDate(Date lastMaintenanceDate) {
+        this.lastMaintenanceDate = lastMaintenanceDate;
+    }
+
+    public Date getRevenueDate() {
+        return revenueDate;
+    }
+
+    public void setRevenueDate(Date revenueDate) {
+        this.revenueDate = revenueDate;
+    }
     
+
 }
