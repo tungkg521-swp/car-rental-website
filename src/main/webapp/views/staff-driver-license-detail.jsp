@@ -53,6 +53,24 @@
                     <img src="${pageContext.request.contextPath}/license-image?name=${license.imageBack}"
                          alt="Back">
                 </div>
+                         
+                         <div class="image-box">
+                    <p><b>Ảnh selfie</b></p>
+                    <img src="${pageContext.request.contextPath}/license-image?name=${license.selfieImage }"
+                         alt="Front">
+                </div>
+                         
+                         <div class="image-box">
+                    <p><b>Ảnh CCCD mặt trước</b></p>
+                    <img src="${pageContext.request.contextPath}/license-image?name=${license.nationalIdFront}"
+                         alt="Front">
+                </div>
+                         
+                         <div class="image-box">
+                    <p><b>Ảnh CCCD mặt sau</b></p>
+                    <img src="${pageContext.request.contextPath}/license-image?name=${license.nationalIdBack}"
+                         alt="Front">
+                </div>
 
             </div>
 

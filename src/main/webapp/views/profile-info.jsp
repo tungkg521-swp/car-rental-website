@@ -6,28 +6,13 @@
 <!-- ================= PROFILE CARD ================= -->
 <div class="profile-card">
 
-    <c:if test="${param.msg == 'success'}">
-        <div class="alert success">
-            Cập nhật thành công!
-        </div>
-    </c:if>
-
-    <c:if test="${param.msg == 'error'}">
-        <div class="alert error">
-            Cập nhật thất bại!
-        </div>
-    </c:if>
-
     <div class="card-header">
         <h2>Thông tin tài khoản</h2>
         <button class="edit-main-btn" onclick="openModal()">✏</button>
     </div>
 
     <div class="profile-layout">
-
-        <!-- LEFT -->
         <div class="profile-left">
-
             <div class="avatar-circle">
                 ${fn:substring(CUSTOMER_PROFILE.fullName,0,1)}
             </div>
@@ -38,12 +23,9 @@
                 Tham gia:
                 ${fn:substring(CUSTOMER_PROFILE.createdAt,0,10)}
             </p>
-
         </div>
 
-        <!-- RIGHT -->
         <div class="profile-right">
-
             <div class="info-row">
                 <span>Ngày sinh</span>
                 <span>${CUSTOMER_PROFILE.dob}</span>
@@ -58,13 +40,9 @@
                 <span>Email</span>
                 <span>${CUSTOMER_PROFILE.email}</span>
             </div>
-
         </div>
-
     </div>
-
 </div>
-
 
 <!-- ================= DRIVER LICENSE ================= -->
 <div class="profile-card license-card">
@@ -73,7 +51,6 @@
         <h2>Giấy phép lái xe</h2>
 
         <c:choose>
-
             <c:when test="${LICENSE != null && LICENSE.status == 'APPROVED'}">
                 <span class="badge green">Đã xác thực</span>
             </c:when>
@@ -89,13 +66,10 @@
             <c:otherwise>
                 <span class="badge gray">Chưa gửi xác thực</span>
             </c:otherwise>
-
         </c:choose>
 
         <c:if test="${LICENSE == null || LICENSE.status != 'APPROVED'}">
-            <button type="button"
-                    class="edit-btn"
-                    onclick="enableLicenseEdit()">
+            <button type="button" class="edit-btn" onclick="enableLicenseEdit()">
                 Chỉnh sửa
             </button>
         </c:if>
@@ -105,14 +79,10 @@
                   action="${pageContext.request.contextPath}/customer/profile"
                   style="margin-top:10px;">
                 <input type="hidden" name="action" value="requestVerification">
-                <button type="submit" class="verify-btn">
-                    Gửi xác thực
-                </button>
+                <button type="submit" class="verify-btn">Gửi xác thực</button>
             </form>
         </c:if>
-
     </div>
-
 
     <form method="post"
           action="${pageContext.request.contextPath}/customer/profile"
@@ -120,153 +90,415 @@
 
         <input type="hidden" name="action" value="updateLicense">
 
-        <!-- IMAGE -->
-        <div class="license-images">
+        <c:set var="formData" value="${licenseForm != null ? licenseForm : LICENSE}" />
+        <c:set var="errs" value="${licenseErrors}" />
 
-            <div class="image-box">
-                <label>Ảnh mặt trước</label>
+                       
+                       
+                       
+        <!-- ================= GPLX IMAGES ================= -->
+<h3 style="margin-top:20px;">Ảnh giấy phép lái xe</h3>
+<div class="license-images">
+    <div class="image-box">
+        <label>GPLX mặt trước</label>
+        <c:choose>
+            <c:when test="${formData != null && formData.imageFront != null}">
+                <img src="${pageContext.request.contextPath}/license-image?name=${formData.imageFront}"
+                     class="preview-img">
+            </c:when>
+            <c:otherwise>
+                <div class="empty-img">Chưa có ảnh</div>
+            </c:otherwise>
+        </c:choose>
 
-                <c:choose>
-                    <c:when test="${LICENSE != null && LICENSE.imageFront != null}">
-                        <img src="${pageContext.request.contextPath}/license-image?name=${LICENSE.imageFront}"
-                             class="preview-img">
-                    </c:when>
-                    <c:otherwise>
-                        <div class="empty-img">Chưa có ảnh</div>
-                    </c:otherwise>
-                </c:choose>
+        <input type="file"
+               name="imageFront"
+               class="file-input"
+               accept="image/*"
+               ${formData == null || empty formData.imageFront ? 'required' : ''}
+               disabled
+               style="${errs.imageFront != null ? 'border:1.5px solid #e53935;background:#fff5f5;padding:6px;border-radius:8px;' : ''}">
 
-                <input type="file"
-                       name="imageFront"
-                       class="file-input"
-                       accept="image/*"
-                       disabled>
-            </div>
+        <c:if test="${errs.imageFront != null}">
+            <small style="display:block;margin-top:6px;color:#e53935;font-size:13px;font-weight:600;">
+                ${errs.imageFront}
+            </small>
+        </c:if>
+    </div>
 
-            <div class="image-box">
-                <label>Ảnh mặt sau</label>
+    <div class="image-box">
+        <label>GPLX mặt sau</label>
+        <c:choose>
+            <c:when test="${formData != null && formData.imageBack != null}">
+                <img src="${pageContext.request.contextPath}/license-image?name=${formData.imageBack}"
+                     class="preview-img">
+            </c:when>
+            <c:otherwise>
+                <div class="empty-img">Chưa có ảnh</div>
+            </c:otherwise>
+        </c:choose>
 
-                <c:choose>
-                    <c:when test="${LICENSE != null && LICENSE.imageBack != null}">
-                        <img src="${pageContext.request.contextPath}/license-image?name=${LICENSE.imageBack}"
-                             class="preview-img">
-                    </c:when>
-                    <c:otherwise>
-                        <div class="empty-img">Chưa có ảnh</div>
-                    </c:otherwise>
-                </c:choose>
+        <input type="file"
+               name="imageBack"
+               class="file-input"
+               accept="image/*"
+               ${formData == null || empty formData.imageBack ? 'required' : ''}
+               disabled
+               style="${errs.imageBack != null ? 'border:1.5px solid #e53935;background:#fff5f5;padding:6px;border-radius:8px;' : ''}">
 
-                <input type="file"
-                       name="imageBack"
-                       class="file-input"
-                       accept="image/*"
-                       disabled>
-            </div>
+        <c:if test="${errs.imageBack != null}">
+            <small style="display:block;margin-top:6px;color:#e53935;font-size:13px;font-weight:600;">
+                ${errs.imageBack}
+            </small>
+        </c:if>
+    </div>
+</div>
 
-        </div>
+<!-- ================= VERIFY IMAGES ================= -->
+<h3 style="margin-top:30px;">Ảnh xác minh chính chủ</h3>
+<div class="license-images">
+    <div class="image-box">
+        <label>Ảnh selfie cầm giấy tờ</label>
+        <c:choose>
+            <c:when test="${formData != null && formData.selfieImage != null}">
+                <img src="${pageContext.request.contextPath}/license-image?name=${formData.selfieImage}"
+                     class="preview-img">
+            </c:when>
+            <c:otherwise>
+                <div class="empty-img">Chưa có ảnh</div>
+            </c:otherwise>
+        </c:choose>
 
+        <input type="file"
+               name="selfieImage"
+               class="file-input"
+               accept="image/*"
+               ${formData == null || empty formData.selfieImage ? 'required' : ''}
+               disabled
+               style="${errs.selfieImage != null ? 'border:1.5px solid #e53935;background:#fff5f5;padding:6px;border-radius:8px;' : ''}">
 
-        <!-- FORM -->
-        <div class="form-group">
+        <c:if test="${errs.selfieImage != null}">
+            <small style="display:block;margin-top:6px;color:#e53935;font-size:13px;font-weight:600;">
+                ${errs.selfieImage}
+            </small>
+        </c:if>
+    </div>
+
+    <div class="image-box">
+        <label>CCCD mặt trước</label>
+        <c:choose>
+            <c:when test="${formData != null && formData.nationalIdFront != null}">
+                <img src="${pageContext.request.contextPath}/license-image?name=${formData.nationalIdFront}"
+                     class="preview-img">
+            </c:when>
+            <c:otherwise>
+                <div class="empty-img">Chưa có ảnh</div>
+            </c:otherwise>
+        </c:choose>
+
+        <input type="file"
+               name="nationalIdFront"
+               class="file-input"
+               accept="image/*"
+               ${formData == null || empty formData.nationalIdFront ? 'required' : ''}
+               disabled
+               style="${errs.nationalIdFront != null ? 'border:1.5px solid #e53935;background:#fff5f5;padding:6px;border-radius:8px;' : ''}">
+
+        <c:if test="${errs.nationalIdFront != null}">
+            <small style="display:block;margin-top:6px;color:#e53935;font-size:13px;font-weight:600;">
+                ${errs.nationalIdFront}
+            </small>
+        </c:if>
+    </div>
+
+    <div class="image-box">
+        <label>CCCD mặt sau</label>
+        <c:choose>
+            <c:when test="${formData != null && formData.nationalIdBack != null}">
+                <img src="${pageContext.request.contextPath}/license-image?name=${formData.nationalIdBack}"
+                     class="preview-img">
+            </c:when>
+            <c:otherwise>
+                <div class="empty-img">Chưa có ảnh</div>
+            </c:otherwise>
+        </c:choose>
+
+        <input type="file"
+               name="nationalIdBack"
+               class="file-input"
+               accept="image/*"
+               ${formData == null || empty formData.nationalIdBack ? 'required' : ''}
+               disabled
+               style="${errs.nationalIdBack != null ? 'border:1.5px solid #e53935;background:#fff5f5;padding:6px;border-radius:8px;' : ''}">
+
+        <c:if test="${errs.nationalIdBack != null}">
+            <small style="display:block;margin-top:6px;color:#e53935;font-size:13px;font-weight:600;">
+                ${errs.nationalIdBack}
+            </small>
+        </c:if>
+    </div>
+</div>
+                       
+                       
+
+        <!-- ================= FORM INFO ================= -->
+        <div class="form-group" style="margin-bottom:16px;">
             <label>Số GPLX</label>
             <input type="text"
                    name="licenseNumber"
-                   value="${LICENSE != null ? LICENSE.licenseNumber : ''}"
-                   readonly>
+                   value="${formData != null ? formData.licenseNumber : ''}"
+                   readonly
+                   required
+                   style="width:100%;${errs.licenseNumber != null ? 'border:1.5px solid #e53935;background:#fff5f5;' : ''}">
+            <c:if test="${errs.licenseNumber != null}">
+                <small style="display:block;margin-top:6px;color:#e53935;font-size:13px;font-weight:600;">
+                    ${errs.licenseNumber}
+                </small>
+            </c:if>
         </div>
 
-        <div class="form-group">
+        <div class="form-group" style="margin-bottom:16px;">
             <label>Họ và tên</label>
             <input type="text"
                    name="fullName"
-                   value="${LICENSE != null ? LICENSE.fullName : ''}"
-                   readonly>
+                   value="${formData != null ? formData.fullName : ''}"
+                   readonly
+                   required
+                   style="width:100%;${errs.fullName != null ? 'border:1.5px solid #e53935;background:#fff5f5;' : ''}">
+            <c:if test="${errs.fullName != null}">
+                <small style="display:block;margin-top:6px;color:#e53935;font-size:13px;font-weight:600;">
+                    ${errs.fullName}
+                </small>
+            </c:if>
         </div>
 
-        <div class="form-group">
+        <div class="form-group" style="margin-bottom:16px;">
             <label>Ngày sinh</label>
             <input type="date"
                    name="dob"
-                   value="${LICENSE != null && LICENSE.dob != null ? LICENSE.dob : ''}"
-                   readonly>
+                   value="${formData != null && formData.dob != null ? formData.dob : ''}"
+                   readonly
+                   required
+                   style="width:100%;${errs.dob != null ? 'border:1.5px solid #e53935;background:#fff5f5;' : ''}">
+            <c:if test="${errs.dob != null}">
+                <small style="display:block;margin-top:6px;color:#e53935;font-size:13px;font-weight:600;">
+                    ${errs.dob}
+                </small>
+            </c:if>
         </div>
 
-        <div class="form-group">
+        <div class="form-group" style="margin-bottom:16px;">
             <label>Ngày cấp</label>
             <input type="date"
                    name="issueDate"
-                   value="${LICENSE != null && LICENSE.issueDate != null ? LICENSE.issueDate : ''}"
-                   readonly>
+                   value="${formData != null && formData.issueDate != null ? formData.issueDate : ''}"
+                   readonly
+                   required
+                   style="width:100%;${errs.issueDate != null ? 'border:1.5px solid #e53935;background:#fff5f5;' : ''}">
+            <c:if test="${errs.issueDate != null}">
+                <small style="display:block;margin-top:6px;color:#e53935;font-size:13px;font-weight:600;">
+                    ${errs.issueDate}
+                </small>
+            </c:if>
         </div>
 
-        <div class="form-group">
+        <div class="form-group" style="margin-bottom:16px;">
             <label>Ngày hết hạn</label>
             <input type="date"
                    name="expiryDate"
-                   value="${LICENSE != null && LICENSE.expiryDate != null ? LICENSE.expiryDate : ''}"
-                   readonly>
+                   value="${formData != null && formData.expiryDate != null ? formData.expiryDate : ''}"
+                   readonly
+                   required
+                   style="width:100%;${errs.expiryDate != null ? 'border:1.5px solid #e53935;background:#fff5f5;' : ''}">
+            <c:if test="${errs.expiryDate != null}">
+                <small style="display:block;margin-top:6px;color:#e53935;font-size:13px;font-weight:600;">
+                    ${errs.expiryDate}
+                </small>
+            </c:if>
         </div>
+
+        <c:if test="${not empty saveError}">
+            <div style="margin-top:10px;padding:10px 14px;border-radius:8px;background:#fff1f0;color:#d32f2f;border:1px solid #ffcdd2;">
+                ${saveError}
+            </div>
+        </c:if>
 
         <button type="submit"
                 class="save-btn"
-                style="display:none">
+                style="${enableLicenseEdit ? 'display:inline-block' : 'display:none'}">
             Lưu
         </button>
-
     </form>
-
 </div>
-
-
+        
 <!-- ================= MODAL UPDATE PROFILE ================= -->
 <div id="updateModal" class="modal-overlay">
-
     <div class="modal-box">
-
         <button class="modal-close" onclick="closeModal()">✕</button>
-
         <h2>Cập nhật thông tin</h2>
 
-        <form action="${pageContext.request.contextPath}/customer/profile"
-              method="post">
-
+        <form action="${pageContext.request.contextPath}/customer/profile" method="post">
             <input type="hidden" name="action" value="update">
 
             <div class="form-group">
                 <label>Tên tài khoản</label>
-                <input type="text"
-                       name="fullName"
-                       value="${CUSTOMER_PROFILE.fullName}" required>
+                <input type="text" name="fullName" value="${CUSTOMER_PROFILE.fullName}" required>
             </div>
 
             <div class="form-group">
                 <label>Ngày sinh</label>
-                <input type="date"
-                       name="dob"
-                       value="${CUSTOMER_PROFILE.dob}">
+                <input type="date" name="dob" value="${CUSTOMER_PROFILE.dob}">
             </div>
 
             <div class="form-group">
                 <label>Số điện thoại</label>
-                <input type="text"
-                       name="phone"
-                       value="${CUSTOMER_PROFILE.phone}">
+                <input type="text" name="phone" value="${CUSTOMER_PROFILE.phone}">
             </div>
 
             <div class="form-group">
                 <label>Email</label>
-                <input type="email"
-                       name="email"
-                       value="${CUSTOMER_PROFILE.email}">
+                <input type="email" name="email" value="${CUSTOMER_PROFILE.email}">
             </div>
 
-            <button type="submit" class="modal-submit">
-                Cập nhật
-            </button>
-
+            <button type="submit" class="modal-submit">Cập nhật</button>
         </form>
-
     </div>
-
 </div>
-            
+
+<script>
+    function enableLicenseEdit() {
+        document.querySelectorAll('.license-card input').forEach(function (input) {
+            if (input.type === 'file') {
+                input.disabled = false;
+            } else {
+                input.removeAttribute('readonly');
+            }
+        });
+
+        const saveBtn = document.querySelector('.license-card .save-btn');
+        if (saveBtn) {
+            saveBtn.style.display = 'inline-block';
+        }
+    }
+
+    function openModal() {
+        document.getElementById("updateModal").style.display = "flex";
+    }
+
+    function closeModal() {
+        document.getElementById("updateModal").style.display = "none";
+    }
+
+    window.addEventListener('DOMContentLoaded', function () {
+        const shouldEnable = '${enableLicenseEdit}' === 'true';
+        if (shouldEnable) {
+            enableLicenseEdit();
+        }
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<c:if test="${param.msg == 'success'}">
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Thành công',
+            text: 'Cập nhật thành công!',
+            showConfirmButton: false,
+            timer: 1500,
+            timerProgressBar: true
+        }).then(() => {
+            window.location.href = '${pageContext.request.contextPath}/customer/profile';
+        });
+    </script>
+</c:if>
+
+<c:if test="${param.msg == 'error'}">
+    <script>
+        Swal.fire({
+            icon: 'error',
+            title: 'Thất bại',
+            text: 'Cập nhật thất bại!',
+            showConfirmButton: false,
+            timer: 1500,
+            timerProgressBar: true
+        }).then(() => {
+            window.location.href = '${pageContext.request.contextPath}/customer/profile';
+        });
+    </script>
+</c:if>
+
+<c:if test="${param.msg == 'verify_success'}">
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Gửi thành công',
+            text: 'Đã gửi yêu cầu xác thực thành công!',
+            showConfirmButton: false,
+            timer: 1500,
+            timerProgressBar: true
+        }).then(() => {
+            window.location.href = '${pageContext.request.contextPath}/customer/profile';
+        });
+    </script>
+</c:if>
+
+<c:if test="${param.msg == 'license_not_found'}">
+    <script>
+        Swal.fire({
+            icon: 'warning',
+            title: 'Chưa có GPLX',
+            text: 'Bạn chưa khai báo thông tin GPLX.',
+            showConfirmButton: false,
+            timer: 1500,
+            timerProgressBar: true
+        }).then(() => {
+            window.location.href = '${pageContext.request.contextPath}/customer/profile';
+        });
+    </script>
+</c:if>
+
+<c:if test="${param.msg == 'missing_info'}">
+    <script>
+        Swal.fire({
+            icon: 'warning',
+            title: 'Thiếu thông tin',
+            text: 'Vui lòng nhập đầy đủ thông tin và tải đủ 5 ảnh xác minh trước khi gửi duyệt.',
+            showConfirmButton: false,
+            timer: 1500,
+            timerProgressBar: true
+        }).then(() => {
+            window.location.href = '${pageContext.request.contextPath}/customer/profile';
+        });
+    </script>
+</c:if>
+
+<c:if test="${param.msg == 'already_requested'}">
+    <script>
+        Swal.fire({
+            icon: 'info',
+            title: 'Đang chờ duyệt',
+            text: 'Yêu cầu xác thực của bạn đang chờ duyệt.',
+            showConfirmButton: false,
+            timer: 1500,
+            timerProgressBar: true
+        }).then(() => {
+            window.location.href = '${pageContext.request.contextPath}/customer/profile';
+        });
+    </script>
+</c:if>
+
+<c:if test="${param.msg == 'already_approved'}">
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Đã xác thực',
+            text: 'GPLX của bạn đã được xác thực trước đó.',
+            showConfirmButton: false,
+            timer: 1500,
+            timerProgressBar: true
+        }).then(() => {
+            window.location.href = '${pageContext.request.contextPath}/customer/profile';
+        });
+    </script>
+</c:if>
