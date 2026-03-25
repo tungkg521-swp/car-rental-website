@@ -29,7 +29,7 @@
         <c:choose>
 
             <c:when test="${isAdmin}">
-                <li class="menu-section">ADMIN ONLY</li>
+               
 
                 <li>
                     <a class="${fn:contains(currentUri, '/dashboard/admin') and empty param.view ? 'active' : ''}"
@@ -55,7 +55,7 @@
                     </a>
                 </li>
 
-                <li class="menu-section">STAFF FEATURES</li>
+               
 
                 <li>
                     <a class="${fn:contains(currentUri, '/staff/users') ? 'active' : ''}"
@@ -176,6 +176,13 @@
                        href="${pageContext.request.contextPath}/staff/contracts">
                         <i class="icon">📄</i>
                         <span>Manage Contracts</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="${fn:contains(currentUri, '/staff/notification') ? 'active' : ''}"
+                       href="${pageContext.request.contextPath}/staff/notification">
+                        <i class="icon">🔔</i>
+                        <span>Notification</span>
                     </a>
                 </li>
             </c:otherwise>
