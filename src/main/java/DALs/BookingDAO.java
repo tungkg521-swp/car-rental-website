@@ -1,53 +1,59 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package DALs;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
 import Utils.DBContext;
 import models.BookingModel;
 
-/**
- *
- * @author ADMIN
- */
 public class BookingDAO extends DBContext {
 
-public void insert(BookingModel booking) throws SQLException {
 
-    String sql = """
-        INSERT INTO booking
-        (customer_id, car_id, voucher_id, booking_date, start_date, end_date, status, note, total_estimated_price)
-        VALUES (?, ?, ?, GETDATE(), ?, ?, ?, ?, ?)
-    """;
+    public int insert(BookingModel booking) throws SQLException {
 
-    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        String sql = """
+            INSERT INTO booking
+            (customer_id, car_id, voucher_id, booking_date, start_date, end_date, status, note, total_estimated_price)
+            VALUES (?, ?, ?, GETDATE(), ?, ?, ?, ?, ?)
+        """;
 
-        ps.setInt(1, booking.getCustomerId());
-        ps.setInt(2, booking.getCarId());
+        try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-        if (booking.getVoucherId() != null) {
-            ps.setInt(3, booking.getVoucherId());
-        } else {
-            ps.setNull(3, java.sql.Types.INTEGER);
+            ps.setInt(1, booking.getCustomerId());
+            ps.setInt(2, booking.getCarId());
+
+            if (booking.getVoucherId() != null) {
+                ps.setInt(3, booking.getVoucherId());
+            } else {
+                ps.setNull(3, Types.INTEGER);
+            }
+
+            ps.setDate(4, booking.getStartDate());
+            ps.setDate(5, booking.getEndDate());
+            ps.setString(6, booking.getStatus());
+            ps.setString(7, booking.getNote());
+            ps.setBigDecimal(8, booking.getTotalEstimatedPrice());
+
+            ps.executeUpdate();
+
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    int bookingId = rs.getInt(1);
+                    booking.setBookingId(bookingId);
+                    return bookingId;
+                }
+            }
         }
 
-        ps.setDate(4, booking.getStartDate());
-        ps.setDate(5, booking.getEndDate());
-        ps.setString(6, booking.getStatus());
-        ps.setString(7, booking.getNote());
-        ps.setBigDecimal(8, booking.getTotalEstimatedPrice());
-
-        ps.executeUpdate();
+        throw new SQLException("Không lấy được booking_id sau khi tạo booking.");
     }
-}
+
 
     public BookingModel getById(int bookingId) {
         String sql = """
@@ -66,14 +72,18 @@ public void insert(BookingModel booking) throws SQLException {
                 booking.setBookingId(rs.getInt("booking_id"));
                 booking.setCustomerId(rs.getInt("customer_id"));
                 booking.setCarId(rs.getInt("car_id"));
+
+                int voucherId = rs.getInt("voucher_id");
+                if (!rs.wasNull()) {
+                    booking.setVoucherId(voucherId);
+                }
+
                 booking.setBookingDate(rs.getTimestamp("booking_date"));
                 booking.setStartDate(rs.getDate("start_date"));
                 booking.setEndDate(rs.getDate("end_date"));
                 booking.setStatus(rs.getString("status"));
                 booking.setNote(rs.getString("note"));
-                booking.setTotalEstimatedPrice(
-                        rs.getBigDecimal("total_estimated_price")
-                );
+                booking.setTotalEstimatedPrice(rs.getBigDecimal("total_estimated_price"));
 
                 return booking;
             }
@@ -95,18 +105,12 @@ public void insert(BookingModel booking) throws SQLException {
             b.end_date,
             b.status,
             b.total_estimated_price,
-
             c.model_name AS car_name,
             c.image_folder AS image_folder,
-
             rc.contract_status
-
         FROM booking b
         JOIN cars c ON b.car_id = c.car_id
-
-        LEFT JOIN rental_contract rc
-        ON b.booking_id = rc.booking_id
-
+        LEFT JOIN rental_contract rc ON b.booking_id = rc.booking_id
         WHERE b.customer_id = ?
         ORDER BY b.booking_date DESC
     """;
@@ -114,26 +118,19 @@ public void insert(BookingModel booking) throws SQLException {
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
             ps.setInt(1, customerId);
-
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
-
                 BookingModel booking = new BookingModel();
 
                 booking.setBookingId(rs.getInt("booking_id"));
                 booking.setStartDate(rs.getDate("start_date"));
                 booking.setEndDate(rs.getDate("end_date"));
                 booking.setStatus(rs.getString("status"));
-
-                booking.setTotalEstimatedPrice(
-                        rs.getBigDecimal("total_estimated_price"));
-
+                booking.setTotalEstimatedPrice(rs.getBigDecimal("total_estimated_price"));
                 booking.setCarName(rs.getString("car_name"));
                 booking.setImageFolder(rs.getString("image_folder"));
-
-                booking.setContractStatus(
-                        rs.getString("contract_status"));
+                booking.setContractStatus(rs.getString("contract_status"));
 
                 list.add(booking);
             }
@@ -145,7 +142,7 @@ public void insert(BookingModel booking) throws SQLException {
         return list;
     }
 
-    public BookingModel findById(int bookingId, int customerId) {
+     public BookingModel findById(int bookingId, int customerId) {
 
         String sql = """
         SELECT 
@@ -218,17 +215,15 @@ public void insert(BookingModel booking) throws SQLException {
         return null;
     }
 
+
     public boolean updateStatus(int bookingId, String status) {
 
         String sql = "UPDATE booking SET status = ? WHERE booking_id = ?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-
             ps.setString(1, status);
             ps.setInt(2, bookingId);
-
             return ps.executeUpdate() > 0;
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -258,7 +253,6 @@ public void insert(BookingModel booking) throws SQLException {
         try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-
                 BookingModel booking = new BookingModel();
 
                 booking.setBookingId(rs.getInt("booking_id"));
@@ -279,7 +273,7 @@ public void insert(BookingModel booking) throws SQLException {
         return list;
     }
 
-    public BookingModel findById(int bookingId) {
+      public BookingModel findById(int bookingId) {
 
         String sql = """
     SELECT 
@@ -340,10 +334,16 @@ public void insert(BookingModel booking) throws SQLException {
         return null;
     }
 
+
     public int getCompletedBooking(int customerId, int carId) {
 
-        String sql = "SELECT booking_id FROM booking "
-                + "WHERE customer_id = ? AND car_id = ? AND status = 'COMPLETED'";
+        String sql = """
+            SELECT booking_id
+            FROM booking
+            WHERE customer_id = ?
+              AND car_id = ?
+              AND status = 'COMPLETED'
+        """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
@@ -383,11 +383,9 @@ public void insert(BookingModel booking) throws SQLException {
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
             ps.setInt(1, bookingId);
-
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-
                 BookingModel booking = new BookingModel();
 
                 booking.setBookingId(rs.getInt("booking_id"));
@@ -396,12 +394,8 @@ public void insert(BookingModel booking) throws SQLException {
                 booking.setStartDate(rs.getDate("start_date"));
                 booking.setEndDate(rs.getDate("end_date"));
                 booking.setStatus(rs.getString("status"));
-
-                booking.setTotalEstimatedPrice(
-                        rs.getBigDecimal("total_estimated_price"));
-
-                booking.setPricePerDay(
-                        rs.getBigDecimal("price_per_day"));
+                booking.setTotalEstimatedPrice(rs.getBigDecimal("total_estimated_price"));
+                booking.setPricePerDay(rs.getBigDecimal("price_per_day"));
 
                 return booking;
             }
@@ -419,9 +413,9 @@ public void insert(BookingModel booking) throws SQLException {
         SELECT 1
         FROM booking
         WHERE car_id = ?
-        AND status = 'CONFIRMED'
-        AND start_date <= ?
-        AND end_date >= ?
+          AND status = 'CONFIRMED'
+          AND start_date <= ?
+          AND end_date >= ?
     """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -431,8 +425,7 @@ public void insert(BookingModel booking) throws SQLException {
             ps.setDate(3, startDate);
 
             ResultSet rs = ps.executeQuery();
-
-            return rs.next(); // true = bị overlap
+            return rs.next();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -451,10 +444,10 @@ public void insert(BookingModel booking) throws SQLException {
         UPDATE booking
         SET status = 'REJECTED'
         WHERE car_id = ?
-        AND booking_id <> ?
-        AND status = 'PENDING'
-        AND start_date <= ?
-        AND end_date >= ?
+          AND booking_id <> ?
+          AND status IN ('PENDING_PAYMENT', 'DEPOSIT_PAID')
+          AND start_date <= ?
+          AND end_date >= ?
     """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -472,13 +465,16 @@ public void insert(BookingModel booking) throws SQLException {
     }
 
     public boolean deleteBooking(int bookingId, int customerId) {
-        String sql = "DELETE FROM booking WHERE booking_id = ? AND customer_id = ? AND status = 'CANCELLED'";
+        String sql = """
+            DELETE FROM booking
+            WHERE booking_id = ?
+              AND customer_id = ?
+              AND status = 'CANCELLED'
+        """;
 
-        try {
-            PreparedStatement ps = connection.prepareStatement(sql);
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, bookingId);
             ps.setInt(2, customerId);
-
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();

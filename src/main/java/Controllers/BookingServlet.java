@@ -1,44 +1,34 @@
-
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package Controllers;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.util.List;
+
+
+
 
 import DALs.CustomerDAO;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
+import java.util.List;
 import models.AccountModel;
 import models.BookingModel;
 import models.CarModel;
 import models.CustomerModel;
-
 import models.VoucherModel;
 
 import service.BookingService;
-
 import service.CarService;
 import service.VoucherService;
 
-/**
- *
- * @author ADMIN
- */
 public class BookingServlet extends HttpServlet {
 
-    private BookingService bookingService = new BookingService();
+    private final BookingService bookingService = new BookingService();
 
     @Override
     protected void doGet(HttpServletRequest request,
@@ -56,21 +46,18 @@ public class BookingServlet extends HttpServlet {
             case "create":
                 showCreateBooking(request, response);
                 break;
-
-            case "list":   // ⭐ THÊM DÒNG NÀY
+            case "list":
                 viewBookingList(request, response);
                 break;
-
             case "detail":
                 viewBookingDetail(request, response);
                 break;
-
             case "success":
                 showBookingSuccess(request, response);
                 break;
-
             default:
                 response.sendRedirect(request.getContextPath() + "/home");
+                break;
         }
     }
 
@@ -108,50 +95,27 @@ public class BookingServlet extends HttpServlet {
     private void showCreateBooking(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // 1. Check session
         HttpSession session = request.getSession(false);
-
         if (session == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
-        // 2. Lấy account từ session
         AccountModel account = (AccountModel) session.getAttribute("ACCOUNT");
-
-        if (account != null) {
-            System.out.println("ACCOUNT ID = " + account.getAccountId());
-        }
-
         if (account == null) {
-            System.out.println("ACCOUNT NULL -> REDIRECT LOGIN");
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
-        // 3. Lấy customer theo accountId
         CustomerDAO customerDAO = new CustomerDAO();
         CustomerModel customer = customerDAO.getByAccountId(account.getAccountId());
-
-        System.out.println("CUSTOMER = " + customer);
-
-        if (customer != null) {
-            System.out.println("CUSTOMER ID = " + customer.getCustomerId());
-            System.out.println("LICENSE VERIFIED = " + customer.isLicenseVerified());
-        }
-
         if (customer == null) {
-            System.out.println("CUSTOMER NULL -> REDIRECT LOGIN");
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
-        // 4. Lấy carId
         String carIdRaw = request.getParameter("carId");
-        System.out.println("CAR ID RAW = " + carIdRaw);
-
         if (carIdRaw == null) {
-            System.out.println("CAR ID NULL -> REDIRECT CARS");
             response.sendRedirect(request.getContextPath() + "/cars");
             return;
         }
@@ -159,70 +123,44 @@ public class BookingServlet extends HttpServlet {
         int carId;
         try {
             carId = Integer.parseInt(carIdRaw);
-            System.out.println("CAR ID PARSED = " + carId);
         } catch (NumberFormatException e) {
-            System.out.println("CAR ID PARSE ERROR -> REDIRECT CARS");
             response.sendRedirect(request.getContextPath() + "/cars");
             return;
         }
 
-        // 🚨 CHECK GPLX VERIFIED
         if (!customer.isLicenseVerified()) {
-
             request.setAttribute("LICENSE_REQUIRED", true);
 
             CarService carService = new CarService();
             CarModel car = carService.getCarById(carId);
 
             request.setAttribute("car", car);
-
-            request.getRequestDispatcher("/views/car-detail.jsp")
-                    .forward(request, response);
+            request.getRequestDispatcher("/views/car-detail.jsp").forward(request, response);
             return;
         }
 
-        // 5. Load xe
         CarService carService = new CarService();
         CarModel car = carService.getCarById(carId);
 
-        System.out.println("CAR LOADED = " + car);
-
-        if (car != null) {
-            System.out.println("CAR STATUS = " + car.getStatus());
-        }
-
         if (car == null) {
-            System.out.println("CAR NULL -> REDIRECT CARS");
             response.sendRedirect(request.getContextPath() + "/cars");
             return;
         }
 
         if (!"AVAILABLE".equalsIgnoreCase(car.getStatus())) {
-            System.out.println("CAR NOT AVAILABLE -> REDIRECT CAR DETAIL");
-            response.sendRedirect(
-                    request.getContextPath() + "/car-detail?carId=" + carId
-            );
+            response.sendRedirect(request.getContextPath() + "/car-detail?carId=" + carId);
             return;
         }
-        // 6. Load voucher hợp lệ
+
         VoucherService voucherService = new VoucherService();
         List<VoucherModel> validVouchers = voucherService.getAvailableVouchers();
-
-        // 6. Set data cho JSP
-        System.out.println("SET ATTRIBUTE ACCOUNT CUSTOMER CAR");
 
         request.setAttribute("account", account);
         request.setAttribute("customer", customer);
         request.setAttribute("car", car);
         request.setAttribute("vouchers", validVouchers);
-        System.out.println("VOUCHER SIZE = " + (validVouchers == null ? 0 : validVouchers.size()));
-        System.out.println("VOUCHERS = " + validVouchers);
 
-        // 7. Forward
-        System.out.println("FORWARD -> /views/booking.jsp");
-
-        request.getRequestDispatcher("/views/booking.jsp")
-                .forward(request, response);
+        request.getRequestDispatcher("/views/booking.jsp").forward(request, response);
     }
 
     private void createBooking(HttpServletRequest request, HttpServletResponse response)
@@ -235,7 +173,6 @@ public class BookingServlet extends HttpServlet {
         }
 
         AccountModel account = (AccountModel) session.getAttribute("ACCOUNT");
-
         if (account == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
@@ -244,16 +181,13 @@ public class BookingServlet extends HttpServlet {
         CustomerDAO customerDAO = new CustomerDAO();
         CustomerModel customer = customerDAO.getByAccountId(account.getAccountId());
 
-        // 🚨 DOUBLE CHECK GPLX
         if (customer == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
         if (!customer.isLicenseVerified()) {
-            response.sendRedirect(
-                    request.getContextPath() + "/cars"
-            );
+            response.sendRedirect(request.getContextPath() + "/cars");
             return;
         }
 
@@ -261,12 +195,14 @@ public class BookingServlet extends HttpServlet {
         String startDateRaw = request.getParameter("startDate");
         String endDateRaw = request.getParameter("endDate");
         String note = request.getParameter("note");
+
         //String voucherIdRaw = request.getParameter("voucherId");
 
         System.out.println("carId = " + carIdRaw);
         System.out.println("startDate = " + startDateRaw);
         System.out.println("endDate = " + endDateRaw);
         if (carIdRaw == null || startDateRaw == null || endDateRaw == null) {
+
             response.sendRedirect(request.getContextPath() + "/cars");
             return;
         }
@@ -278,6 +214,7 @@ public class BookingServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/cars");
             return;
         }
+
 
         Integer voucherId = null;
         String voucherIdRaw = request.getParameter("voucherId");
@@ -297,52 +234,53 @@ public class BookingServlet extends HttpServlet {
             startDate = Date.valueOf(startDateRaw);
             endDate = Date.valueOf(endDateRaw);
         } catch (IllegalArgumentException e) {
-            response.sendRedirect(request.getContextPath() + "/booking?carId=" + carId);
+            response.sendRedirect(request.getContextPath() + "/booking?action=create&carId=" + carId);
             return;
         }
 
-        // Không cho thuê ngày trong quá khứSystem.currentTimeMillis()
         Date today = Date.valueOf(LocalDate.now());
 
         if (startDate.before(today)) {
-
             request.setAttribute("errorMessage", "Không thể đặt xe trong ngày quá khứ");
 
             CarService carService = new CarService();
             CarModel car = carService.getCarById(carId);
+            VoucherService voucherService = new VoucherService();
 
             request.setAttribute("car", car);
             request.setAttribute("customer", customer);
+            request.setAttribute("vouchers", voucherService.getAvailableVouchers());
 
-            request.getRequestDispatcher("/views/booking.jsp")
-                    .forward(request, response);
+            request.getRequestDispatcher("/views/booking.jsp").forward(request, response);
             return;
         }
 
-        // Ngày trả không được nhỏ hơn ngày thuê
         if (endDate.before(startDate)) {
-
             request.setAttribute("errorMessage", "Ngày trả xe phải sau ngày thuê");
 
             CarService carService = new CarService();
             CarModel car = carService.getCarById(carId);
+            VoucherService voucherService = new VoucherService();
 
             request.setAttribute("car", car);
             request.setAttribute("customer", customer);
+            request.setAttribute("vouchers", voucherService.getAvailableVouchers());
 
-            request.getRequestDispatcher("/views/booking.jsp")
-                    .forward(request, response);
+            request.getRequestDispatcher("/views/booking.jsp").forward(request, response);
             return;
         }
 
         CarService carService = new CarService();
 
         CarModel car = carService.getCarById(carId);
+
         //carService.updateCarStatus(carId, "BOOKED");
+
         if (car == null || !"AVAILABLE".equalsIgnoreCase(car.getStatus())) {
             response.sendRedirect(request.getContextPath() + "/cars");
             return;
         }
+
 
         String totalPriceRaw = request.getParameter("totalEstimatedPrice");
         BigDecimal totalPrice;
@@ -351,22 +289,25 @@ public class BookingServlet extends HttpServlet {
             totalPrice = new BigDecimal(totalPriceRaw);
         } catch (Exception e) {
             response.sendRedirect(request.getContextPath() + "/booking?carId=" + carId);
+
             return;
         }
 
         BookingModel booking = new BookingModel();
         booking.setCustomerId(customer.getCustomerId());
         booking.setCarId(carId);
+        booking.setVoucherId(voucherId);
         booking.setBookingDate(new Timestamp(System.currentTimeMillis()));
         booking.setStartDate(startDate);
         booking.setEndDate(endDate);
-        booking.setStatus("PENDING");
+        booking.setStatus("PENDING_PAYMENT");
         booking.setNote(note);
         booking.setTotalEstimatedPrice(totalPrice);
         booking.setVoucherId(voucherId);
 
         try {
-            bookingService.createBooking(booking);
+            int bookingId = bookingService.createBooking(booking);
+
 
             if (voucherId != null) {
                 VoucherService voucherService = new VoucherService();
@@ -374,13 +315,14 @@ public class BookingServlet extends HttpServlet {
             }
 
             session.setAttribute("LAST_BOOKING", booking.getBookingId());
+
             response.sendRedirect(
                     request.getContextPath()
-                    + "/booking?action=success"
+                    + "/payment?action=create&bookingId=" + bookingId
             );
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/booking?carId=" + carId);
+            response.sendRedirect(request.getContextPath() + "/booking?action=create&carId=" + carId);
         }
     }
 
@@ -394,31 +336,22 @@ public class BookingServlet extends HttpServlet {
             return;
         }
 
-        AccountModel account
-                = (AccountModel) session.getAttribute("ACCOUNT");
+        AccountModel account = (AccountModel) session.getAttribute("ACCOUNT");
         if (account == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
-        CustomerModel customer
-                = new CustomerDAO()
-                        .getByAccountId(account.getAccountId());
-
+        CustomerModel customer = new CustomerDAO().getByAccountId(account.getAccountId());
         if (customer == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
-        List<BookingModel> bookings
-                = bookingService.getBookingsByCustomer(
-                        customer.getCustomerId());
+        List<BookingModel> bookings = bookingService.getBookingsByCustomer(customer.getCustomerId());
 
         request.setAttribute("BOOKINGS", bookings);
-        System.out.println("BOOKINGS SIZE = " + bookings.size());
-
-        request.getRequestDispatcher("/views/booking-list.jsp")
-                .forward(request, response);
+        request.getRequestDispatcher("/views/booking-list.jsp").forward(request, response);
     }
 
     private void viewBookingDetail(HttpServletRequest request,
@@ -426,26 +359,30 @@ public class BookingServlet extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
-        AccountModel account
-                = (AccountModel) session.getAttribute("ACCOUNT");
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
 
+        AccountModel account = (AccountModel) session.getAttribute("ACCOUNT");
         if (account == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
-        CustomerModel customer
-                = new CustomerDAO().getByAccountId(account.getAccountId());
+        CustomerModel customer = new CustomerDAO().getByAccountId(account.getAccountId());
+        if (customer == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
 
         String bookingIdRaw = request.getParameter("bookingId");
-
         if (bookingIdRaw == null) {
             response.sendRedirect(request.getContextPath() + "/customer/bookings?action=list");
             return;
         }
 
         int bookingId;
-
         try {
             bookingId = Integer.parseInt(bookingIdRaw);
         } catch (NumberFormatException e) {
@@ -453,24 +390,19 @@ public class BookingServlet extends HttpServlet {
             return;
         }
 
-        BookingModel booking
-                = bookingService.getBookingDetail(
-                        bookingId,
-                        customer.getCustomerId());
+        BookingModel booking = bookingService.getBookingDetail(bookingId, customer.getCustomerId());
 
         if (booking == null) {
             request.setAttribute("error", "Booking not found");
-            request.getRequestDispatcher("/views/error.jsp")
-                    .forward(request, response);
+            request.getRequestDispatcher("/views/error.jsp").forward(request, response);
             return;
         }
 
         String cancelStatus = request.getParameter("cancelStatus");
         request.setAttribute("cancelStatus", cancelStatus);
-
         request.setAttribute("booking", booking);
-        request.getRequestDispatcher("/views/booking-detail.jsp")
-                .forward(request, response);
+
+        request.getRequestDispatcher("/views/booking-detail.jsp").forward(request, response);
     }
 
     private void cancelBooking(HttpServletRequest request,
@@ -478,32 +410,41 @@ public class BookingServlet extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
-        AccountModel account = (AccountModel) session.getAttribute("ACCOUNT");
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
 
+        AccountModel account = (AccountModel) session.getAttribute("ACCOUNT");
         if (account == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
-        CustomerModel customer
-                = new CustomerDAO().getByAccountId(account.getAccountId());
-
-        System.out.println("Customer login ID = " + customer.getCustomerId());
+        CustomerModel customer = new CustomerDAO().getByAccountId(account.getAccountId());
+        if (customer == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
 
         String bookingIdRaw = request.getParameter("bookingId");
-
         if (bookingIdRaw == null) {
             response.sendRedirect(request.getContextPath() + "/booking?action=list");
             return;
         }
 
-        int bookingId = Integer.parseInt(bookingIdRaw);
+        int bookingId;
+        try {
+            bookingId = Integer.parseInt(bookingIdRaw);
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/booking?action=list");
+            return;
+        }
 
-        boolean success
-                = bookingService.cancelBooking(
-                        bookingId,
-                        customer.getCustomerId()
-                );
+        boolean success = bookingService.cancelBooking(
+                bookingId,
+                customer.getCustomerId()
+        );
 
         if (success) {
             response.sendRedirect(
@@ -525,17 +466,13 @@ public class BookingServlet extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
-
         if (session == null) {
             response.sendRedirect(request.getContextPath() + "/home");
             return;
         }
 
-        // chỉ xóa session booking nếu có
         session.removeAttribute("LAST_BOOKING");
-
-        request.getRequestDispatcher("/views/booking-success.jsp")
-                .forward(request, response);
+        request.getRequestDispatcher("/views/booking-success.jsp").forward(request, response);
     }
 
     private void deleteBooking(HttpServletRequest request,
@@ -543,28 +480,24 @@ public class BookingServlet extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
-
         if (session == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
         AccountModel account = (AccountModel) session.getAttribute("ACCOUNT");
-
         if (account == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
         CustomerModel customer = new CustomerDAO().getByAccountId(account.getAccountId());
-
         if (customer == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
         String bookingIdRaw = request.getParameter("bookingId");
-
         if (bookingIdRaw == null) {
             response.sendRedirect(request.getContextPath() + "/booking?action=list");
             return;
@@ -584,13 +517,12 @@ public class BookingServlet extends HttpServlet {
         );
 
         if (success) {
-            response.sendRedirect(request.getContextPath()
-                    + "/booking?action=list");
+            response.sendRedirect(request.getContextPath() + "/booking?action=list");
         } else {
-            response.sendRedirect(request.getContextPath()
+            response.sendRedirect(
+                    request.getContextPath()
                     + "/booking?action=detail&bookingId=" + bookingId
             );
         }
     }
-
 }

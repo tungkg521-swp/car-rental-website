@@ -32,13 +32,13 @@ public class AuthFilter implements Filter {
             "/staff/vouchers",
             "/staff/notification",
             "/staff/send-notification",
-            "/admin/rental-report"  // giữ nguyên như bạn có
+            "/admin/rental-report" // giữ nguyên như bạn có
     );
 
     private static final Set<String> ADMIN_ALLOWED_PATHS = Set.of(
             "/dashboard/admin",
             "/admin/review"
-            // không cần thêm /admin/... vào đây vì ta xử lý bằng startsWith("/admin/")
+    // không cần thêm /admin/... vào đây vì ta xử lý bằng startsWith("/admin/")
     );
 
     @Override
@@ -105,13 +105,13 @@ public class AuthFilter implements Filter {
         }
 
         // === ADMIN AREA (đã sửa để fix lỗi AJAX report bị redirect login) ===
-        if (path.equals("/dashboard/admin") 
+        if (path.equals("/dashboard/admin")
                 || path.startsWith("/admin/")
                 || path.startsWith("/dashboard/admin/")) {
 
             // Cho phép tất cả các endpoint nội bộ/fragment (AJAX) đi qua mà KHÔNG check session/role
             // Vì chúng được gọi từ trang admin đã được bảo vệ rồi
-            if (path.endsWith("-content") 
+            if (path.endsWith("-content")
                     || path.contains("report-content")
                     || path.equals("/admin/rental-report-content")
                     || path.equals("/admin/revenue-report-content")
@@ -147,6 +147,7 @@ public class AuthFilter implements Filter {
             }
 
             if (path.startsWith("/booking")
+                    || path.startsWith("/payment")
                     || path.startsWith("/wishlist")
                     || path.startsWith("/review")
                     || path.startsWith("/customer/")) {
@@ -162,6 +163,7 @@ public class AuthFilter implements Filter {
 
         // === Customer area ===
         if (path.startsWith("/booking")
+                || path.startsWith("/payment")
                 || path.startsWith("/wishlist")
                 || path.startsWith("/review")
                 || path.startsWith("/customer/")) {
