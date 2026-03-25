@@ -28,9 +28,6 @@
                     </div>
                 </c:if>
 
-
-
-
                 <a href="${pageContext.request.contextPath}/cars?action=detail&carId=${car.carId}"
                    class="back-link">
                     <span class="bi bi-arrow-left">Quay lại</span>
@@ -44,6 +41,7 @@
                     <input type="hidden" name="action" value="create">
                     <input type="hidden" name="carId" value="${car.carId}">
                     <input type="hidden" id="totalEstimatedPrice" name="totalEstimatedPrice" value="0">
+
                     <div class="row g-4">
 
                         <!-- LEFT -->
@@ -58,7 +56,7 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <p><strong>Họ tên:</strong> ${customer.fullName}</p>
-                                        <p><strong>Email:</strong><span class="text-muted"> ${customer.email}</span></p>
+                                        <p><strong>Email:</strong> <span class="text-muted">${customer.email}</span></p>
                                     </div>
                                     <div class="col-md-6">
                                         <p><strong>Số điện thoại:</strong> ${customer.phone}</p>
@@ -69,9 +67,10 @@
                             <!-- CAR -->
                             <div class="card p-4 mt-4">
                                 <img src="${pageContext.request.contextPath}/assets/images/cars/${car.imageFolder}/${car.imageFolder}_1.jpg"
-                                     class="car-img mb-3">
-                                <h1>${car.imageFolder}</h1>
+                                     class="car-img mb-3"
+                                     alt="${car.imageFolder}">
 
+                                <h1>${car.imageFolder}</h1>
 
                                 <p class="text-muted">
                                     ${car.brandName} • ${car.typeName}
@@ -85,9 +84,7 @@
                                 </div>
 
                                 <div class="price-box mt-3">
-
-                                    <span >
-
+                                    <span>
                                         Đơn giá thuê
                                         <i class="info-icon" onclick="openModal()">?</i>
                                     </span>
@@ -118,7 +115,6 @@
                             </div>
 
                             <!-- VOUCHER -->
-
                             <div class="card p-4 mt-4">
                                 <h5 class="section-title">
                                     <i class="bi bi-ticket-perforated"></i> Voucher
@@ -165,9 +161,7 @@
                                 </h5>
 
                                 <textarea class="form-control"
-
                                           id="bookingNote"
-
                                           name="note"
                                           rows="3"
                                           placeholder="Ghi chú thêm..."></textarea>
@@ -215,9 +209,7 @@
                                     <span id="totalText">0 VND</span>
                                 </div>
 
-
                                 <button type="button" id="openConfirmBtn" class="btn btn-primary w-100 mt-3">
-
                                     Xác nhận đặt xe
                                 </button>
                             </div>
@@ -228,21 +220,18 @@
             </div>
         </div>
 
-
         <!-- ================= CONFIRM BOOKING MODAL ================= -->
         <div id="confirmBookingModal" class="confirm-modal-overlay">
             <div class="confirm-modal-box">
 
-
                 <button type="button" class="confirm-close" onclick="closeConfirmModal()">×</button>
-
 
                 <div class="confirm-topbar">
                     <div>
                         <p class="confirm-subtitle">Booking Preview</p>
                         <h2 class="confirm-title">Xác nhận đặt xe</h2>
                     </div>
-                    <div class="confirm-badge">Sẵn sàng đặt xe</div>
+                    <div class="confirm-badge">Bước 1/2: Xác nhận</div>
                 </div>
 
                 <div class="confirm-layout">
@@ -270,19 +259,20 @@
                             </div>
                         </div>
 
-
                         <div class="price-highlight-card">
-                            
-
                             <div class="price-highlight-top">Tổng thanh toán</div>
-                            
+
                             <div class="price-highlight-main" id="confirmTotal">0 VND</div>
+
+                            <div class="price-highlight-note">
+                                Thanh toán trước 30% để giữ xe
+                            </div>
 
                             <div class="price-highlight-sub">
                                 <span id="confirmDays">0 ngày</span>
                                 <span>•</span>
                                 <span id="confirmPricePerDay">0 VND</span>
-                                <span class="discount-corner" id="confirmDiscount"> -0 VND</span>
+                                <span class="discount-corner" id="confirmDiscountCorner">-0 VND</span>
                             </div>
                         </div>
                     </div>
@@ -354,6 +344,16 @@
                                     <strong id="confirmVoucherCode">Không có</strong>
                                 </div>
 
+                                <div class="summary-modern-row">
+                                    <span>Tiền cọc cần thanh toán (30%)</span>
+                                    <strong id="confirmDeposit">0 VND</strong>
+                                </div>
+
+                                <div class="summary-modern-row">
+                                    <span>Còn lại thanh toán sau</span>
+                                    <strong id="confirmRemaining">0 VND</strong>
+                                </div>
+
                                 <div class="summary-modern-row total">
                                     <span>Tổng cộng</span>
                                     <strong id="confirmTotal2">0 VND</strong>
@@ -414,14 +414,14 @@
 
                 <div class="confirm-actions modern-actions">
                     <button type="button" class="btn-cancel-confirm" onclick="closeConfirmModal()">Hủy</button>
-                    <button type="button" class="btn-submit-confirm" id="finalSubmitBtn">Đặt xe ngay</button>
+                    <button type="button" class="btn-submit-confirm" id="finalSubmitBtn">
+                        Xác nhận và tiếp tục thanh toán
+                    </button>
                 </div>
             </div>
         </div>
+
         <!-- JS -->
         <script src="${pageContext.request.contextPath}/assets/js/booking.js?v=4"></script>
-
-
-
     </body>
 </html>

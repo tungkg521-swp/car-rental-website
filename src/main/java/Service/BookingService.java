@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package service;
 
 import java.math.BigDecimal;
@@ -15,17 +11,12 @@ import DALs.CarDAO;
 import models.BookingModel;
 import models.ContractModel;
 
-/**
- *
- * @author ADMIN
- */
 public class BookingService {
 
-    private BookingDAO bookingDAO = new BookingDAO();
+    private final BookingDAO bookingDAO = new BookingDAO();
     private final ContractService contractService = new ContractService();
     private final CarDAO carDAO = new CarDAO();
 
-    // ===== TÍNH TIỀN =====
     public BigDecimal calculateTotalPrice(
             Date startDate,
             Date endDate,
@@ -43,9 +34,8 @@ public class BookingService {
         return pricePerDay.multiply(BigDecimal.valueOf(days));
     }
 
-    // ===== TẠO BOOKING =====
-    public void createBooking(BookingModel booking) throws SQLException {
-        bookingDAO.insert(booking);
+    public int createBooking(BookingModel booking) throws SQLException {
+        return bookingDAO.insert(booking);
     }
 
     public BookingModel getById(int bookingId) {
@@ -64,31 +54,36 @@ public boolean cancelBooking(int bookingId, int customerId) {
 
     BookingModel booking = bookingDAO.findById(bookingId, customerId);
 
-    if (booking == null) {
-        return false;
-    }
 
-    // Chỉ cho customer cancel khi booking còn PENDING
-    if (!"PENDING".equalsIgnoreCase(booking.getStatus())) {
-        return false;
-    }
+        if (booking == null) {
+            return false;
+        }
 
-    boolean updated = bookingDAO.updateStatus(bookingId, "CANCELLED");
+        if (!"PENDING_PAYMENT".equalsIgnoreCase(booking.getStatus())) {
+            return false;
+        }
 
-    if (!updated) {
-        return false;
-    }
+        boolean updated = bookingDAO.updateStatus(bookingId, "CANCELLED");
+
+        if (updated) {
+            carDAO.updateStatus(booking.getCarId(), "AVAILABLE");
+        }
+
+        return updated;
+
+
+   
 
     // Vì booking PENDING chưa khóa xe nên thường không cần mở lại xe
     // Nhưng nếu sau này flow thay đổi thì có thể bật dòng dưới:
-     carDAO.updateStatus(booking.getCarId(), "AVAILABLE");
+    
 
     // Nếu sau này có tăng used_count khi tạo booking thì hoàn lại voucher ở đây
     // if (booking.getVoucherId() != null) {
     //     voucherDAO.decreaseUsedCount(booking.getVoucherId());
     // }
 
-    return true;
+   
 }
 
     public List<BookingModel> findAllBookings() {
@@ -107,7 +102,7 @@ public boolean cancelBooking(int bookingId, int customerId) {
             return;
         }
 
-        if (!"PENDING".equalsIgnoreCase(booking.getStatus())) {
+        if (!"DEPOSIT_PAID".equalsIgnoreCase(booking.getStatus())) {
             return;
         }
 
@@ -152,9 +147,7 @@ public boolean cancelBooking(int bookingId, int customerId) {
         contract.setNote("Contract created automatically after staff approved booking.");
 
         contractService.createContract(contract);
-
         carDAO.updateStatus(booking.getCarId(), "BOOKED");
-
     }
 
     public void rejectBooking(int bookingId) {
@@ -164,7 +157,7 @@ public boolean cancelBooking(int bookingId, int customerId) {
             return;
         }
 
-        if (!"PENDING".equalsIgnoreCase(booking.getStatus())) {
+        if (!"DEPOSIT_PAID".equalsIgnoreCase(booking.getStatus())) {
             return;
         }
 
@@ -190,8 +183,10 @@ public boolean cancelBooking(int bookingId, int customerId) {
     }
 
     public void updateBookingStatus(int bookingId, String status) {
-
         bookingDAO.updateStatus(bookingId, status);
+    }
 
+    public boolean markDepositPaid(int bookingId) {
+        return bookingDAO.updateStatus(bookingId, "DEPOSIT_PAID");
     }
 }

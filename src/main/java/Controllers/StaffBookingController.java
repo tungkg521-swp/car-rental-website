@@ -46,7 +46,7 @@ public class StaffBookingController extends HttpServlet {
                 BookingModel booking = service.getBookingById(id);
 
                 if (booking == null) {
-
+                    System.out.println("lỗi idbooking");
                     response.sendRedirect(
                             request.getContextPath() + "/staff/bookings");
 

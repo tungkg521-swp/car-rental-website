@@ -764,3 +764,9 @@ textarea:focus {
     align-items: center;
     justify-content: center;
 }
+
+.price-highlight-note {
+    font-size: 13px;
+    opacity: 0.9;
+    margin-bottom: 8px;
+}
