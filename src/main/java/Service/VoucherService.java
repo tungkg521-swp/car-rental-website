@@ -20,7 +20,7 @@ public class VoucherService {
     }
     // Get voucher by ID
 
-    public Object getVoucherById(int voucherId) {
+    public VoucherModel getVoucherById(int voucherId) {
 
         return voucherDAO.findById(voucherId);
     }

@@ -21,3 +21,29 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 });
+
+(function () {
+    const startInput = document.getElementById("startDate");
+    const endInput = document.getElementById("endDate");
+
+    if (!startInput || !endInput) {
+        return;
+    }
+
+    const today = new Date().toISOString().split("T")[0];
+    startInput.min = today;
+    endInput.min = today;
+
+    startInput.addEventListener("change", function () {
+        endInput.min = startInput.value || today;
+
+        if (endInput.value && endInput.value <= startInput.value) {
+            endInput.value = "";
+        }
+    });
+})();
+
+function toggleNotification() {
+                const popup = document.querySelector(".notification-popup");
+                popup.classList.toggle("show");
+            }

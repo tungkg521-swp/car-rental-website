@@ -20,7 +20,7 @@ public class StaffBookingController extends HttpServlet {
     // ================= GET =================
     @Override
     protected void doGet(HttpServletRequest request,
-                         HttpServletResponse response)
+            HttpServletResponse response)
             throws ServletException, IOException {
 
         String action = request.getParameter("action");
@@ -34,9 +34,7 @@ public class StaffBookingController extends HttpServlet {
 
             request.getRequestDispatcher("/views/staff-booking.jsp")
                     .forward(request, response);
-        }
-
-        // ===== 2. VIEW DETAIL =====
+        } // ===== 2. VIEW DETAIL =====
         else if ("detail".equals(action)) {
 
             try {
@@ -65,9 +63,7 @@ public class StaffBookingController extends HttpServlet {
                 response.sendRedirect(
                         request.getContextPath() + "/staff/bookings");
             }
-        }
-
-        // ===== DEFAULT =====
+        } // ===== DEFAULT =====
         else {
 
             response.sendRedirect(
@@ -75,11 +71,10 @@ public class StaffBookingController extends HttpServlet {
         }
     }
 
-
     // ================= POST =================
     @Override
     protected void doPost(HttpServletRequest request,
-                          HttpServletResponse response)
+            HttpServletResponse response)
             throws ServletException, IOException {
 
         String action = request.getParameter("action");
@@ -100,16 +95,11 @@ public class StaffBookingController extends HttpServlet {
 
             // ===== APPROVE BOOKING =====
             if ("approve".equals(action)) {
-
                 service.approveBooking(bookingId, staffId);
-
-            }
-
-            // ===== REJECT BOOKING =====
-            else if ("reject".equals(action)) {
-
+            } else if ("reject".equals(action)) {
                 service.rejectBooking(bookingId);
-
+            } else if ("markDepositPaid".equals(action)) {
+                service.markDepositPaid(bookingId);
             }
 
             // quay lại detail

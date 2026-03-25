@@ -28,7 +28,7 @@
                     </div>
                 </c:if>
 
-                <a href="${pageContext.request.contextPath}/cars?action=detail&carId=${car.carId}"
+                <a href="${pageContext.request.contextPath}/cars?action=detail&carId=${car.carId}&startDate=${startDate}&endDate=${endDate}"
                    class="back-link">
                     <span class="bi bi-arrow-left">Quay lại</span>
                 </a>
@@ -105,11 +105,25 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <label>Từ ngày</label>
-                                        <input type="date" name="startDate" id="startDate" class="form-control" required>
+                                        <input type="date"
+                                               name="startDate"
+                                               id="startDate"
+                                               class="form-control"
+                                               required
+                                               value="${startDate}"
+                                               readonly>
+
+
                                     </div>
                                     <div class="col-md-6">
                                         <label>Đến ngày</label>
-                                        <input type="date" name="endDate" id="endDate" class="form-control" required>
+                                        <input type="date"
+                                               name="endDate"
+                                               id="endDate"
+                                               class="form-control"
+                                               required
+                                               value="${endDate}"
+                                               readonly>
                                     </div>
                                 </div>
                             </div>

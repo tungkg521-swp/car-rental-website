@@ -71,10 +71,7 @@ public class ContractService {
         }
 
         if ("ACTIVE".equalsIgnoreCase(status)) {
-            // Xe đang được thuê
-            carDAO.updateStatus(contract.getCarId(), "BOOKED");
-
-            // Booking đang diễn ra
+            carDAO.updateStatus(contract.getCarId(), "RENTING");
             bookingDAO.updateStatus(contract.getBookingId(), "ACTIVE");
         } else if ("COMPLETED".equalsIgnoreCase(status)) {
             // Trả xe xong

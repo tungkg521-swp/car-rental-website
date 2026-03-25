@@ -46,7 +46,9 @@
 
                     <!-- RIGHT INFO -->
                     <div class="car-summary">
-
+                        <c:if test="${not empty BOOKING_ERROR}">
+                            <div class="alert alert-danger">${BOOKING_ERROR}</div>
+                        </c:if>
                         <h1>
                             ${car.modelName}
                             <span class="status">${car.status}</span>
@@ -59,7 +61,11 @@
                         <div class="badge">
                             Miễn phí sạc tới 31/12/2027
                         </div>
-
+                        <c:if test="${not empty startDate and not empty endDate}">
+                            <div class="selected-period">
+                                <strong>Rental period:</strong> ${startDate} → ${endDate}
+                            </div>
+                        </c:if>
                         <ul class="specs">
                             <li>🚗 ${car.seatCount} chỗ</li>
                             <li>⚙️ ${car.transmission}</li>
@@ -69,7 +75,8 @@
                             <li>🏷️ ${car.brandName}</li>
                         </ul>
 
-                        <a href="${pageContext.request.contextPath}/booking?action=create&carId=${car.carId}"
+
+                        <a href="${pageContext.request.contextPath}/booking?action=create&carId=${car.carId}&startDate=${startDate}&endDate=${endDate}"
                            class="btn ${car.status ne 'AVAILABLE' ? 'disabled' : ''}">
                             Đặt xe
                         </a>
@@ -169,6 +176,7 @@
                                     👤 ${r.customerName}
                                 </div>
                                 <c:if test="${not empty sessionScope.CUSTOMER and sessionScope.CUSTOMER.customerId == r.customerId}">
+
                                     <button type="button"
                                             class="review-edit"
                                             data-review-id="${r.reviewId}"
@@ -179,6 +187,7 @@
                                     </button>
 
                                     <textarea id="review-comment-${r.reviewId}" hidden><c:out value="${r.comment}"/></textarea>
+
                                 </c:if>
 
                                 <div class="review-stars">
