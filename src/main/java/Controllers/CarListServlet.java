@@ -76,7 +76,11 @@ public class CarListServlet extends HttpServlet {
             cars = carService.findAllAvailableCars();
         }
 
+        String keyword = request.getParameter("keyword");
         request.setAttribute("cars", cars);
+        request.setAttribute("keyword", keyword);
+        request.setAttribute("startDate", startDateRaw);
+        request.setAttribute("endDate", endDateRaw);
         request.getRequestDispatcher("/views/car-list.jsp").forward(request, response);
     }
 
@@ -119,51 +123,117 @@ public class CarListServlet extends HttpServlet {
 
     private void searchCar(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         String keyword = request.getParameter("keyword");
+        String startDateRaw = request.getParameter("startDate");
+        String endDateRaw = request.getParameter("endDate");
 
         String cleaned = (keyword == null) ? "" : keyword.trim().replaceAll("\\s+", " ");
 
         List<CarModel> list = cleaned.isEmpty()
                 ? carService.findAllAvailableCars()
                 : carService.searchCars(cleaned);
+
+        list = keepCarsAvailableInDateRange(list, startDateRaw, endDateRaw);
+
         request.setAttribute("cars", list);
-        request.setAttribute("keyword", keyword);  // Để giữ giá trị search box
+        request.setAttribute("keyword", keyword);
+        request.setAttribute("startDate", startDateRaw);
+        request.setAttribute("endDate", endDateRaw);
+
         request.getRequestDispatcher("/views/car-list.jsp").forward(request, response);
     }
 
     private void filterCars(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Lấy tất cả param như trước
+
         String keyword = request.getParameter("keyword");
+        String startDateRaw = request.getParameter("startDate");
+        String endDateRaw = request.getParameter("endDate");
+
         boolean availableOnly = "on".equals(request.getParameter("availableOnly"));
         String[] brands = request.getParameterValues("brand");
         String[] types = request.getParameterValues("type");
         String[] fuels = request.getParameterValues("fuel");
+
         String seatsStr = request.getParameter("seats");
         Integer seats = (seatsStr != null && !seatsStr.isEmpty()) ? Integer.parseInt(seatsStr) : null;
+
         String transmission = request.getParameter("transmission");
         if ("Any".equals(transmission)) {
             transmission = null;
         }
+
         String yearRange = request.getParameter("yearRange");
         if ("Any".equals(yearRange)) {
             yearRange = null;
         }
-        String maxPriceStr = request.getParameter("maxPrice");
-        BigDecimal maxPrice = (maxPriceStr != null && !maxPriceStr.isEmpty()) ? new BigDecimal(maxPriceStr) : null;
 
-        List<CarModel> list = carService.filterCars(keyword, availableOnly, brands, types, fuels,
-                seats, transmission, yearRange, maxPrice);
+        String maxPriceStr = request.getParameter("maxPrice");
+        BigDecimal maxPrice = (maxPriceStr != null && !maxPriceStr.isEmpty())
+                ? new BigDecimal(maxPriceStr)
+                : null;
+
+        List<CarModel> list = carService.filterCars(
+                keyword,
+                availableOnly,
+                brands,
+                types,
+                fuels,
+                seats,
+                transmission,
+                yearRange,
+                maxPrice
+        );
+
+        list = keepCarsAvailableInDateRange(list, startDateRaw, endDateRaw);
 
         request.setAttribute("cars", list);
-        // Giữ các param để hiển thị trạng thái filter và search box
         request.setAttribute("keyword", keyword);
         request.setAttribute("availableOnly", availableOnly);
         request.setAttribute("seats", seats);
         request.setAttribute("transmission", transmission);
         request.setAttribute("yearRange", yearRange);
         request.setAttribute("maxPrice", maxPrice);
+        request.setAttribute("startDate", startDateRaw);
+        request.setAttribute("endDate", endDateRaw);
 
         request.getRequestDispatcher("/views/car-list.jsp").forward(request, response);
+    }
+
+    private boolean isValidDateRange(String startDateRaw, String endDateRaw) {
+        if (startDateRaw == null || endDateRaw == null
+                || startDateRaw.isBlank() || endDateRaw.isBlank()) {
+            return false;
+        }
+
+        try {
+            Date startDate = Date.valueOf(startDateRaw);
+            Date endDate = Date.valueOf(endDateRaw);
+            Date today = Date.valueOf(LocalDate.now());
+
+            return !startDate.before(today) && endDate.after(startDate);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private List<CarModel> keepCarsAvailableInDateRange(List<CarModel> cars, String startDateRaw, String endDateRaw) {
+        if (!isValidDateRange(startDateRaw, endDateRaw)) {
+            return cars;
+        }
+
+        Date startDate = Date.valueOf(startDateRaw);
+        Date endDate = Date.valueOf(endDateRaw);
+
+        List<CarModel> filtered = new java.util.ArrayList<>();
+
+        for (CarModel car : cars) {
+            if (!carService.isCarBookedInRange(car.getCarId(), startDate, endDate)) {
+                filtered.add(car);
+            }
+        }
+
+        return filtered;
     }
 }

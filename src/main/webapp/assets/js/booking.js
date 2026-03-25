@@ -71,12 +71,12 @@ function calculateRentalDays(startValue, endValue) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    if (startDate < today || endDate < startDate) {
+    if (startDate < today || endDate <= startDate) {
         return 0;
     }
 
     const diff = endDate - startDate;
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24)) + 1;
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
 
     return days;
 }

@@ -68,8 +68,6 @@ public class CarDAO extends DBContext {
             e.printStackTrace();
         }
 
-
-
         return list;
     }
 
@@ -105,10 +103,8 @@ public class CarDAO extends DBContext {
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
-
             ps.setInt(1, carId);
             ResultSet rs = ps.executeQuery();
-
 
             if (rs.next()) {
                 return new CarModel(
@@ -121,9 +117,7 @@ public class CarDAO extends DBContext {
                         rs.getString("transmission"),
                         rs.getString("brand_name"),
                         rs.getString("type_name"),
-
                         rs.getString("image_url"),
-
                         rs.getString("image_folder"),
                         rs.getString("description"),
                         rs.getString("status")
@@ -136,9 +130,7 @@ public class CarDAO extends DBContext {
         return null;
     }
 
-
-     public List<CarModel> findAllCars() {
-
+    public List<CarModel> findAllCars() {
 
         List<CarModel> list = new ArrayList<>();
 
@@ -212,13 +204,8 @@ public class CarDAO extends DBContext {
         return false;
     }
 
-
- 
-    
-
     public List<CarModel> searchCars(String keyword) {
         List<CarModel> list = new ArrayList<>();
-
 
         System.out.println("Connection = " + connection);
         String sql = """
@@ -304,7 +291,7 @@ public class CarDAO extends DBContext {
             sql.append(" AND c.model_name LIKE ?");
             params.add("%" + keyword.trim() + "%");
         }
-        
+
         if (availableOnly) {
             sql.append(" AND c.status = 'AVAILABLE'");
         }
@@ -929,11 +916,11 @@ public class CarDAO extends DBContext {
             return false;
         }
     }
-    
-    public List<CarModel> findAvailableCarsByDateRange(Date startDate, Date endDate) {
-    List<CarModel> list = new ArrayList<>();
 
-    String sql = """
+    public List<CarModel> findAvailableCarsByDateRange(Date startDate, Date endDate) {
+        List<CarModel> list = new ArrayList<>();
+
+        String sql = """
         SELECT
             c.car_id,
             c.model_name,
@@ -962,35 +949,58 @@ public class CarDAO extends DBContext {
         ORDER BY c.car_id DESC
     """;
 
-    try (PreparedStatement ps = connection.prepareStatement(sql)) {
-        ps.setDate(1, endDate);
-        ps.setDate(2, startDate);
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setDate(1, endDate);
+            ps.setDate(2, startDate);
 
-        ResultSet rs = ps.executeQuery();
+            ResultSet rs = ps.executeQuery();
 
-        while (rs.next()) {
-            list.add(new CarModel(
-                    rs.getInt("car_id"),
-                    rs.getString("model_name"),
-                    rs.getInt("model_year"),
-                    rs.getBigDecimal("price_per_day"),
-                    rs.getInt("seat_count"),
-                    rs.getString("fuel_type"),
-                    rs.getString("transmission"),
-                    rs.getString("brand_name"),
-                    rs.getString("type_name"),
-                    rs.getString("image_url"),
-                    rs.getString("image_folder"),
-                    null,
-                    rs.getString("status")
-            ));
+            while (rs.next()) {
+                list.add(new CarModel(
+                        rs.getInt("car_id"),
+                        rs.getString("model_name"),
+                        rs.getInt("model_year"),
+                        rs.getBigDecimal("price_per_day"),
+                        rs.getInt("seat_count"),
+                        rs.getString("fuel_type"),
+                        rs.getString("transmission"),
+                        rs.getString("brand_name"),
+                        rs.getString("type_name"),
+                        rs.getString("image_url"),
+                        rs.getString("image_folder"),
+                        null,
+                        rs.getString("status")
+                ));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-    } catch (Exception e) {
-        e.printStackTrace();
+        return list;
     }
 
-    return list;
-}
+    public boolean isCarBookedInRange(int carId, Date startDate, Date endDate) {
+        String sql = """
+        SELECT 1
+        FROM booking
+        WHERE car_id = ?
+          AND status IN ('CONFIRMED', 'ACTIVE')
+          AND start_date <= ?
+          AND end_date >= ?
+    """;
 
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, carId);
+            ps.setDate(2, endDate);
+            ps.setDate(3, startDate);
+
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
 }

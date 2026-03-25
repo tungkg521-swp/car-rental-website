@@ -61,7 +61,11 @@
                         <div class="badge">
                             Miễn phí sạc tới 31/12/2027
                         </div>
-
+                        <c:if test="${not empty startDate and not empty endDate}">
+                            <div class="selected-period">
+                                <strong>Rental period:</strong> ${startDate} → ${endDate}
+                            </div>
+                        </c:if>
                         <ul class="specs">
                             <li>🚗 ${car.seatCount} chỗ</li>
                             <li>⚙️ ${car.transmission}</li>
@@ -71,14 +75,10 @@
                             <li>🏷️ ${car.brandName}</li>
                         </ul>
 
-                        <c:if test="${not empty startDate and not empty endDate}">
-                            <div class="selected-period">
-                                <strong>Rental period:</strong> ${startDate} → ${endDate}
-                            </div>
-                        </c:if>
+
                         <a href="${pageContext.request.contextPath}/booking?action=create&carId=${car.carId}&startDate=${startDate}&endDate=${endDate}"
-                           class="btn btn-dark">
-                            Book now
+                           class="btn ${car.status ne 'AVAILABLE' ? 'disabled' : ''}">
+                            Đặt xe
                         </a>
 
 

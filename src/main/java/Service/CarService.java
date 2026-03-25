@@ -82,4 +82,7 @@ public boolean updateCar(CarModel car) {
     public String getPrimaryImage(int carId) {
         return carDAO.getPrimaryImageByCarId(carId);
     }
+    public boolean isCarBookedInRange(int carId, Date startDate, Date endDate) {
+    return carDAO.isCarBookedInRange(carId, startDate, endDate);
+}
 }

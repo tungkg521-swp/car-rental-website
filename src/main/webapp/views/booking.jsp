@@ -105,11 +105,25 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <label>Từ ngày</label>
-                                        <input type="date" name="startDate" id="startDate" class="form-control" required value="${startDate}">
+                                        <input type="date"
+                                               name="startDate"
+                                               id="startDate"
+                                               class="form-control"
+                                               required
+                                               value="${startDate}"
+                                               readonly>
+
+
                                     </div>
                                     <div class="col-md-6">
                                         <label>Đến ngày</label>
-                                        <input type="date" name="endDate" id="endDate" class="form-control" required value="${endDate}">
+                                        <input type="date"
+                                               name="endDate"
+                                               id="endDate"
+                                               class="form-control"
+                                               required
+                                               value="${endDate}"
+                                               readonly>
                                     </div>
                                 </div>
                             </div>

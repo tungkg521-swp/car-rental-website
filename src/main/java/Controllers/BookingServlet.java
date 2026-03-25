@@ -138,6 +138,8 @@ public class BookingServlet extends HttpServlet {
             CarModel car = carService.getCarById(carId);
 
             request.setAttribute("car", car);
+            request.setAttribute("startDate", startDateRaw);
+            request.setAttribute("endDate", endDateRaw);
             request.getRequestDispatcher("/views/car-detail.jsp").forward(request, response);
             return;
         }
@@ -162,6 +164,8 @@ public class BookingServlet extends HttpServlet {
         request.setAttribute("customer", customer);
         request.setAttribute("car", car);
         request.setAttribute("vouchers", validVouchers);
+        request.setAttribute("startDate", startDateRaw);
+        request.setAttribute("endDate", endDateRaw);
 
         request.getRequestDispatcher("/views/booking.jsp").forward(request, response);
     }

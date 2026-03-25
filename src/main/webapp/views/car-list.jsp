@@ -25,7 +25,10 @@
                     <div class="search-box">
                         <form action="${pageContext.request.contextPath}/cars" method="get">
                             <input type="hidden" name="action" value="search"/>
-                            <input type="text" name="keyword" placeholder="Tìm kiếm xe..." value="${param.keyword}">
+                            <input type="hidden" name="startDate" value="${not empty startDate ? startDate : param.startDate}"/>
+                            <input type="hidden" name="endDate" value="${not empty endDate ? endDate : param.endDate}"/>
+
+                            <input type="text" name="keyword" placeholder="Tìm kiếm xe..." value="${not empty keyword ? keyword : param.keyword}">
                             <button type="submit">Tìm</button>
                         </form>
                     </div>
@@ -33,12 +36,16 @@
                     <!-- FORM FILTER RIÊNG (các filter + nút Apply) -->
                     <form action="${pageContext.request.contextPath}/cars" method="get">
                         <input type="hidden" name="action" value="filter"/>
-                        <!-- Giữ keyword từ search để kết hợp -->
-                        <input type="hidden" name="keyword" value="${param.keyword}"/>
+                        <input type="hidden" name="keyword" value="${not empty keyword ? keyword : param.keyword}"/>
+                        <input type="hidden" name="startDate" value="${not empty startDate ? startDate : param.startDate}"/>
+                        <input type="hidden" name="endDate" value="${not empty endDate ? endDate : param.endDate}"/>
 
                         <div class="filter-header">
                             <h3>Lọc theo</h3>
-                            <a href="${pageContext.request.contextPath}/cars" class="reset">Xóa tất cả</a>
+                            <a href="${pageContext.request.contextPath}/cars?action=list&startDate=${not empty startDate ? startDate : param.startDate}&endDate=${not empty endDate ? endDate : param.endDate}"
+                               class="reset">
+                                Xóa tất cả
+                            </a>
                         </div>
 
                         <!-- AVAILABLE -->
@@ -159,15 +166,16 @@
 
                         <form action="${pageContext.request.contextPath}/cars" method="get" class="mb-4">
                             <input type="hidden" name="action" value="list">
+                            <input type="hidden" name="keyword" value="${not empty keyword ? keyword : param.keyword}">
 
                             <div style="display:flex; gap:12px; align-items:end; flex-wrap:wrap;">
                                 <div>
                                     <label>Pick-up date</label>
-                                    <input type="date" name="startDate" value="${startDate}" required>
+                                    <input type="date" name="startDate" value="${not empty startDate ? startDate : param.startDate}" required>
                                 </div>
                                 <div>
                                     <label>Return date</label>
-                                    <input type="date" name="endDate" value="${endDate}" required>
+                                    <input type="date" name="endDate" value="${not empty endDate ? endDate : param.endDate}" required>
                                 </div>
                                 <div>
                                     <button type="submit" class="btn btn-dark">Update</button>
