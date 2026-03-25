@@ -93,153 +93,156 @@
         <c:set var="formData" value="${licenseForm != null ? licenseForm : LICENSE}" />
         <c:set var="errs" value="${licenseErrors}" />
 
-                       
-                       
-                       
+
+
+
         <!-- ================= GPLX IMAGES ================= -->
-<h3 style="margin-top:20px;">Ảnh giấy phép lái xe</h3>
-<div class="license-images">
-    <div class="image-box">
-        <label>GPLX mặt trước</label>
-        <c:choose>
-            <c:when test="${formData != null && formData.imageFront != null}">
-                <img src="${pageContext.request.contextPath}/license-image?name=${formData.imageFront}"
-                     class="preview-img">
-            </c:when>
-            <c:otherwise>
-                <div class="empty-img">Chưa có ảnh</div>
-            </c:otherwise>
-        </c:choose>
+        <h3 style="margin-top:20px;">Ảnh giấy phép lái xe</h3>
+        <div class="license-images">
+            <div class="image-box">
+                <label>GPLX mặt trước</label>
+                <c:choose>
+                    <c:when test="${formData != null && formData.imageFront != null}">
+                        <img src="${pageContext.request.contextPath}/license-image?name=${formData.imageFront}"
+                             class="preview-img">
+                    </c:when>
+                    <c:otherwise>
+                        <div class="empty-img">Chưa có ảnh</div>
+                    </c:otherwise>
+                </c:choose>
 
-        <input type="file"
-               name="imageFront"
-               class="file-input"
-               accept="image/*"
-               ${formData == null || empty formData.imageFront ? 'required' : ''}
-               disabled
-               style="${errs.imageFront != null ? 'border:1.5px solid #e53935;background:#fff5f5;padding:6px;border-radius:8px;' : ''}">
+                <input type="file"
+                       name="imageFront"
+                       class="file-input"
+                       accept="image/*"
+                       ${formData == null || empty formData.imageFront ? 'required' : ''}
+                       disabled
+                       onchange="previewImage(this)">
 
-        <c:if test="${errs.imageFront != null}">
-            <small style="display:block;margin-top:6px;color:#e53935;font-size:13px;font-weight:600;">
-                ${errs.imageFront}
-            </small>
-        </c:if>
-    </div>
+                <c:if test="${errs.imageFront != null}">
+                    <small style="display:block;margin-top:6px;color:#e53935;font-size:13px;font-weight:600;">
+                        ${errs.imageFront}
+                    </small>
+                </c:if>
+            </div>
 
-    <div class="image-box">
-        <label>GPLX mặt sau</label>
-        <c:choose>
-            <c:when test="${formData != null && formData.imageBack != null}">
-                <img src="${pageContext.request.contextPath}/license-image?name=${formData.imageBack}"
-                     class="preview-img">
-            </c:when>
-            <c:otherwise>
-                <div class="empty-img">Chưa có ảnh</div>
-            </c:otherwise>
-        </c:choose>
+            <div class="image-box">
+                <label>GPLX mặt sau</label>
+                <c:choose>
+                    <c:when test="${formData != null && formData.imageBack != null}">
+                        <img src="${pageContext.request.contextPath}/license-image?name=${formData.imageBack}"
+                             class="preview-img">
+                    </c:when>
+                    <c:otherwise>
+                        <div class="empty-img">Chưa có ảnh</div>
+                    </c:otherwise>
+                </c:choose>
 
-        <input type="file"
-               name="imageBack"
-               class="file-input"
-               accept="image/*"
-               ${formData == null || empty formData.imageBack ? 'required' : ''}
-               disabled
-               style="${errs.imageBack != null ? 'border:1.5px solid #e53935;background:#fff5f5;padding:6px;border-radius:8px;' : ''}">
+                <input type="file"
+                       name="imageBack"
+                       class="file-input"
+                       accept="image/*"
+                       ${formData == null || empty formData.imageBack ? 'required' : ''}
+                       disabled
+                       onchange="previewImage(this)">
 
-        <c:if test="${errs.imageBack != null}">
-            <small style="display:block;margin-top:6px;color:#e53935;font-size:13px;font-weight:600;">
-                ${errs.imageBack}
-            </small>
-        </c:if>
-    </div>
-</div>
+                <c:if test="${errs.imageBack != null}">
+                    <small style="display:block;margin-top:6px;color:#e53935;font-size:13px;font-weight:600;">
+                        ${errs.imageBack}
+                    </small>
+                </c:if>
+            </div>
+        </div>
 
-<!-- ================= VERIFY IMAGES ================= -->
-<h3 style="margin-top:30px;">Ảnh xác minh chính chủ</h3>
-<div class="license-images">
-    <div class="image-box">
-        <label>Ảnh selfie cầm giấy tờ</label>
-        <c:choose>
-            <c:when test="${formData != null && formData.selfieImage != null}">
-                <img src="${pageContext.request.contextPath}/license-image?name=${formData.selfieImage}"
-                     class="preview-img">
-            </c:when>
-            <c:otherwise>
-                <div class="empty-img">Chưa có ảnh</div>
-            </c:otherwise>
-        </c:choose>
+        <!-- ================= VERIFY IMAGES ================= -->
+        <h3 style="margin-top:30px;">Ảnh xác minh chính chủ</h3>
+        <div class="license-images">
+            <div class="image-box">
+                <label>Ảnh selfie cầm giấy tờ</label>
+                <c:choose>
+                    <c:when test="${formData != null && formData.selfieImage != null}">
+                        <img src="${pageContext.request.contextPath}/license-image?name=${formData.selfieImage}"
+                             class="preview-img">
+                    </c:when>
+                    <c:otherwise>
+                        <div class="empty-img">Chưa có ảnh</div>
+                    </c:otherwise>
+                </c:choose>
 
-        <input type="file"
-               name="selfieImage"
-               class="file-input"
-               accept="image/*"
-               ${formData == null || empty formData.selfieImage ? 'required' : ''}
-               disabled
-               style="${errs.selfieImage != null ? 'border:1.5px solid #e53935;background:#fff5f5;padding:6px;border-radius:8px;' : ''}">
 
-        <c:if test="${errs.selfieImage != null}">
-            <small style="display:block;margin-top:6px;color:#e53935;font-size:13px;font-weight:600;">
-                ${errs.selfieImage}
-            </small>
-        </c:if>
-    </div>
+                <input type="file"
+                       name="selfieImage"
+                       class="file-input"
+                       accept="image/*"
+                       ${formData == null || empty formData.selfieImage ? 'required' : ''}
+                       disabled
+                       onchange="previewImage(this)">
 
-    <div class="image-box">
-        <label>CCCD mặt trước</label>
-        <c:choose>
-            <c:when test="${formData != null && formData.nationalIdFront != null}">
-                <img src="${pageContext.request.contextPath}/license-image?name=${formData.nationalIdFront}"
-                     class="preview-img">
-            </c:when>
-            <c:otherwise>
-                <div class="empty-img">Chưa có ảnh</div>
-            </c:otherwise>
-        </c:choose>
+                <c:if test="${errs.selfieImage != null}">
+                    <small style="display:block;margin-top:6px;color:#e53935;font-size:13px;font-weight:600;">
+                        ${errs.selfieImage}
+                    </small>
+                </c:if>
+            </div>
 
-        <input type="file"
-               name="nationalIdFront"
-               class="file-input"
-               accept="image/*"
-               ${formData == null || empty formData.nationalIdFront ? 'required' : ''}
-               disabled
-               style="${errs.nationalIdFront != null ? 'border:1.5px solid #e53935;background:#fff5f5;padding:6px;border-radius:8px;' : ''}">
+            <div class="image-box">
+                <label>CCCD mặt trước</label>
+                <c:choose>
+                    <c:when test="${formData != null && formData.nationalIdFront != null}">
+                        <img src="${pageContext.request.contextPath}/license-image?name=${formData.nationalIdFront}"
+                             class="preview-img">
+                    </c:when>
+                    <c:otherwise>
+                        <div class="empty-img">Chưa có ảnh</div>
+                    </c:otherwise>
+                </c:choose>
 
-        <c:if test="${errs.nationalIdFront != null}">
-            <small style="display:block;margin-top:6px;color:#e53935;font-size:13px;font-weight:600;">
-                ${errs.nationalIdFront}
-            </small>
-        </c:if>
-    </div>
+                <input type="file"
+                       name="nationalIdFront"
+                       class="file-input"
+                       accept="image/*"
+                       ${formData == null || empty formData.nationalIdFront ? 'required' : ''}
+                       disabled
+                       onchange="previewImage(this)"
+                       ">
 
-    <div class="image-box">
-        <label>CCCD mặt sau</label>
-        <c:choose>
-            <c:when test="${formData != null && formData.nationalIdBack != null}">
-                <img src="${pageContext.request.contextPath}/license-image?name=${formData.nationalIdBack}"
-                     class="preview-img">
-            </c:when>
-            <c:otherwise>
-                <div class="empty-img">Chưa có ảnh</div>
-            </c:otherwise>
-        </c:choose>
+                <c:if test="${errs.nationalIdFront != null}">
+                    <small style="display:block;margin-top:6px;color:#e53935;font-size:13px;font-weight:600;">
+                        ${errs.nationalIdFront}
+                    </small>
+                </c:if>
+            </div>
 
-        <input type="file"
-               name="nationalIdBack"
-               class="file-input"
-               accept="image/*"
-               ${formData == null || empty formData.nationalIdBack ? 'required' : ''}
-               disabled
-               style="${errs.nationalIdBack != null ? 'border:1.5px solid #e53935;background:#fff5f5;padding:6px;border-radius:8px;' : ''}">
+            <div class="image-box">
+                <label>CCCD mặt sau</label>
+                <c:choose>
+                    <c:when test="${formData != null && formData.nationalIdBack != null}">
+                        <img src="${pageContext.request.contextPath}/license-image?name=${formData.nationalIdBack}"
+                             class="preview-img">
+                    </c:when>
+                    <c:otherwise>
+                        <div class="empty-img">Chưa có ảnh</div>
+                    </c:otherwise>
+                </c:choose>
 
-        <c:if test="${errs.nationalIdBack != null}">
-            <small style="display:block;margin-top:6px;color:#e53935;font-size:13px;font-weight:600;">
-                ${errs.nationalIdBack}
-            </small>
-        </c:if>
-    </div>
-</div>
-                       
-                       
+                <input type="file"
+                       name="nationalIdBack"
+                       class="file-input"
+                       accept="image/*"
+                       ${formData == null || empty formData.nationalIdBack ? 'required' : ''}
+                       disabled
+                       onchange="previewImage(this)"
+                       ">
+
+                <c:if test="${errs.nationalIdBack != null}">
+                    <small style="display:block;margin-top:6px;color:#e53935;font-size:13px;font-weight:600;">
+                        ${errs.nationalIdBack}
+                    </small>
+                </c:if>
+            </div>
+        </div>
+
+
 
         <!-- ================= FORM INFO ================= -->
         <div class="form-group" style="margin-bottom:16px;">
@@ -330,7 +333,7 @@
         </button>
     </form>
 </div>
-        
+
 <!-- ================= MODAL UPDATE PROFILE ================= -->
 <div id="updateModal" class="modal-overlay">
     <div class="modal-box">
@@ -396,20 +399,58 @@
         }
     });
 </script>
+
+<script>
+    function previewImage(input) {
+        const file = input.files[0];
+        if (!file)
+            return;
+
+        if (!file.type.startsWith('image/'))
+            return;
+
+        const imageBox = input.closest('.image-box');
+        if (!imageBox)
+            return;
+
+        const oldPreview = imageBox.querySelector('.preview-img');
+        const oldEmpty = imageBox.querySelector('.empty-img');
+
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+            if (oldPreview) {
+                oldPreview.src = e.target.result;
+                return;
+            }
+
+            if (oldEmpty) {
+                const newImg = document.createElement('img');
+                newImg.src = e.target.result;
+                newImg.alt = 'Preview';
+                newImg.className = 'preview-img';
+
+                oldEmpty.parentNode.replaceChild(newImg, oldEmpty);
+            }
+        };
+
+        reader.readAsDataURL(file);
+    }
+</script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <c:if test="${param.msg == 'success'}">
     <script>
-        Swal.fire({
-            icon: 'success',
-            title: 'Thành công',
-            text: 'Cập nhật thành công!',
-            showConfirmButton: false,
-            timer: 1500,
-            timerProgressBar: true
-        }).then(() => {
-            window.location.href = '${pageContext.request.contextPath}/customer/profile';
-        });
+    Swal.fire({
+        icon: 'success',
+        title: 'Thành công',
+        text: 'Cập nhật thành công!',
+        showConfirmButton: false,
+        timer: 1500,
+        timerProgressBar: true
+    }).then(() => {
+        window.location.href = '${pageContext.request.contextPath}/customer/profile';
+    });
     </script>
 </c:if>
 
