@@ -1,76 +1,19 @@
 package Controllers;
 
-import DALs.ReviewDAO;
-import DALs.BookingDAO;
-import DALs.CarDAO;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
 import java.io.IOException;
 
-import models.CarModel;
 import models.CustomerModel;
-import models.ReviewModel;
 import service.ReviewService;
 
 public class ReviewServlet extends HttpServlet {
 
-    ReviewService reviewService = new ReviewService();
-    ReviewDAO reviewDAO = new ReviewDAO();
-    BookingDAO bookingDAO = new BookingDAO();
-    CarDAO carDAO = new CarDAO();
+    private final ReviewService reviewService = new ReviewService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        HttpSession session = request.getSession();
-        CustomerModel customer = (CustomerModel) session.getAttribute("CUSTOMER");
-
-        String action = request.getParameter("action");
-
-        if ("edit".equals(action)) {
-            String reviewIdRaw = request.getParameter("reviewId");
-            String carIdRaw = request.getParameter("carId");
-
-            if (customer == null) {
-                response.sendRedirect("login.jsp");
-                return;
-            }
-
-            try {
-                int reviewId = Integer.parseInt(reviewIdRaw);
-                int carId = Integer.parseInt(carIdRaw);
-
-                ReviewModel review = reviewDAO.getReviewById(reviewId);
-
-                if (review == null) {
-                    session.setAttribute("error", "Review not found.");
-                    response.sendRedirect("cars?action=detail&carId=" + carId);
-                    return;
-                }
-
-                if (review.getCustomerId() != customer.getCustomerId()) {
-                    session.setAttribute("error", "You can only edit your own review.");
-                    response.sendRedirect("cars?action=detail&carId=" + carId);
-                    return;
-                }
-
-                CarModel car = carDAO.findById(carId);
-
-                request.setAttribute("review", review);
-                request.setAttribute("car", car);
-                request.setAttribute("carId", carId);
-
-                request.getRequestDispatcher("views/edit-review.jsp").forward(request, response);
-                return;
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                response.sendRedirect("cars");
-                return;
-            }
-        }
 
         String contractParam = request.getParameter("contractId");
         String carParam = request.getParameter("carId");
@@ -95,10 +38,17 @@ public class ReviewServlet extends HttpServlet {
 
         String action = request.getParameter("action");
         String carIdStr = request.getParameter("carId");
-        int carId = Integer.parseInt(carIdStr);
+
+        int carId;
+        try {
+            carId = Integer.parseInt(carIdStr);
+        } catch (Exception e) {
+            session.setAttribute("error", "Invalid car ID.");
+            response.sendRedirect("cars");
+            return;
+        }
 
         if ("update".equals(action)) {
-
             String result = reviewService.handleUpdateReview(
                     customer,
                     request.getParameter("reviewId"),

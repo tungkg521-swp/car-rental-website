@@ -178,6 +178,13 @@
                         <span>Manage Contracts</span>
                     </a>
                 </li>
+                <li>
+                    <a class="${fn:contains(currentUri, '/staff/notification') ? 'active' : ''}"
+                       href="${pageContext.request.contextPath}/staff/notification">
+                        <i class="icon">🔔</i>
+                        <span>Notification</span>
+                    </a>
+                </li>
             </c:otherwise>
 
         </c:choose>
