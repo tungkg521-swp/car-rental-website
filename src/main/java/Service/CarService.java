@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import models.CarModel;
+import java.sql.Date;
 
 public class CarService {
 
@@ -14,6 +15,10 @@ public class CarService {
         return carDAO.findAllAvailableCars();
     }
 
+    public List<CarModel> findAvailableCarsByDateRange(Date startDate, Date endDate) {
+    return carDAO.findAvailableCarsByDateRange(startDate, endDate);
+}
+    
     public CarModel getCarById(int carId) {
         return carDAO.findById(carId);
     }

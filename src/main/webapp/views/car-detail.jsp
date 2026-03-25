@@ -46,7 +46,9 @@
 
                     <!-- RIGHT INFO -->
                     <div class="car-summary">
-
+                        <c:if test="${not empty BOOKING_ERROR}">
+                            <div class="alert alert-danger">${BOOKING_ERROR}</div>
+                        </c:if>
                         <h1>
                             ${car.modelName}
                             <span class="status">${car.status}</span>
@@ -69,9 +71,14 @@
                             <li>🏷️ ${car.brandName}</li>
                         </ul>
 
-                        <a href="${pageContext.request.contextPath}/booking?action=create&carId=${car.carId}"
-                           class="btn ${car.status ne 'AVAILABLE' ? 'disabled' : ''}">
-                            Đặt xe
+                        <c:if test="${not empty startDate and not empty endDate}">
+                            <div class="selected-period">
+                                <strong>Rental period:</strong> ${startDate} → ${endDate}
+                            </div>
+                        </c:if>
+                        <a href="${pageContext.request.contextPath}/booking?action=create&carId=${car.carId}&startDate=${startDate}&endDate=${endDate}"
+                           class="btn btn-dark">
+                            Book now
                         </a>
 
 
@@ -169,11 +176,11 @@
                                     👤 ${r.customerName}
                                 </div>
                                 <c:if test="${not empty sessionScope.CUSTOMER and sessionScope.CUSTOMER.customerId == r.customerId}">
-    <a class="review-edit"
-       href="${pageContext.request.contextPath}/review?action=edit&reviewId=${r.reviewId}&carId=${car.carId}">
-        ✏
-    </a>
-</c:if>
+                                    <a class="review-edit"
+                                       href="${pageContext.request.contextPath}/review?action=edit&reviewId=${r.reviewId}&carId=${car.carId}">
+                                        ✏
+                                    </a>
+                                </c:if>
 
                                 <div class="review-stars">
                                     <c:forEach begin="1" end="${r.rating}">

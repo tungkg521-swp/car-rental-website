@@ -1,9 +1,5 @@
 package Controllers;
 
-
-
-
-
 import DALs.CustomerDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -25,6 +21,7 @@ import models.VoucherModel;
 import service.BookingService;
 import service.CarService;
 import service.VoucherService;
+import java.math.RoundingMode;
 
 public class BookingServlet extends HttpServlet {
 
@@ -114,6 +111,12 @@ public class BookingServlet extends HttpServlet {
             return;
         }
 
+        String startDateRaw = request.getParameter("startDate");
+        String endDateRaw = request.getParameter("endDate");
+        if (startDateRaw == null || endDateRaw == null) {
+            response.sendRedirect(request.getContextPath() + "/home");
+            return;
+        }
         String carIdRaw = request.getParameter("carId");
         if (carIdRaw == null) {
             response.sendRedirect(request.getContextPath() + "/cars");
@@ -196,13 +199,7 @@ public class BookingServlet extends HttpServlet {
         String endDateRaw = request.getParameter("endDate");
         String note = request.getParameter("note");
 
-        //String voucherIdRaw = request.getParameter("voucherId");
-
-        System.out.println("carId = " + carIdRaw);
-        System.out.println("startDate = " + startDateRaw);
-        System.out.println("endDate = " + endDateRaw);
         if (carIdRaw == null || startDateRaw == null || endDateRaw == null) {
-
             response.sendRedirect(request.getContextPath() + "/cars");
             return;
         }
@@ -215,10 +212,8 @@ public class BookingServlet extends HttpServlet {
             return;
         }
 
-
         Integer voucherId = null;
         String voucherIdRaw = request.getParameter("voucherId");
-
         if (voucherIdRaw != null && !voucherIdRaw.trim().isEmpty()) {
             try {
                 voucherId = Integer.parseInt(voucherIdRaw);
@@ -227,6 +222,7 @@ public class BookingServlet extends HttpServlet {
                 return;
             }
         }
+
         Date startDate;
         Date endDate;
 
@@ -234,64 +230,116 @@ public class BookingServlet extends HttpServlet {
             startDate = Date.valueOf(startDateRaw);
             endDate = Date.valueOf(endDateRaw);
         } catch (IllegalArgumentException e) {
-            response.sendRedirect(request.getContextPath() + "/booking?action=create&carId=" + carId);
+            response.sendRedirect(request.getContextPath() + "/cars");
             return;
         }
 
         Date today = Date.valueOf(LocalDate.now());
 
-        if (startDate.before(today)) {
-            request.setAttribute("errorMessage", "Không thể đặt xe trong ngày quá khứ");
-
-            CarService carService = new CarService();
-            CarModel car = carService.getCarById(carId);
-            VoucherService voucherService = new VoucherService();
-
-            request.setAttribute("car", car);
-            request.setAttribute("customer", customer);
-            request.setAttribute("vouchers", voucherService.getAvailableVouchers());
-
-            request.getRequestDispatcher("/views/booking.jsp").forward(request, response);
-            return;
-        }
-
-        if (endDate.before(startDate)) {
-            request.setAttribute("errorMessage", "Ngày trả xe phải sau ngày thuê");
-
-            CarService carService = new CarService();
-            CarModel car = carService.getCarById(carId);
-            VoucherService voucherService = new VoucherService();
-
-            request.setAttribute("car", car);
-            request.setAttribute("customer", customer);
-            request.setAttribute("vouchers", voucherService.getAvailableVouchers());
-
-            request.getRequestDispatcher("/views/booking.jsp").forward(request, response);
-            return;
-        }
-
         CarService carService = new CarService();
-
         CarModel car = carService.getCarById(carId);
+        VoucherService voucherService = new VoucherService();
 
-        //carService.updateCarStatus(carId, "BOOKED");
-
-        if (car == null || !"AVAILABLE".equalsIgnoreCase(car.getStatus())) {
+        if (car == null) {
             response.sendRedirect(request.getContextPath() + "/cars");
             return;
         }
 
-
-        String totalPriceRaw = request.getParameter("totalEstimatedPrice");
-        BigDecimal totalPrice;
-
-        try {
-            totalPrice = new BigDecimal(totalPriceRaw);
-        } catch (Exception e) {
-            response.sendRedirect(request.getContextPath() + "/booking?carId=" + carId);
-
+        if (startDate.before(today)) {
+            request.setAttribute("errorMessage", "Không thể đặt xe trong ngày quá khứ");
+            request.setAttribute("car", car);
+            request.setAttribute("customer", customer);
+            request.setAttribute("vouchers", voucherService.getAvailableVouchers());
+            request.setAttribute("startDate", startDateRaw);
+            request.setAttribute("endDate", endDateRaw);
+            request.getRequestDispatcher("/views/booking.jsp").forward(request, response);
             return;
         }
+
+        if (!endDate.after(startDate)) {
+            request.setAttribute("errorMessage", "Ngày trả xe phải sau ngày nhận xe");
+            request.setAttribute("car", car);
+            request.setAttribute("customer", customer);
+            request.setAttribute("vouchers", voucherService.getAvailableVouchers());
+            request.setAttribute("startDate", startDateRaw);
+            request.setAttribute("endDate", endDateRaw);
+            request.getRequestDispatcher("/views/booking.jsp").forward(request, response);
+            return;
+        }
+
+        if ("MAINTENANCE".equalsIgnoreCase(car.getStatus())) {
+            response.sendRedirect(request.getContextPath() + "/cars");
+            return;
+        }
+
+        if (bookingService.hasOverlapConfirmed(carId, startDate, endDate)) {
+            request.setAttribute("errorMessage", "Xe không khả dụng trong khoảng thời gian đã chọn.");
+            request.setAttribute("car", car);
+            request.setAttribute("customer", customer);
+            request.setAttribute("vouchers", voucherService.getAvailableVouchers());
+            request.setAttribute("startDate", startDateRaw);
+            request.setAttribute("endDate", endDateRaw);
+            request.getRequestDispatcher("/views/booking.jsp").forward(request, response);
+            return;
+        }
+
+        BigDecimal totalPrice = bookingService.calculateTotalPrice(
+                startDate,
+                endDate,
+                car.getPricePerDay()
+        );
+
+        if (voucherId != null) {
+            VoucherModel voucher = voucherService.getVoucherById(voucherId);
+
+            if (voucher == null || !"ACTIVE".equalsIgnoreCase(voucher.getStatus())) {
+                request.setAttribute("errorMessage", "Voucher không hợp lệ.");
+                request.setAttribute("car", car);
+                request.setAttribute("customer", customer);
+                request.setAttribute("vouchers", voucherService.getAvailableVouchers());
+                request.setAttribute("startDate", startDateRaw);
+                request.setAttribute("endDate", endDateRaw);
+                request.getRequestDispatcher("/views/booking.jsp").forward(request, response);
+                return;
+            }
+
+            if (voucher.getMinBookingAmount() != null
+                    && totalPrice.compareTo(voucher.getMinBookingAmount()) < 0) {
+                request.setAttribute("errorMessage", "Đơn thuê chưa đủ điều kiện áp dụng voucher.");
+                request.setAttribute("car", car);
+                request.setAttribute("customer", customer);
+                request.setAttribute("vouchers", voucherService.getAvailableVouchers());
+                request.setAttribute("startDate", startDateRaw);
+                request.setAttribute("endDate", endDateRaw);
+                request.getRequestDispatcher("/views/booking.jsp").forward(request, response);
+                return;
+            }
+
+            if ("PERCENT".equalsIgnoreCase(voucher.getType())) {
+                BigDecimal discount = totalPrice
+                        .multiply(voucher.getDiscount())
+                        .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
+                totalPrice = totalPrice.subtract(discount);
+            } else {
+                totalPrice = totalPrice.subtract(voucher.getDiscount());
+            }
+
+            if (totalPrice.compareTo(BigDecimal.ZERO) < 0) {
+                totalPrice = BigDecimal.ZERO;
+            }
+        }
+
+        BigDecimal depositAmount = totalPrice
+                .multiply(new BigDecimal("0.30"))
+                .setScale(2, RoundingMode.HALF_UP);
+
+        BigDecimal remainingAmount = totalPrice
+                .subtract(depositAmount)
+                .setScale(2, RoundingMode.HALF_UP);
+
+        Timestamp paymentDeadline = Timestamp.valueOf(
+                java.time.LocalDateTime.now().plusMinutes(30)
+        );
 
         BookingModel booking = new BookingModel();
         booking.setCustomerId(customer.getCustomerId());
@@ -302,27 +350,26 @@ public class BookingServlet extends HttpServlet {
         booking.setEndDate(endDate);
         booking.setStatus("PENDING_PAYMENT");
         booking.setNote(note);
+        booking.setDepositAmount(depositAmount);
+        booking.setRemainingAmount(remainingAmount);
+        booking.setPaymentDeadline(paymentDeadline);
         booking.setTotalEstimatedPrice(totalPrice);
-        booking.setVoucherId(voucherId);
 
         try {
             int bookingId = bookingService.createBooking(booking);
-
-
-            if (voucherId != null) {
-                VoucherService voucherService = new VoucherService();
-                voucherService.updateVoucherQuantity(voucherId);
-            }
-
             session.setAttribute("LAST_BOOKING", booking.getBookingId());
 
             response.sendRedirect(
-                    request.getContextPath()
-                    + "/payment?action=create&bookingId=" + bookingId
+                    request.getContextPath() + "/payment?action=create&bookingId=" + bookingId
             );
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/booking?action=create&carId=" + carId);
+            response.sendRedirect(
+                    request.getContextPath()
+                    + "/booking?action=create&carId=" + carId
+                    + "&startDate=" + startDateRaw
+                    + "&endDate=" + endDateRaw
+            );
         }
     }
 

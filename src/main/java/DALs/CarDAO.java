@@ -929,5 +929,68 @@ public class CarDAO extends DBContext {
             return false;
         }
     }
+    
+    public List<CarModel> findAvailableCarsByDateRange(Date startDate, Date endDate) {
+    List<CarModel> list = new ArrayList<>();
+
+    String sql = """
+        SELECT
+            c.car_id,
+            c.model_name,
+            c.model_year,
+            c.price_per_day,
+            c.seat_count,
+            c.fuel_type,
+            c.transmission,
+            b.brand_name,
+            t.type_name,
+            i.image_url,
+            c.image_folder,
+            c.status
+        FROM cars c
+        LEFT JOIN brand b ON c.brand_id = b.brand_id
+        LEFT JOIN cars_type t ON c.type_id = t.type_id
+        LEFT JOIN cars_image i ON c.car_id = i.car_id AND i.is_primary = 1
+        WHERE c.status <> 'MAINTENANCE'
+          AND c.car_id NOT IN (
+              SELECT bk.car_id
+              FROM booking bk
+              WHERE bk.status IN ('CONFIRMED', 'ACTIVE')
+                AND bk.start_date <= ?
+                AND bk.end_date >= ?
+          )
+        ORDER BY c.car_id DESC
+    """;
+
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setDate(1, endDate);
+        ps.setDate(2, startDate);
+
+        ResultSet rs = ps.executeQuery();
+
+        while (rs.next()) {
+            list.add(new CarModel(
+                    rs.getInt("car_id"),
+                    rs.getString("model_name"),
+                    rs.getInt("model_year"),
+                    rs.getBigDecimal("price_per_day"),
+                    rs.getInt("seat_count"),
+                    rs.getString("fuel_type"),
+                    rs.getString("transmission"),
+                    rs.getString("brand_name"),
+                    rs.getString("type_name"),
+                    rs.getString("image_url"),
+                    rs.getString("image_folder"),
+                    null,
+                    rs.getString("status")
+            ));
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return list;
+}
 
 }

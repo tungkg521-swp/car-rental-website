@@ -9,6 +9,7 @@ import java.util.List;
 import DALs.BookingDAO;
 import DALs.CarDAO;
 import models.BookingModel;
+import models.CarModel;
 import models.ContractModel;
 
 public class BookingService {
@@ -50,41 +51,21 @@ public class BookingService {
         return bookingDAO.findById(bookingId, customerId);
     }
 
-public boolean cancelBooking(int bookingId, int customerId) {
+    public boolean cancelBooking(int bookingId, int customerId) {
 
-    BookingModel booking = bookingDAO.findById(bookingId, customerId);
-
+        BookingModel booking = bookingDAO.findById(bookingId, customerId);
 
         if (booking == null) {
             return false;
         }
 
-        if (!"PENDING_PAYMENT".equalsIgnoreCase(booking.getStatus())) {
+        if (!"PENDING_PAYMENT".equalsIgnoreCase(booking.getStatus())
+                && !"DEPOSIT_PAID".equalsIgnoreCase(booking.getStatus())) {
             return false;
         }
 
-        boolean updated = bookingDAO.updateStatus(bookingId, "CANCELLED");
-
-        if (updated) {
-            carDAO.updateStatus(booking.getCarId(), "AVAILABLE");
-        }
-
-        return updated;
-
-
-   
-
-    // Vì booking PENDING chưa khóa xe nên thường không cần mở lại xe
-    // Nhưng nếu sau này flow thay đổi thì có thể bật dòng dưới:
-    
-
-    // Nếu sau này có tăng used_count khi tạo booking thì hoàn lại voucher ở đây
-    // if (booking.getVoucherId() != null) {
-    //     voucherDAO.decreaseUsedCount(booking.getVoucherId());
-    // }
-
-   
-}
+        return bookingDAO.updateStatus(bookingId, "CANCELLED");
+    }
 
     public List<BookingModel> findAllBookings() {
         return bookingDAO.findAllBookings();
@@ -110,23 +91,22 @@ public boolean cancelBooking(int bookingId, int customerId) {
             return;
         }
 
-        if (bookingDAO.hasOverlapConfirmed(
-                booking.getCarId(),
-                booking.getStartDate(),
-                booking.getEndDate())) {
-
-            bookingDAO.updateStatus(bookingId, "REJECTED");
+        CarModel car = carDAO.findById(booking.getCarId());
+        if (car == null) {
             return;
         }
 
-        bookingDAO.updateStatus(bookingId, "CONFIRMED");
+        if ("MAINTENANCE".equalsIgnoreCase(car.getStatus())) {
+            return;
+        }
 
-        bookingDAO.rejectOverlappingBookings(
+        if (bookingDAO.hasBookingConflict(
                 booking.getCarId(),
                 booking.getStartDate(),
-                booking.getEndDate(),
-                bookingId
-        );
+                booking.getEndDate())) {
+            bookingDAO.updateStatus(bookingId, "REJECTED");
+            return;
+        }
 
         ContractModel contract = new ContractModel();
         contract.setBookingId(booking.getBookingId());
@@ -139,14 +119,21 @@ public boolean cancelBooking(int bookingId, int customerId) {
         contract.setDailyPrice(booking.getPricePerDay().doubleValue());
 
         double total = booking.getTotalEstimatedPrice().doubleValue();
-        double deposit = total * 0.3;
+        double deposit = booking.getDepositAmount() != null
+                ? booking.getDepositAmount().doubleValue()
+                : total * 0.3;
 
         contract.setDepositAmount(deposit);
         contract.setTotalAmount(total);
         contract.setSignedAt(null);
         contract.setNote("Contract created automatically after staff approved booking.");
 
-        contractService.createContract(contract);
+        boolean created = contractService.createContract(contract);
+        if (!created) {
+            return;
+        }
+
+        bookingDAO.updateStatus(bookingId, "CONFIRMED");
         carDAO.updateStatus(booking.getCarId(), "BOOKED");
     }
 
@@ -165,7 +152,7 @@ public boolean cancelBooking(int bookingId, int customerId) {
     }
 
     public boolean hasOverlapConfirmed(int carId, Date startDate, Date endDate) {
-        return bookingDAO.hasOverlapConfirmed(carId, startDate, endDate);
+        return bookingDAO.hasBookingConflict(carId, startDate, endDate);
     }
 
     public boolean deleteCancelledBooking(int bookingId, int customerId) {
@@ -187,6 +174,17 @@ public boolean cancelBooking(int bookingId, int customerId) {
     }
 
     public boolean markDepositPaid(int bookingId) {
+        BookingModel booking = bookingDAO.getById(bookingId);
+
+        if (booking == null) {
+            return false;
+        }
+
+        if (!"PENDING_PAYMENT".equalsIgnoreCase(booking.getStatus())) {
+            return false;
+        }
+
         return bookingDAO.updateStatus(bookingId, "DEPOSIT_PAID");
     }
+
 }

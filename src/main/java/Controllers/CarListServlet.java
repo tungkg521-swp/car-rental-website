@@ -15,6 +15,8 @@ import models.CarModel;
 import service.CarService;
 import DALs.ReviewDAO;
 import models.ReviewModel;
+import java.sql.Date;
+import java.time.LocalDate;
 
 /**
  *
@@ -44,7 +46,36 @@ public class CarListServlet extends HttpServlet {
     private void listCars(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        List<CarModel> cars = carService.findAllAvailableCars();
+        String startDateRaw = request.getParameter("startDate");
+        String endDateRaw = request.getParameter("endDate");
+
+        List<CarModel> cars;
+
+        if (startDateRaw != null && endDateRaw != null
+                && !startDateRaw.isBlank() && !endDateRaw.isBlank()) {
+
+            try {
+                Date startDate = Date.valueOf(startDateRaw);
+                Date endDate = Date.valueOf(endDateRaw);
+                Date today = Date.valueOf(LocalDate.now());
+
+                if (startDate.before(today) || !endDate.after(startDate)) {
+                    request.setAttribute("dateError", "Ngày thuê không hợp lệ.");
+                    cars = carService.findAllAvailableCars();
+                } else {
+                    cars = carService.findAvailableCarsByDateRange(startDate, endDate);
+                    request.setAttribute("startDate", startDateRaw);
+                    request.setAttribute("endDate", endDateRaw);
+                }
+            } catch (Exception e) {
+                request.setAttribute("dateError", "Ngày thuê không hợp lệ.");
+                cars = carService.findAllAvailableCars();
+            }
+
+        } else {
+            cars = carService.findAllAvailableCars();
+        }
+
         request.setAttribute("cars", cars);
         request.getRequestDispatcher("/views/car-list.jsp").forward(request, response);
     }
@@ -72,22 +103,23 @@ public class CarListServlet extends HttpServlet {
             return;
         }
 
+        String startDate = request.getParameter("startDate");
+        String endDate = request.getParameter("endDate");
+
         ReviewDAO reviewDAO = new ReviewDAO();
         List<ReviewModel> reviews = reviewDAO.getReviewByCar(carId);
 
         request.setAttribute("car", car);
         request.setAttribute("reviews", reviews);
+        request.setAttribute("startDate", startDate);
+        request.setAttribute("endDate", endDate);
 
-        request.getRequestDispatcher("/views/car-detail.jsp")
-                .forward(request, response);
+        request.getRequestDispatcher("/views/car-detail.jsp").forward(request, response);
     }
 
     private void searchCar(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String keyword = request.getParameter("keyword");
-
-       
-
 
         String cleaned = (keyword == null) ? "" : keyword.trim().replaceAll("\\s+", " ");
 
@@ -98,7 +130,6 @@ public class CarListServlet extends HttpServlet {
         request.setAttribute("keyword", keyword);  // Để giữ giá trị search box
         request.getRequestDispatcher("/views/car-list.jsp").forward(request, response);
     }
-
 
     private void filterCars(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -136,4 +167,3 @@ public class CarListServlet extends HttpServlet {
         request.getRequestDispatcher("/views/car-list.jsp").forward(request, response);
     }
 }
-

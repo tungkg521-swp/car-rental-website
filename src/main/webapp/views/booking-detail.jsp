@@ -189,7 +189,7 @@
                                     ← Back to My Bookings
                                 </a>
 
-                                <c:if test="${booking.status == 'PENDING_PAYMENT'}">
+                                <c:if test="${booking.status == 'PENDING_PAYMENT' or booking.status == 'DEPOSIT_PAID'}">
                                     <form method="post"
                                           action="${pageContext.request.contextPath}/booking"
                                           class="inline-form">

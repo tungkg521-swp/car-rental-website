@@ -4,10 +4,8 @@
  */
 package service;
 
-
-
 import DALs.BookingDAO;
-import DALs.CarDAO;
+
 import DALs.PaymentDAO;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -19,7 +17,7 @@ public class PaymentService {
 
     private final PaymentDAO paymentDAO = new PaymentDAO();
     private final BookingDAO bookingDAO = new BookingDAO();
-    private final CarDAO carDAO = new CarDAO();
+
     private final VoucherService voucherService = new VoucherService();
 
     public BigDecimal calculateDeposit(BigDecimal totalAmount) {
@@ -90,7 +88,6 @@ public class PaymentService {
             return updated;
         } else {
             bookingDAO.updateStatus(bookingId, "CANCELLED");
-            carDAO.updateStatus(booking.getCarId(), "AVAILABLE");
             return true;
         }
     }

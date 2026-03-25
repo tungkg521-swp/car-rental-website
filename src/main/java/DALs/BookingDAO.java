@@ -14,14 +14,14 @@ import models.BookingModel;
 
 public class BookingDAO extends DBContext {
 
-
     public int insert(BookingModel booking) throws SQLException {
 
         String sql = """
-            INSERT INTO booking
-            (customer_id, car_id, voucher_id, booking_date, start_date, end_date, status, note, total_estimated_price)
-            VALUES (?, ?, ?, GETDATE(), ?, ?, ?, ?, ?)
-        """;
+        INSERT INTO booking
+        (customer_id, car_id, voucher_id, booking_date, start_date, end_date,
+         status, note, deposit_amount, remaining_amount, payment_deadline, total_estimated_price)
+        VALUES (?, ?, ?, SYSDATETIME(), ?, ?, ?, ?, ?, ?, ?, ?)
+    """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -38,7 +38,26 @@ public class BookingDAO extends DBContext {
             ps.setDate(5, booking.getEndDate());
             ps.setString(6, booking.getStatus());
             ps.setString(7, booking.getNote());
-            ps.setBigDecimal(8, booking.getTotalEstimatedPrice());
+
+            if (booking.getDepositAmount() != null) {
+                ps.setBigDecimal(8, booking.getDepositAmount());
+            } else {
+                ps.setNull(8, Types.DECIMAL);
+            }
+
+            if (booking.getRemainingAmount() != null) {
+                ps.setBigDecimal(9, booking.getRemainingAmount());
+            } else {
+                ps.setNull(9, Types.DECIMAL);
+            }
+
+            if (booking.getPaymentDeadline() != null) {
+                ps.setTimestamp(10, booking.getPaymentDeadline());
+            } else {
+                ps.setNull(10, Types.TIMESTAMP);
+            }
+
+            ps.setBigDecimal(11, booking.getTotalEstimatedPrice());
 
             ps.executeUpdate();
 
@@ -53,7 +72,6 @@ public class BookingDAO extends DBContext {
 
         throw new SQLException("Không lấy được booking_id sau khi tạo booking.");
     }
-
 
     public BookingModel getById(int bookingId) {
         String sql = """
@@ -84,7 +102,9 @@ public class BookingDAO extends DBContext {
                 booking.setStatus(rs.getString("status"));
                 booking.setNote(rs.getString("note"));
                 booking.setTotalEstimatedPrice(rs.getBigDecimal("total_estimated_price"));
-
+                booking.setDepositAmount(rs.getBigDecimal("deposit_amount"));
+                booking.setRemainingAmount(rs.getBigDecimal("remaining_amount"));
+                booking.setPaymentDeadline(rs.getTimestamp("payment_deadline"));
                 return booking;
             }
         } catch (SQLException e) {
@@ -142,7 +162,7 @@ public class BookingDAO extends DBContext {
         return list;
     }
 
-     public BookingModel findById(int bookingId, int customerId) {
+    public BookingModel findById(int bookingId, int customerId) {
 
         String sql = """
         SELECT 
@@ -153,7 +173,9 @@ public class BookingDAO extends DBContext {
             b.status,
             b.note,
             b.total_estimated_price,
-
+            b.deposit_amount,
+            b.remaining_amount,
+            b.payment_deadline,
             c.model_name,
             c.image_folder,
 
@@ -204,7 +226,9 @@ public class BookingDAO extends DBContext {
 
                 booking.setContractStatus(
                         rs.getString("contract_status"));
-
+                booking.setDepositAmount(rs.getBigDecimal("deposit_amount"));
+                booking.setRemainingAmount(rs.getBigDecimal("remaining_amount"));
+                booking.setPaymentDeadline(rs.getTimestamp("payment_deadline"));
                 return booking;
             }
 
@@ -214,7 +238,6 @@ public class BookingDAO extends DBContext {
 
         return null;
     }
-
 
     public boolean updateStatus(int bookingId, String status) {
 
@@ -273,7 +296,7 @@ public class BookingDAO extends DBContext {
         return list;
     }
 
-      public BookingModel findById(int bookingId) {
+    public BookingModel findById(int bookingId) {
 
         String sql = """
     SELECT 
@@ -284,7 +307,9 @@ public class BookingDAO extends DBContext {
         b.status,
         b.note,
         b.total_estimated_price,
-
+        b.deposit_amount,
+        b.remaining_amount,
+        b.payment_deadline,
         c.full_name,
         c.email,
         c.phone,
@@ -323,7 +348,9 @@ public class BookingDAO extends DBContext {
                 booking.setCarName(rs.getString("model_name"));
                 booking.setPricePerDay(rs.getBigDecimal("price_per_day"));
                 booking.setImageFolder(rs.getString("image_folder"));
-
+                booking.setDepositAmount(rs.getBigDecimal("deposit_amount"));
+                booking.setRemainingAmount(rs.getBigDecimal("remaining_amount"));
+                booking.setPaymentDeadline(rs.getTimestamp("payment_deadline"));
                 return booking;
             }
 
@@ -333,7 +360,6 @@ public class BookingDAO extends DBContext {
 
         return null;
     }
-
 
     public int getCompletedBooking(int customerId, int carId) {
 
@@ -479,6 +505,33 @@ public class BookingDAO extends DBContext {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return false;
+    }
+
+    public boolean hasBookingConflict(int carId, Date startDate, Date endDate) {
+
+        String sql = """
+        SELECT 1
+        FROM booking
+        WHERE car_id = ?
+          AND status IN ('CONFIRMED', 'ACTIVE')
+          AND start_date <= ?
+          AND end_date >= ?
+    """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            ps.setInt(1, carId);
+            ps.setDate(2, endDate);
+            ps.setDate(3, startDate);
+
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return false;
     }
 }

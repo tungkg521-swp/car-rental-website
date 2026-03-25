@@ -66,13 +66,13 @@
                             <label>Hãng xe</label>
                             <div class="checkbox-list">
                                 <label><input type="checkbox" name="brand" value="Toyota" 
-                                    ${fn:contains(fn:join(paramValues.brand, ','), 'Toyota') ? 'checked' : ''} onchange="this.form.submit();"> Toyota</label>
+                                              ${fn:contains(fn:join(paramValues.brand, ','), 'Toyota') ? 'checked' : ''} onchange="this.form.submit();"> Toyota</label>
                                 <label><input type="checkbox" name="brand" value="Mazda" 
-                                    ${fn:contains(fn:join(paramValues.brand, ','), 'Mazda') ? 'checked' : ''} onchange="this.form.submit();"> Mazda</label>
+                                              ${fn:contains(fn:join(paramValues.brand, ','), 'Mazda') ? 'checked' : ''} onchange="this.form.submit();"> Mazda</label>
                                 <label><input type="checkbox" name="brand" value="BMW" 
-                                    ${fn:contains(fn:join(paramValues.brand, ','), 'BMW') ? 'checked' : ''} onchange="this.form.submit();"> BMW</label>
+                                              ${fn:contains(fn:join(paramValues.brand, ','), 'BMW') ? 'checked' : ''} onchange="this.form.submit();"> BMW</label>
                                 <label><input type="checkbox" name="brand" value="VinFast" 
-                                    ${fn:contains(fn:join(paramValues.brand, ','), 'VinFast') ? 'checked' : ''} onchange="this.form.submit();"> VinFast</label>
+                                              ${fn:contains(fn:join(paramValues.brand, ','), 'VinFast') ? 'checked' : ''} onchange="this.form.submit();"> VinFast</label>
                             </div>
                         </div>
 
@@ -81,13 +81,13 @@
                             <label>Loại xe</label>
                             <div class="checkbox-list">
                                 <label><input type="checkbox" name="type" value="Sedan" 
-                                    ${fn:contains(fn:join(paramValues.type, ','), 'Sedan') ? 'checked' : ''} onchange="this.form.submit();"> Sedan</label>
+                                              ${fn:contains(fn:join(paramValues.type, ','), 'Sedan') ? 'checked' : ''} onchange="this.form.submit();"> Sedan</label>
                                 <label><input type="checkbox" name="type" value="SUV" 
-                                    ${fn:contains(fn:join(paramValues.type, ','), 'SUV') ? 'checked' : ''} onchange="this.form.submit();"> SUV</label>
+                                              ${fn:contains(fn:join(paramValues.type, ','), 'SUV') ? 'checked' : ''} onchange="this.form.submit();"> SUV</label>
                                 <label><input type="checkbox" name="type" value="Hatchback" 
-                                    ${fn:contains(fn:join(paramValues.type, ','), 'Hatchback') ? 'checked' : ''} onchange="this.form.submit();"> Hatchback</label>
+                                              ${fn:contains(fn:join(paramValues.type, ','), 'Hatchback') ? 'checked' : ''} onchange="this.form.submit();"> Hatchback</label>
                                 <label><input type="checkbox" name="type" value="Coupe" 
-                                    ${fn:contains(fn:join(paramValues.type, ','), 'Coupe') ? 'checked' : ''} onchange="this.form.submit();"> Coupe</label>
+                                              ${fn:contains(fn:join(paramValues.type, ','), 'Coupe') ? 'checked' : ''} onchange="this.form.submit();"> Coupe</label>
                             </div>
                         </div>
 
@@ -124,13 +124,13 @@
                             <label>Nhiên liệu</label>
                             <div class="checkbox-list">
                                 <label><input type="checkbox" name="fuel" value="Gasoline" 
-                                    ${fn:contains(fn:join(paramValues.fuel, ','), 'Gasoline') ? 'checked' : ''} onchange="this.form.submit();"> Xăng (Gasoline)</label>
+                                              ${fn:contains(fn:join(paramValues.fuel, ','), 'Gasoline') ? 'checked' : ''} onchange="this.form.submit();"> Xăng (Gasoline)</label>
                                 <label><input type="checkbox" name="fuel" value="Diesel" 
-                                    ${fn:contains(fn:join(paramValues.fuel, ','), 'Diesel') ? 'checked' : ''} onchange="this.form.submit();"> Dầu diesel</label>
+                                              ${fn:contains(fn:join(paramValues.fuel, ','), 'Diesel') ? 'checked' : ''} onchange="this.form.submit();"> Dầu diesel</label>
                                 <label><input type="checkbox" name="fuel" value="Electric" 
-                                    ${fn:contains(fn:join(paramValues.fuel, ','), 'Electric') ? 'checked' : ''} onchange="this.form.submit();"> Điện</label>
+                                              ${fn:contains(fn:join(paramValues.fuel, ','), 'Electric') ? 'checked' : ''} onchange="this.form.submit();"> Điện</label>
                                 <label><input type="checkbox" name="fuel" value="Hybrid" 
-                                    ${fn:contains(fn:join(paramValues.fuel, ','), 'Hybrid') ? 'checked' : ''} onchange="this.form.submit();"> Hybrid</label>
+                                              ${fn:contains(fn:join(paramValues.fuel, ','), 'Hybrid') ? 'checked' : ''} onchange="this.form.submit();"> Hybrid</label>
                             </div>
                         </div>
 
@@ -153,6 +153,27 @@
                 <!-- CAR LIST -->
                 <main class="car-list">
                     <div class="list-header">
+                        <c:if test="${not empty dateError}">
+                            <div class="alert alert-danger">${dateError}</div>
+                        </c:if>
+
+                        <form action="${pageContext.request.contextPath}/cars" method="get" class="mb-4">
+                            <input type="hidden" name="action" value="list">
+
+                            <div style="display:flex; gap:12px; align-items:end; flex-wrap:wrap;">
+                                <div>
+                                    <label>Pick-up date</label>
+                                    <input type="date" name="startDate" value="${startDate}" required>
+                                </div>
+                                <div>
+                                    <label>Return date</label>
+                                    <input type="date" name="endDate" value="${endDate}" required>
+                                </div>
+                                <div>
+                                    <button type="submit" class="btn btn-dark">Update</button>
+                                </div>
+                            </div>
+                        </form>
                         <h2>${cars.size()} xe có sẵn để thuê</h2>
                         <div class="list-actions">
                             <select>
@@ -165,7 +186,7 @@
                     </div>
                     <div class="car-grid">
                         <c:forEach var="car" items="${cars}">
-                            <a href="${pageContext.request.contextPath}/cars?action=detail&carId=${car.carId}" class="car-card-link">
+                            <a href="${pageContext.request.contextPath}/cars?action=detail&carId=${car.carId}&startDate=${startDate}&endDate=${endDate}" class="car-card-link">
                                 <div class="car-card">
                                     <div class="car-img">
                                         <img src="${car.imageUrl}" alt="${car.modelName}">
