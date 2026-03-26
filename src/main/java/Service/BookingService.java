@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package service;
 
 import java.math.BigDecimal;
@@ -13,19 +9,15 @@ import java.util.List;
 import DALs.BookingDAO;
 import DALs.CarDAO;
 import models.BookingModel;
+import models.CarModel;
 import models.ContractModel;
 
-/**
- *
- * @author ADMIN
- */
 public class BookingService {
 
-    private BookingDAO bookingDAO = new BookingDAO();
+    private final BookingDAO bookingDAO = new BookingDAO();
     private final ContractService contractService = new ContractService();
     private final CarDAO carDAO = new CarDAO();
 
-    // ===== TÍNH TIỀN =====
     public BigDecimal calculateTotalPrice(
             Date startDate,
             Date endDate,
@@ -43,9 +35,8 @@ public class BookingService {
         return pricePerDay.multiply(BigDecimal.valueOf(days));
     }
 
-    // ===== TẠO BOOKING =====
-    public void createBooking(BookingModel booking) throws SQLException {
-        bookingDAO.insert(booking);
+    public int createBooking(BookingModel booking) throws SQLException {
+        return bookingDAO.insert(booking);
     }
 
     public BookingModel getById(int bookingId) {
@@ -68,8 +59,8 @@ public class BookingService {
             return false;
         }
 
-        // Chỉ cho cancel khi PENDING
-        if (!"PENDING".equalsIgnoreCase(booking.getStatus())) {
+        if (!"PENDING_PAYMENT".equalsIgnoreCase(booking.getStatus())
+                && !"DEPOSIT_PAID".equalsIgnoreCase(booking.getStatus())) {
             return false;
         }
 
@@ -92,7 +83,7 @@ public class BookingService {
             return;
         }
 
-        if (!"PENDING".equalsIgnoreCase(booking.getStatus())) {
+        if (!"DEPOSIT_PAID".equalsIgnoreCase(booking.getStatus())) {
             return;
         }
 
@@ -100,23 +91,22 @@ public class BookingService {
             return;
         }
 
-        if (bookingDAO.hasOverlapConfirmed(
-                booking.getCarId(),
-                booking.getStartDate(),
-                booking.getEndDate())) {
-
-            bookingDAO.updateStatus(bookingId, "REJECTED");
+        CarModel car = carDAO.findById(booking.getCarId());
+        if (car == null) {
             return;
         }
 
-        bookingDAO.updateStatus(bookingId, "CONFIRMED");
+        if ("MAINTENANCE".equalsIgnoreCase(car.getStatus())) {
+            return;
+        }
 
-        bookingDAO.rejectOverlappingBookings(
+        if (bookingDAO.hasBookingConflict(
                 booking.getCarId(),
                 booking.getStartDate(),
-                booking.getEndDate(),
-                bookingId
-        );
+                booking.getEndDate())) {
+            bookingDAO.updateStatus(bookingId, "REJECTED");
+            return;
+        }
 
         ContractModel contract = new ContractModel();
         contract.setBookingId(booking.getBookingId());
@@ -129,17 +119,22 @@ public class BookingService {
         contract.setDailyPrice(booking.getPricePerDay().doubleValue());
 
         double total = booking.getTotalEstimatedPrice().doubleValue();
-        double deposit = total * 0.3;
+        double deposit = booking.getDepositAmount() != null
+                ? booking.getDepositAmount().doubleValue()
+                : total * 0.3;
 
         contract.setDepositAmount(deposit);
         contract.setTotalAmount(total);
         contract.setSignedAt(null);
         contract.setNote("Contract created automatically after staff approved booking.");
 
-        contractService.createContract(contract);
+        boolean created = contractService.createContract(contract);
+        if (!created) {
+            return;
+        }
 
+        bookingDAO.updateStatus(bookingId, "CONFIRMED");
         carDAO.updateStatus(booking.getCarId(), "BOOKED");
-
     }
 
     public void rejectBooking(int bookingId) {
@@ -149,7 +144,7 @@ public class BookingService {
             return;
         }
 
-        if (!"PENDING".equalsIgnoreCase(booking.getStatus())) {
+        if (!"DEPOSIT_PAID".equalsIgnoreCase(booking.getStatus())) {
             return;
         }
 
@@ -157,7 +152,7 @@ public class BookingService {
     }
 
     public boolean hasOverlapConfirmed(int carId, Date startDate, Date endDate) {
-        return bookingDAO.hasOverlapConfirmed(carId, startDate, endDate);
+        return bookingDAO.hasBookingConflict(carId, startDate, endDate);
     }
 
     public boolean deleteCancelledBooking(int bookingId, int customerId) {
@@ -175,8 +170,21 @@ public class BookingService {
     }
 
     public void updateBookingStatus(int bookingId, String status) {
-
         bookingDAO.updateStatus(bookingId, status);
-
     }
+
+    public boolean markDepositPaid(int bookingId) {
+        BookingModel booking = bookingDAO.getById(bookingId);
+
+        if (booking == null) {
+            return false;
+        }
+
+        if (!"PENDING_PAYMENT".equalsIgnoreCase(booking.getStatus())) {
+            return false;
+        }
+
+        return bookingDAO.updateStatus(bookingId, "DEPOSIT_PAID");
+    }
+
 }

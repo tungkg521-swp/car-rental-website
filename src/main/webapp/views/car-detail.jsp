@@ -7,9 +7,9 @@
     <head>
         <title>${car.modelName}</title>
 
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style-base.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/car-detail.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/wishlist.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style-base.css?v=6">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/car-detail.css?v=6">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/wishlist.css?v=6">
     </head>
 
     <body>
@@ -46,7 +46,9 @@
 
                     <!-- RIGHT INFO -->
                     <div class="car-summary">
-
+                        <c:if test="${not empty BOOKING_ERROR}">
+                            <div class="alert alert-danger">${BOOKING_ERROR}</div>
+                        </c:if>
                         <h1>
                             ${car.modelName}
                             <span class="status">${car.status}</span>
@@ -59,7 +61,11 @@
                         <div class="badge">
                             Miễn phí sạc tới 31/12/2027
                         </div>
-
+                        <c:if test="${not empty startDate and not empty endDate}">
+                            <div class="selected-period">
+                                <strong>Rental period:</strong> ${startDate} → ${endDate}
+                            </div>
+                        </c:if>
                         <ul class="specs">
                             <li>🚗 ${car.seatCount} chỗ</li>
                             <li>⚙️ ${car.transmission}</li>
@@ -69,7 +75,8 @@
                             <li>🏷️ ${car.brandName}</li>
                         </ul>
 
-                        <a href="${pageContext.request.contextPath}/booking?action=create&carId=${car.carId}"
+
+                        <a href="${pageContext.request.contextPath}/booking?action=create&carId=${car.carId}&startDate=${startDate}&endDate=${endDate}"
                            class="btn ${car.status ne 'AVAILABLE' ? 'disabled' : ''}">
                             Đặt xe
                         </a>
@@ -169,11 +176,19 @@
                                     👤 ${r.customerName}
                                 </div>
                                 <c:if test="${not empty sessionScope.CUSTOMER and sessionScope.CUSTOMER.customerId == r.customerId}">
-    <a class="review-edit"
-       href="${pageContext.request.contextPath}/review?action=edit&reviewId=${r.reviewId}&carId=${car.carId}">
-        ✏
-    </a>
-</c:if>
+
+                                    <button type="button"
+                                            class="review-edit"
+                                            data-review-id="${r.reviewId}"
+                                            data-car-id="${car.carId}"
+                                            data-rating="${r.rating}"
+                                            onclick="openEditReviewModal(this)">
+                                        ✏
+                                    </button>
+
+                                    <textarea id="review-comment-${r.reviewId}" hidden><c:out value="${r.comment}"/></textarea>
+
+                                </c:if>
 
                                 <div class="review-stars">
                                     <c:forEach begin="1" end="${r.rating}">
@@ -203,7 +218,6 @@
             <div id="verifyModal" class="verify-modal">
                 <div class="verify-box">
                     <div class="verify-icon">!</div>
-
                     <p>Bạn cần xác thực <b>GPLX</b> mới có thể đặt xe.</p>
 
                     <div class="verify-actions">
@@ -228,10 +242,48 @@
             </script>
         </c:if>
 
+        <div id="editReviewModal" class="review-modal">
+            <div class="review-modal-content">
+                <button type="button" class="review-modal-close" onclick="closeEditReviewModal()">×</button>
+
+                <h3 class="edit-review-title">Edit Review</h3>
+
+                <form action="${pageContext.request.contextPath}/review" method="post" id="editReviewForm">
+                    <input type="hidden" name="action" value="update"/>
+                    <input type="hidden" name="reviewId" id="editReviewId"/>
+                    <input type="hidden" name="carId" id="editCarId"/>
+
+                    <div class="edit-form-group">
+                        <label for="editRating" class="edit-label">Rating</label>
+                        <select name="rating" id="editRating" class="edit-select">
+                            <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+                            <option value="4">⭐⭐⭐⭐ (4)</option>
+                            <option value="3">⭐⭐⭐ (3)</option>
+                            <option value="2">⭐⭐ (2)</option>
+                            <option value="1">⭐ (1)</option>
+                        </select>
+                    </div>
+
+                    <div class="edit-form-group">
+                        <label for="editComment" class="edit-label">Write Feedback</label>
+                        <textarea name="comment"
+                                  id="editComment"
+                                  rows="6"
+                                  class="edit-textarea"
+                                  placeholder="Write your feedback..."></textarea>
+                    </div>
+
+                    <div class="edit-actions">
+                        <button type="submit" class="edit-btn save-btn">Save</button>
+                        <button type="button" class="edit-btn cancel-btn" onclick="closeEditReviewModal()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
         <script src="${pageContext.request.contextPath}/assets/js/car-detail.js"></script>
         <script src="${pageContext.request.contextPath}/assets/js/verify-license.js"></script>
         <script src="${pageContext.request.contextPath}/assets/js/wishlist.js"></script>
-
+        <script src="${pageContext.request.contextPath}/assets/js/edit-review.js"></script>
     </body>
 
 </html>

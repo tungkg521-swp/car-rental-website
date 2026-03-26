@@ -40,30 +40,47 @@ public class ContractService {
             return false;
         }
 
+        if (!"ACTIVE".equalsIgnoreCase(status)
+                && !"COMPLETED".equalsIgnoreCase(status)
+                && !"CANCELLED".equalsIgnoreCase(status)) {
+            return false;
+        }
+
+        String currentStatus = contract.getContractStatus();
+
+        if ("ACTIVE".equalsIgnoreCase(status)
+                && !"CREATED".equalsIgnoreCase(currentStatus)) {
+            return false;
+        }
+
+        if ("COMPLETED".equalsIgnoreCase(status)
+                && !"ACTIVE".equalsIgnoreCase(currentStatus)) {
+            return false;
+        }
+
+        if ("CANCELLED".equalsIgnoreCase(status)
+                && !("CREATED".equalsIgnoreCase(currentStatus)
+                || "ACTIVE".equalsIgnoreCase(currentStatus))) {
+            return false;
+        }
+
         boolean updated = contractDAO.updateContractStatus(contractId, status);
 
         if (!updated) {
             return false;
         }
 
-        // CANCEL CONTRACT
-        if ("CANCELLED".equalsIgnoreCase(status)) {
-
-            bookingDAO.updateStatus(contract.getBookingId(), "CANCELLED");
-
-            carDAO.updateStatus(contract.getCarId(), "AVAILABLE");
-        }
-
-        // ACTIVATE CONTRACT (giao xe)
         if ("ACTIVE".equalsIgnoreCase(status)) {
-
-            carDAO.updateStatus(contract.getCarId(), "BOOKED");
-        }
-
-        // RETURN CAR
-        if ("COMPLETED".equalsIgnoreCase(status)) {
-
+            carDAO.updateStatus(contract.getCarId(), "RENTING");
+            bookingDAO.updateStatus(contract.getBookingId(), "ACTIVE");
+        } else if ("COMPLETED".equalsIgnoreCase(status)) {
+            // Trả xe xong
             carDAO.updateStatus(contract.getCarId(), "AVAILABLE");
+            bookingDAO.updateStatus(contract.getBookingId(), "COMPLETED");
+        } else if ("CANCELLED".equalsIgnoreCase(status)) {
+            // Hủy hợp đồng -> mở xe lại
+            carDAO.updateStatus(contract.getCarId(), "AVAILABLE");
+            bookingDAO.updateStatus(contract.getBookingId(), "CANCELLED");
         }
 
         return true;

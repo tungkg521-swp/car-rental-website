@@ -265,8 +265,14 @@ body {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-5px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to   {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .license-card {
@@ -387,10 +393,22 @@ body {
     padding: 6px;
 }
 
-.badge.green { background: #d4edda; color: #155724; }
-.badge.orange { background: #fff3cd; color: #856404; }
-.badge.red { background: #f8d7da; color: #721c24; }
-.badge.gray { background: #e2e3e5; color: #383d41; }
+.badge.green {
+    background: #d4edda;
+    color: #155724;
+}
+.badge.orange {
+    background: #fff3cd;
+    color: #856404;
+}
+.badge.red {
+    background: #f8d7da;
+    color: #721c24;
+}
+.badge.gray {
+    background: #e2e3e5;
+    color: #383d41;
+}
 
 .verify-btn {
     padding: 8px 16px;

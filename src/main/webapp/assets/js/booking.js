@@ -14,6 +14,14 @@ function validateBooking() {
     const startDate = new Date(sy, sm - 1, sd);
     const endDate = new Date(ey, em - 1, ed);
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (startDate < today) {
+        alert("Ngày thuê không được nhỏ hơn ngày hiện tại");
+        return false;
+    }
+
     if (endDate < startDate) {
         alert("Ngày trả không được nhỏ hơn ngày thuê");
         return false;
@@ -33,6 +41,22 @@ function formatMoney(number) {
     return Number(number || 0).toLocaleString("vi-VN");
 }
 
+function formatDateVN(dateStr) {
+    if (!dateStr) {
+        return "--/--/----";
+    }
+    const [y, m, d] = dateStr.split("-");
+    return `${d}/${m}/${y}`;
+}
+
+function calculateDepositAmount(total) {
+    return Number(total || 0) * 0.3;
+}
+
+function calculateRemainingAmount(total) {
+    return Number(total || 0) - calculateDepositAmount(total);
+}
+
 function calculateRentalDays(startValue, endValue) {
     if (!startValue || !endValue) {
         return 0;
@@ -47,12 +71,12 @@ function calculateRentalDays(startValue, endValue) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    if (startDate < today || endDate < startDate) {
+    if (startDate < today || endDate <= startDate) {
         return 0;
     }
 
     const diff = endDate - startDate;
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24)) + 1;
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
 
     return days;
 }
@@ -311,11 +335,97 @@ function calculateBookingSummary() {
     }
 }
 
+function fillConfirmModal() {
+    const startValue = document.getElementById("startDate")?.value || "";
+    const endValue = document.getElementById("endDate")?.value || "";
+    const noteValue = document.getElementById("bookingNote")?.value?.trim() || "";
+
+    const pricePerDay = parseFloat(document.getElementById("pricePerDayRaw")?.value) || 0;
+    const total = parseFloat(document.getElementById("totalEstimatedPrice")?.value) || 0;
+
+    const subtotalText = document.getElementById("subtotalText")?.innerText || "0 VND";
+    const discountText = document.getElementById("discountText")?.innerText || "-0 VND";
+    const voucherCodeText = document.getElementById("voucherCodeText")?.innerText || "Không có";
+
+    const days = calculateRentalDays(startValue, endValue);
+
+    if (!startValue || !endValue || days <= 0) {
+        return;
+    }
+
+    const deposit = calculateDepositAmount(total);
+    const remaining = calculateRemainingAmount(total);
+
+    const confirmStartDate = document.getElementById("confirmStartDate");
+    const confirmEndDate = document.getElementById("confirmEndDate");
+    const confirmPricePerDay = document.getElementById("confirmPricePerDay");
+    const confirmDays = document.getElementById("confirmDays");
+    const confirmTotal = document.getElementById("confirmTotal");
+
+    const confirmPricePerDay2 = document.getElementById("confirmPricePerDay2");
+    const confirmDays2 = document.getElementById("confirmDays2");
+    const confirmSubtotal = document.getElementById("confirmSubtotal");
+    const confirmDiscount = document.getElementById("confirmDiscount");
+    const confirmVoucherCode = document.getElementById("confirmVoucherCode");
+    const confirmTotal2 = document.getElementById("confirmTotal2");
+    const confirmDeposit = document.getElementById("confirmDeposit");
+    const confirmRemaining = document.getElementById("confirmRemaining");
+    const confirmDiscountCorner = document.getElementById("confirmDiscountCorner");
+    const confirmNoteBox = document.getElementById("confirmNoteBox");
+
+    if (confirmStartDate) {
+        confirmStartDate.innerText = formatDateVN(startValue);
+    }
+    if (confirmEndDate) {
+        confirmEndDate.innerText = formatDateVN(endValue);
+    }
+
+    if (confirmPricePerDay) {
+        confirmPricePerDay.innerText = formatMoney(pricePerDay) + " VND";
+    }
+    if (confirmDays) {
+        confirmDays.innerText = days + " ngày";
+    }
+    if (confirmTotal) {
+        confirmTotal.innerText = formatMoney(total) + " VND";
+    }
+
+    if (confirmPricePerDay2) {
+        confirmPricePerDay2.innerText = formatMoney(pricePerDay) + " VND";
+    }
+    if (confirmDays2) {
+        confirmDays2.innerText = days + " ngày";
+    }
+    if (confirmSubtotal) {
+        confirmSubtotal.innerText = subtotalText;
+    }
+    if (confirmDiscount) {
+        confirmDiscount.innerText = discountText;
+    }
+    if (confirmVoucherCode) {
+        confirmVoucherCode.innerText = voucherCodeText;
+    }
+    if (confirmTotal2) {
+        confirmTotal2.innerText = formatMoney(total) + " VND";
+    }
+    if (confirmDeposit) {
+        confirmDeposit.innerText = formatMoney(deposit) + " VND";
+    }
+    if (confirmRemaining) {
+        confirmRemaining.innerText = formatMoney(remaining) + " VND";
+    }
+    if (confirmDiscountCorner) {
+        confirmDiscountCorner.innerText = discountText;
+    }
+    if (confirmNoteBox) {
+        confirmNoteBox.innerText = noteValue || "Không có ghi chú";
+    }
+}
+
 // ================= MAIN =================
 document.addEventListener("DOMContentLoaded", function () {
     setTimeout(function () {
         const alertBox = document.querySelector(".alert-danger");
-
         if (alertBox) {
             alertBox.style.transition = "opacity 0.5s";
             alertBox.style.opacity = "0";
@@ -329,6 +439,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const startDateInput = document.getElementById("startDate");
     const endDateInput = document.getElementById("endDate");
     const voucherSelect = document.getElementById("voucherSelect");
+    const bookingForm = document.getElementById("bookingForm");
+    const openConfirmBtn = document.getElementById("openConfirmBtn");
+    const finalSubmitBtn = document.getElementById("finalSubmitBtn");
+    const agreePolicy = document.getElementById("agreePolicy");
 
     if (!startDateInput || !endDateInput) {
         return;
@@ -354,10 +468,36 @@ document.addEventListener("DOMContentLoaded", function () {
         voucherSelect.addEventListener("change", calculateBookingSummary);
     }
 
+    if (openConfirmBtn) {
+        openConfirmBtn.addEventListener("click", function () {
+            calculateBookingSummary();
+
+            if (!validateBooking()) {
+                return;
+            }
+
+            fillConfirmModal();
+            openConfirmModal();
+        });
+    }
+
+    if (finalSubmitBtn) {
+        finalSubmitBtn.addEventListener("click", function () {
+            if (agreePolicy && !agreePolicy.checked) {
+                alert("Vui lòng đồng ý chính sách hủy chuyến trước khi đặt xe");
+                return;
+            }
+
+            if (bookingForm) {
+                bookingForm.submit();
+            }
+        });
+    }
+
     calculateBookingSummary();
 });
 
-// ================= MODAL =================
+// ================= PRICE MODAL =================
 function openModal() {
     const modal = document.getElementById("priceModal");
     if (modal) {
@@ -378,3 +518,18 @@ window.addEventListener("click", function (event) {
         closeModal();
     }
 });
+
+// ================= CONFIRM MODAL =================
+function openConfirmModal() {
+    const modal = document.getElementById("confirmBookingModal");
+    if (modal) {
+        modal.style.display = "flex";
+    }
+}
+
+function closeConfirmModal() {
+    const modal = document.getElementById("confirmBookingModal");
+    if (modal) {
+        modal.style.display = "none";
+    }
+}

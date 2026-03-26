@@ -26,7 +26,6 @@
                         <div class="topbar-left">
                             <p class="page-kicker">Customer Booking</p>
                             <h1>Booking Detail</h1>
-
                         </div>
 
                         <div class="topbar-right">
@@ -83,20 +82,23 @@
 
                             </div>
                         </div>
+
                         <!-- RIGHT -->
                         <div class="detail-right">
 
                             <div class="detail-header">
                                 <div>
                                     <h2>${booking.carName}</h2>
-
-
                                 </div>
 
                                 <!-- STATUS BADGE -->
                                 <c:choose>
-                                    <c:when test="${booking.status == 'PENDING'}">
-                                        <span class="status-badge pending">Waiting Approval</span>
+                                    <c:when test="${booking.status == 'PENDING_PAYMENT'}">
+                                        <span class="status-badge pending">Waiting Payment</span>
+                                    </c:when>
+
+                                    <c:when test="${booking.status == 'DEPOSIT_PAID'}">
+                                        <span class="status-badge confirmed">Waiting Approval</span>
                                     </c:when>
 
                                     <c:when test="${booking.contractStatus == 'CREATED'}">
@@ -182,13 +184,12 @@
 
                             <!-- ACTIONS -->
                             <div class="action-buttons">
-                                <a href="${pageContext.request.contextPath}/customer/bookings?action=list"
+                                <a href="${pageContext.request.contextPath}/booking?action=list"
                                    class="btn btn-secondary">
                                     ← Back to My Bookings
                                 </a>
 
-
-                                <c:if test="${booking.status == 'PENDING'}">
+                                <c:if test="${booking.status == 'PENDING_PAYMENT' or booking.status == 'DEPOSIT_PAID'}">
                                     <form method="post"
                                           action="${pageContext.request.contextPath}/booking"
                                           class="inline-form">
@@ -204,6 +205,21 @@
                                     </form>
                                 </c:if>
 
+                                <c:if test="${booking.status == 'DEPOSIT_PAID'}">
+                                    <form method="post"
+                                          action="${pageContext.request.contextPath}/booking"
+                                          class="inline-form">
+
+                                        <input type="hidden" name="action" value="cancel"/>
+                                        <input type="hidden" name="bookingId" value="${booking.bookingId}"/>
+
+                                        <button type="submit"
+                                                class="btn btn-danger"
+                                                onclick="return confirm('Are you sure you want to cancel this booking?');">
+                                            Cancel Booking
+                                        </button>
+                                    </form>
+                                </c:if>
                                 <c:if test="${booking.status == 'CANCELLED'}">
                                     <form method="post"
                                           action="${pageContext.request.contextPath}/booking"
@@ -227,6 +243,7 @@
                 </div>
             </div>
         </section>
+
         <div id="popupOverlay" class="popup-overlay">
             <div class="popup-box" id="popupBox">
                 <div class="popup-icon" id="popupIcon">✓</div>
@@ -235,6 +252,7 @@
                 <button type="button" class="popup-btn" onclick="closePopup()">OK</button>
             </div>
         </div>
+
         <script src="${pageContext.request.contextPath}/assets/js/booking-detail.js?v=1"></script>
     </body>
 </html>

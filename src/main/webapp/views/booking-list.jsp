@@ -1,4 +1,4 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
@@ -65,35 +65,30 @@
                                     </div>
 
                                     <c:choose>
-
-                                        <c:when test="${b.status == 'PENDING'}">
+                                        <c:when test="${b.status == 'PENDING_PAYMENT'}">
+                                            <span class="status pending">Waiting Payment</span>
+                                        </c:when>
+                                        <c:when test="${b.status == 'DEPOSIT_PAID'}">
                                             <span class="status pending">Waiting Approval</span>
                                         </c:when>
-
                                         <c:when test="${b.contractStatus == 'CREATED'}">
                                             <span class="status confirmed">Approved</span>
                                         </c:when>
-
                                         <c:when test="${b.contractStatus == 'ACTIVE'}">
                                             <span class="status active">Renting</span>
                                         </c:when>
-
                                         <c:when test="${b.contractStatus == 'COMPLETED'}">
                                             <span class="status completed">Completed</span>
                                         </c:when>
-
                                         <c:when test="${b.status == 'REJECTED'}">
                                             <span class="status rejected">Rejected</span>
                                         </c:when>
-
                                         <c:when test="${b.status == 'CANCELLED'}">
                                             <span class="status cancelled">Cancelled</span>
                                         </c:when>
-
                                         <c:otherwise>
                                             <span class="status">${b.status}</span>
                                         </c:otherwise>
-
                                     </c:choose>
 
                                 </div>

@@ -7,10 +7,14 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <title>Car Manager</title>
+           <title>Car Manager</title>
+        <link rel="stylesheet" 
+              href="${pageContext.request.contextPath}/assets/css/staff.css">
+     
         <link rel="stylesheet" 
               href="${pageContext.request.contextPath}/assets/css/staff-cars-manager.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
     </head>
     <body>
         <div class="staff-layout">
@@ -120,15 +124,17 @@
                                                             </a>
                                                         </c:if>
 
-                                                        <form class="delete-form" method="POST" 
-                                                              action="${pageContext.request.contextPath}/staff/cars"
-                                                              onsubmit="return confirm('Are you sure you want to delete this car?');">
-                                                            <input type="hidden" name="action" value="delete">
-                                                            <input type="hidden" name="carId" value="${car.carId}">
-                                                            <button type="submit" class="btn-delete" title="Delete">
-                                                                <i class="fas fa-trash"></i>
-                                                            </button>
-                                                        </form>
+                                                        <c:if test="${isAdmin}">
+                                                            <form class="delete-form" method="POST" 
+                                                                  action="${pageContext.request.contextPath}/staff/cars"
+                                                                  onsubmit="return confirm('Are you sure you want to delete this car?');">
+                                                                <input type="hidden" name="action" value="delete">
+                                                                <input type="hidden" name="carId" value="${car.carId}">
+                                                                <button type="submit" class="btn-delete" title="Delete">
+                                                                    <i class="fas fa-trash"></i>
+                                                                </button>
+                                                            </form>
+                                                        </c:if>
                                                     </td>
                                                 </tr>
                                             </c:forEach>
