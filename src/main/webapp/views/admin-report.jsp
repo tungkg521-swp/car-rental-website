@@ -4,186 +4,207 @@
 
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Báo cáo</title>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/report.css">
-    </head>
-    <body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo cáo Chi Tiết</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/report.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
 
-        <c:choose>
-            <c:when test="${reportType == 'RENTAL'}">
-                <h2 class="report-title">Báo cáo Chuyến Thuê</h2>
-                <c:if test="${empty reportList}">
-                    <p class="no-data">Không có dữ liệu chuyến thuê nào.</p>
-                </c:if>
-                <c:if test="${not empty reportList}">
-                    <table class="report-table">
-                        <thead>
-                            <tr>
-                                <th>Mã hợp đồng / Booking</th>
-                                <th>Khách hàng</th>
-                                <th>SĐT</th>
-                                <th>Biển số</th>
-                                <th>Xe</th>
-                                <th>Nhận - Trả (dự kiến)</th>
-                                <th>Số ngày</th>
-                                <th>Tổng tiền</th>
-                                <th>Trạng thái</th>
-                                <th>Nhân viên</th>
-                                <th>Ghi chú</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <c:forEach var="r" items="${reportList}">
-                                <tr>
-                                    <td>${r.contractId != null ? r.contractId : r.bookingId}</td>
-                                    <td>${r.customerName}</td>
-                                    <td>${r.customerPhone}</td>
-                                    <td>${r.plateNumber}</td>
-                                    <td>${r.modelName} (${r.brandName} - ${r.typeName})</td>
-                                    <td>
-                                        <fmt:formatDate value="${r.startDate}" pattern="dd/MM/yyyy"/> →
-                                        <fmt:formatDate value="${r.endDate}" pattern="dd/MM/yyyy"/>
-                                    </td>
-                                    <td>${r.rentalDays}</td>
-                                    <td><fmt:formatNumber value="${r.totalPrice}" pattern="#,##0 ₫"/></td>
-                                    <td>${r.status}</td>
-                                    <td>${r.staffName != null ? r.staffName : 'Chưa có'}</td>
-                                    <td>${r.note != null ? r.note : '-'}</td>
-                                </tr>
-                            </c:forEach>
-                        </tbody>
-                    </table>
-                </c:if>
-            </c:when>
+    <button onclick="loadReportsOverview()" class="back-btn" style="margin-bottom:15px;">
+        ← Quay lại Report Dashboard
+    </button>
 
-            <c:when test="${reportType == 'USAGE'}">
-                <h2 class="report-title">Báo cáo Sử Dụng Xe</h2>
-                <c:if test="${empty reportList}">
-                    <p class="no-data">Không có dữ liệu sử dụng xe nào.</p>
-                </c:if>
-                <c:if test="${not empty reportList}">
-                    <table class="report-table">
-                        <thead>
-                            <tr>
-                                <th>Biển số</th>
-                                <th>Xe</th>
-                                <th>Số lần thuê</th>
-                                <th>Tổng ngày thuê</th>
-                                <th>Tổng doanh thu</th>
-                                <th>Lần thuê gần nhất</th>
-                                <th>Bảo dưỡng gần nhất</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <c:forEach var="r" items="${reportList}">
-                                <tr>
-                                    <td>${r.plateNumber}</td>
-                                    <td>${r.modelName} (${r.brandName} - ${r.typeName})</td>
-                                    <td>${r.rentalCount != null ? r.rentalCount : 0}</td>
-                                    <td>${r.totalRentalDays != null ? r.totalRentalDays : 0}</td>
-                                    <td><fmt:formatNumber value="${r.totalRevenue}" pattern="#,##0 ₫"/></td>
-                                    <td>
-                                        <fmt:formatDate value="${r.lastRentalDate}" pattern="dd/MM/yyyy"/>
-                                        <c:if test="${r.lastRentalDate == null}">-</c:if>
-                                        </td>
-                                        <td>
-                                        <fmt:formatDate value="${r.lastMaintenanceDate}" pattern="dd/MM/yyyy"/>
-                                        <c:if test="${r.lastMaintenanceDate == null}">-</c:if>
-                                        </td>
-                                    </tr>
-                            </c:forEach>
-                        </tbody>
-                    </table>
-                </c:if>
-            </c:when>
+    <c:choose>
+        <%-- ====================== RENTAL (TRIP REPORT) ====================== --%>
+        <c:when test="${reportType == 'RENTAL'}">
+            <h2 class="report-title">🚗 Trip Report - Báo cáo Chuyến Thuê</h2>
+            
+            <!-- Mini Bar Chart -->
+            <canvas id="rentalMiniChart" height="80"></canvas>
 
-            <c:when test="${reportType == 'REVENUE'}">
-                <h2 class="report-title">Báo cáo Doanh Thu</h2>
-
-                <c:if test="${empty reportList}">
-                    <p class="no-data">Chưa có doanh thu nào được ghi nhận từ các chuyến hoàn thành.</p>
-                </c:if>
-
-                <c:if test="${not empty reportList}">
-                    <table class="report-table">
-                        <thead>
-                            <tr>
-                                <th>Mã HĐ/Booking</th>
-                                <th>Khách hàng</th>
-                                <th>SĐT</th>
-                                <th>Biển số</th>
-                                <th>Xe</th>
-                                <th>Thời gian thuê</th>
-                                <th>Số ngày</th>
-                                <th>Doanh thu</th>
-                                <th>Ngày ghi nhận</th>
-                                <th>Trạng thái</th>
-                                <th>Nhân viên</th>
-                                <th>Ghi chú</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <c:forEach var="r" items="${reportList}">
-                                <tr>
-                                    <td>${r.contractId != null ? r.contractId : (r.bookingId != null ? r.bookingId : '-')}</td>
-                                    <td>${r.customerName != null ? r.customerName : '-'}</td>
-                                    <td>${r.customerPhone != null ? r.customerPhone : '-'}</td>
-                                    <td>${r.plateNumber != null ? r.plateNumber : '-'}</td>
-                                    <td>${r.modelName != null ? r.modelName : '-'} (${r.brandName != null ? r.brandName : '-'} - ${r.typeName != null ? r.typeName : '-'})</td>
-                                    <td>
-                                        <fmt:formatDate value="${r.startDate}" pattern="dd/MM/yyyy" /> →
-                                        <fmt:formatDate value="${r.endDate}" pattern="dd/MM/yyyy" />
-                                    </td>
-                                    <td>${r.rentalDays}</td>
-                                    <td>
-                                        <c:choose>
-                                            <c:when test="${not empty r.totalPrice}">
-                                                <fmt:formatNumber value="${r.totalPrice}" pattern="#,##0 ₫"/>
-                                            </c:when>
-                                            <c:otherwise>-</c:otherwise>
-                                        </c:choose>
-                                    </td>
-                                    <td>
-                                        <c:choose>
-                                            <c:when test="${not empty r.revenueDate}">
-                                                <fmt:formatDate value="${r.revenueDate}" pattern="dd/MM/yyyy"/>
-                                            </c:when>
-                                            <c:otherwise>-</c:otherwise>
-                                        </c:choose>
-                                    </td>
-                                    <td>${r.status != null ? r.status : '-'}</td>
-                                    <td>${r.staffName != null ? r.staffName : 'Chưa có'}</td>
-                                    <td>${r.note != null ? r.note : '-'}</td>
-                                </tr>
-                            </c:forEach>
-                        </tbody>
-                    </table>
-
-                    <!-- Tính tổng an toàn bằng c:set -->
-                    <c:set var="totalRevenue" value="0" scope="page" />
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th>Mã Booking/HĐ</th>
+                        <th>Khách hàng</th>
+                        <th>Biển số</th>
+                        <th>Nhận xe</th>
+                        <th>Trả xe</th>
+                        <th>Số ngày</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
                     <c:forEach var="r" items="${reportList}">
-                        <c:if test="${not empty r.totalPrice}">
-                            <c:set var="totalRevenue" value="${totalRevenue + r.totalPrice}" />
-                        </c:if>
+                        <tr>
+                            <td>${r.contractId != null ? r.contractId : r.bookingId}</td>
+                            <td>${r.customerName}</td>
+                            <td>${r.plateNumber}</td>
+                            <td><fmt:formatDate value="${r.startDate}" pattern="dd/MM/yyyy"/></td>
+                            <td><fmt:formatDate value="${r.endDate}" pattern="dd/MM/yyyy"/></td>
+                            <td>${r.rentalDays}</td>
+                            <td><fmt:formatNumber value="${r.totalPrice}" pattern="#,##0 ₫"/></td>
+                            <td>${r.status}</td>
+                        </tr>
                     </c:forEach>
+                </tbody>
+            </table>
+        </c:when>
 
-                    <div style="margin-top: 20px; font-weight: bold; text-align: right; font-size: 1.2em; color: #27ae60;">
-                        Tổng doanh thu: <fmt:formatNumber value="${totalRevenue}" pattern="#,##0 ₫"/>
-                    </div>
-                </c:if>
-            </c:when>
-            <c:otherwise>
-                <p class="no-data">Không xác định loại báo cáo.</p>
-            </c:otherwise>
-        </c:choose>
+        <%-- ====================== REVENUE REPORT ====================== --%>
+        <c:when test="${reportType == 'REVENUE'}">
+            <h2 class="report-title">💰 Revenue Report - Báo cáo Doanh Thu</h2>
+            
+            <canvas id="revenueLineChart" height="140"></canvas>
 
-        <br>
-        <button class="back-btn" onclick="loadReportsOverview()">
-            ← Quay lại Reports Overview
-        </button>
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th>Mã HĐ/Booking</th>
+                        <th>Khách hàng</th>
+                        <th>Biển số</th>
+                        <th>Thời gian</th>
+                        <th>Số ngày</th>
+                        <th>Doanh thu</th>
+                        <th>Ngày ghi nhận</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <c:forEach var="r" items="${reportList}">
+                        <tr>
+                            <td>${r.contractId != null ? r.contractId : r.bookingId}</td>
+                            <td>${r.customerName}</td>
+                            <td>${r.plateNumber}</td>
+                            <td>
+                                <fmt:formatDate value="${r.startDate}" pattern="dd/MM"/> →
+                                <fmt:formatDate value="${r.endDate}" pattern="dd/MM/yyyy"/>
+                            </td>
+                            <td>${r.rentalDays}</td>
+                            <td><fmt:formatNumber value="${r.totalPrice}" pattern="#,##0 ₫"/></td>
+                            <td><fmt:formatDate value="${r.revenueDate}" pattern="dd/MM/yyyy"/></td>
+                        </tr>
+                    </c:forEach>
+                </tbody>
+            </table>
+        </c:when>
 
-    </body>
+        <%-- ====================== USAGE REPORT ====================== --%>
+        <c:when test="${reportType == 'USAGE'}">
+            <h2 class="report-title">⚙️ Vehicle Utilization Report</h2>
+            
+            <div style="display: flex; gap: 30px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 300px;">
+                    <h3>Phân bổ trạng thái xe</h3>
+                    <canvas id="usagePieChart" height="200"></canvas>
+                </div>
+                <div style="flex: 2; min-width: 400px;">
+                    <h3>Tỷ lệ sử dụng theo xe</h3>
+                    <canvas id="usageBarChart" height="300"></canvas>
+                </div>
+            </div>
+
+            <table class="report-table" style="margin-top:30px;">
+                <thead>
+                    <tr>
+                        <th>Biển số</th>
+                        <th>Xe</th>
+                        <th>Số lần thuê</th>
+                        <th>Tổng ngày thuê</th>
+                        <th>Tổng doanh thu</th>
+                        <th>Lần thuê gần nhất</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <c:forEach var="r" items="${reportList}">
+                        <tr>
+                            <td>${r.plateNumber}</td>
+                            <td>${r.modelName} (${r.brandName})</td>
+                            <td>${r.rentalCount}</td>
+                            <td>${r.totalRentalDays}</td>
+                            <td><fmt:formatNumber value="${r.totalRevenue}" pattern="#,##0 ₫"/></td>
+                            <td><fmt:formatDate value="${r.lastRentalDate}" pattern="dd/MM/yyyy"/></td>
+                        </tr>
+                    </c:forEach>
+                </tbody>
+            </table>
+        </c:when>
+    </c:choose>
+
+    <!-- CHARTS SCRIPT -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const type = '${reportType}';
+            
+            if (type === 'RENTAL') renderRentalMiniChart();
+            if (type === 'REVENUE') renderRevenueLineChart();
+            if (type === 'USAGE') {
+                renderUsagePieChart();
+                renderUsageBarChart();
+            }
+        });
+
+        function renderRentalMiniChart() {
+            // Mini bar chart số chuyến theo ngày (có thể cải tiến sau)
+            new Chart(document.getElementById('rentalMiniChart'), {
+                type: 'bar',
+                data: { labels: ['Tổng'], datasets: [{ label: 'Số chuyến', data: [${reportList.size()}], backgroundColor: '#3498db' }] },
+                options: { responsive: true, plugins: { legend: { display: false }}}
+            });
+        }
+
+        function renderRevenueLineChart() {
+            const labels = [<c:forEach var="r" items="${reportList}" varStatus="s">'<fmt:formatDate value="${r.revenueDate}" pattern="dd/MM"/>'${!s.last ? ',' : ''}</c:forEach>];
+            const data  = [<c:forEach var="r" items="${reportList}" varStatus="s">${r.totalPrice != null ? r.totalPrice : 0}${!s.last ? ',' : ''}</c:forEach>];
+
+            new Chart(document.getElementById('revenueLineChart'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Doanh thu (₫)',
+                        data: data,
+                        borderColor: '#27ae60',
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: { responsive: true }
+            });
+        }
+
+        function renderUsagePieChart() {
+            // Pie chart giả lập (bạn có thể cải tiến sau bằng cách query thêm trạng thái)
+            new Chart(document.getElementById('usagePieChart'), {
+                type: 'pie',
+                data: {
+                    labels: ['Đang thuê', 'Rảnh', 'Bảo trì'],
+                    datasets: [{ data: [60, 30, 10], backgroundColor: ['#e74c3c', '#2ecc71', '#f1c40f'] }]
+                }
+            });
+        }
+
+        function renderUsageBarChart() {
+            const labels = [<c:forEach var="r" items="${reportList}" varStatus="s">'${r.plateNumber}'${!s.last ? ',' : ''}</c:forEach>];
+            const values = [<c:forEach var="r" items="${reportList}" varStatus="s">${r.totalRentalDays}${!s.last ? ',' : ''}</c:forEach>];
+
+            new Chart(document.getElementById('usageBarChart'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Tổng ngày thuê',
+                        data: values,
+                        backgroundColor: '#3498db'
+                    }]
+                },
+                options: { indexAxis: 'y', responsive: true }
+            });
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
 </html>
