@@ -159,7 +159,7 @@
                                                 type="submit"
                                                 name="action"
                                                 value="activate">
-                                            Activate
+                                            Handover Car
                                         </button>
 
                                         <button class="btn btn-danger"
@@ -185,9 +185,20 @@
                                         <button class="btn btn-success"
                                                 type="submit"
                                                 name="action"
-                                                value="complete">
-                                            Complete
+                                                value="complete"
+                                                onclick="this.form.carNextStatus.value = 'AVAILABLE'">
+                                            Return Car - Available
                                         </button>
+
+                                        <button class="btn btn-warning"
+                                                type="submit"
+                                                name="action"
+                                                value="complete"
+                                                onclick="this.form.carNextStatus.value = 'MAINTENANCE'">
+                                            Return Car - Maintenance
+                                        </button>
+
+                                        <input type="hidden" name="carNextStatus" value="AVAILABLE"/>
                                     </form>
                                 </c:when>
                             </c:choose>

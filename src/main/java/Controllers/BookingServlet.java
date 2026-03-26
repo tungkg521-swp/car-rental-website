@@ -341,10 +341,6 @@ public class BookingServlet extends HttpServlet {
                 .subtract(depositAmount)
                 .setScale(2, RoundingMode.HALF_UP);
 
-        Timestamp paymentDeadline = Timestamp.valueOf(
-                java.time.LocalDateTime.now().plusMinutes(30)
-        );
-
         BookingModel booking = new BookingModel();
         booking.setCustomerId(customer.getCustomerId());
         booking.setCarId(carId);
@@ -352,19 +348,20 @@ public class BookingServlet extends HttpServlet {
         booking.setBookingDate(new Timestamp(System.currentTimeMillis()));
         booking.setStartDate(startDate);
         booking.setEndDate(endDate);
-        booking.setStatus("PENDING_PAYMENT");
+        booking.setStatus("PENDING_APPROVAL");
+
         booking.setNote(note);
         booking.setDepositAmount(depositAmount);
         booking.setRemainingAmount(remainingAmount);
-        booking.setPaymentDeadline(paymentDeadline);
+        booking.setPaymentDeadline(null);
         booking.setTotalEstimatedPrice(totalPrice);
 
         try {
             int bookingId = bookingService.createBooking(booking);
-            session.setAttribute("LAST_BOOKING", booking.getBookingId());
+            session.setAttribute("LAST_BOOKING", bookingId);
 
             response.sendRedirect(
-                    request.getContextPath() + "/payment?action=create&bookingId=" + bookingId
+                    request.getContextPath() + "/booking?action=detail&bookingId=" + bookingId + "&created=1"
             );
         } catch (Exception e) {
             e.printStackTrace();

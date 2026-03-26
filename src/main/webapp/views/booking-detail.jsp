@@ -35,7 +35,11 @@
                             </div>
                         </div>
                     </div>
-
+                    <c:if test="${param.created == '1'}">
+                        <div class="alert alert-success">
+                            Booking request created successfully. Please wait for staff approval.
+                        </div>
+                    </c:if>
                     <!-- MAIN CARD -->
                     <div class="detail-card">
 
@@ -93,12 +97,12 @@
 
                                 <!-- STATUS BADGE -->
                                 <c:choose>
-                                    <c:when test="${booking.status == 'PENDING_PAYMENT'}">
-                                        <span class="status-badge pending">Waiting Payment</span>
+                                    <c:when test="${booking.status == 'PENDING_APPROVAL'}">
+                                        <span class="status-badge pending">Chờ staff duyệt</span>
                                     </c:when>
 
-                                    <c:when test="${booking.status == 'DEPOSIT_PAID'}">
-                                        <span class="status-badge confirmed">Waiting Approval</span>
+                                    <c:when test="${booking.status == 'AWAITING_PAYMENT'}">
+                                        <span class="status-badge confirmed">Waiting Payment</span>
                                     </c:when>
 
                                     <c:when test="${booking.contractStatus == 'CREATED'}">
@@ -189,7 +193,7 @@
                                     ← Back to My Bookings
                                 </a>
 
-                                <c:if test="${booking.status == 'PENDING_PAYMENT' or booking.status == 'DEPOSIT_PAID'}">
+                                <c:if test="${booking.status == 'PENDING_APPROVAL' or booking.status == 'AWAITING_PAYMENT'}">
                                     <form method="post"
                                           action="${pageContext.request.contextPath}/booking"
                                           class="inline-form">
@@ -205,20 +209,12 @@
                                     </form>
                                 </c:if>
 
-                                <c:if test="${booking.status == 'DEPOSIT_PAID'}">
-                                    <form method="post"
-                                          action="${pageContext.request.contextPath}/booking"
-                                          class="inline-form">
 
-                                        <input type="hidden" name="action" value="cancel"/>
-                                        <input type="hidden" name="bookingId" value="${booking.bookingId}"/>
-
-                                        <button type="submit"
-                                                class="btn btn-danger"
-                                                onclick="return confirm('Are you sure you want to cancel this booking?');">
-                                            Cancel Booking
-                                        </button>
-                                    </form>
+                                <c:if test="${booking.status == 'AWAITING_PAYMENT'}">
+                                    <a href="${pageContext.request.contextPath}/payment?action=create&bookingId=${booking.bookingId}"
+                                       class="btn btn-primary">
+                                        Thanh toán ngay
+                                    </a>
                                 </c:if>
                                 <c:if test="${booking.status == 'CANCELLED'}">
                                     <form method="post"

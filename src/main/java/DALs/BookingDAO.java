@@ -101,6 +101,7 @@ public class BookingDAO extends DBContext {
                 booking.setEndDate(rs.getDate("end_date"));
                 booking.setStatus(rs.getString("status"));
                 booking.setNote(rs.getString("note"));
+                booking.setStaffId(rs.getInt("staff_id"));
                 booking.setTotalEstimatedPrice(rs.getBigDecimal("total_estimated_price"));
                 booking.setDepositAmount(rs.getBigDecimal("deposit_amount"));
                 booking.setRemainingAmount(rs.getBigDecimal("remaining_amount"));
@@ -245,6 +246,36 @@ public class BookingDAO extends DBContext {
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, status);
+            ps.setInt(2, bookingId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+    
+     public boolean updateStaffId(int bookingId,int staffId) {
+
+        String sql = "UPDATE booking SET staff_id = ? WHERE booking_id = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, staffId);
+            ps.setInt(2, bookingId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+    
+      public boolean updatePaymentDeadline(int bookingId, int hours) {
+
+       String sql = "UPDATE booking SET payment_deadline = DATEADD(HOUR, ?, GETDATE()) WHERE booking_id = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, hours);
             ps.setInt(2, bookingId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -470,8 +501,7 @@ public class BookingDAO extends DBContext {
         UPDATE booking
         SET status = 'REJECTED'
         WHERE car_id = ?
-          AND booking_id <> ?
-          AND status IN ('PENDING_PAYMENT', 'DEPOSIT_PAID')
+          AND booking_id <> ?        
           AND start_date <= ?
           AND end_date >= ?
     """;

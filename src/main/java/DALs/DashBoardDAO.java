@@ -28,7 +28,7 @@ public class DashBoardDAO extends DBContext {
     }
 
     public int countPendingBookings() {
-        String sql = "SELECT COUNT(*) FROM booking WHERE status IN ('PENDING_PAYMENT', 'DEPOSIT_PAID')";
+        String sql = "SELECT COUNT(*) FROM booking WHERE status IN ('PENDING_APPROVAL', 'AWAITING_PAYMENT')";
         return executeCount(sql);
     }
 

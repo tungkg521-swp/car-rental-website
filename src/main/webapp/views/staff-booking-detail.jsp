@@ -39,10 +39,34 @@
                                         </p>
                                     </c:if>
 
-                                    <c:if test="${booking.status == 'CONFIRMED'}">
-                                        <p class="status-message confirmed">
-                                            This booking has been approved.
-                                        </p>
+                                    <c:if test="${booking.status == 'PENDING_APPROVAL'}">
+                                        <form method="post"
+                                              action="${pageContext.request.contextPath}/staff/bookings"
+                                              class="inline-form">
+
+                                            <input type="hidden" name="bookingId" value="${booking.bookingId}"/>
+
+                                            <button type="submit"
+                                                    name="action"
+                                                    value="approve"
+                                                    class="btn btn-success"
+                                                    onclick="return confirm('Approve this booking request?');">
+                                                Approve
+                                            </button>
+
+                                            <button type="submit"
+                                                    name="action"
+                                                    value="reject"
+                                                    class="btn btn-danger"
+                                                    onclick="return confirm('Reject this booking request?');">
+                                                Reject
+                                            </button>
+                                        </form>
+                                    </c:if>
+                                    <c:if test="${booking.status == 'AWAITING_PAYMENT'}">
+                                        <div class="info-message">
+                                            This booking has been approved and is waiting for customer payment.
+                                        </div>
                                     </c:if>
 
                                     <div class="specs">
@@ -141,40 +165,7 @@
 
                             <div class="detail-actions">
 
-                                <c:if test="${booking.status == 'PENDING_PAYMENT'}">
-                                    <form action="${pageContext.request.contextPath}/staff/bookings" method="post">
-                                        <input type="hidden" name="bookingId" value="${booking.bookingId}">
 
-                                        <button type="submit"
-                                                name="action"
-                                                value="markDepositPaid"
-                                                class="btn-approve"
-                                                onclick="return confirm('Mark this booking as deposit paid?')">
-                                            ✓ Mark Deposit Paid
-                                        </button>
-                                    </form>
-                                </c:if>
-                                <c:if test="${booking.status == 'DEPOSIT_PAID'}">
-                                    <form action="${pageContext.request.contextPath}/staff/bookings" method="post">
-                                        <input type="hidden" name="bookingId" value="${booking.bookingId}">
-
-                                        <button type="submit"
-                                                name="action"
-                                                value="approve"
-                                                class="btn-approve"
-                                                onclick="return confirmApprove()">
-                                            ✓ Approve
-                                        </button>
-
-                                        <button type="submit"
-                                                name="action"
-                                                value="reject"
-                                                class="btn-reject"
-                                                onclick="return confirmReject()">
-                                            ✕ Reject
-                                        </button>
-                                    </form>
-                                </c:if>
 
                                 <a href="${pageContext.request.contextPath}/staff/bookings" class="btn-back">
                                     Back

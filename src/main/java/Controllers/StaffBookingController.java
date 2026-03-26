@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import models.BookingModel;
+import models.StaffModel;
 import service.BookingService;
 
 @WebServlet("/staff/bookings")
@@ -86,26 +87,29 @@ public class StaffBookingController extends HttpServlet {
             // ===== lấy staffId từ session =====
             HttpSession session = request.getSession();
 
-            Integer staffId = (Integer) session.getAttribute("staffId");
+            
+            StaffModel staff = (StaffModel) session.getAttribute("STAFF");
 
-            // nếu chưa có login staff thì tạm thời gán = 1
-            if (staffId == null) {
-                staffId = 1;
+            if (staff == null) {
+                response.sendRedirect(request.getContextPath() + "/dashboard");
+                return;
             }
+
+            int staffId = staff.getStaffId();
 
             // ===== APPROVE BOOKING =====
-            if ("approve".equals(action)) {
-                service.approveBooking(bookingId, staffId);
-            } else if ("reject".equals(action)) {
-                service.rejectBooking(bookingId);
-            } else if ("markDepositPaid".equals(action)) {
-                service.markDepositPaid(bookingId);
-            }
+            boolean success = false;
 
+            if ("approve".equals(action)) {
+                success = service.approveBooking(bookingId, staffId);
+            } else if ("reject".equals(action)) {
+                success = service.rejectBooking(bookingId);
+            }
             // quay lại detail
             response.sendRedirect(
                     request.getContextPath()
                     + "/staff/bookings?action=detail&id=" + bookingId
+                    + "&result=" + (success ? "success" : "fail")
             );
 
         } catch (Exception e) {
