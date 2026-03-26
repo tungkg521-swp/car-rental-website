@@ -114,22 +114,22 @@ public class StaffContractController extends HttpServlet {
                 contractService.updateContractStatus(contractId, "ACTIVE");
 
             } else if ("complete".equals(action)) {
-                contractService.updateContractStatus(contractId, "COMPLETED");
-
-            } else if ("cancel".equals(action)) {
+                String carNextStatus = request.getParameter("carNextStatus");
+                contractService.completeContract(contractId, carNextStatus);
+            }else if ("cancel".equals(action)) {
                 contractService.updateContractStatus(contractId, "CANCELLED");
             }
 
-            response.sendRedirect(
-                    request.getContextPath()
-                    + "/staff/contracts?action=detail&id=" + contractId);
+                response.sendRedirect(
+                        request.getContextPath()
+                        + "/staff/contracts?action=detail&id=" + contractId);
 
-        } catch (Exception e) {
+            }catch (Exception e) {
 
             e.printStackTrace();
 
             response.sendRedirect(
                     request.getContextPath() + "/staff/contracts");
         }
+        }
     }
-}

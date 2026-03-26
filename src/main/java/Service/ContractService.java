@@ -89,4 +89,32 @@ public class ContractService {
     public boolean existsByBookingId(int bookingId) {
         return contractDAO.existsByBookingId(bookingId);
     }
+
+    public boolean completeContract(int contractId, String carNextStatus) {
+
+        ContractModel contract = contractDAO.getContractById(contractId);
+
+        if (contract == null) {
+            return false;
+        }
+
+        if (!"ACTIVE".equalsIgnoreCase(contract.getContractStatus())) {
+            return false;
+        }
+
+        boolean updated = contractDAO.updateContractStatus(contractId, "COMPLETED");
+        if (!updated) {
+            return false;
+        }
+
+        bookingDAO.updateStatus(contract.getBookingId(), "COMPLETED");
+
+        if ("MAINTENANCE".equalsIgnoreCase(carNextStatus)) {
+            carDAO.updateStatus(contract.getCarId(), "MAINTENANCE");
+        } else {
+            carDAO.updateStatus(contract.getCarId(), "AVAILABLE");
+        }
+
+        return true;
+    }
 }

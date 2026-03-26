@@ -65,19 +65,19 @@
                                     </div>
 
                                     <c:choose>
-                                        <c:when test="${b.status == 'PENDING_PAYMENT'}">
-                                            <span class="status pending">Waiting Payment</span>
+                                        <c:when test="${b.status == 'PENDING_APPROVAL'}">
+                                            <span class="status pending">Waiting for Staff Approval</span>
                                         </c:when>
-                                        <c:when test="${b.status == 'DEPOSIT_PAID'}">
-                                            <span class="status pending">Waiting Approval</span>
+                                        <c:when test="${b.status == 'AWAITING_PAYMENT'}">
+                                            <span class="status awaiting">Awaiting Payment</span>
                                         </c:when>
-                                        <c:when test="${b.contractStatus == 'CREATED'}">
-                                            <span class="status confirmed">Approved</span>
+                                        <c:when test="${b.status == 'CONFIRMED'}">
+                                            <span class="status confirmed">Confirmed</span>
                                         </c:when>
-                                        <c:when test="${b.contractStatus == 'ACTIVE'}">
+                                        <c:when test="${b.status == 'ACTIVE'}">
                                             <span class="status active">Renting</span>
                                         </c:when>
-                                        <c:when test="${b.contractStatus == 'COMPLETED'}">
+                                        <c:when test="${b.status == 'COMPLETED'}">
                                             <span class="status completed">Completed</span>
                                         </c:when>
                                         <c:when test="${b.status == 'REJECTED'}">
