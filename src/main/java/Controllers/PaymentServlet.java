@@ -62,10 +62,10 @@ public class PaymentServlet extends HttpServlet {
 
         switch (action) {
             case "sandbox-success":
-                handleSandboxPayment(request, response, true);
+                handlePayment(request, response, true);
                 break;
             case "sandbox-fail":
-                handleSandboxPayment(request, response, false);
+                handlePayment(request, response, false);
                 break;
             case "cancel-payment":
                 cancelPayment(request, response);
@@ -124,7 +124,7 @@ public class PaymentServlet extends HttpServlet {
         request.getRequestDispatcher("/views/payment.jsp").forward(request, response);
     }
 
-    private void handleSandboxPayment(HttpServletRequest request, HttpServletResponse response, boolean success)
+    private void handlePayment(HttpServletRequest request, HttpServletResponse response, boolean success)
             throws IOException {
 
         CustomerModel customer = getCurrentCustomer(request, response);

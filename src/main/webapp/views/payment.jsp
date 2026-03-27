@@ -173,7 +173,7 @@
                         </div>
 
                         <div class="note-box">
-                            Đây là bước mô phỏng sandbox. Bạn có thể thử cả trường hợp thanh toán thành công, thất bại hoặc hủy thanh toán để kiểm tra luồng nghiệp vụ.
+                            Đây là bước mô phỏng. Bạn có thể thử cả trường hợp thanh toán thành công, thất bại hoặc hủy thanh toán để kiểm tra luồng nghiệp vụ.
                         </div>
 
                         <c:if test="${booking.status == 'AWAITING_PAYMENT'}">
@@ -183,8 +183,8 @@
                                 <div class="mb-3">
                                     <label class="form-label">Chọn cổng thanh toán</label>
                                     <select name="paymentMethod" class="form-select">
-                                        <option value="VNPAY">VNPAY Sandbox</option>
-                                        <option value="MOMO">MoMo Sandbox</option>
+                                        <option value="VNPAY">VNPAY</option>
+                                        <option value="MOMO">MoMo</option>
                                     </select>
                                 </div>
 
@@ -193,14 +193,14 @@
                                             name="action"
                                             value="sandbox-success"
                                             class="btn-pay-success">
-                                        Giả lập thanh toán thành công
+                                        Thanh toán thành công
                                     </button>
 
                                     <button type="submit"
                                             name="action"
                                             value="sandbox-fail"
                                             class="btn-pay-fail">
-                                        Giả lập thanh toán thất bại
+                                        Thanh toán thất bại
                                     </button>
 
                                     <button type="submit"
