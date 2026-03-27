@@ -1,13 +1,18 @@
 package DALs;
 
-import Utils.DBContext;
-import static Utils.DBContext.getConnection;
-import java.io.File;
 import java.math.BigDecimal;
-import models.CarModel;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
+import Utils.DBContext;
+import static Utils.DBContext.getConnection;
+import models.CarModel;
 
 public class CarDAO extends DBContext {
 
@@ -1003,4 +1008,88 @@ public class CarDAO extends DBContext {
 
         return false;
     }
+
+    public List<CarModel> getAvailableReplacementCars(
+        int oldCarId,
+        String typeName,
+        BigDecimal pricePerDay,
+        Date startDate,
+        Date endDate
+) {
+    List<CarModel> list = new ArrayList<>();
+
+    String sql = """
+        SELECT
+            c.car_id,
+            c.model_name,
+            c.model_year,
+            c.price_per_day,
+            c.seat_count,
+            c.fuel_type,
+            c.transmission,
+            b.brand_name,
+            t.type_name,
+            c.plate_number,
+            c.image_folder,
+            c.description,
+            c.status
+        FROM cars c
+        JOIN brand b ON c.brand_id = b.brand_id
+        JOIN cars_type t ON c.type_id = t.type_id
+        WHERE c.car_id <> ?
+          AND t.type_name = ?
+          AND c.price_per_day = ?
+          AND c.status = 'AVAILABLE'
+          AND NOT EXISTS (
+              SELECT 1
+              FROM booking bk
+              WHERE bk.car_id = c.car_id
+                AND bk.status IN ('AWAITING_PAYMENT', 'CONFIRMED', 'ACTIVE')
+                AND bk.start_date <= ?
+                AND bk.end_date >= ?
+          )
+          AND NOT EXISTS (
+              SELECT 1
+              FROM maintenance_record m
+              WHERE m.car_id = c.car_id
+                AND CAST(m.start_time AS DATE) <= ?
+                AND CAST(ISNULL(m.end_time, '9999-12-31') AS DATE) >= ?
+                AND m.status IN ('OPEN', 'IN_PROGRESS')
+          )
+    """;
+
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setInt(1, oldCarId);
+        ps.setString(2, typeName);
+        ps.setBigDecimal(3, pricePerDay);
+        ps.setDate(4, endDate);
+        ps.setDate(5, startDate);
+        ps.setDate(6, endDate);
+        ps.setDate(7, startDate);
+
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(new CarModel(
+                        rs.getInt("car_id"),
+                        rs.getString("model_name"),
+                        rs.getInt("model_year"),
+                        rs.getBigDecimal("price_per_day"),
+                        rs.getInt("seat_count"),
+                        rs.getString("fuel_type"),
+                        rs.getString("transmission"),
+                        rs.getString("brand_name"),
+                        rs.getString("type_name"),
+                        null,
+                        rs.getString("image_folder"),
+                        rs.getString("description"),
+                        rs.getString("status")
+                ));
+            }
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return list;
+}
 }

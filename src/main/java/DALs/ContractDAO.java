@@ -4,12 +4,13 @@
  */
 package DALs;
 
-import models.ContractModel;
-import Utils.DBContext;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+
+import Utils.DBContext;
+import models.ContractModel;
 
 /**
  *
@@ -179,5 +180,51 @@ public class ContractDAO extends DBContext{
     }
 
     return -1;
+}
+
+public boolean updateCarId(int contractId, int newCarId) {
+    String sql = "UPDATE rental_contract SET car_id = ? WHERE contract_id = ?";
+
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setInt(1, newCarId);
+        ps.setInt(2, contractId);
+        return ps.executeUpdate() > 0;
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return false;
+}
+
+public ContractModel getContractByBookingId(int bookingId) {
+    String sql = "SELECT * FROM rental_contract WHERE booking_id = ?";
+
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setInt(1, bookingId);
+
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                ContractModel contract = new ContractModel();
+                contract.setContractId(rs.getInt("contract_id"));
+                contract.setBookingId(rs.getInt("booking_id"));
+                contract.setCustomerId(rs.getInt("customer_id"));
+                contract.setStaffId(rs.getInt("staff_id"));
+                contract.setCarId(rs.getInt("car_id"));
+                contract.setContractStartDate(rs.getDate("contract_start_date"));
+                contract.setContractEndDate(rs.getDate("contract_end_date"));
+                contract.setContractStatus(rs.getString("contract_status"));
+                contract.setDailyPrice(rs.getDouble("daily_price"));
+                contract.setDepositAmount(rs.getDouble("deposit_amount"));
+                contract.setTotalAmount(rs.getDouble("total_amount"));
+                contract.setSignedAt(rs.getTimestamp("signed_at"));
+                contract.setCreatedAt(rs.getTimestamp("created_at"));
+                contract.setNote(rs.getString("note"));
+                return contract;
+            }
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return null;
 }
 }

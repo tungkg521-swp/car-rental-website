@@ -163,9 +163,147 @@
                                 </div>
                             </div>
 
+                            <c:if test="${booking.status == 'AWAITING_PAYMENT' || booking.status == 'CONFIRMED'}">
+                                <div class="detail-description">
+                                    <h2>🔄 Car Change Request</h2>
+
+                                    <c:if test="${param.changeRequest == 'success'}">
+                                        <div class="info-message" style="color: green; font-weight: 600;">
+                                            Car change request created successfully.
+                                        </div>
+                                    </c:if>
+
+                                    <c:if test="${param.changeRequest == 'fail'}">
+                                        <div class="info-message" style="color: red; font-weight: 600;">
+                                            Failed to create car change request.
+                                        </div>
+                                    </c:if>
+
+                                    <c:choose>
+                                        <c:when test="${not empty pendingCarChangeRequest}">
+                                            <div class="info-grid">
+                                                <div>
+                                                    <strong>Request ID</strong>
+                                                    <p>#${pendingCarChangeRequest.requestId}</p>
+                                                </div>
+
+                                                <div>
+                                                    <strong>Status</strong>
+                                                    <p>${pendingCarChangeRequest.status}</p>
+                                                </div>
+
+                                                <div>
+                                                    <strong>Old Car ID</strong>
+                                                    <p>${pendingCarChangeRequest.oldCarId}</p>
+                                                </div>
+
+                                                <div>
+                                                    <strong>New Car ID</strong>
+                                                    <p>${pendingCarChangeRequest.newCarId}</p>
+                                                </div>
+
+                                                <div>
+                                                    <strong>Reason</strong>
+                                                    <p>${pendingCarChangeRequest.reason}</p>
+                                                </div>
+
+                                                <div>
+                                                    <strong>Created At</strong>
+                                                    <p>${pendingCarChangeRequest.createdAt}</p>
+                                                </div>
+                                            </div>
+
+                                            <p class="status-message" style="color: #b26a00;">
+                                                There is already a pending car change request for this booking.
+                                            </p>
+                                        </c:when>
+
+                                        <c:otherwise>
+                                            <c:choose>
+                                                <c:when test="${not empty replacementCars}">
+                                                    <form method="post"
+                                                          action="${pageContext.request.contextPath}/car-change"
+                                                          class="inline-form"
+                                                          style="display:block; margin-top:16px;">
+
+                                                        <input type="hidden" name="action" value="create"/>
+                                                        <input type="hidden" name="bookingId" value="${booking.bookingId}"/>
+
+                                                        <div style="margin-bottom: 16px;">
+                                                            <label for="newCarId"><strong>Select replacement car</strong></label><br/>
+                                                            <select name="newCarId" id="newCarId" required
+                                                                    style="width:100%; max-width:420px; padding:10px; margin-top:8px;">
+                                                                <option value="">-- Select car --</option>
+                                                                <c:forEach var="car" items="${replacementCars}">
+                                                                    <option value="${car.carId}">
+                                                                        ID: ${car.carId} - ${car.modelName}
+                                                                        - ${car.plateNumber}
+                                                                        - <fmt:formatNumber value="${car.pricePerDay}" pattern="#,###"/> VND/day
+                                                                    </option>
+                                                                </c:forEach>
+                                                            </select>
+                                                        </div>
+
+                                                        <div style="margin-bottom: 16px;">
+                                                            <label for="reason"><strong>Reason</strong></label><br/>
+                                                            <textarea name="reason"
+                                                                      id="reason"
+                                                                      rows="4"
+                                                                      required
+                                                                      style="width:100%; max-width:520px; padding:10px; margin-top:8px;"
+                                                                      placeholder="Enter reason for changing car..."></textarea>
+                                                        </div>
+
+                                                        <button type="submit"
+                                                                class="btn btn-warning"
+                                                                onclick="return confirm('Create car change request for this booking?');">
+                                                            Send Car Change Request
+                                                        </button>
+                                                    </form>
+                                                </c:when>
+
+                                                <c:otherwise>
+                                                    <p class="status-message rejected">
+                                                        No suitable replacement car is currently available.
+                                                    </p>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
+                            </c:if>
+
                             <div class="detail-actions">
 
+                                <c:if test="${booking.status == 'REFUND_PENDING'}">
+                                    <form method="post"
+                                          action="${pageContext.request.contextPath}/car-change"
+                                          class="inline-form">
+                                        <input type="hidden" name="action" value="refund"/>
+                                        <input type="hidden" name="bookingId" value="${booking.bookingId}"/>
 
+                                        <button type="submit"
+                                                class="btn btn-danger"
+                                                onclick="return confirm('Confirm that refund has been completed?');">
+                                            Mark Refund Completed
+                                        </button>
+                                    </form>
+                                </c:if>
+
+                                <c:if test="${booking.status == 'CONFIRMED' && not empty pendingCarChangeRequest}">
+                                    <form method="post"
+                                          action="${pageContext.request.contextPath}/car-change"
+                                          class="inline-form">
+                                        <input type="hidden" name="action" value="staffRejectRefund"/>
+                                        <input type="hidden" name="bookingId" value="${booking.bookingId}"/>
+
+                                        <button type="submit"
+                                                class="btn btn-warning"
+                                                onclick="return confirm('Reject on behalf of customer and mark refunded at counter?');">
+                                            Reject & Refund at Counter
+                                        </button>
+                                    </form>
+                                </c:if>
 
                                 <a href="${pageContext.request.contextPath}/staff/bookings" class="btn-back">
                                     Back

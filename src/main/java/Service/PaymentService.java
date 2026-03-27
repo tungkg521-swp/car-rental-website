@@ -40,8 +40,14 @@ public class PaymentService {
     }
 
     public boolean processSandboxPayment(int bookingId, String paymentMethod, boolean success) {
-        
+
         BookingModel booking = bookingDAO.getById(bookingId);
+
+        if (booking.getPaymentDeadline() != null
+                && booking.getPaymentDeadline().before(new Timestamp(System.currentTimeMillis()))) {
+            bookingDAO.updateStatus(bookingId, "CANCELLED");
+            return false;
+        }
 
         if (booking == null) {
             return false;
