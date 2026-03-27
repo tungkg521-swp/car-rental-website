@@ -22,11 +22,16 @@ import service.BookingService;
 import service.CarService;
 import service.VoucherService;
 import java.math.RoundingMode;
+
 import java.util.ArrayList;
+
+import models.CarChangeRequestModel;
+import service.CarChangeRequestService;
 
 public class BookingServlet extends HttpServlet {
 
     private final BookingService bookingService = new BookingService();
+    private final CarChangeRequestService carChangeService = new CarChangeRequestService();
 
     @Override
     protected void doGet(HttpServletRequest request,
@@ -481,6 +486,11 @@ public class BookingServlet extends HttpServlet {
             request.getRequestDispatcher("/views/error.jsp").forward(request, response);
             return;
         }
+
+        CarChangeRequestModel pendingRequest
+                = carChangeService.getPendingRequestByBookingId(bookingId);
+
+        request.setAttribute("pendingCarChangeRequest", pendingRequest);
 
         String cancelStatus = request.getParameter("cancelStatus");
         request.setAttribute("cancelStatus", cancelStatus);

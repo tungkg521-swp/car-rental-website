@@ -26,7 +26,7 @@ public class BookingService {
         long days = ChronoUnit.DAYS.between(
                 startDate.toLocalDate(),
                 endDate.toLocalDate()
-        ) + 1;
+        );
 
         if (days < 1) {
             days = 1;
@@ -192,8 +192,12 @@ public class BookingService {
         if (!bookingUpdated) {
             return false;
         }
+        
 
-        carDAO.updateStatus(booking.getCarId(), "BOOKED");
+        boolean carUpdated = carDAO.updateStatus(booking.getCarId(), "BOOKED");
+        if (!carUpdated) {
+            return false;
+        }
 
         return true;
     }

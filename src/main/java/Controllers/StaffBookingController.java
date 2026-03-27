@@ -10,13 +10,17 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import models.BookingModel;
+import models.CarChangeRequestModel;
+import models.CarModel;
 import models.StaffModel;
 import service.BookingService;
+import service.CarChangeRequestService;
 
 @WebServlet("/staff/bookings")
 public class StaffBookingController extends HttpServlet {
 
     private BookingService service = new BookingService();
+    private CarChangeRequestService carChangeService = new CarChangeRequestService();
 
     // ================= GET =================
     @Override
@@ -51,6 +55,15 @@ public class StaffBookingController extends HttpServlet {
 
                     return;
                 }
+
+                CarChangeRequestModel pendingRequest
+                        = carChangeService.getPendingRequestByBookingId(id);
+
+                List<CarModel> replacementCars
+                        = carChangeService.getAvailableReplacementCars(id);
+
+                request.setAttribute("pendingCarChangeRequest", pendingRequest);
+                request.setAttribute("replacementCars", replacementCars);
 
                 request.setAttribute("booking", booking);
 
@@ -87,7 +100,6 @@ public class StaffBookingController extends HttpServlet {
             // ===== lấy staffId từ session =====
             HttpSession session = request.getSession();
 
-            
             StaffModel staff = (StaffModel) session.getAttribute("STAFF");
 
             if (staff == null) {

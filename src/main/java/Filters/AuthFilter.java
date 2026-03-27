@@ -104,6 +104,43 @@ public class AuthFilter implements Filter {
             return;
         }
 
+        // === CAR CHANGE ACTIONS ===
+        if (path.equals("/car-change")) {
+            if (account == null) {
+                response.sendRedirect(ctx + "/login");
+                return;
+            }
+
+            String action = request.getParameter("action");
+            int roleId = account.getRoleId();
+
+            // Staff/Admin: tạo request đổi xe + hoàn tiền + xử lý tại quầy
+            if ("create".equals(action)
+                    || "refund".equals(action)
+                    || "staffRejectRefund".equals(action)) {
+                if (roleId != RoleConstants.STAFF && roleId != RoleConstants.ADMIN) {
+                    showNotFound(request, response);
+                    return;
+                }
+                chain.doFilter(req, res);
+                return;
+            }
+
+            // Customer: phản hồi accept / reject
+            if ("respond".equals(action)) {
+                if (roleId != RoleConstants.CUSTOMER) {
+                    showNotFound(request, response);
+                    return;
+                }
+                chain.doFilter(req, res);
+                return;
+            }
+
+            // action không hợp lệ
+            response.sendRedirect(ctx + "/home");
+            return;
+        }
+
         // === ADMIN AREA (đã sửa để fix lỗi AJAX report bị redirect login) ===
         if (path.equals("/dashboard/admin")
                 || path.startsWith("/admin/")
