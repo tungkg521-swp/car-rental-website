@@ -1,3 +1,7 @@
+
+:root {
+    --app-font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
 /* ===== GLOBAL ===== */
 body {
     background: linear-gradient(180deg, #f5f7fa, #eef2f7);

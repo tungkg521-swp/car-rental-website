@@ -1,4 +1,6 @@
-
+:root {
+    --app-font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
 .table-wrapper{
     background:#fff;
     border-radius:16px;

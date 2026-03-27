@@ -1,3 +1,4 @@
+
 .booking-detail-page {
     min-height: calc(100vh - 80px);
     padding: 56px 0 72px;
@@ -6,7 +7,9 @@
         linear-gradient(180deg, #f8f8fa 0%, #efeff2 100%);
     position: relative;
 }
-
+:root {
+    --app-font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
 .booking-detail-page::before {
     content: "";
     position: absolute;

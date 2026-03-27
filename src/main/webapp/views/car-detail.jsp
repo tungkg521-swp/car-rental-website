@@ -4,13 +4,14 @@
 
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>${car.modelName}</title>
+   <head>
+    <title>Car Detail</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style-base.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/car-detail.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/wishlist.css">
-    </head>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style-base.css?v=6">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/car-detail.css?v=6">
+</head>
 
     <body>
 

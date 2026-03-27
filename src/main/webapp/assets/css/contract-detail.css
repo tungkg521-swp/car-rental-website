@@ -1,7 +1,9 @@
 .contract-page{
     padding:40px;
 }
-
+:root {
+    --app-font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
 .contract-container{
     max-width:950px;
     margin:auto;

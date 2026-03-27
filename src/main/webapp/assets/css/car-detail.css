@@ -1,6 +1,9 @@
 /* =========================
    PAGE
 ========================= */
+:root {
+    --app-font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
 .car-detail-page {
     padding: 40px 0;
 }

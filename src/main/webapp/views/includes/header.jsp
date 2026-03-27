@@ -1,20 +1,14 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<!-- Font Awesome (nếu project đã có thì có thể bỏ) -->
 <link rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
 <header class="site-header">
     <div class="container header-inner">
 
-        <!-- LEFT -->
-        <nav class="nav-left">
-            <a href="#">The Hypercar</a>
-            <a href="#">News</a>
-        </nav>
-
-        <!-- CENTER LOGO -->
-        <div class="brand">
+        <!-- LEFT: LOGO -->
+        <div class="brand brand-left">
             <a href="${pageContext.request.contextPath}/home"
                style="text-decoration:none;color:inherit">
                 <span class="top">AUTOMOBILI</span>
@@ -22,75 +16,51 @@
             </a>
         </div>
 
-        <!-- RIGHT -->
-        <div class="header-right">
-            <nav class="nav-main">
-                <a href="${pageContext.request.contextPath}/cars">Thuê xe</a>
-                <a href="#">Khuyến mãi</a>
-                <a href="#">Giới thiệu</a>
-                <c:if test="${not empty sessionScope.ACCOUNT}">
-                    <div class="notification-bell" onclick="toggleNotification()">
-                        🔔
+        <!-- CENTER: MENU -->
+        <nav class="nav-main nav-center">
+            <a href="${pageContext.request.contextPath}/cars">Thuê xe</a>
+            <a href="#">Khuyến mãi</a>
+            <a href="#">Giới thiệu</a>
+
+            <c:if test="${not empty sessionScope.ACCOUNT}">
+                <div class="notification-bell" onclick="toggleNotification()">🔔</div>
+            </c:if>
+        </nav>
+
+        <!-- RIGHT: AUTH -->
+        <div class="auth auth-right">
+            <c:if test="${empty sessionScope.ACCOUNT}">
+                <a href="${pageContext.request.contextPath}/login" class="login">Login</a>
+                <a href="${pageContext.request.contextPath}/register" class="register">Register</a>
+            </c:if>
+
+            <c:if test="${not empty sessionScope.ACCOUNT}">
+                <a href="${pageContext.request.contextPath}/customer/bookings?action=list"
+                   class="icon-btn booking-btn"
+                   title="My Bookings">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                </a>
+
+                <a href="${pageContext.request.contextPath}/customer/profile" class="profile-link">
+                    <div class="header-avatar">
+                        ${sessionScope.CUSTOMER.fullName.substring(0,1)}
                     </div>
-                </c:if>
-            </nav>
+                    <span class="user-name">
+                        ${sessionScope.CUSTOMER.fullName}
+                    </span>
+                </a>
 
-            <!-- AUTH -->
-            <div class="auth">
-
-                <!-- ===== CHƯA LOGIN ===== -->
-                <c:if test="${empty sessionScope.ACCOUNT}">
-                    <a href="${pageContext.request.contextPath}/login" class="login">Login</a>
-                    <a href="${pageContext.request.contextPath}/register" class="register">Register</a>
-                </c:if>
-
-                <!-- ===== ĐÃ LOGIN ===== -->
-                <c:if test="${not empty sessionScope.ACCOUNT}">
-
-                    <!-- ICON VIEW BOOKING -->
-                    <a href="${pageContext.request.contextPath}/customer/bookings?action=list"
-                       class="icon-btn booking-btn"
-                       title="My Bookings">
-                        <i class="fa-solid fa-clipboard-list"></i>
-                    </a>
-
-                    <!-- PROFILE LINK -->
-                    <a href="${pageContext.request.contextPath}/customer/profile"
-                       class="profile-link">
-
-                        <div class="header-avatar">
-                            ${sessionScope.CUSTOMER.fullName.substring(0,1)}
-                        </div>
-
-                        <span class="user-name">
-                            ${sessionScope.CUSTOMER.fullName}
-                        </span>
-                    </a>
-
-                    <a href="${pageContext.request.contextPath}/logout" class="logout">
-                        Logout
-                    </a>
-
-                </c:if>
-
-
-            </div>
+                <a href="${pageContext.request.contextPath}/logout" class="logout">Logout</a>
+            </c:if>
         </div>
-
-        <script>
-function toggleNotification() {
-    const popup = document.querySelector(".notification-popup");
-    popup.classList.toggle("show");
-}
-</script>
     </div>
 </header>
-<% service.NotificationService ns = new service.NotificationService();
+
+<%
+    service.NotificationService ns = new service.NotificationService();
     models.AccountModel acc = (models.AccountModel) session.getAttribute("ACCOUNT");
     if (acc != null) {
         java.util.List list = ns.getNotificationsByAccount(acc.getAccountId());
         request.setAttribute("notifications", list);
-    }%>
-<jsp:include page="/views/notifications.jsp"/>
-
-
+    }
+%>
