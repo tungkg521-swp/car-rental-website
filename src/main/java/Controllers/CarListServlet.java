@@ -17,6 +17,8 @@ import DALs.ReviewDAO;
 import models.ReviewModel;
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import service.BookingService;
 
 /**
  *
@@ -25,6 +27,7 @@ import java.time.LocalDate;
 public class CarListServlet extends HttpServlet {
 
     private CarService carService = new CarService();
+    private BookingService bookingService = new BookingService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -106,6 +109,33 @@ public class CarListServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/cars");
             return;
         }
+        List<Date[]> busyRanges = bookingService.getBusyDateRangesByCarId(carId);
+
+        System.out.println("=== BUSY RANGES OF CAR " + carId + " ===");
+        for (Date[] range : busyRanges) {
+            System.out.println("Start: " + range[0] + " | End: " + range[1]);
+        }
+    
+        List<String> busyDates = new ArrayList<>();
+        for (Date[] range : busyRanges) {
+            LocalDate start = range[0].toLocalDate();
+            LocalDate end = range[1].toLocalDate();
+
+            while (!start.isAfter(end)) {
+                busyDates.add(start.toString());
+                start = start.plusDays(1);
+            }
+        }
+
+        StringBuilder busyDatesJson = new StringBuilder("[");
+        for (int i = 0; i < busyDates.size(); i++) {
+            busyDatesJson.append("\"").append(busyDates.get(i)).append("\"");
+            if (i < busyDates.size() - 1) {
+                busyDatesJson.append(",");
+            }
+        }
+        busyDatesJson.append("]");
+           System.out.println("busyDatesJson = " + busyDatesJson.toString());
 
         String startDate = request.getParameter("startDate");
         String endDate = request.getParameter("endDate");
@@ -117,7 +147,7 @@ public class CarListServlet extends HttpServlet {
         request.setAttribute("reviews", reviews);
         request.setAttribute("startDate", startDate);
         request.setAttribute("endDate", endDate);
-
+        request.setAttribute("busyDatesJson", busyDatesJson.toString());
         request.getRequestDispatcher("/views/car-detail.jsp").forward(request, response);
     }
 
