@@ -16,7 +16,7 @@ import java.util.Map;
 @WebServlet(name = "ReportController", urlPatterns = {
     "/admin/report-summary",
     "/admin/trip-detail",
-    "/admin/revenue-chart", // ← Endpoint cho Revenue Line Chart
+    "/admin/revenue-chart", 
     "/admin/rental-report-content",
     "/admin/usage-report-content",
     "/admin/revenue-report-content",
@@ -36,7 +36,7 @@ public class ReportController extends HttpServlet {
         String endDate = request.getParameter("endDate");
 
         try {
-            // ==================== JSON ENDPOINTS (cho Dashboard) ====================
+            // ==================== JSON ENDPOINTS ====================
             if ("/admin/report-summary".equals(path)) {
                 Map<String, Object> summary = reportService.getReportSummary(startDate, endDate);
                 sendJsonResponse(response, summary);
