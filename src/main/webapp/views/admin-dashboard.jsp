@@ -6,7 +6,9 @@
         <title>Admin Dashboard</title>
 
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/staff.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/report.css">
 
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
         <script>
             window.contextPath = '${pageContext.request.contextPath}';
         </script>
