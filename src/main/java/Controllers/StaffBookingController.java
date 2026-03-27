@@ -10,17 +10,22 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import models.BookingModel;
+import models.CarChangeRequestModel;
+import models.CarModel;
+import models.StaffModel;
 import service.BookingService;
+import service.CarChangeRequestService;
 
 @WebServlet("/staff/bookings")
 public class StaffBookingController extends HttpServlet {
 
     private BookingService service = new BookingService();
+    private CarChangeRequestService carChangeService = new CarChangeRequestService();
 
     // ================= GET =================
     @Override
     protected void doGet(HttpServletRequest request,
-                         HttpServletResponse response)
+            HttpServletResponse response)
             throws ServletException, IOException {
 
         String action = request.getParameter("action");
@@ -34,9 +39,7 @@ public class StaffBookingController extends HttpServlet {
 
             request.getRequestDispatcher("/views/staff-booking.jsp")
                     .forward(request, response);
-        }
-
-        // ===== 2. VIEW DETAIL =====
+        } // ===== 2. VIEW DETAIL =====
         else if ("detail".equals(action)) {
 
             try {
@@ -46,12 +49,21 @@ public class StaffBookingController extends HttpServlet {
                 BookingModel booking = service.getBookingById(id);
 
                 if (booking == null) {
-
+                    System.out.println("lỗi idbooking");
                     response.sendRedirect(
                             request.getContextPath() + "/staff/bookings");
 
                     return;
                 }
+
+                CarChangeRequestModel pendingRequest
+                        = carChangeService.getPendingRequestByBookingId(id);
+
+                List<CarModel> replacementCars
+                        = carChangeService.getAvailableReplacementCars(id);
+
+                request.setAttribute("pendingCarChangeRequest", pendingRequest);
+                request.setAttribute("replacementCars", replacementCars);
 
                 request.setAttribute("booking", booking);
 
@@ -65,9 +77,7 @@ public class StaffBookingController extends HttpServlet {
                 response.sendRedirect(
                         request.getContextPath() + "/staff/bookings");
             }
-        }
-
-        // ===== DEFAULT =====
+        } // ===== DEFAULT =====
         else {
 
             response.sendRedirect(
@@ -75,11 +85,10 @@ public class StaffBookingController extends HttpServlet {
         }
     }
 
-
     // ================= POST =================
     @Override
     protected void doPost(HttpServletRequest request,
-                          HttpServletResponse response)
+            HttpServletResponse response)
             throws ServletException, IOException {
 
         String action = request.getParameter("action");
@@ -91,31 +100,28 @@ public class StaffBookingController extends HttpServlet {
             // ===== lấy staffId từ session =====
             HttpSession session = request.getSession();
 
-            Integer staffId = (Integer) session.getAttribute("staffId");
+            StaffModel staff = (StaffModel) session.getAttribute("STAFF");
 
-            // nếu chưa có login staff thì tạm thời gán = 1
-            if (staffId == null) {
-                staffId = 1;
+            if (staff == null) {
+                response.sendRedirect(request.getContextPath() + "/dashboard");
+                return;
             }
+
+            int staffId = staff.getStaffId();
 
             // ===== APPROVE BOOKING =====
+            boolean success = false;
+
             if ("approve".equals(action)) {
-
-                service.approveBooking(bookingId, staffId);
-
+                success = service.approveBooking(bookingId, staffId);
+            } else if ("reject".equals(action)) {
+                success = service.rejectBooking(bookingId);
             }
-
-            // ===== REJECT BOOKING =====
-            else if ("reject".equals(action)) {
-
-                service.rejectBooking(bookingId);
-
-            }
-
             // quay lại detail
             response.sendRedirect(
                     request.getContextPath()
                     + "/staff/bookings?action=detail&id=" + bookingId
+                    + "&result=" + (success ? "success" : "fail")
             );
 
         } catch (Exception e) {

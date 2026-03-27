@@ -2,7 +2,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <!DOCTYPE html>
-
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -11,7 +10,6 @@
               href="${pageContext.request.contextPath}/assets/css/staff.css">
         <link rel="stylesheet"
               href="${pageContext.request.contextPath}/assets/css/notification.css">
-
     </head>
 
     <body>
@@ -22,7 +20,6 @@
             <div class="staff-content">
 
                 <h1 class="dashboard-title">Send Notification</h1>
-
 
                 <form class="noti-form"
                       action="${pageContext.request.contextPath}/staff/send-notification"
@@ -84,49 +81,18 @@
                     <button type="submit" class="noti-btn">
                         Send
                     </button>
-
                 </form>
 
             </div>
-
         </div>
 
+        <div id="notificationData"
+             data-success="${success}"
+             data-error="${error}"
+             data-redirect="${pageContext.request.contextPath}/staff/send-notification"
+             style="display:none;"></div>
+
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-        <c:if test="${not empty success}">
-            <script>
-                                           Swal.fire({
-                                               icon: 'success',
-                                               title: '${success}',
-                                               showConfirmButton: false,
-                                               timer: 1500
-                                           }).then(() => {
-                                               window.location.href = '${pageContext.request.contextPath}/staff/send-notification';
-                                           });
-            </script>
-        </c:if>
-
-        <c:if test="${not empty error}">
-            <script>
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: '${error}'
-                });
-            </script>
-        </c:if>
-        <script>
-            function toggleCustomer(show) {
-
-                const box = document.getElementById("customerSelectBox");
-
-                if (show) {
-                    box.style.display = "block";
-                } else {
-                    box.style.display = "none";
-                }
-
-            }
-        </script>
+        <script src="${pageContext.request.contextPath}/assets/js/notification.js"></script>
     </body>
 </html>

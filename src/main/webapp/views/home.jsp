@@ -37,17 +37,47 @@
                     </div>
                 </div>
 
+
+                <div class="hero-booking-panel">
+                    <p class="hero-kicker">AUTOMOBILI RENTAL CAR</p>
+
+                    <h2 class="hero-booking-title">
+                        THUÊ XE DỄ DÀNG<br>
+                        CHO MỌI HÀNH TRÌNH
+                    </h2>
+
+                    <p class="hero-booking-subtitle">
+                        Chọn ngày thuê và trả xe để tìm những mẫu xe đang khả dụng cho lịch trình của bạn.
+                    </p>
+
+                    <form action="${pageContext.request.contextPath}/cars" method="get" class="hero-booking-form">
+                        <input type="hidden" name="action" value="list">
+
+                        <div class="hero-booking-grid">
+                            <div class="hero-field">
+                                <label for="startDate">Pick-up date</label>
+                                <input type="date" id="startDate" name="startDate" required>
+                            </div>
+
+                            <div class="hero-field">
+                                <label for="endDate">Return date</label>
+                                <input type="date" id="endDate" name="endDate" required>
+                            </div>
+
+                            <div class="hero-field hero-field-submit">
+                                <button type="submit" class="hero-search-btn">Tìm xe ngay</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                        <!-- Row 2 -->
+
                 <div class="grid-12 hero-summary">
                     <div class="col-4">
                         <h3>Luxury Meets<br>Performance</h3>
                     </div>
 
-                    <div class="col-4">
-                        <p>
-                            Trải nghiệm thuê xe cao cấp với giao diện hiện đại,
-                            đặt xe nhanh chóng và minh bạch.
-                        </p>
-                    </div>
+
 
                     <div class="col-4 cta">
                         <a href="${pageContext.request.contextPath}/cars" class="btn-primary">
@@ -216,7 +246,9 @@
             </div>
         </footer>
 
+
         <script src="${pageContext.request.contextPath}/assets/js/main.js"></script>
         <script src="${pageContext.request.contextPath}/assets/js/home.js"></script>
+
     </body>
 </html>

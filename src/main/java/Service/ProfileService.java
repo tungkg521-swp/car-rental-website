@@ -30,7 +30,7 @@ public class ProfileService {
             if (result == 1) {
                 return "SUCCESS";
             } else {
-                return "Email or old password is incorrect!";
+                return "Old password is incorrect!";
             }
 
         } catch (Exception e) {

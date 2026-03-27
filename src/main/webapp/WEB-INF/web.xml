@@ -44,6 +44,15 @@
         <url-pattern>/home</url-pattern>
     </servlet-mapping>
 
+   <servlet>
+    <servlet-name>PaymentServlet</servlet-name>
+    <servlet-class>Controllers.PaymentServlet</servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>PaymentServlet</servlet-name>
+    <url-pattern>/payment</url-pattern>
+</servlet-mapping>
     <servlet>
         <servlet-name>CarListServlet</servlet-name>
         <servlet-class>Controllers.CarListServlet</servlet-class>
@@ -110,7 +119,7 @@
         <servlet-name>SendNotificationController</servlet-name>
         <url-pattern>/staff/send-notification</url-pattern>
     </servlet-mapping>
-<servlet-mapping>
+    <servlet-mapping>
         <servlet-name>AdminReviewServlet</servlet-name>
         <url-pattern>/admin/review</url-pattern>
     </servlet-mapping>
@@ -162,5 +171,6 @@
         <filter-name>AuthFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
+    
     
 </web-app>

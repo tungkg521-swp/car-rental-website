@@ -28,7 +28,7 @@ public class DashBoardDAO extends DBContext {
     }
 
     public int countPendingBookings() {
-        String sql = "SELECT COUNT(*) FROM booking WHERE status = 'PENDING'";
+        String sql = "SELECT COUNT(*) FROM booking WHERE status IN ('PENDING_APPROVAL', 'AWAITING_PAYMENT')";
         return executeCount(sql);
     }
 
@@ -41,10 +41,8 @@ public class DashBoardDAO extends DBContext {
         String sql = "SELECT ISNULL(SUM(total_estimated_price),0) FROM booking WHERE status = 'COMPLETED'";
         double total = 0;
 
-        try (PreparedStatement ps = connection.prepareStatement(sql);
-                ResultSet rs = ps.executeQuery()) {
+        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
-            
             if (rs.next()) {
                 total = rs.getDouble(1);
             }
@@ -59,8 +57,7 @@ public class DashBoardDAO extends DBContext {
     private int executeCount(String sql) {
         int count = 0;
 
-        try (PreparedStatement ps = connection.prepareStatement(sql);
-                ResultSet rs = ps.executeQuery()) {
+        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             if (rs.next()) {
                 count = rs.getInt(1);

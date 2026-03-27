@@ -28,11 +28,14 @@ public class BookingModel {
     private String customerPhone;
 
     private BigDecimal pricePerDay;
-    
-    private String contractStatus;
 
+    private String contractStatus;
+    private BigDecimal depositAmount;
+    private BigDecimal remainingAmount;
+    private Timestamp paymentDeadline;
 // getter + setter
     // ===== CONSTRUCTOR =====
+
     public BookingModel() {
     }
 
@@ -181,5 +184,28 @@ public class BookingModel {
         this.contractStatus = contractStatus;
     }
 
-    
+    public BigDecimal getDepositAmount() {
+        return depositAmount;
+    }
+
+    public void setDepositAmount(BigDecimal depositAmount) {
+        this.depositAmount = depositAmount;
+    }
+
+    public BigDecimal getRemainingAmount() {
+        return remainingAmount;
+    }
+
+    public void setRemainingAmount(BigDecimal remainingAmount) {
+        this.remainingAmount = remainingAmount;
+    }
+
+    public Timestamp getPaymentDeadline() {
+        return paymentDeadline;
+    }
+
+    public void setPaymentDeadline(Timestamp paymentDeadline) {
+        this.paymentDeadline = paymentDeadline;
+    }
+
 }

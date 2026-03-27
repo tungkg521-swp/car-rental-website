@@ -26,7 +26,6 @@
                         <div class="topbar-left">
                             <p class="page-kicker">Customer Booking</p>
                             <h1>Booking Detail</h1>
-
                         </div>
 
                         <div class="topbar-right">
@@ -36,7 +35,11 @@
                             </div>
                         </div>
                     </div>
-
+                    <c:if test="${param.created == '1'}">
+                        <div class="alert alert-success">
+                            Booking request created successfully. Please wait for staff approval.
+                        </div>
+                    </c:if>
                     <!-- MAIN CARD -->
                     <div class="detail-card">
 
@@ -83,31 +86,34 @@
 
                             </div>
                         </div>
+
                         <!-- RIGHT -->
                         <div class="detail-right">
 
                             <div class="detail-header">
                                 <div>
                                     <h2>${booking.carName}</h2>
-
-
                                 </div>
 
                                 <!-- STATUS BADGE -->
                                 <c:choose>
-                                    <c:when test="${booking.status == 'PENDING'}">
-                                        <span class="status-badge pending">Waiting Approval</span>
+                                    <c:when test="${booking.status == 'PENDING_APPROVAL'}">
+                                        <span class="status-badge pending">Waiting for Staff Approval</span>
                                     </c:when>
 
-                                    <c:when test="${booking.contractStatus == 'CREATED'}">
-                                        <span class="status-badge confirmed">Approved</span>
+                                    <c:when test="${booking.status == 'AWAITING_PAYMENT'}">
+                                        <span class="status-badge awaiting">Awaiting Payment</span>
                                     </c:when>
 
-                                    <c:when test="${booking.contractStatus == 'ACTIVE'}">
+                                    <c:when test="${booking.status == 'CONFIRMED'}">
+                                        <span class="status-badge confirmed">Confirmed</span>
+                                    </c:when>
+
+                                    <c:when test="${booking.status == 'ACTIVE'}">
                                         <span class="status-badge active">Renting</span>
                                     </c:when>
 
-                                    <c:when test="${booking.contractStatus == 'COMPLETED'}">
+                                    <c:when test="${booking.status == 'COMPLETED'}">
                                         <span class="status-badge completed">Completed</span>
                                     </c:when>
 
@@ -180,15 +186,91 @@
                                 </div>
                             </c:if>
 
+                            <c:if test="${not empty pendingCarChangeRequest}">
+                                <div class="info-card" style="margin-top: 20px;">
+                                    <h3 style="margin-bottom: 12px;">Car Change Request</h3>
+
+                                    <c:if test="${param.changeResponse == 'success'}">
+                                        <div class="alert alert-success">
+                                            Your response to the car change request was submitted successfully.
+                                        </div>
+                                    </c:if>
+
+                                    <c:if test="${param.changeResponse == 'fail'}">
+                                        <div class="alert alert-danger">
+                                            Failed to process your response. The replacement car may no longer be available.
+                                        </div>
+                                    </c:if>
+
+                                    <div class="info-row">
+                                        <span class="info-label">Request ID</span>
+                                        <span class="info-value">#${pendingCarChangeRequest.requestId}</span>
+                                    </div>
+
+                                    <div class="info-row">
+                                        <span class="info-label">Status</span>
+                                        <span class="info-value">${pendingCarChangeRequest.status}</span>
+                                    </div>
+
+                                    <div class="info-row">
+                                        <span class="info-label">Old Car ID</span>
+                                        <span class="info-value">${pendingCarChangeRequest.oldCarId}</span>
+                                    </div>
+
+                                    <div class="info-row">
+                                        <span class="info-label">New Car ID</span>
+                                        <span class="info-value">${pendingCarChangeRequest.newCarId}</span>
+                                    </div>
+
+                                    <div class="info-row">
+                                        <span class="info-label">Reason</span>
+                                        <span class="info-value">${pendingCarChangeRequest.reason}</span>
+                                    </div>
+
+                                    <c:if test="${pendingCarChangeRequest.status == 'PENDING'}">
+                                        <div style="display:flex; gap:12px; margin-top:16px; flex-wrap:wrap;">
+                                            <form method="post"
+                                                  action="${pageContext.request.contextPath}/car-change"
+                                                  class="inline-form">
+                                                <input type="hidden" name="action" value="respond"/>
+                                                <input type="hidden" name="requestId" value="${pendingCarChangeRequest.requestId}"/>
+                                                <input type="hidden" name="bookingId" value="${booking.bookingId}"/>
+                                                <input type="hidden" name="decision" value="accept"/>
+
+                                                <button type="submit"
+                                                        class="btn btn-primary"
+                                                        onclick="return confirm('Do you want to accept this car change request?');">
+                                                    Accept Car Change
+                                                </button>
+                                            </form>
+
+                                            <form method="post"
+                                                  action="${pageContext.request.contextPath}/car-change"
+                                                  class="inline-form">
+                                                <input type="hidden" name="action" value="respond"/>
+                                                <input type="hidden" name="requestId" value="${pendingCarChangeRequest.requestId}"/>
+                                                <input type="hidden" name="bookingId" value="${booking.bookingId}"/>
+                                                <input type="hidden" name="decision" value="reject"/>
+
+                                                <button type="submit"
+                                                        class="btn btn-danger"
+                                                        onclick="return confirm('Do you want to reject this car change request?');">
+                                                    Reject Car Change
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </c:if>
+                                </div>
+                            </c:if>
+
                             <!-- ACTIONS -->
                             <div class="action-buttons">
-                                <a href="${pageContext.request.contextPath}/customer/bookings?action=list"
+                                <a href="${pageContext.request.contextPath}/booking?action=list"
                                    class="btn btn-secondary">
                                     ← Back to My Bookings
                                 </a>
 
-
-                                <c:if test="${booking.status == 'PENDING'}">
+                                <c:if test="${booking.status == 'PENDING_APPROVAL' or booking.status == 'AWAITING_PAYMENT'}">
                                     <form method="post"
                                           action="${pageContext.request.contextPath}/booking"
                                           class="inline-form">
@@ -204,6 +286,13 @@
                                     </form>
                                 </c:if>
 
+
+                                <c:if test="${booking.status == 'AWAITING_PAYMENT' && empty pendingCarChangeRequest}">
+                                    <a href="${pageContext.request.contextPath}/payment?action=create&bookingId=${booking.bookingId}"
+                                       class="btn btn-primary">
+                                        Thanh toán ngay
+                                    </a>
+                                </c:if>
                                 <c:if test="${booking.status == 'CANCELLED'}">
                                     <form method="post"
                                           action="${pageContext.request.contextPath}/booking"
@@ -227,6 +316,7 @@
                 </div>
             </div>
         </section>
+
         <div id="popupOverlay" class="popup-overlay">
             <div class="popup-box" id="popupBox">
                 <div class="popup-icon" id="popupIcon">✓</div>
@@ -235,6 +325,7 @@
                 <button type="button" class="popup-btn" onclick="closePopup()">OK</button>
             </div>
         </div>
+
         <script src="${pageContext.request.contextPath}/assets/js/booking-detail.js?v=1"></script>
     </body>
 </html>

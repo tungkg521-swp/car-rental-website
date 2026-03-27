@@ -1,4 +1,4 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
@@ -65,35 +65,30 @@
                                     </div>
 
                                     <c:choose>
-
-                                        <c:when test="${b.status == 'PENDING'}">
-                                            <span class="status pending">Waiting Approval</span>
+                                        <c:when test="${b.status == 'PENDING_APPROVAL'}">
+                                            <span class="status pending">Waiting for Staff Approval</span>
                                         </c:when>
-
-                                        <c:when test="${b.contractStatus == 'CREATED'}">
-                                            <span class="status confirmed">Approved</span>
+                                        <c:when test="${b.status == 'AWAITING_PAYMENT'}">
+                                            <span class="status awaiting">Awaiting Payment</span>
                                         </c:when>
-
-                                        <c:when test="${b.contractStatus == 'ACTIVE'}">
+                                        <c:when test="${b.status == 'CONFIRMED'}">
+                                            <span class="status confirmed">Confirmed</span>
+                                        </c:when>
+                                        <c:when test="${b.status == 'ACTIVE'}">
                                             <span class="status active">Renting</span>
                                         </c:when>
-
-                                        <c:when test="${b.contractStatus == 'COMPLETED'}">
+                                        <c:when test="${b.status == 'COMPLETED'}">
                                             <span class="status completed">Completed</span>
                                         </c:when>
-
                                         <c:when test="${b.status == 'REJECTED'}">
                                             <span class="status rejected">Rejected</span>
                                         </c:when>
-
                                         <c:when test="${b.status == 'CANCELLED'}">
                                             <span class="status cancelled">Cancelled</span>
                                         </c:when>
-
                                         <c:otherwise>
                                             <span class="status">${b.status}</span>
                                         </c:otherwise>
-
                                     </c:choose>
 
                                 </div>

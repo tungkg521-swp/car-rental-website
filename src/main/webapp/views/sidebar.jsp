@@ -1,4 +1,4 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page pageEncoding="UTF-8"%>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
@@ -15,7 +15,7 @@
         <c:choose>
 
             <c:when test="${isAdmin}">
-              
+
 
                 <li>
                     <a class="${fn:contains(currentUri, '/dashboard/admin') and empty param.view ? 'active' : ''}"
@@ -41,7 +41,7 @@
                     </a>
                 </li>
 
-                <li class="menu-section">STAFF FEATURES</li>
+               
 
                 <li>
                     <a class="${fn:contains(currentUri, '/staff/users') ? 'active' : ''}"
@@ -162,6 +162,13 @@
                        href="${pageContext.request.contextPath}/staff/contracts">
                         <i class="icon">📄</i>
                         <span>Manage Contracts</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="${fn:contains(currentUri, '/staff/notification') ? 'active' : ''}"
+                       href="${pageContext.request.contextPath}/staff/notification">
+                        <i class="icon">🔔</i>
+                        <span>Notification</span>
                     </a>
                 </li>
             </c:otherwise>
