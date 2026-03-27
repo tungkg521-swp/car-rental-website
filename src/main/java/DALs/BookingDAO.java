@@ -254,8 +254,8 @@ public class BookingDAO extends DBContext {
 
         return false;
     }
-    
-     public boolean updateStaffId(int bookingId,int staffId) {
+
+    public boolean updateStaffId(int bookingId, int staffId) {
 
         String sql = "UPDATE booking SET staff_id = ? WHERE booking_id = ?";
 
@@ -269,10 +269,10 @@ public class BookingDAO extends DBContext {
 
         return false;
     }
-    
-      public boolean updatePaymentDeadline(int bookingId, int hours) {
 
-       String sql = "UPDATE booking SET payment_deadline = DATEADD(HOUR, ?, GETDATE()) WHERE booking_id = ?";
+    public boolean updatePaymentDeadline(int bookingId, int hours) {
+
+        String sql = "UPDATE booking SET payment_deadline = DATEADD(HOUR, ?, GETDATE()) WHERE booking_id = ?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, hours);
@@ -541,13 +541,13 @@ public class BookingDAO extends DBContext {
     public boolean hasBookingConflict(int carId, Date startDate, Date endDate) {
 
         String sql = """
-        SELECT 1
-        FROM booking
-        WHERE car_id = ?
-          AND status IN ('CONFIRMED', 'ACTIVE')
-          AND start_date <= ?
-          AND end_date >= ?
-    """;
+            SELECT 1
+            FROM booking
+            WHERE car_id = ?
+            AND status IN ('AWAITING_PAYMENT', 'CONFIRMED', 'ACTIVE')
+            AND start_date <= ?
+            AND end_date >= ?
+             """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
@@ -564,4 +564,59 @@ public class BookingDAO extends DBContext {
 
         return false;
     }
+    
+    public List<Date[]> getBusyDateRangesByCarId(int carId) {
+    List<Date[]> ranges = new ArrayList<>();
+
+    String sql = """
+        SELECT start_date, end_date
+        FROM booking
+        WHERE car_id = ?
+          AND status IN ('AWAITING_PAYMENT', 'CONFIRMED', 'ACTIVE')
+        ORDER BY start_date
+    """;
+
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setInt(1, carId);
+
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            Date startDate = rs.getDate("start_date");
+            Date endDate = rs.getDate("end_date");
+            ranges.add(new Date[]{startDate, endDate});
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return ranges;
+}
+    
+    public boolean hasBookingConflictExcludeBooking(int carId, Date startDate, Date endDate, int excludeBookingId) {
+
+    String sql = """
+        SELECT 1
+        FROM booking
+        WHERE car_id = ?
+          AND booking_id <> ?
+          AND status IN ('AWAITING_PAYMENT', 'CONFIRMED', 'ACTIVE')
+          AND start_date <= ?
+          AND end_date >= ?
+    """;
+
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setInt(1, carId);
+        ps.setInt(2, excludeBookingId);
+        ps.setDate(3, endDate);
+        ps.setDate(4, startDate);
+
+        ResultSet rs = ps.executeQuery();
+        return rs.next();
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return false;
+}
 }

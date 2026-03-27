@@ -22,6 +22,7 @@ import service.BookingService;
 import service.CarService;
 import service.VoucherService;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 
 public class BookingServlet extends HttpServlet {
 
@@ -130,13 +131,11 @@ public class BookingServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/cars");
             return;
         }
+        CarService carService = new CarService();
+        CarModel car = carService.getCarById(carId);
 
         if (!customer.isLicenseVerified()) {
             request.setAttribute("LICENSE_REQUIRED", true);
-
-            CarService carService = new CarService();
-            CarModel car = carService.getCarById(carId);
-
             request.setAttribute("car", car);
             request.setAttribute("startDate", startDateRaw);
             request.setAttribute("endDate", endDateRaw);
@@ -144,8 +143,45 @@ public class BookingServlet extends HttpServlet {
             return;
         }
 
-        CarService carService = new CarService();
-        CarModel car = carService.getCarById(carId);
+        Date startDate;
+        Date endDate;
+        try {
+            startDate = Date.valueOf(startDateRaw);
+            endDate = Date.valueOf(endDateRaw);
+        } catch (IllegalArgumentException e) {
+            response.sendRedirect(request.getContextPath() + "/car-detail?carId=" + carId);
+            return;
+        }
+        if (bookingService.hasOverlapConfirmed(carId, startDate, endDate)) {
+            request.setAttribute("BOOKING_ERROR", "Xe đang bận trong khoảng thời gian bạn chọn. Vui lòng chọn lịch khác.");
+            request.setAttribute("car", car);
+            request.setAttribute("startDate", startDateRaw);
+            request.setAttribute("endDate", endDateRaw);
+
+            List<Date[]> busyRanges = bookingService.getBusyDateRangesByCarId(carId);
+            List<String> busyDates = new ArrayList<>();
+            for (Date[] range : busyRanges) {
+                LocalDate d = range[0].toLocalDate();
+                LocalDate end = range[1].toLocalDate();
+                while (!d.isAfter(end)) {
+                    busyDates.add(d.toString());
+                    d = d.plusDays(1);
+                }
+            }
+
+            StringBuilder busyDatesJson = new StringBuilder("[");
+            for (int i = 0; i < busyDates.size(); i++) {
+                busyDatesJson.append("\"").append(busyDates.get(i)).append("\"");
+                if (i < busyDates.size() - 1) {
+                    busyDatesJson.append(",");
+                }
+            }
+            busyDatesJson.append("]");
+
+            request.setAttribute("busyDatesJson", busyDatesJson.toString());
+            request.getRequestDispatcher("/views/car-detail.jsp").forward(request, response);
+            return;
+        }
 
         if (car == null) {
             response.sendRedirect(request.getContextPath() + "/cars");

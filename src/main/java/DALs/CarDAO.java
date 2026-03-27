@@ -942,7 +942,7 @@ public class CarDAO extends DBContext {
           AND c.car_id NOT IN (
               SELECT bk.car_id
               FROM booking bk
-              WHERE bk.status IN ('CONFIRMED', 'ACTIVE')
+              WHERE bk.status IN ('AWAITING_PAYMENT', 'CONFIRMED', 'ACTIVE')
                 AND bk.start_date <= ?
                 AND bk.end_date >= ?
           )
