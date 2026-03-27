@@ -14,51 +14,80 @@ import java.util.List;
 import java.util.Map;
 
 @WebServlet(name = "ReportController", urlPatterns = {
+    "/admin/report-summary",
+    "/admin/trip-detail",
+    "/admin/revenue-chart", // ← Endpoint cho Revenue Line Chart
     "/admin/rental-report-content",
     "/admin/usage-report-content",
     "/admin/revenue-report-content",
-    "/admin/report-summary"   // ← mới: KPI overview
+    "/admin/vehicle-utilization"
 })
 public class ReportController extends HttpServlet {
 
-    private ReportService reportService = new ReportService();
+    private final ReportService reportService = new ReportService();
+    private final Gson gson = new Gson();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String servletPath = request.getServletPath();
-        String startDate = request.getParameter("startDate");  // yyyy-MM-dd
-        String endDate   = request.getParameter("endDate");
+        String path = request.getServletPath();
+        String startDate = request.getParameter("startDate");
+        String endDate = request.getParameter("endDate");
 
-        List<ReportModel> reportList = null;
-        String reportType = null;
+        try {
+            // ==================== JSON ENDPOINTS (cho Dashboard) ====================
+            if ("/admin/report-summary".equals(path)) {
+                Map<String, Object> summary = reportService.getReportSummary(startDate, endDate);
+                sendJsonResponse(response, summary);
 
-        if (servletPath.equals("/admin/rental-report-content")) {
-            reportList = reportService.getAllRentalReports(startDate, endDate);
-            reportType = "RENTAL";
-        } else if (servletPath.equals("/admin/usage-report-content")) {
-            reportList = reportService.getVehicleUsageReports(startDate, endDate);
-            reportType = "USAGE";
-        } else if (servletPath.equals("/admin/revenue-report-content")) {
-            reportList = reportService.getRevenueReports(startDate, endDate);
-            reportType = "REVENUE";
-        } else if (servletPath.equals("/admin/report-summary")) {
-            // Trả về JSON summary cho KPI cards
-            Map<String, Object> summary = reportService.getReportSummary(startDate, endDate);
-            response.setContentType("application/json");
-            response.getWriter().write(new Gson().toJson(summary)); // cần import com.google.gson.Gson
-            return;
-        } else {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND);
-            return;
+            } else if ("/admin/trip-detail".equals(path)) {
+                List<ReportModel> trips = reportService.getAllRentalReports(startDate, endDate);
+                sendJsonResponse(response, trips);
+
+            } else if ("/admin/revenue-chart".equals(path)) {
+                List<ReportModel> revenueData = reportService.getRevenueByDate(startDate, endDate);
+                sendJsonResponse(response, revenueData);
+
+            } else if ("/admin/vehicle-utilization".equals(path)) {
+                Map<String, Object> utilizationData = reportService.getVehicleUtilization(startDate, endDate);
+                sendJsonResponse(response, utilizationData);
+                // ==================== JSP FORWARD ENDPOINTS ====================
+            } else if ("/admin/rental-report-content".equals(path)) {
+                List<ReportModel> list = reportService.getAllRentalReports(startDate, endDate);
+                forwardToJSP(request, response, list, "RENTAL");
+
+            } else if ("/admin/usage-report-content".equals(path)) {
+                List<ReportModel> list = reportService.getVehicleUsageReports(startDate, endDate);
+                forwardToJSP(request, response, list, "USAGE");
+
+            } else if ("/admin/revenue-report-content".equals(path)) {
+                List<ReportModel> list = reportService.getRevenueReports(startDate, endDate);
+                forwardToJSP(request, response, list, "REVENUE");
+
+            } else {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, "Report endpoint not found: " + path);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            sendJsonResponse(response, Map.of("error", "Internal server error: " + e.getMessage()));
         }
+    }
 
-        request.setAttribute("reportList", reportList);
+    // Helper: Trả về JSON
+    private void sendJsonResponse(HttpServletResponse response, Object data) throws IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(gson.toJson(data));
+    }
+
+    // Helper: Forward sang JSP
+    private void forwardToJSP(HttpServletRequest request, HttpServletResponse response,
+            List<ReportModel> list, String reportType) throws ServletException, IOException {
+        request.setAttribute("reportList", list);
         request.setAttribute("reportType", reportType);
-        request.setAttribute("startDate", startDate);   // truyền lại filter cho JSP
-        request.setAttribute("endDate", endDate);
-
         request.getRequestDispatcher("/views/admin-report.jsp").forward(request, response);
     }
 }

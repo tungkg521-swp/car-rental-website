@@ -155,7 +155,7 @@ public class ReportDAO extends DBContext {
         return list;
     }
 
-    // ==================== REVENUE REPORT ====================
+    // ==================== REVENUE REPORT (CHI TIẾT) ====================
     public List<ReportModel> findRevenueReports(String startDate, String endDate) {
         List<ReportModel> list = new ArrayList<>();
         StringBuilder sql = new StringBuilder("""
@@ -232,22 +232,168 @@ public class ReportDAO extends DBContext {
         return list;
     }
 
-    // ==================== SUMMARY KPI ====================
+  // ==================== REVENUE CHART  ====================
+public List<ReportModel> findRevenueByDate(String startDate, String endDate) {
+    List<ReportModel> list = new ArrayList<>();
+
+    StringBuilder sql = new StringBuilder("""
+        SELECT 
+            CONVERT(DATE, COALESCE(c.contract_end_date, b.end_date)) AS revenue_date,
+            SUM(COALESCE(c.total_amount, b.total_estimated_price, 0)) AS daily_revenue,
+            COUNT(DISTINCT COALESCE(c.contract_id, b.booking_id)) AS transaction_count
+        FROM dbo.booking b
+        LEFT JOIN dbo.rental_contract c ON b.booking_id = c.booking_id
+        WHERE COALESCE(c.total_amount, b.total_estimated_price, 0) > 0
+        """);
+
+    List<Object> params = new ArrayList<>();
+
+    
+    if (startDate != null && !startDate.isEmpty()) {
+        sql.append(" AND COALESCE(c.contract_end_date, b.end_date) >= ?");
+        params.add(Date.valueOf(startDate));
+    }
+    if (endDate != null && !endDate.isEmpty()) {
+        sql.append(" AND COALESCE(c.contract_end_date, b.end_date) <= ?");
+        params.add(Date.valueOf(endDate));
+    }
+
+   
+    sql.append(" AND COALESCE(c.contract_status, b.status) NOT IN ('CANCELLED', 'REJECTED')");
+
+    sql.append("""
+        GROUP BY CONVERT(DATE, COALESCE(c.contract_end_date, b.end_date))
+        ORDER BY revenue_date ASC
+        """);
+
+    try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+        for (int i = 0; i < params.size(); i++) {
+            ps.setObject(i + 1, params.get(i));
+        }
+
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                ReportModel r = new ReportModel();
+                r.setRevenueDate(rs.getDate("revenue_date"));
+                r.setTotalPrice(rs.getBigDecimal("daily_revenue"));
+                r.setRentalCount(rs.getLong("transaction_count"));
+                list.add(r);
+            }
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+        System.out.println("Lỗi Revenue Chart: " + e.getMessage());
+    }
+
+    System.out.println("Revenue trả về: " + list.size() + " dòng");
+    return list;
+}
+
+    // ==================== VEHICLE UTILIZATION ====================
+    public Map<String, Object> getVehicleUtilization(String startDate, String endDate) {
+        Map<String, Object> result = new HashMap<>();
+
+        // Pie Chart: Phân bổ trạng thái xe
+        String pieSql = """
+        SELECT 
+            COUNT(CASE WHEN c.status = 'RENTED' OR rc.contract_status IN ('ACTIVE', 'ONGOING') THEN 1 END) AS rented,
+            COUNT(CASE WHEN (c.status = 'AVAILABLE' OR c.status IS NULL) 
+                        AND (rc.contract_status IS NULL OR rc.contract_status NOT IN ('ACTIVE', 'ONGOING')) THEN 1 END) AS available,
+            COUNT(CASE WHEN c.status = 'MAINTENANCE' THEN 1 END) AS maintenance,
+            COUNT(*) AS total_cars
+        FROM dbo.cars c
+        LEFT JOIN dbo.rental_contract rc 
+            ON c.car_id = rc.car_id 
+            AND rc.contract_status IN ('ACTIVE', 'ONGOING')
+        """;
+
+        // Bar Chart: Top 10 xe sử dụng nhiều nhất
+        String barSql = """
+        SELECT TOP 10
+            c.plate_number,
+            c.model_name,
+            br.brand_name,
+            ISNULL(SUM(DATEDIFF(DAY, rc.contract_start_date, rc.contract_end_date) + 1), 0) AS total_rental_days
+        FROM dbo.cars c
+        INNER JOIN dbo.brand br ON c.brand_id = br.brand_id
+        LEFT JOIN dbo.rental_contract rc 
+            ON c.car_id = rc.car_id 
+            AND rc.contract_status = 'COMPLETED'
+        WHERE 1=1
+        """;
+
+        List<Object> params = new ArrayList<>();
+
+        if (startDate != null && !startDate.isEmpty()) {
+            barSql += " AND rc.contract_start_date >= ?";
+            params.add(Date.valueOf(startDate));
+        }
+        if (endDate != null && !endDate.isEmpty()) {
+            barSql += " AND rc.contract_end_date <= ?";
+            params.add(Date.valueOf(endDate));
+        }
+
+        barSql += """
+        GROUP BY c.car_id, c.plate_number, c.model_name, br.brand_name
+        ORDER BY total_rental_days DESC
+        """;
+
+        try {
+            // Pie Chart
+            try (PreparedStatement ps = connection.prepareStatement(pieSql)) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        Map<String, Integer> pieData = new HashMap<>();
+                        pieData.put("rented", rs.getInt("rented"));
+                        pieData.put("available", rs.getInt("available"));
+                        pieData.put("maintenance", rs.getInt("maintenance"));
+                        result.put("pieData", pieData);
+                    }
+                }
+            }
+
+            // Bar Chart
+            try (PreparedStatement ps = connection.prepareStatement(barSql)) {
+                for (int i = 0; i < params.size(); i++) {
+                    ps.setObject(i + 1, params.get(i));
+                }
+                try (ResultSet rs = ps.executeQuery()) {
+                    List<Map<String, Object>> barList = new ArrayList<>();
+                    while (rs.next()) {
+                        Map<String, Object> car = new HashMap<>();
+                        car.put("plateNumber", rs.getString("plate_number"));
+                        car.put("modelName", rs.getString("model_name"));
+                        car.put("brandName", rs.getString("brand_name"));
+                        car.put("rentalDays", rs.getInt("total_rental_days"));
+                        barList.add(car);
+                    }
+                    result.put("barData", barList);
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    // ==================== SUMMARY KPI  ====================
     public Map<String, Object> getReportSummary(String startDate, String endDate) {
         Map<String, Object> summary = new HashMap<>();
 
         String sql = """
-            SELECT 
-                ISNULL(SUM(rc.total_amount), 0) AS totalRevenue,
-                COUNT(rc.contract_id) AS totalTrips,
-                ISNULL(SUM(DATEDIFF(DAY, rc.contract_start_date, rc.contract_end_date) + 1), 0) AS totalRentalDays,
-                COUNT(DISTINCT c.car_id) AS totalCars
-            FROM dbo.cars c
-            LEFT JOIN dbo.rental_contract rc 
-                ON c.car_id = rc.car_id 
-                AND rc.contract_status = 'COMPLETED'
-            WHERE 1=1
-            """;
+        SELECT 
+            ISNULL(SUM(DATEDIFF(DAY, rc.contract_start_date, rc.contract_end_date) + 1), 0) AS totalRentalDays,
+            COUNT(DISTINCT rc.contract_id) AS totalTrips,
+            ISNULL(SUM(rc.total_amount), 0) AS totalRevenue,
+            COUNT(DISTINCT c.car_id) AS totalCars
+        FROM dbo.cars c
+        LEFT JOIN dbo.rental_contract rc 
+            ON c.car_id = rc.car_id 
+            AND rc.contract_status = 'COMPLETED'
+        WHERE 1=1
+        """;
 
         List<Object> params = new ArrayList<>();
 
@@ -264,25 +410,35 @@ public class ReportDAO extends DBContext {
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
             }
+
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    long revenue = rs.getLong("totalRevenue");
-                    long trips = rs.getLong("totalTrips");
-                    int days = rs.getInt("totalRentalDays");
-                    int cars = rs.getInt("totalCars");
+                    long totalRevenue = rs.getLong("totalRevenue");
+                    long totalTrips = rs.getLong("totalTrips");
+                    int totalRentalDays = rs.getInt("totalRentalDays");
+                    int totalCars = rs.getInt("totalCars");
 
-                    // Tính Utilization % (mặc định 30 ngày nếu không có filter)
-                    int periodDays = 30;
-                    if (startDate != null && endDate != null) {
-                        periodDays = (int) java.time.temporal.ChronoUnit.DAYS.between(
-                            java.sql.Date.valueOf(startDate).toLocalDate(),
-                            java.sql.Date.valueOf(endDate).toLocalDate()) + 1;
+                    // Tính số ngày trong kỳ
+                    int periodDays = 30; // mặc định
+                    if (startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
+                        try {
+                            java.time.LocalDate s = java.sql.Date.valueOf(startDate).toLocalDate();
+                            java.time.LocalDate e = java.sql.Date.valueOf(endDate).toLocalDate();
+                            periodDays = (int) java.time.temporal.ChronoUnit.DAYS.between(s, e) + 1;
+                        } catch (Exception ignored) {
+                            periodDays = 30;
+                        }
                     }
-                    double utilization = (cars > 0) ? (double) days / (cars * periodDays) * 100 : 0;
 
-                    summary.put("totalRevenue", revenue);
-                    summary.put("totalTrips", trips);
-                    summary.put("utilization", Math.round(utilization * 100.0) / 100.0);
+                    // Công thức Utilization 
+                    double utilization = (totalCars > 0)
+                            ? (double) totalRentalDays / (totalCars * periodDays) * 100
+                            : 0.0;
+
+                    summary.put("totalRevenue", totalRevenue);
+                    summary.put("totalTrips", totalTrips);
+                    summary.put("utilization", Math.round(utilization * 10.0) / 10.0); // 1 chữ số thập phân
+                    summary.put("periodDays", periodDays);   // truyền thêm để JS dùng nếu cần
                 }
             }
         } catch (Exception e) {
