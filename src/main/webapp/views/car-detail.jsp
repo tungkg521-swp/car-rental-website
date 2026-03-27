@@ -4,15 +4,23 @@
 
 <!DOCTYPE html>
 <html>
+
     <head>
         <title>${car.modelName}</title>
-
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style-base.css?v=6">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/car-detail.css?v=6">
+
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/wishlist.css?v=6">
+
     </head>
 
+
+
     <body>
+
+    <body data-context-path="${pageContext.request.contextPath}">
+
 
         <jsp:include page="includes/header.jsp"/>
 
@@ -26,19 +34,19 @@
                     <div class="car-gallery">
 
                         <div class="main-image">
-                            <button class="nav prev" onclick="prevImage()">‹</button>
+                            <button class="nav prev" type="button">‹</button>
 
                             <img id="mainCarImage"
                                  src="${pageContext.request.contextPath}/assets/images/cars/${car.imageFolder}/${car.imageFolder}_1.jpg"
                                  alt="${car.modelName}">
 
-                            <button class="nav next" onclick="nextImage()">›</button>
+                            <button class="nav next" type="button">›</button>
                         </div>
 
                         <div class="thumbs">
                             <c:forEach var="i" begin="1" end="5">
                                 <img src="${pageContext.request.contextPath}/assets/images/cars/${car.imageFolder}/${car.imageFolder}_${i}.jpg"
-                                     onclick="changeImage(${i})">
+                                     alt="${car.modelName} image ${i}">
                             </c:forEach>
                         </div>
 
@@ -46,67 +54,115 @@
 
                     <!-- RIGHT INFO -->
                     <div class="car-summary">
+
                         <c:if test="${not empty BOOKING_ERROR}">
                             <div class="alert alert-danger">${BOOKING_ERROR}</div>
                         </c:if>
+
                         <h1>
                             ${car.modelName}
-                            <span class="status">${car.status}</span>
+                           
                         </h1>
 
                         <div class="price">
                             <fmt:formatNumber value="${car.pricePerDay}" pattern="#,###"/> VND / day
                         </div>
 
-                        <div class="badge">
-                            Miễn phí sạc tới 31/12/2027
-                        </div>
-                        <c:if test="${not empty startDate and not empty endDate}">
-                            <div class="selected-period">
-                                <strong>Rental period:</strong> ${startDate} → ${endDate}
+                        <c:if test="${not empty car.description}">
+                            <div class="badge">
+                                ${car.description}
                             </div>
                         </c:if>
-                        <ul class="specs">
-                            <li>🚗 ${car.seatCount} chỗ</li>
-                            <li>⚙️ ${car.transmission}</li>
-                            <li>⛽ ${car.fuelType}</li>
-                            <li>📅 Năm ${car.modelYear}</li>
-                            <li>🚘 ${car.typeName}</li>
-                            <li>🏷️ ${car.brandName}</li>
-                        </ul>
 
+                        <div class="rental-calendar-box">
 
-                        <a href="${pageContext.request.contextPath}/booking?action=create&carId=${car.carId}&startDate=${startDate}&endDate=${endDate}"
-                           class="btn ${car.status ne 'AVAILABLE' ? 'disabled' : ''}">
-                            Đặt xe
-                        </a>
+                            <h3>Chọn thời gian thuê</h3>
 
-
-                        <form class="wishlist-form"
-                              action="${pageContext.request.contextPath}/wishlist?action=add"
-                              method="POST">
-
-                            <input type="hidden" name="carId" value="${car.carId}">
-
-                            <button type="submit" class="wishlist-btn">
-                                ❤️ Thêm vào yêu thích
-                            </button>
-
-                            <c:if test="${not empty SUCCESS}">
-                                <div class="alert success">${SUCCESS}</div>
+                            <c:if test="${not empty BOOKING_ERROR}">
+                                <div class="date-error-box">${BOOKING_ERROR}</div>
                             </c:if>
 
-                            <c:if test="${not empty ERROR}">
-                                <div class="alert error">${ERROR}</div>
+                            <div id="calendarDateError" class="date-error-box" style="display:none;"></div>
+
+                            <form id="bookingFromDetailForm"
+                                  action="${pageContext.request.contextPath}/booking"
+                                  method="get">
+                                <input type="hidden" name="action" value="create">
+                                <input type="hidden" name="carId" value="${car.carId}">
+                                <input type="hidden" id="startDate" name="startDate" value="${startDate}">
+                                <input type="hidden" id="endDate" name="endDate" value="${endDate}">
+
+                                <div class="rental-summary-trigger" id="openRentalModal" role="button" tabindex="0">
+
+                                    <div class="rental-summary-grid">
+                                        <div class="rental-summary-col">
+                                            <div class="rental-summary-label">Nhận xe</div>
+                                            <div class="rental-summary-value" id="displayStartDate">
+                                                <c:choose>
+                                                    <c:when test="${not empty startDate}">
+                                                        ${startDate}
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        Chọn ngày nhận xe
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </div>
+                                        </div>
+
+                                        <div class="rental-summary-col">
+                                            <div class="rental-summary-label">Trả xe</div>
+                                            <div class="rental-summary-value" id="displayEndDate">
+                                                <c:choose>
+                                                    <c:when test="${not empty endDate}">
+                                                        ${endDate}
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        Chọn ngày trả xe
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <button type="submit"
+                                        id="bookNowBtn"
+                                        data-car-available="${car.status eq 'AVAILABLE'}"
+                                        class="btn ${car.status ne 'AVAILABLE' ? 'disabled' : ''}"
+                                        ${car.status ne 'AVAILABLE' ? 'disabled' : ''}>
+                                    Đặt xe
+                                </button>
+                            </form>
+
+                            <div class="specs">
+                                <div>🚗 ${car.seatCount} chỗ</div>
+                                <div>⚙ ${car.transmission}</div>
+                                <div>⛽ ${car.fuelType}</div>
+                                <div>📅 Năm ${car.modelYear}</div>
+                                <c:if test="${not empty car.typeName}">
+                                    <div>🚘 ${car.typeName}</div>
+                                </c:if>
+                                <c:if test="${not empty car.brandName}">
+                                    <div>🏷 ${car.brandName}</div>
+                                </c:if>
+                            </div>
+
+                            <c:if test="${sessionScope.ACCOUNT != null and sessionScope.ACCOUNT.roleId == 1}">
+                                <button type="button"
+                                        class="wishlist-btn"
+                                        data-car-id="${car.carId}">
+                                    ❤ Thêm vào yêu thích
+                                </button>
                             </c:if>
-                        </form>
+
+                            <a href="#" class="consult">Nhận thông tin tư vấn</a>
 
 
-                        <a href="#" class="consult">Nhận thông tin tư vấn</a>
+                        </div>
 
                     </div>
                 </div>
-
 
                 <!-- DESCRIPTION -->
                 <div class="section">
@@ -114,148 +170,65 @@
                     <p>${car.description}</p>
                 </div>
 
-
-                <!-- CONDITIONS -->
-                <div class="bottom-grid">
-
-                    <div class="conditions">
-
-                        <h2>Điều kiện thuê xe</h2>
-
-                        <div class="box">
-                            <h4>Thông tin cần có khi nhận xe</h4>
-                            <ul>
-                                <li>CCCD hoặc Hộ chiếu còn thời hạn</li>
-                                <li>Bằng lái hợp lệ</li>
-                            </ul>
-                        </div>
-
-                        <div class="box">
-                            <h4>Hình thức thanh toán</h4>
-                            <ul>
-                                <li>Trả trước</li>
-                                <li>Thanh toán 100% khi nhận xe</li>
-                            </ul>
-                        </div>
-
-                        <div class="box">
-                            <h4>Chính sách đặt cọc</h4>
-                            <p>Đặt cọc theo quy định của chủ xe</p>
-                        </div>
-
-                    </div>
-
-
-                    <div class="similar">
-                        <h2>Xe tương tự</h2>
-                        <p>Đang cập nhật...</p>
-                    </div>
-
-                </div>
-
-
                 <!-- REVIEWS -->
                 <div class="section review-section">
+                    <h2>Đánh giá</h2>
 
-                    <h2>Customer Reviews</h2>
-                    <p>Xem đánh giá từ khách hàng đã thuê xe này.</p>
+                    <c:choose>
+                        <c:when test="${not empty reviews}">
+                            <c:forEach var="review" items="${reviews}">
+                                <div class="review-card">
+                                    <div class="review-header">
+                                        <span>${review.customerName}</span>
+                                        <span class="review-stars">${review.rating} ★</span>
+                                    </div>
 
-                    <c:if test="${empty reviews}">
-                        <div class="no-review">
-                            No reviews yet. Be the first to review this car.
-                        </div>
-                    </c:if>
+                                    <div class="review-date">
+                                        ${review.createdAt}
+                                    </div>
 
-                    <c:forEach var="r" items="${reviews}">
+                                    <div class="review-comment">
+                                        ${review.comment}
+                                    </div>
 
-                        <div class="review-card">
-
-                            <div class="review-header">
-
-                                <div class="review-user">
-                                    👤 ${r.customerName}
+                                    <c:if test="${sessionScope.ACCOUNT != null and review.customerId == sessionScope.CUSTOMER.customerId}">
+                                        <button type="button"
+                                                class="review-edit"
+                                                data-review-id="${review.reviewId}"
+                                                data-rating="${review.rating}"
+                                                data-comment="<c:out value='${review.comment}'/>">
+                                            ✏
+                                        </button>
+                                    </c:if>
                                 </div>
-                                <c:if test="${not empty sessionScope.CUSTOMER and sessionScope.CUSTOMER.customerId == r.customerId}">
-
-                                    <button type="button"
-                                            class="review-edit"
-                                            data-review-id="${r.reviewId}"
-                                            data-car-id="${car.carId}"
-                                            data-rating="${r.rating}"
-                                            onclick="openEditReviewModal(this)">
-                                        ✏
-                                    </button>
-
-                                    <textarea id="review-comment-${r.reviewId}" hidden><c:out value="${r.comment}"/></textarea>
-
-                                </c:if>
-
-                                <div class="review-stars">
-                                    <c:forEach begin="1" end="${r.rating}">
-                                        ⭐
-                                    </c:forEach>
-                                </div>
-
-                                <div class="review-date">
-                                    <fmt:formatDate value="${r.createdAt}" pattern="dd/MM/yyyy"/>
-                                </div>
-
-                            </div>
-
-                            <div class="review-comment">
-                                ${r.comment}
-                            </div>
-
-                        </div>
-
-                    </c:forEach>
-
+                            </c:forEach>
+                        </c:when>
+                        <c:otherwise>
+                            <p>Chưa có đánh giá nào.</p>
+                        </c:otherwise>
+                    </c:choose>
                 </div>
 
             </div>
         </section>
-        <c:if test="${LICENSE_REQUIRED}">
-            <div id="verifyModal" class="verify-modal">
-                <div class="verify-box">
-                    <div class="verify-icon">!</div>
-                    <p>Bạn cần xác thực <b>GPLX</b> mới có thể đặt xe.</p>
 
-                    <div class="verify-actions">
-                        <a href="${pageContext.request.contextPath}/customer/profile"
-                           class="verify-btn primary">
-                            Đi xác thực ngay
-                        </a>
-
-                        <button type="button"
-                                onclick="closeVerifyModal()"
-                                class="verify-btn secondary">
-                            Đóng
-                        </button>
-                    </div>
+        <!-- EDIT REVIEW MODAL -->
+        <div id="editReviewModal" class="edit-modal" style="display:none;">
+            <div class="edit-modal-content">
+                <div class="edit-modal-header">
+                    <h3>Edit Review</h3>
+                    <button type="button" class="edit-close" onclick="closeEditReviewModal()">×</button>
                 </div>
-            </div>
 
-            <script>
-                document.addEventListener("DOMContentLoaded", function () {
-                    openVerifyModal();
-                });
-            </script>
-        </c:if>
-
-        <div id="editReviewModal" class="review-modal">
-            <div class="review-modal-content">
-                <button type="button" class="review-modal-close" onclick="closeEditReviewModal()">×</button>
-
-                <h3 class="edit-review-title">Edit Review</h3>
-
-                <form action="${pageContext.request.contextPath}/review" method="post" id="editReviewForm">
-                    <input type="hidden" name="action" value="update"/>
-                    <input type="hidden" name="reviewId" id="editReviewId"/>
-                    <input type="hidden" name="carId" id="editCarId"/>
+                <form id="editReviewForm"
+                      action="${pageContext.request.contextPath}/review"
+                      method="post">
+                    <input type="hidden" name="action" value="edit">
+                    <input type="hidden" name="reviewId" id="editReviewId">
 
                     <div class="edit-form-group">
                         <label for="editRating" class="edit-label">Rating</label>
-                        <select name="rating" id="editRating" class="edit-select">
+                        <select name="rating" id="editRating" class="edit-select" required>
                             <option value="5">⭐⭐⭐⭐⭐ (5)</option>
                             <option value="4">⭐⭐⭐⭐ (4)</option>
                             <option value="3">⭐⭐⭐ (3)</option>
@@ -270,7 +243,8 @@
                                   id="editComment"
                                   rows="6"
                                   class="edit-textarea"
-                                  placeholder="Write your feedback..."></textarea>
+                                  placeholder="Write your feedback..."
+                                  required></textarea>
                     </div>
 
                     <div class="edit-actions">
@@ -280,11 +254,27 @@
                 </form>
             </div>
         </div>
-        <script src="${pageContext.request.contextPath}/assets/js/car-detail.js"></script>
+
+        <div id="rentalTimeModal" class="rental-time-modal">
+            <div class="rental-time-modal-content">
+                <button type="button" class="rental-time-close" id="closeRentalModal">×</button>
+
+                <h3 class="rental-time-title">Thời gian</h3>
+
+                <div id="rentalCalendar"
+                     data-busy-dates='${empty busyDatesJson ? "[]" : busyDatesJson}'></div>
+
+                <div class="rental-modal-actions">
+                    <button type="button" class="rental-confirm-btn" id="confirmRentalSelection">
+                        Tiếp tục
+                    </button>
+                </div>
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+        <script src="${pageContext.request.contextPath}/assets/js/car-detail.js?v=9"></script>
         <script src="${pageContext.request.contextPath}/assets/js/verify-license.js"></script>
         <script src="${pageContext.request.contextPath}/assets/js/wishlist.js"></script>
         <script src="${pageContext.request.contextPath}/assets/js/edit-review.js"></script>
     </body>
-
 </html>
-

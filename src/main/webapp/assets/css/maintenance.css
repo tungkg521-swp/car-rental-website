@@ -4,6 +4,9 @@
 /* ==========================================
    GENERAL MAINTENANCE LAYOUT
    ========================================== */
+:root {
+    --app-font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
 .maintenance-page {
     background: #f8fafc;
     min-height: 100vh;

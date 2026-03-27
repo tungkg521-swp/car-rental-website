@@ -1,6 +1,9 @@
 /* =========================
    GRID 12 (HOME)
    ========================= */
+:root {
+    --app-font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
 .home-page .grid-12 {
   display: grid;
   grid-template-columns: repeat(12, 1fr);

@@ -15,6 +15,7 @@ import models.PaymentModel;
 
 public class PaymentService {
 
+    private final BookingService bookingService = new BookingService();
     private final PaymentDAO paymentDAO = new PaymentDAO();
     private final BookingDAO bookingDAO = new BookingDAO();
 
@@ -39,13 +40,20 @@ public class PaymentService {
     }
 
     public boolean processSandboxPayment(int bookingId, String paymentMethod, boolean success) {
+
         BookingModel booking = bookingDAO.getById(bookingId);
+
+        if (booking.getPaymentDeadline() != null
+                && booking.getPaymentDeadline().before(new Timestamp(System.currentTimeMillis()))) {
+            bookingDAO.updateStatus(bookingId, "CANCELLED");
+            return false;
+        }
 
         if (booking == null) {
             return false;
         }
 
-        if (!"PENDING_PAYMENT".equalsIgnoreCase(booking.getStatus())) {
+        if (!"AWAITING_PAYMENT".equalsIgnoreCase(booking.getStatus())) {
             return false;
         }
 
@@ -79,16 +87,24 @@ public class PaymentService {
         }
 
         if (success) {
-            boolean updated = bookingDAO.updateStatus(bookingId, "DEPOSIT_PAID");
+            boolean confirmed = bookingService.confirmBookingAfterSuccessfulPayment(bookingId);
 
-            if (updated && booking.getVoucherId() != null) {
+            if (confirmed && booking.getVoucherId() != null) {
                 voucherService.updateVoucherQuantity(booking.getVoucherId());
             }
 
-            return updated;
-        } else {
-            bookingDAO.updateStatus(bookingId, "CANCELLED");
-            return true;
+            return confirmed;
         }
+
+        // thanh toán thất bại thì giữ nguyên AWAITING_PAYMENT
+        return true;
+    }
+
+    public boolean isPaymentExpired(BookingModel booking) {
+        if (booking == null || booking.getPaymentDeadline() == null) {
+            return false;
+        }
+
+        return booking.getPaymentDeadline().before(new Timestamp(System.currentTimeMillis()));
     }
 }

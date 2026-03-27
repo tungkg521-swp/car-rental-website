@@ -23,9 +23,15 @@ import service.CarService;
 import service.VoucherService;
 import java.math.RoundingMode;
 
+import java.util.ArrayList;
+
+import models.CarChangeRequestModel;
+import service.CarChangeRequestService;
+
 public class BookingServlet extends HttpServlet {
 
     private final BookingService bookingService = new BookingService();
+    private final CarChangeRequestService carChangeService = new CarChangeRequestService();
 
     @Override
     protected void doGet(HttpServletRequest request,
@@ -130,13 +136,11 @@ public class BookingServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/cars");
             return;
         }
+        CarService carService = new CarService();
+        CarModel car = carService.getCarById(carId);
 
         if (!customer.isLicenseVerified()) {
             request.setAttribute("LICENSE_REQUIRED", true);
-
-            CarService carService = new CarService();
-            CarModel car = carService.getCarById(carId);
-
             request.setAttribute("car", car);
             request.setAttribute("startDate", startDateRaw);
             request.setAttribute("endDate", endDateRaw);
@@ -144,8 +148,45 @@ public class BookingServlet extends HttpServlet {
             return;
         }
 
-        CarService carService = new CarService();
-        CarModel car = carService.getCarById(carId);
+        Date startDate;
+        Date endDate;
+        try {
+            startDate = Date.valueOf(startDateRaw);
+            endDate = Date.valueOf(endDateRaw);
+        } catch (IllegalArgumentException e) {
+            response.sendRedirect(request.getContextPath() + "/car-detail?carId=" + carId);
+            return;
+        }
+        if (bookingService.hasOverlapConfirmed(carId, startDate, endDate)) {
+            request.setAttribute("BOOKING_ERROR", "Xe đang bận trong khoảng thời gian bạn chọn. Vui lòng chọn lịch khác.");
+            request.setAttribute("car", car);
+            request.setAttribute("startDate", startDateRaw);
+            request.setAttribute("endDate", endDateRaw);
+
+            List<Date[]> busyRanges = bookingService.getBusyDateRangesByCarId(carId);
+            List<String> busyDates = new ArrayList<>();
+            for (Date[] range : busyRanges) {
+                LocalDate d = range[0].toLocalDate();
+                LocalDate end = range[1].toLocalDate();
+                while (!d.isAfter(end)) {
+                    busyDates.add(d.toString());
+                    d = d.plusDays(1);
+                }
+            }
+
+            StringBuilder busyDatesJson = new StringBuilder("[");
+            for (int i = 0; i < busyDates.size(); i++) {
+                busyDatesJson.append("\"").append(busyDates.get(i)).append("\"");
+                if (i < busyDates.size() - 1) {
+                    busyDatesJson.append(",");
+                }
+            }
+            busyDatesJson.append("]");
+
+            request.setAttribute("busyDatesJson", busyDatesJson.toString());
+            request.getRequestDispatcher("/views/car-detail.jsp").forward(request, response);
+            return;
+        }
 
         if (car == null) {
             response.sendRedirect(request.getContextPath() + "/cars");
@@ -341,10 +382,6 @@ public class BookingServlet extends HttpServlet {
                 .subtract(depositAmount)
                 .setScale(2, RoundingMode.HALF_UP);
 
-        Timestamp paymentDeadline = Timestamp.valueOf(
-                java.time.LocalDateTime.now().plusMinutes(30)
-        );
-
         BookingModel booking = new BookingModel();
         booking.setCustomerId(customer.getCustomerId());
         booking.setCarId(carId);
@@ -352,19 +389,20 @@ public class BookingServlet extends HttpServlet {
         booking.setBookingDate(new Timestamp(System.currentTimeMillis()));
         booking.setStartDate(startDate);
         booking.setEndDate(endDate);
-        booking.setStatus("PENDING_PAYMENT");
+        booking.setStatus("PENDING_APPROVAL");
+
         booking.setNote(note);
         booking.setDepositAmount(depositAmount);
         booking.setRemainingAmount(remainingAmount);
-        booking.setPaymentDeadline(paymentDeadline);
+        booking.setPaymentDeadline(null);
         booking.setTotalEstimatedPrice(totalPrice);
 
         try {
             int bookingId = bookingService.createBooking(booking);
-            session.setAttribute("LAST_BOOKING", booking.getBookingId());
+            session.setAttribute("LAST_BOOKING", bookingId);
 
             response.sendRedirect(
-                    request.getContextPath() + "/payment?action=create&bookingId=" + bookingId
+                    request.getContextPath() + "/booking?action=detail&bookingId=" + bookingId + "&created=1"
             );
         } catch (Exception e) {
             e.printStackTrace();
@@ -448,6 +486,11 @@ public class BookingServlet extends HttpServlet {
             request.getRequestDispatcher("/views/error.jsp").forward(request, response);
             return;
         }
+
+        CarChangeRequestModel pendingRequest
+                = carChangeService.getPendingRequestByBookingId(bookingId);
+
+        request.setAttribute("pendingCarChangeRequest", pendingRequest);
 
         String cancelStatus = request.getParameter("cancelStatus");
         request.setAttribute("cancelStatus", cancelStatus);

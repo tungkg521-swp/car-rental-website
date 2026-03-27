@@ -8,8 +8,8 @@
     <head>
         <meta charset="UTF-8">
         <title>Danh sách xe</title>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style-base.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/car-list.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style-base.css?v=2">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/car-list.css?v=2">
     </head>
     <body>
         <!-- HEADER -->

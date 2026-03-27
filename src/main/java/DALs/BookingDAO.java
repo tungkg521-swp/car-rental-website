@@ -101,6 +101,7 @@ public class BookingDAO extends DBContext {
                 booking.setEndDate(rs.getDate("end_date"));
                 booking.setStatus(rs.getString("status"));
                 booking.setNote(rs.getString("note"));
+                booking.setStaffId(rs.getInt("staff_id"));
                 booking.setTotalEstimatedPrice(rs.getBigDecimal("total_estimated_price"));
                 booking.setDepositAmount(rs.getBigDecimal("deposit_amount"));
                 booking.setRemainingAmount(rs.getBigDecimal("remaining_amount"));
@@ -245,6 +246,36 @@ public class BookingDAO extends DBContext {
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, status);
+            ps.setInt(2, bookingId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public boolean updateStaffId(int bookingId, int staffId) {
+
+        String sql = "UPDATE booking SET staff_id = ? WHERE booking_id = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, staffId);
+            ps.setInt(2, bookingId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public boolean updatePaymentDeadline(int bookingId, int hours) {
+
+        String sql = "UPDATE booking SET payment_deadline = DATEADD(HOUR, ?, GETDATE()) WHERE booking_id = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, hours);
             ps.setInt(2, bookingId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -470,8 +501,7 @@ public class BookingDAO extends DBContext {
         UPDATE booking
         SET status = 'REJECTED'
         WHERE car_id = ?
-          AND booking_id <> ?
-          AND status IN ('PENDING_PAYMENT', 'DEPOSIT_PAID')
+          AND booking_id <> ?        
           AND start_date <= ?
           AND end_date >= ?
     """;
@@ -511,19 +541,157 @@ public class BookingDAO extends DBContext {
     public boolean hasBookingConflict(int carId, Date startDate, Date endDate) {
 
         String sql = """
-        SELECT 1
-        FROM booking
-        WHERE car_id = ?
-          AND status IN ('CONFIRMED', 'ACTIVE')
-          AND start_date <= ?
-          AND end_date >= ?
-    """;
+            SELECT 1
+            FROM booking
+            WHERE car_id = ?
+            AND status IN ('AWAITING_PAYMENT', 'CONFIRMED', 'ACTIVE')
+            AND start_date <= ?
+            AND end_date >= ?
+             """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
             ps.setInt(1, carId);
             ps.setDate(2, endDate);
             ps.setDate(3, startDate);
+
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public List<Date[]> getBusyDateRangesByCarId(int carId) {
+        List<Date[]> ranges = new ArrayList<>();
+
+        String sql = """
+        SELECT start_date, end_date
+        FROM booking
+        WHERE car_id = ?
+          AND status IN ('AWAITING_PAYMENT', 'CONFIRMED', 'ACTIVE')
+        ORDER BY start_date
+    """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, carId);
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Date startDate = rs.getDate("start_date");
+                Date endDate = rs.getDate("end_date");
+                ranges.add(new Date[]{startDate, endDate});
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return ranges;
+    }
+
+    public boolean updateCarId(int bookingId, int newCarId) {
+        String sql = "UPDATE booking SET car_id = ? WHERE booking_id = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, newCarId);
+            ps.setInt(2, bookingId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public BookingModel findByIdForCarChange(int bookingId, int customerId) {
+        String sql = """
+        SELECT 
+            b.booking_id,
+            b.car_id,
+            b.booking_date,
+            b.start_date,
+            b.end_date,
+            b.status,
+            b.note,
+            b.total_estimated_price,
+            b.deposit_amount,
+            b.remaining_amount,
+            b.payment_deadline,
+            c.model_name,
+            c.image_folder,
+            cus.full_name AS customer_name,
+            cus.email,
+            cus.phone,
+            rc.contract_status
+        FROM booking b
+        JOIN cars c ON b.car_id = c.car_id
+        JOIN customer cus ON b.customer_id = cus.customer_id
+        LEFT JOIN rental_contract rc
+            ON b.booking_id = rc.booking_id
+        WHERE b.booking_id = ?
+          AND b.customer_id = ?
+    """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, bookingId);
+            ps.setInt(2, customerId);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                BookingModel booking = new BookingModel();
+
+                booking.setBookingId(rs.getInt("booking_id"));
+                booking.setCarId(rs.getInt("car_id"));
+                booking.setBookingDate(rs.getTimestamp("booking_date"));
+                booking.setStartDate(rs.getDate("start_date"));
+                booking.setEndDate(rs.getDate("end_date"));
+                booking.setStatus(rs.getString("status"));
+                booking.setNote(rs.getString("note"));
+                booking.setTotalEstimatedPrice(rs.getBigDecimal("total_estimated_price"));
+                booking.setDepositAmount(rs.getBigDecimal("deposit_amount"));
+                booking.setRemainingAmount(rs.getBigDecimal("remaining_amount"));
+                booking.setPaymentDeadline(rs.getTimestamp("payment_deadline"));
+
+                booking.setCarName(rs.getString("model_name"));
+                booking.setImageFolder(rs.getString("image_folder"));
+
+                booking.setCustomerName(rs.getString("customer_name"));
+                booking.setCustomerEmail(rs.getString("email"));
+                booking.setCustomerPhone(rs.getString("phone"));
+
+                booking.setContractStatus(rs.getString("contract_status"));
+
+                return booking;
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+
+    }
+
+    public boolean hasBookingConflictExcludeBooking(int carId, Date startDate, Date endDate, int excludeBookingId) {
+
+        String sql = """
+        SELECT 1
+        FROM booking
+        WHERE car_id = ?
+          AND booking_id <> ?
+          AND status IN ('AWAITING_PAYMENT', 'CONFIRMED', 'ACTIVE')
+          AND start_date <= ?
+          AND end_date >= ?
+    """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, carId);
+            ps.setInt(2, excludeBookingId);
+            ps.setDate(3, endDate);
+            ps.setDate(4, startDate);
 
             ResultSet rs = ps.executeQuery();
             return rs.next();

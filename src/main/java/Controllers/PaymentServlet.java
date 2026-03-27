@@ -62,10 +62,10 @@ public class PaymentServlet extends HttpServlet {
 
         switch (action) {
             case "sandbox-success":
-                handleSandboxPayment(request, response, true);
+                handlePayment(request, response, true);
                 break;
             case "sandbox-fail":
-                handleSandboxPayment(request, response, false);
+                handlePayment(request, response, false);
                 break;
             case "cancel-payment":
                 cancelPayment(request, response);
@@ -98,6 +98,21 @@ public class PaymentServlet extends HttpServlet {
             return;
         }
 
+        // chỉ cho mở payment page khi đang chờ thanh toán
+        if (!"AWAITING_PAYMENT".equalsIgnoreCase(booking.getStatus())) {
+            response.sendRedirect(request.getContextPath()
+                    + "/booking?action=detail&bookingId=" + bookingId + "&paymentStatus=invalid");
+            return;
+        }
+
+        // nếu quá hạn thì hủy
+        if (paymentService.isPaymentExpired(booking)) {
+            bookingService.updateBookingStatus(bookingId, "CANCELLED");
+            response.sendRedirect(request.getContextPath()
+                    + "/booking?action=detail&bookingId=" + bookingId + "&paymentStatus=expired");
+            return;
+        }
+
         BigDecimal total = booking.getTotalEstimatedPrice();
         BigDecimal deposit = paymentService.calculateDeposit(total);
         BigDecimal remaining = paymentService.calculateRemaining(total);
@@ -109,7 +124,7 @@ public class PaymentServlet extends HttpServlet {
         request.getRequestDispatcher("/views/payment.jsp").forward(request, response);
     }
 
-    private void handleSandboxPayment(HttpServletRequest request, HttpServletResponse response, boolean success)
+    private void handlePayment(HttpServletRequest request, HttpServletResponse response, boolean success)
             throws IOException {
 
         CustomerModel customer = getCurrentCustomer(request, response);
@@ -131,22 +146,33 @@ public class PaymentServlet extends HttpServlet {
             return;
         }
 
+        if (paymentService.isPaymentExpired(booking)) {
+            bookingService.updateBookingStatus(bookingId, "CANCELLED");
+            response.sendRedirect(request.getContextPath()
+                    + "/booking?action=detail&bookingId=" + bookingId + "&paymentStatus=expired");
+            return;
+        }
+        
         String paymentMethod = request.getParameter("paymentMethod");
         if (paymentMethod == null || paymentMethod.isBlank()) {
             paymentMethod = "VNPAY";
         }
 
-        boolean processed = paymentService.processSandboxPayment(bookingId, paymentMethod, success);
+        boolean processed = paymentService.processSandboxPayment(
+                bookingId,
+                paymentMethod,
+                success
+        );
 
         if (processed && success) {
             response.sendRedirect(request.getContextPath()
-                    + "/payment?action=create&bookingId=" + bookingId + "&result=success");
+                    + "/booking?action=detail&bookingId=" + bookingId + "&paymentStatus=success");
             return;
         }
 
         if (processed) {
             response.sendRedirect(request.getContextPath()
-                    + "/booking?action=detail&bookingId=" + bookingId + "&cancelStatus=payment_fail");
+                    + "/payment?action=create&bookingId=" + bookingId + "&result=fail");
             return;
         }
 
@@ -157,11 +183,6 @@ public class PaymentServlet extends HttpServlet {
     private void cancelPayment(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
 
-        CustomerModel customer = getCurrentCustomer(request, response);
-        if (customer == null) {
-            return;
-        }
-
         int bookingId;
         try {
             bookingId = Integer.parseInt(request.getParameter("bookingId"));
@@ -170,15 +191,8 @@ public class PaymentServlet extends HttpServlet {
             return;
         }
 
-        boolean cancelled = bookingService.cancelBooking(bookingId, customer.getCustomerId());
-
-        if (cancelled) {
-            response.sendRedirect(request.getContextPath()
-                    + "/booking?action=detail&bookingId=" + bookingId + "&cancelStatus=success");
-        } else {
-            response.sendRedirect(request.getContextPath()
-                    + "/payment?action=create&bookingId=" + bookingId + "&result=invalid");
-        }
+        response.sendRedirect(request.getContextPath()
+                + "/booking?action=detail&bookingId=" + bookingId + "&paymentStatus=cancelled");
     }
 
     private CustomerModel getCurrentCustomer(HttpServletRequest request, HttpServletResponse response)
@@ -206,4 +220,5 @@ public class PaymentServlet extends HttpServlet {
 
         return customer;
     }
+
 }

@@ -1,4 +1,4 @@
-/* admin-reports.css - ĐÃ SỬA HOÀN CHỈNH */
+/* admin-reports.css */
 
 body {
     font-family: 'Segoe UI', Arial, sans-serif;
@@ -16,7 +16,7 @@ body {
     padding-bottom: 10px;
 }
 
-/* ==================== KPI NGANG - ĐẸP NHƯ ẢNH ==================== */
+/* ==================== KPI NGANG ==================== */
 .dashboard-kpi {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));

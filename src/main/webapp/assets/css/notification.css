@@ -8,7 +8,9 @@
     box-shadow:0 10px 30px rgba(0,0,0,0.2);
     display:none;
 }
-
+:root {
+    --app-font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
 .notification-list{
     max-height:300px;   
     overflow-y:auto;

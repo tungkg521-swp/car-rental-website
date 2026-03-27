@@ -8,7 +8,7 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <title>Voucher Management</title>
+        <title>Management Vouchers</title>
         <link rel="stylesheet" 
               href="${pageContext.request.contextPath}/assets/css/staff.css">
         <link rel="stylesheet" 
@@ -20,7 +20,7 @@
 
             <div class="staff-content">
                 <div class="container">
-                    <h1>Voucher Management</h1>
+                    <h1>Management Vouchers</h1>
 
                     <!-- Messages -->
                     <c:if test="${not empty error}">

@@ -26,7 +26,7 @@ public class BookingService {
         long days = ChronoUnit.DAYS.between(
                 startDate.toLocalDate(),
                 endDate.toLocalDate()
-        ) + 1;
+        );
 
         if (days < 1) {
             days = 1;
@@ -59,8 +59,8 @@ public class BookingService {
             return false;
         }
 
-        if (!"PENDING_PAYMENT".equalsIgnoreCase(booking.getStatus())
-                && !"DEPOSIT_PAID".equalsIgnoreCase(booking.getStatus())) {
+        if (!"PENDING_APPROVAL".equalsIgnoreCase(booking.getStatus())
+                && !"AWAITING_PAYMENT".equalsIgnoreCase(booking.getStatus())) {
             return false;
         }
 
@@ -75,80 +75,37 @@ public class BookingService {
         return bookingDAO.findById(id);
     }
 
-    public void approveBooking(int bookingId, int staffId) {
+    public boolean approveBooking(int bookingId, int staffId) {
 
-        BookingModel booking = bookingDAO.getBookingForContract(bookingId);
-
-        if (booking == null) {
-            return;
-        }
-
-        if (!"DEPOSIT_PAID".equalsIgnoreCase(booking.getStatus())) {
-            return;
-        }
-
-        if (contractService.existsByBookingId(bookingId)) {
-            return;
-        }
-
-        CarModel car = carDAO.findById(booking.getCarId());
-        if (car == null) {
-            return;
-        }
-
-        if ("MAINTENANCE".equalsIgnoreCase(car.getStatus())) {
-            return;
-        }
-
-        if (bookingDAO.hasBookingConflict(
-                booking.getCarId(),
-                booking.getStartDate(),
-                booking.getEndDate())) {
-            bookingDAO.updateStatus(bookingId, "REJECTED");
-            return;
-        }
-
-        ContractModel contract = new ContractModel();
-        contract.setBookingId(booking.getBookingId());
-        contract.setCustomerId(booking.getCustomerId());
-        contract.setStaffId(staffId);
-        contract.setCarId(booking.getCarId());
-        contract.setContractStartDate(booking.getStartDate());
-        contract.setContractEndDate(booking.getEndDate());
-        contract.setContractStatus("CREATED");
-        contract.setDailyPrice(booking.getPricePerDay().doubleValue());
-
-        double total = booking.getTotalEstimatedPrice().doubleValue();
-        double deposit = booking.getDepositAmount() != null
-                ? booking.getDepositAmount().doubleValue()
-                : total * 0.3;
-
-        contract.setDepositAmount(deposit);
-        contract.setTotalAmount(total);
-        contract.setSignedAt(null);
-        contract.setNote("Contract created automatically after staff approved booking.");
-
-        boolean created = contractService.createContract(contract);
-        if (!created) {
-            return;
-        }
-
-        bookingDAO.updateStatus(bookingId, "CONFIRMED");
-        carDAO.updateStatus(booking.getCarId(), "BOOKED");
-    }
-
-    public void rejectBooking(int bookingId) {
         BookingModel booking = bookingDAO.getById(bookingId);
 
         if (booking == null) {
-            return;
+            return false;
         }
 
-        if (!"DEPOSIT_PAID".equalsIgnoreCase(booking.getStatus())) {
-            return;
+        if (!"PENDING_APPROVAL".equalsIgnoreCase(booking.getStatus())) {
+            return false;
         }
 
-        bookingDAO.updateStatus(bookingId, "REJECTED");
+        boolean updatedStaff = bookingDAO.updateStaffId(bookingId, staffId);
+        boolean updatedDeadline = bookingDAO.updatePaymentDeadline(bookingId, 24);
+        boolean updatedStatus = bookingDAO.updateStatus(bookingId, "AWAITING_PAYMENT");
+
+        return updatedStaff && updatedDeadline && updatedStatus;
+    }
+
+    public boolean rejectBooking(int bookingId) {
+        BookingModel booking = bookingDAO.getById(bookingId);
+
+        if (booking == null) {
+            return false;
+        }
+
+        if (!"PENDING_APPROVAL".equalsIgnoreCase(booking.getStatus())) {
+            return false;
+        }
+
+        return bookingDAO.updateStatus(bookingId, "REJECTED");
     }
 
     public boolean hasOverlapConfirmed(int carId, Date startDate, Date endDate) {
@@ -173,18 +130,80 @@ public class BookingService {
         bookingDAO.updateStatus(bookingId, status);
     }
 
-    public boolean markDepositPaid(int bookingId) {
+    public boolean confirmBookingAfterSuccessfulPayment(int bookingId) {
         BookingModel booking = bookingDAO.getById(bookingId);
 
         if (booking == null) {
             return false;
         }
 
-        if (!"PENDING_PAYMENT".equalsIgnoreCase(booking.getStatus())) {
+        if (!"AWAITING_PAYMENT".equalsIgnoreCase(booking.getStatus())) {
             return false;
         }
 
-        return bookingDAO.updateStatus(bookingId, "DEPOSIT_PAID");
+        if (contractService.existsByBookingId(bookingId)) {
+            return false;
+        }
+
+        CarModel car = carDAO.findById(booking.getCarId());
+        if (car == null) {
+            return false;
+        }
+
+        // nếu xe đang maintenance thì không cho chốt
+        if ("MAINTENANCE".equalsIgnoreCase(car.getStatus())) {
+            return false;
+        }
+
+        // check conflict lần cuối trước khi chốt cứng xe
+        if (bookingDAO.hasBookingConflictExcludeBooking(
+                booking.getCarId(),
+                booking.getStartDate(),
+                booking.getEndDate(),
+                bookingId)) {
+            bookingDAO.updateStatus(bookingId, "CANCELLED");
+            return false;
+        }
+
+        ContractModel contract = new ContractModel();
+        contract.setBookingId(booking.getBookingId());
+        contract.setCustomerId(booking.getCustomerId());
+        contract.setStaffId(booking.getStaffId());
+        contract.setCarId(booking.getCarId());
+        contract.setContractStartDate(booking.getStartDate());
+        contract.setContractEndDate(booking.getEndDate());
+        contract.setContractStatus("CREATED");
+        contract.setDailyPrice(car.getPricePerDay().doubleValue());
+
+        double total = booking.getTotalEstimatedPrice().doubleValue();
+        double deposit = total * 0.3;
+
+        contract.setDepositAmount(deposit);
+        contract.setTotalAmount(total);
+        contract.setSignedAt(null);
+        contract.setNote("Contract created automatically after successful deposit payment.");
+
+        boolean created = contractService.createContract(contract);
+        if (!created) {
+            return false;
+        }
+
+        boolean bookingUpdated = bookingDAO.updateStatus(bookingId, "CONFIRMED");
+        if (!bookingUpdated) {
+            return false;
+        }
+        
+
+        boolean carUpdated = carDAO.updateStatus(booking.getCarId(), "BOOKED");
+        if (!carUpdated) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public List<Date[]> getBusyDateRangesByCarId(int carId) {
+        return bookingDAO.getBusyDateRangesByCarId(carId);
     }
 
 }
