@@ -1,6 +1,9 @@
 /* ========== VOUCHER MANAGEMENT STYLES ========== */
 
 /* Layout */
+:root {
+    --app-font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
 .staff-layout {
     display: flex;
     min-height: 100vh;

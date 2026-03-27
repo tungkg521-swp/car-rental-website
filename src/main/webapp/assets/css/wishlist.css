@@ -11,7 +11,9 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css
    WISHLIST PAGE
 ============================= */
 /* TITLE */
-
+:root {
+    --app-font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
 .wishlist-title{
     font-size:28px;
     font-weight:700;

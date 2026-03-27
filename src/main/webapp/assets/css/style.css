@@ -1,8 +1,8 @@
-/* =========================
-   RESET + BASE
-   ========================= */
 * {
   box-sizing: border-box;
+}
+:root {
+    --app-font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
 }
 
 html, body {
@@ -11,28 +11,27 @@ html, body {
 }
 
 body {
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  background: #fff;
-  color: #111;
+  font-family: var(--app-font-family);
 }
-
 a {
   text-decoration: none;
   color: inherit;
 }
 
-/* =========================
-   CONTAINER + GRID 12 CỘT
-   ========================= */
+img {
+  max-width: 100%;
+  display: block;
+}
+
 .container {
   max-width: 1440px;
   margin: 0 auto;
-  padding: 0 80px; /* đúng Figma */
+  padding: 0 80px;
 }
 
 .grid-12 {
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
+  grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: 20px;
 }
 
@@ -42,118 +41,116 @@ a {
 .col-3  { grid-column: span 3; }
 
 /* =========================
-   HEADER (HEIGHT = 102px)
+   HEADER
    ========================= */
 .site-header {
-  height: 102px; /* chuẩn Figma */
-  background: #000;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  height: 102px;
+  background: #0a7c3b;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .header-inner {
   height: 100%;
   display: grid;
-  grid-template-columns: 4fr 4fr 4fr;
+  grid-template-columns: 1fr 1fr 1fr;
   align-items: center;
 }
 
-/* LEFT MENU */
-.nav-left {
-  display: flex;
-  gap: 28px;
-  font-size: 14px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #fff;
-}
-
-/* BRAND CENTER */
-.brand {
-  text-align: center;
+/* LEFT: LOGO */
+.brand,
+.brand-left {
+  justify-self: start;
+  text-align: left;
   color: #fff;
   line-height: 1.1;
+  white-space: nowrap;
 }
 
 .brand .top {
+  display: block;
   font-size: 12px;
   letter-spacing: 2px;
-  opacity: 0.7;
+  opacity: 0.75;
 }
 
 .brand .bottom {
+  display: block;
   font-size: 28px;
   font-style: italic;
+  font-weight: 500;
 }
 
-/* RIGHT (MENU + AUTH) */
-.header-right {
+/* CENTER: MENU */
+.nav-main,
+.nav-main.nav-center {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   align-items: center;
-  gap: 32px;
-}
-
-/* RIGHT MENU */
-.nav-main {
-  display: flex;
-  gap: 28px;
+  gap: 42px;
   font-size: 14px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #fff;
+  white-space: nowrap;
 }
 
-.nav-left a,
-.nav-main a {
-  opacity: 0.75;
+.nav-main a,
+.nav-main.nav-center a {
+  display: inline-block;
+  opacity: 0.85;
+  transition: opacity 0.2s ease;
 }
 
-.nav-left a:hover,
-.nav-main a:hover {
+.nav-main a:hover,
+.nav-main.nav-center a:hover {
   opacity: 1;
 }
 
-/* AUTH */
-.auth {
+/* RIGHT: AUTH */
+.auth,
+.auth-right {
   display: flex;
+  justify-self: end;
+  justify-content: flex-end;
   align-items: center;
   gap: 14px;
+  white-space: nowrap;
 }
 
 .auth .login {
-  font-size: 13px;
+  font-size: 14px;
   color: #fff;
-  opacity: 0.75;
-}
-
-.auth .login:hover {
-  opacity: 1;
+  opacity: 0.9;
 }
 
 .auth .register {
-  padding: 8px 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 96px;
+  height: 44px;
+  padding: 0 22px;
   border-radius: 999px;
-  background: #fff;
-  color: #000;
-  font-size: 13px;
-  font-weight: 600;
+  background: #18b6eb;
+  color: #111;
+  font-size: 14px;
+  font-weight: 700;
 }
 
-.auth .register:hover {
-  filter: brightness(0.95);
+/* ẨN CSS CŨ NẾU CÒN */
+.nav-left,
+.header-right {
+  all: unset;
 }
 
-/* =========================
-   HERO SECTION
-   ========================= */
 .hero {
-  background: #000;
+  background: #FFF;
   color: #fff;
   padding: 72px 0 56px;
 }
 
 .hero-main {
-  align-items: stretch; /* default nhưng ghi rõ cho dễ hiểu */
+  align-items: stretch;
 }
 
 .hero-left,
@@ -162,9 +159,9 @@ a {
   flex-direction: column;
 }
 
-
 /* LEFT */
 .hero-title {
+ color: #000;
   margin: 0;
   font-size: 72px;
   line-height: 1.05;
@@ -182,6 +179,7 @@ a {
   height: 232px;
   background: #aaa;
   border-radius: 30px;
+  overflow: hidden;
 }
 
 /* RIGHT BIG CAR */
@@ -190,14 +188,30 @@ a {
   min-height: 520px;
   background: #777;
   border-radius: 30px;
+  overflow: hidden;
+}
+
+/* ảnh bên trong */
+.mini-card img,
+.big-car img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 
-/* =========================
-   HERO SUMMARY (ROW DƯỚI)
-   ========================= */
+
+.image-card img,
+.big-car img,
+.car-info-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .hero-summary {
-  margin-top: 56px;
+  margin-top: 48px;
   padding-top: 32px;
   border-top: 1px solid rgba(255,255,255,0.12);
   align-items: center;
@@ -205,14 +219,17 @@ a {
 
 .hero-summary h3 {
   margin: 0;
-  font-size: 28px;
+  font-size: 30px;
+  line-height: 1.25;
+  color: #000;
 }
 
 .hero-summary p {
   margin: 0;
+  max-width: 440px;
   font-size: 16px;
-  line-height: 1.6;
-  color: rgba(255,255,255,0.75);
+  line-height: 1.7;
+  color: #000;
 }
 
 .cta {
@@ -220,189 +237,302 @@ a {
   justify-content: flex-end;
 }
 
-/* BUTTON */
 .btn-primary {
-  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 150px;
+  height: 46px;
+  padding: 0 28px;
   border-radius: 999px;
-  padding: 14px 28px;
   background: #fff;
   color: #000;
   font-weight: 700;
   letter-spacing: 0.08em;
-  cursor: pointer;
 }
 
-.btn-primary:hover {
-  filter: brightness(0.95);
+.promo-section {
+  padding: 90px 0 70px;
+  background: #f3f3f3;
 }
 
-/* =========================
-   PROMOTION
-   ========================= */
-.promotion {
-  padding: 96px 0;
-  background: #fff;
-}
-
-.promotion-title {
+.promo-header {
   text-align: center;
-  font-size: 44px;
+  margin-bottom: 55px;
+}
+
+.promo-header h2 {
+  margin: 0 0 14px;
+  font-size: 64px;
+  font-weight: 800;
+  color: #0b0b0b;
+}
+
+.promo-header p {
   margin: 0;
+  font-size: 20px;
+  color: #5a6472;
 }
 
-.promotion-subtitle {
-  text-align: center;
-  margin-top: 14px;
-  font-size: 16px;
-  color: rgba(0,0,0,0.65);
-}
-
-
-.promotion-wrapper {
-  position: relative;
-  margin-top: 56px;
-}
-
-
-.promotion-carousel {
+.promo-grid {
   display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: calc((100% - 40px) / 3); /* 3 card / 12 cột */
-  gap: 20px;
-
-  overflow-x: auto;
-  scroll-behavior: smooth;
-  scrollbar-width: none;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
 }
 
-.promotion-carousel::-webkit-scrollbar {
+.promo-card {
+  min-height: 325px;
+  border-radius: 34px;
+  padding: 48px 36px 34px;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.promo-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 18px 35px rgba(0, 0, 0, 0.14);
+}
+
+.promo-dark {
+  background: linear-gradient(90deg, #0d0d0f 0%, #5c5c5c 100%);
+}
+
+.promo-blue {
+  background: linear-gradient(90deg, #11235f 0%, #5d98f0 100%);
+}
+
+.promo-orange {
+  background: linear-gradient(90deg, #7d3d00 0%, #ef9400 100%);
+}
+
+.promo-badge {
+  display: inline-block;
+  align-self: flex-start;
+  margin-bottom: 28px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.promo-card h3 {
+  margin: 0 0 18px;
+  font-size: 34px;
+  line-height: 1.25;
+  font-weight: 800;
+  max-width: 420px;
+}
+
+.promo-card p {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.95);
+  max-width: 420px;
+}
+
+/* MODAL */
+.promo-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
   display: none;
 }
 
+.promo-modal.show {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-.promo-arrow {
+.promo-modal-overlay {
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: none;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.promo-modal-box {
+  position: relative;
+  width: min(900px, 92%);
+  max-height: 88vh;
+  overflow-y: auto;
   background: #fff;
-  font-size: 22px;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  border-radius: 20px;
   z-index: 2;
+  padding: 28px;
+  animation: fadeInUp 0.25s ease;
 }
 
-.promo-arrow.left {
-  left: -22px;
+.promo-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  border: none;
+  background: transparent;
+  font-size: 34px;
+  line-height: 1;
+  cursor: pointer;
+  color: #444;
 }
 
-.promo-arrow.right {
-  right: -22px;
+.promo-modal-image img {
+  width: 100%;
+  border-radius: 14px;
+  display: block;
+  margin-bottom: 24px;
+  object-fit: cover;
 }
 
-
-.promo-card {
-  width: 100%;          /* 🔥 QUAN TRỌNG */
-  height: 260px;
-  background: #ccc;
-  border-radius: 24px;
+.promo-modal-body {
+  text-align: center;
 }
 
+.promo-modal-body h3 {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.5;
+  margin: 0 0 10px;
+  text-transform: uppercase;
+}
 
-/* =========================
-   RESPONSIVE (CƠ BẢN)
-   ========================= */
-@media (max-width: 1100px) {
-  .container {
-    padding: 0 32px;
+.promo-modal-body h4 {
+  font-size: 18px;
+  font-weight: 500;
+  color: #333;
+  margin: 0 0 18px;
+}
+
+.promo-line {
+  width: 160px;
+  height: 4px;
+  background: #53c56b;
+  border-radius: 999px;
+  margin: 0 auto 24px;
+}
+
+.promo-modal-body p {
+  text-align: left;
+  font-size: 18px;
+  line-height: 1.9;
+  color: #333;
+  margin: 0;
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 1200px) {
+  .promo-header h2 {
+    font-size: 52px;
   }
 
-  .hero-title {
-    font-size: 56px;
-  }
-
-  .big-car {
-    height: 380px;
+  .promo-card h3 {
+    font-size: 28px;
   }
 }
 
-@media (max-width: 860px) {
-  .col-6,
-  .col-4 {
-    grid-column: span 12;
-  }
-
-  .header-inner {
+@media (max-width: 992px) {
+  .promo-grid {
     grid-template-columns: 1fr;
-    gap: 12px;
   }
 
-  .brand {
-    order: -1;
+  .promo-header h2 {
+    font-size: 42px;
   }
 
-  .header-right {
-    justify-content: space-between;
+  .promo-header p {
+    font-size: 18px;
   }
 
-  .cta {
-    justify-content: flex-start;
-    margin-top: 16px;
+  .promo-card {
+    min-height: auto;
   }
-  
+
+  .promo-modal-box {
+    padding: 20px;
+  }
+
+  .promo-modal-body h3 {
+    font-size: 22px;
+  }
+
+  .promo-modal-body p {
+    font-size: 16px;
+  }
 }
-/* =========================
-   XE DÀNH CHO BẠN
-   ========================= */
+
 .recommend {
   padding: 96px 0;
-  background: #fff;
+  background: #f7f8fa;
 }
 
 .recommend-title {
   text-align: center;
-  font-size: 36px;
-  font-weight: 700;
-  margin-bottom: 48px;
+  font-size: 42px;
+  margin: 0 0 48px;
 }
 
-/* grid 4 cột / 2 hàng */
 .recommend-grid {
-  row-gap: 32px;
+  row-gap: 24px;
 }
 
-/* mỗi khung xe */
-.car-card {
-  grid-column: span 3; /* 12 / 4 = 3 */
-  height: 340px;
-  background: #e0e0e0;
-  border-radius: 18px;
+.car-info-card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    overflow: hidden;
+    border-radius: 28px;
+    background: #fff;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
 }
 
-/* =========================
-   FOOTER
-   ========================= */
+.car-info-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+}
+
+.car-info-card img {
+    width: 100%;
+    display: block;
+    object-fit: cover;
+}
+
+.car-card-body {
+    padding: 18px 22px 22px;
+}
 .site-footer {
   background: #000;
   color: #fff;
-  padding: 80px 0 40px;
-  border-radius: 48px 48px 0 0;
+  padding: 80px 0 36px;
 }
 
-/* GRID FOOTER */
 .footer-grid {
   display: grid;
-  grid-template-columns: 3fr 1fr 1fr 1.5fr;
-  gap: 48px;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 32px;
 }
 
-/* CỘT CHUNG */
 .footer-col h4 {
-  font-size: 16px;
+  margin-top: 0;
   margin-bottom: 16px;
 }
 
@@ -417,173 +547,144 @@ a {
 }
 
 .footer-col a {
-  color: rgba(255,255,255,0.75);
+  color: rgba(255,255,255,0.78);
 }
 
 .footer-col a:hover {
   color: #fff;
 }
 
-/* COMPANY */
-.company h4 {
-  margin-top: 24px;
-  font-size: 15px;
-}
-
-.company .small {
-  font-size: 13px;
-  line-height: 1.6;
-  color: rgba(255,255,255,0.7);
-}
-
-/* LOGO */
 .footer-logo {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .logo-text {
-  font-size: 32px;
-  font-weight: 700;
-  color: #00ff66;
+  font-size: 28px;
+  font-style: italic;
 }
 
 .logo-desc {
-  font-size: 13px;
-  line-height: 1.4;
+  color: rgba(255,255,255,0.72);
+  line-height: 1.6;
 }
 
-/* CERT */
+.small {
+  color: rgba(255,255,255,0.72);
+  line-height: 1.7;
+}
+
 .cert-box {
-  margin-top: 20px;
-  padding: 10px 14px;
-  background: #1e88e5;
-  border-radius: 8px;
+  display: inline-block;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 14px;
   font-size: 12px;
-  width: fit-content;
 }
 
-/* CONTACT */
 .hotline {
-  color: #00ff66;
   font-weight: 700;
-  margin-bottom: 12px;
 }
 
-/* BOTTOM */
 .footer-bottom {
-  margin-top: 48px;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,0.1);
   display: flex;
   justify-content: space-between;
+  gap: 16px;
+  color: rgba(255,255,255,0.72);
   font-size: 13px;
-  color: rgba(255,255,255,0.7);
 }
 
-.footer-bottom a {
-  color: rgba(255,255,255,0.7);
+@media (max-width: 1200px) {
+  .container {
+    padding: 0 40px;
+  }
+
+  .hero-title {
+    font-size: 60px;
+  }
+
+  .mini-card {
+    width: calc(50% - 10px);
+  }
+
+  .big-car {
+    min-height: 420px;
+  }
 }
 
-.footer-bottom a:hover {
-  color: #fff;
-}
+@media (max-width: 992px) {
+  .header-inner {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 16px 0;
+  }
 
-/* CUSTOMER AUTH (HEADER RIGHT) */
-.customer-auth {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  border: 1px solid red;
-}
-
-.customer-auth .auth-link {
-  color: #ffffff;          /* QUAN TRỌNG */
-  font-size: 14px;
-  text-decoration: none;
-  opacity: 0.9;
-}
-
-.customer-auth .auth-link:hover {
-  opacity: 1;
-  text-decoration: underline;
-}
-
-.customer-auth .logout {
-  color: #ff6b6b;          /* Logout nổi hơn */
-}
-
-.customer-auth .divider {
-  color: #888;
-}
-
-
-.customer-auth .logout:hover {
-  color: #ff3b3b;
-}
-
-.customer-auth .divider {
-  color: rgba(255,255,255,0.3);
-}
-
-
-/* ===== ICON BUTTON (My Bookings) ===== */
-.icon-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  margin-right: 12px;
-  border-radius: 50%;
-  color: #111;
-  transition: background 0.2s ease, transform 0.15s ease;
-}
-
-.icon-btn i {
-  font-size: 16px;
-}
-
-.icon-btn:hover {
-  background: #f2f2f2;
-  transform: translateY(-1px);
-}
-
-/* ===== FORCE ICON COLOR IN HEADER ===== */
-.site-header .icon-btn,
-.site-header .icon-btn i {
-  color: #ffffff !important;
-}
-
-.site-header .icon-btn:hover {
-  background: rgba(255, 255, 255, 0.2) !important;
-}
-
-
-.profile-link {
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-    color: #111;
-    margin-left: 15px;
-}
-
-.header-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: #5c6f7c;
-    color: #fff;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
+  .nav-left,
+  .header-right,
+  .nav-main,
+  .auth {
     justify-content: center;
-    margin-right: 8px;
-    font-weight: 600;
+    flex-wrap: wrap;
+  }
+
+  .col-6,
+  .col-4,
+  .col-3 {
+    grid-column: span 12;
+  }
+
+  .promotion-row,
+  .footer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-title {
+    font-size: 52px;
+  }
+
+  .cta {
+    justify-content: flex-start;
+  }
 }
 
-.profile-link:hover .header-avatar {
-    background: #000;
+@media (max-width: 768px) {
+  .container {
+    padding: 0 20px;
+  }
+
+  .hero {
+    padding-top: 40px;
+  }
+
+  .hero-title {
+    font-size: 42px;
+  }
+
+  .mini-cars {
+    flex-direction: column;
+  }
+
+  .mini-card {
+    width: 100%;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+  }
 }
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
 
 .profile-link:hover .user-name {
     text-decoration: underline;
@@ -871,3 +972,4 @@ a {
     height: 52px;
   }
 }
+

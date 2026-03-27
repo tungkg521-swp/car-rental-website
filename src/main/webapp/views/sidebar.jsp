@@ -9,27 +9,13 @@
 
 <div class="staff-sidebar">
 
-    <div class="sidebar-header">
-        <a href="${pageContext.request.contextPath}/guest-home"
-           style="text-decoration:none; color:inherit;">
-            <div class="brand">
-                <span class="top">AUTOMOBILI</span>
-                <span class="bottom">
-                    <c:choose>
-                        <c:when test="${isAdmin}">Admin Panel</c:when>
-                        <c:otherwise>Rental Car</c:otherwise>
-                    </c:choose>
-                </span>
-            </div>
-        </a>
-    </div>
-
+   
     <ul class="sidebar-menu">
 
         <c:choose>
 
             <c:when test="${isAdmin}">
-               
+
 
                 <li>
                     <a class="${fn:contains(currentUri, '/dashboard/admin') and empty param.view ? 'active' : ''}"

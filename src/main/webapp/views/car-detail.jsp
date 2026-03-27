@@ -4,16 +4,23 @@
 
 <!DOCTYPE html>
 <html>
+
     <head>
         <title>${car.modelName}</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style-base.css?v=6">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/car-detail.css?v=6">
+
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/wishlist.css?v=6">
 
     </head>
 
+
+
+    <body>
+
     <body data-context-path="${pageContext.request.contextPath}">
+
 
         <jsp:include page="includes/header.jsp"/>
 
