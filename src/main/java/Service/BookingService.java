@@ -156,10 +156,11 @@ public class BookingService {
         }
 
         // check conflict lần cuối trước khi chốt cứng xe
-        if (bookingDAO.hasBookingConflict(
+        if (bookingDAO.hasBookingConflictExcludeBooking(
                 booking.getCarId(),
                 booking.getStartDate(),
-                booking.getEndDate())) {
+                booking.getEndDate(),
+                bookingId)) {
             bookingDAO.updateStatus(bookingId, "CANCELLED");
             return false;
         }
@@ -172,7 +173,7 @@ public class BookingService {
         contract.setContractStartDate(booking.getStartDate());
         contract.setContractEndDate(booking.getEndDate());
         contract.setContractStatus("CREATED");
-       contract.setDailyPrice(car.getPricePerDay().doubleValue());
+        contract.setDailyPrice(car.getPricePerDay().doubleValue());
 
         double total = booking.getTotalEstimatedPrice().doubleValue();
         double deposit = total * 0.3;
@@ -199,6 +200,10 @@ public class BookingService {
         }
 
         return true;
+    }
+
+    public List<Date[]> getBusyDateRangesByCarId(int carId) {
+        return bookingDAO.getBusyDateRangesByCarId(carId);
     }
 
 }
