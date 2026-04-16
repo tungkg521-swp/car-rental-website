@@ -1,0 +1,705 @@
+package DALs;
+
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
+
+import Utils.DBContext;
+import models.BookingModel;
+
+public class BookingDAO extends DBContext {
+
+    public int insert(BookingModel booking) throws SQLException {
+
+        String sql = """
+        INSERT INTO booking
+        (customer_id, car_id, voucher_id, booking_date, start_date, end_date,
+         status, note, deposit_amount, remaining_amount, payment_deadline, total_estimated_price)
+        VALUES (?, ?, ?, SYSDATETIME(), ?, ?, ?, ?, ?, ?, ?, ?)
+    """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            ps.setInt(1, booking.getCustomerId());
+            ps.setInt(2, booking.getCarId());
+
+            if (booking.getVoucherId() != null) {
+                ps.setInt(3, booking.getVoucherId());
+            } else {
+                ps.setNull(3, Types.INTEGER);
+            }
+
+            ps.setDate(4, booking.getStartDate());
+            ps.setDate(5, booking.getEndDate());
+            ps.setString(6, booking.getStatus());
+            ps.setString(7, booking.getNote());
+
+            if (booking.getDepositAmount() != null) {
+                ps.setBigDecimal(8, booking.getDepositAmount());
+            } else {
+                ps.setNull(8, Types.DECIMAL);
+            }
+
+            if (booking.getRemainingAmount() != null) {
+                ps.setBigDecimal(9, booking.getRemainingAmount());
+            } else {
+                ps.setNull(9, Types.DECIMAL);
+            }
+
+            if (booking.getPaymentDeadline() != null) {
+                ps.setTimestamp(10, booking.getPaymentDeadline());
+            } else {
+                ps.setNull(10, Types.TIMESTAMP);
+            }
+
+            ps.setBigDecimal(11, booking.getTotalEstimatedPrice());
+
+            ps.executeUpdate();
+
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    int bookingId = rs.getInt(1);
+                    booking.setBookingId(bookingId);
+                    return bookingId;
+                }
+            }
+        }
+
+        throw new SQLException("Không lấy được booking_id sau khi tạo booking.");
+    }
+
+    public BookingModel getById(int bookingId) {
+        String sql = """
+            SELECT *
+            FROM booking
+            WHERE booking_id = ?
+        """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, bookingId);
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                BookingModel booking = new BookingModel();
+
+                booking.setBookingId(rs.getInt("booking_id"));
+                booking.setCustomerId(rs.getInt("customer_id"));
+                booking.setCarId(rs.getInt("car_id"));
+
+                int voucherId = rs.getInt("voucher_id");
+                if (!rs.wasNull()) {
+                    booking.setVoucherId(voucherId);
+                }
+
+                booking.setBookingDate(rs.getTimestamp("booking_date"));
+                booking.setStartDate(rs.getDate("start_date"));
+                booking.setEndDate(rs.getDate("end_date"));
+                booking.setStatus(rs.getString("status"));
+                booking.setNote(rs.getString("note"));
+                booking.setStaffId(rs.getInt("staff_id"));
+                booking.setTotalEstimatedPrice(rs.getBigDecimal("total_estimated_price"));
+                booking.setDepositAmount(rs.getBigDecimal("deposit_amount"));
+                booking.setRemainingAmount(rs.getBigDecimal("remaining_amount"));
+                booking.setPaymentDeadline(rs.getTimestamp("payment_deadline"));
+                return booking;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public List<BookingModel> findByCustomerId(int customerId) {
+
+        List<BookingModel> list = new ArrayList<>();
+
+        String sql = """
+        SELECT 
+            b.booking_id,
+            b.start_date,
+            b.end_date,
+            b.status,
+            b.total_estimated_price,
+            c.model_name AS car_name,
+            c.image_folder AS image_folder,
+            rc.contract_status
+        FROM booking b
+        JOIN cars c ON b.car_id = c.car_id
+        LEFT JOIN rental_contract rc ON b.booking_id = rc.booking_id
+        WHERE b.customer_id = ?
+        ORDER BY b.booking_date DESC
+    """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            ps.setInt(1, customerId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                BookingModel booking = new BookingModel();
+
+                booking.setBookingId(rs.getInt("booking_id"));
+                booking.setStartDate(rs.getDate("start_date"));
+                booking.setEndDate(rs.getDate("end_date"));
+                booking.setStatus(rs.getString("status"));
+                booking.setTotalEstimatedPrice(rs.getBigDecimal("total_estimated_price"));
+                booking.setCarName(rs.getString("car_name"));
+                booking.setImageFolder(rs.getString("image_folder"));
+                booking.setContractStatus(rs.getString("contract_status"));
+
+                list.add(booking);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public BookingModel findById(int bookingId, int customerId) {
+
+        String sql = """
+        SELECT 
+            b.booking_id,
+            b.booking_date,
+            b.start_date,
+            b.end_date,
+            b.status,
+            b.note,
+            b.total_estimated_price,
+            b.deposit_amount,
+            b.remaining_amount,
+            b.payment_deadline,
+            c.model_name,
+            c.image_folder,
+
+            cus.full_name AS customer_name,
+            cus.email,
+            cus.phone,
+
+            rc.contract_status
+
+        FROM booking b
+        JOIN cars c ON b.car_id = c.car_id
+        JOIN customer cus ON b.customer_id = cus.customer_id
+
+        LEFT JOIN rental_contract rc
+        ON b.booking_id = rc.booking_id
+
+        WHERE b.booking_id = ?
+        AND b.customer_id = ?
+    """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            ps.setInt(1, bookingId);
+            ps.setInt(2, customerId);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+
+                BookingModel booking = new BookingModel();
+
+                booking.setBookingId(rs.getInt("booking_id"));
+                booking.setBookingDate(rs.getTimestamp("booking_date"));
+                booking.setStartDate(rs.getDate("start_date"));
+                booking.setEndDate(rs.getDate("end_date"));
+                booking.setStatus(rs.getString("status"));
+                booking.setNote(rs.getString("note"));
+
+                booking.setTotalEstimatedPrice(
+                        rs.getBigDecimal("total_estimated_price"));
+
+                booking.setCarName(rs.getString("model_name"));
+                booking.setImageFolder(rs.getString("image_folder"));
+
+                booking.setCustomerName(rs.getString("customer_name"));
+                booking.setCustomerEmail(rs.getString("email"));
+                booking.setCustomerPhone(rs.getString("phone"));
+
+                booking.setContractStatus(
+                        rs.getString("contract_status"));
+                booking.setDepositAmount(rs.getBigDecimal("deposit_amount"));
+                booking.setRemainingAmount(rs.getBigDecimal("remaining_amount"));
+                booking.setPaymentDeadline(rs.getTimestamp("payment_deadline"));
+                return booking;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public boolean updateStatus(int bookingId, String status) {
+
+        String sql = "UPDATE booking SET status = ? WHERE booking_id = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setInt(2, bookingId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public boolean updateStaffId(int bookingId, int staffId) {
+
+        String sql = "UPDATE booking SET staff_id = ? WHERE booking_id = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, staffId);
+            ps.setInt(2, bookingId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public boolean updatePaymentDeadline(int bookingId, int hours) {
+
+        String sql = "UPDATE booking SET payment_deadline = DATEADD(HOUR, ?, GETDATE()) WHERE booking_id = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, hours);
+            ps.setInt(2, bookingId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public List<BookingModel> findAllBookings() {
+
+        List<BookingModel> list = new ArrayList<>();
+
+        String sql = """
+        SELECT 
+            b.booking_id,
+            c.full_name,
+            ca.model_name,
+            b.start_date,
+            b.end_date,
+            b.total_estimated_price,
+            b.status
+        FROM booking b
+        JOIN customer c ON b.customer_id = c.customer_id
+        JOIN cars ca ON b.car_id = ca.car_id
+        ORDER BY b.booking_date DESC
+    """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                BookingModel booking = new BookingModel();
+
+                booking.setBookingId(rs.getInt("booking_id"));
+                booking.setCustomerName(rs.getString("full_name"));
+                booking.setCarName(rs.getString("model_name"));
+                booking.setStartDate(rs.getDate("start_date"));
+                booking.setEndDate(rs.getDate("end_date"));
+                booking.setTotalEstimatedPrice(rs.getBigDecimal("total_estimated_price"));
+                booking.setStatus(rs.getString("status"));
+
+                list.add(booking);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public BookingModel findById(int bookingId) {
+
+        String sql = """
+    SELECT 
+        b.booking_id,
+        b.booking_date,
+        b.start_date,
+        b.end_date,
+        b.status,
+        b.note,
+        b.total_estimated_price,
+        b.deposit_amount,
+        b.remaining_amount,
+        b.payment_deadline,
+        c.full_name,
+        c.email,
+        c.phone,
+
+        car.model_name,
+        car.price_per_day,
+        car.image_folder
+
+    FROM booking b
+    JOIN customer c ON b.customer_id = c.customer_id
+    JOIN cars car ON b.car_id = car.car_id
+    WHERE b.booking_id = ?
+""";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            ps.setInt(1, bookingId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+
+                BookingModel booking = new BookingModel();
+
+                booking.setBookingId(rs.getInt("booking_id"));
+                booking.setBookingDate(rs.getTimestamp("booking_date"));
+                booking.setStartDate(rs.getDate("start_date"));
+                booking.setEndDate(rs.getDate("end_date"));
+                booking.setStatus(rs.getString("status"));
+                booking.setNote(rs.getString("note"));
+                booking.setTotalEstimatedPrice(rs.getBigDecimal("total_estimated_price"));
+
+                booking.setCustomerName(rs.getString("full_name"));
+                booking.setCustomerEmail(rs.getString("email"));
+                booking.setCustomerPhone(rs.getString("phone"));
+
+                booking.setCarName(rs.getString("model_name"));
+                booking.setPricePerDay(rs.getBigDecimal("price_per_day"));
+                booking.setImageFolder(rs.getString("image_folder"));
+                booking.setDepositAmount(rs.getBigDecimal("deposit_amount"));
+                booking.setRemainingAmount(rs.getBigDecimal("remaining_amount"));
+                booking.setPaymentDeadline(rs.getTimestamp("payment_deadline"));
+                return booking;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public int getCompletedBooking(int customerId, int carId) {
+
+        String sql = """
+            SELECT booking_id
+            FROM booking
+            WHERE customer_id = ?
+              AND car_id = ?
+              AND status = 'COMPLETED'
+        """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            ps.setInt(1, customerId);
+            ps.setInt(2, carId);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt("booking_id");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return -1;
+    }
+
+    public BookingModel getBookingForContract(int bookingId) {
+
+        String sql = """
+        SELECT 
+            b.booking_id,
+            b.customer_id,
+            b.car_id,
+            b.start_date,
+            b.end_date,
+            b.total_estimated_price,
+            b.status,
+            car.price_per_day
+        FROM booking b
+        JOIN cars car ON b.car_id = car.car_id
+        WHERE b.booking_id = ?
+    """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            ps.setInt(1, bookingId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                BookingModel booking = new BookingModel();
+
+                booking.setBookingId(rs.getInt("booking_id"));
+                booking.setCustomerId(rs.getInt("customer_id"));
+                booking.setCarId(rs.getInt("car_id"));
+                booking.setStartDate(rs.getDate("start_date"));
+                booking.setEndDate(rs.getDate("end_date"));
+                booking.setStatus(rs.getString("status"));
+                booking.setTotalEstimatedPrice(rs.getBigDecimal("total_estimated_price"));
+                booking.setPricePerDay(rs.getBigDecimal("price_per_day"));
+
+                return booking;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public boolean hasOverlapConfirmed(int carId, Date startDate, Date endDate) {
+
+        String sql = """
+        SELECT 1
+        FROM booking
+        WHERE car_id = ?
+          AND status = 'CONFIRMED'
+          AND start_date <= ?
+          AND end_date >= ?
+    """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            ps.setInt(1, carId);
+            ps.setDate(2, endDate);
+            ps.setDate(3, startDate);
+
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public void rejectOverlappingBookings(
+            int carId,
+            Date startDate,
+            Date endDate,
+            int confirmedBookingId) {
+
+        String sql = """
+        UPDATE booking
+        SET status = 'REJECTED'
+        WHERE car_id = ?
+          AND booking_id <> ?        
+          AND start_date <= ?
+          AND end_date >= ?
+    """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            ps.setInt(1, carId);
+            ps.setInt(2, confirmedBookingId);
+            ps.setDate(3, endDate);
+            ps.setDate(4, startDate);
+
+            ps.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean deleteBooking(int bookingId, int customerId) {
+        String sql = """
+            DELETE FROM booking
+            WHERE booking_id = ?
+              AND customer_id = ?
+              AND status = 'CANCELLED'
+        """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, bookingId);
+            ps.setInt(2, customerId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean hasBookingConflict(int carId, Date startDate, Date endDate) {
+
+        String sql = """
+            SELECT 1
+            FROM booking
+            WHERE car_id = ?
+            AND status IN ('AWAITING_PAYMENT', 'CONFIRMED', 'ACTIVE')
+            AND start_date <= ?
+            AND end_date >= ?
+             """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            ps.setInt(1, carId);
+            ps.setDate(2, endDate);
+            ps.setDate(3, startDate);
+
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public List<Date[]> getBusyDateRangesByCarId(int carId) {
+        List<Date[]> ranges = new ArrayList<>();
+
+        String sql = """
+        SELECT start_date, end_date
+        FROM booking
+        WHERE car_id = ?
+          AND status IN ('AWAITING_PAYMENT', 'CONFIRMED', 'ACTIVE')
+        ORDER BY start_date
+    """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, carId);
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Date startDate = rs.getDate("start_date");
+                Date endDate = rs.getDate("end_date");
+                ranges.add(new Date[]{startDate, endDate});
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return ranges;
+    }
+
+    public boolean updateCarId(int bookingId, int newCarId) {
+        String sql = "UPDATE booking SET car_id = ? WHERE booking_id = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, newCarId);
+            ps.setInt(2, bookingId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public BookingModel findByIdForCarChange(int bookingId, int customerId) {
+        String sql = """
+        SELECT 
+            b.booking_id,
+            b.car_id,
+            b.booking_date,
+            b.start_date,
+            b.end_date,
+            b.status,
+            b.note,
+            b.total_estimated_price,
+            b.deposit_amount,
+            b.remaining_amount,
+            b.payment_deadline,
+            c.model_name,
+            c.image_folder,
+            cus.full_name AS customer_name,
+            cus.email,
+            cus.phone,
+            rc.contract_status
+        FROM booking b
+        JOIN cars c ON b.car_id = c.car_id
+        JOIN customer cus ON b.customer_id = cus.customer_id
+        LEFT JOIN rental_contract rc
+            ON b.booking_id = rc.booking_id
+        WHERE b.booking_id = ?
+          AND b.customer_id = ?
+    """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, bookingId);
+            ps.setInt(2, customerId);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                BookingModel booking = new BookingModel();
+
+                booking.setBookingId(rs.getInt("booking_id"));
+                booking.setCarId(rs.getInt("car_id"));
+                booking.setBookingDate(rs.getTimestamp("booking_date"));
+                booking.setStartDate(rs.getDate("start_date"));
+                booking.setEndDate(rs.getDate("end_date"));
+                booking.setStatus(rs.getString("status"));
+                booking.setNote(rs.getString("note"));
+                booking.setTotalEstimatedPrice(rs.getBigDecimal("total_estimated_price"));
+                booking.setDepositAmount(rs.getBigDecimal("deposit_amount"));
+                booking.setRemainingAmount(rs.getBigDecimal("remaining_amount"));
+                booking.setPaymentDeadline(rs.getTimestamp("payment_deadline"));
+
+                booking.setCarName(rs.getString("model_name"));
+                booking.setImageFolder(rs.getString("image_folder"));
+
+                booking.setCustomerName(rs.getString("customer_name"));
+                booking.setCustomerEmail(rs.getString("email"));
+                booking.setCustomerPhone(rs.getString("phone"));
+
+                booking.setContractStatus(rs.getString("contract_status"));
+
+                return booking;
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+
+    }
+
+    public boolean hasBookingConflictExcludeBooking(int carId, Date startDate, Date endDate, int excludeBookingId) {
+
+        String sql = """
+        SELECT 1
+        FROM booking
+        WHERE car_id = ?
+          AND booking_id <> ?
+          AND status IN ('AWAITING_PAYMENT', 'CONFIRMED', 'ACTIVE')
+          AND start_date <= ?
+          AND end_date >= ?
+    """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, carId);
+            ps.setInt(2, excludeBookingId);
+            ps.setDate(3, endDate);
+            ps.setDate(4, startDate);
+
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+}

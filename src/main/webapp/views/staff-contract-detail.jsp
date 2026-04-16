@@ -1,0 +1,215 @@
+<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Contract Detail</title>
+
+        <link rel="stylesheet"
+              href="${pageContext.request.contextPath}/assets/css/style.css">
+        <link rel="stylesheet"
+              href="${pageContext.request.contextPath}/assets/css/staff.css">
+        <link rel="stylesheet"
+              href="${pageContext.request.contextPath}/assets/css/contract-detail.css?v=1">
+    </head>
+
+    <body>
+
+        <div class="staff-layout">
+
+            <%@ include file="sidebar.jsp" %>
+
+            <div class="staff-content">
+
+                <div class="contract-page">
+                    <div class="contract-container">
+
+                        <div class="contract-header">
+                            <div>
+                                <h1>Contract #${contract.contractId}</h1>
+
+                                <span class="contract-status ${contract.contractStatus}">
+                                    ${contract.contractStatus}
+                                </span>
+                            </div>
+
+                            <div class="contract-meta">
+                                <p><b>Booking ID:</b> #${contract.bookingId}</p>
+                                <p><b>Created At:</b> ${contract.createdAt}</p>
+                                <p><b>Start Date:</b> ${contract.contractStartDate}</p>
+                                <p><b>End Date:</b> ${contract.contractEndDate}</p>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="contract-section">
+                            <h2>👤 Customer Information</h2>
+
+                            <div class="contract-grid">
+                                <div>
+                                    <span class="label">Name</span>
+                                    <p>${customer.fullName}</p>
+                                </div>
+
+                                <div>
+                                    <span class="label">Email</span>
+                                    <p>${customer.email}</p>
+                                </div>
+
+                                <div>
+                                    <span class="label">Phone</span>
+                                    <p>${customer.phone}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="contract-section">
+                            <h2>🚗 Car Information</h2>
+
+                            <div class="contract-grid">
+                                <div>
+                                    <span class="label">Model</span>
+                                    <p>${car.modelName}</p>
+                                </div>
+
+                                <div>
+                                    <span class="label">Daily Price</span>
+                                    <fmt:formatNumber value="${contract.dailyPrice}" type="number"/> VND
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="contract-section">
+                            <h2>📅 Rental Information</h2>
+
+                            <div class="contract-grid">
+                                <div>
+                                    <span class="label">Start Date</span>
+                                    <p>${contract.contractStartDate}</p>
+                                </div>
+
+                                <div>
+                                    <span class="label">End Date</span>
+                                    <p>${contract.contractEndDate}</p>
+                                </div>
+
+                                <div>
+                                    <span class="label">Rental Days</span>
+                                    <p>${rentalDays} days</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="contract-section">
+                            <h2>📄 Payment Summary</h2>
+
+                            <div class="payment-grid">
+                                <div>
+                                    <span class="label">Daily Price</span>
+                                    <fmt:formatNumber value="${contract.dailyPrice}" type="number"/> VND
+                                </div>
+
+                                <div>
+                                    <span class="label">Deposit (30%)</span>
+                                    <fmt:formatNumber value="${contract.depositAmount}" type="number"/> VND
+                                </div>
+
+                                <div class="total">
+                                    <span class="label">Total Amount</span>
+                                    <fmt:formatNumber value="${contract.totalAmount}" type="number"/> VND
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="contract-section">
+                            <h2>📝 Note</h2>
+                            <p class="note">${contract.note}</p>
+                        </div>
+
+                        <div class="contract-actions">
+
+                            <a class="btn btn-back"
+                               href="${pageContext.request.contextPath}/staff/contracts">
+                                Back
+                            </a>
+
+                            <c:choose>
+                                <c:when test="${contract.contractStatus eq 'CREATED'}">
+
+                                    <form method="post"
+                                          action="${pageContext.request.contextPath}/staff/contracts"
+                                          class="action-form">
+
+                                        <input type="hidden"
+                                               name="contractId"
+                                               value="${contract.contractId}"/>
+
+                                        <button class="btn btn-success"
+                                                type="submit"
+                                                name="action"
+                                                value="activate">
+                                            Handover Car
+                                        </button>
+
+                                        <button class="btn btn-danger"
+                                                type="submit"
+                                                name="action"
+                                                value="cancel"
+                                                onclick="return confirm('Are you sure you want to cancel this contract?');">
+                                            Cancel
+                                        </button>
+                                    </form>
+
+                                </c:when>
+
+                                <c:when test="${contract.contractStatus eq 'ACTIVE'}">
+                                    <form method="post"
+                                          action="${pageContext.request.contextPath}/staff/contracts"
+                                          class="action-form">
+
+                                        <input type="hidden"
+                                               name="contractId"
+                                               value="${contract.contractId}"/>
+
+                                        <button class="btn btn-success"
+                                                type="submit"
+                                                name="action"
+                                                value="complete"
+                                                onclick="this.form.carNextStatus.value = 'AVAILABLE'">
+                                            Return Car - Available
+                                        </button>
+
+                                        <button class="btn btn-warning"
+                                                type="submit"
+                                                name="action"
+                                                value="complete"
+                                                onclick="this.form.carNextStatus.value = 'MAINTENANCE'">
+                                            Return Car - Maintenance
+                                        </button>
+
+                                        <input type="hidden" name="carNextStatus" value="AVAILABLE"/>
+                                    </form>
+                                </c:when>
+                            </c:choose>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </body>
+</html>

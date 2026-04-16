@@ -1,0 +1,98 @@
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>Send Notification</title>
+        <link rel="stylesheet"
+              href="${pageContext.request.contextPath}/assets/css/staff.css">
+        <link rel="stylesheet"
+              href="${pageContext.request.contextPath}/assets/css/notification.css">
+    </head>
+
+    <body>
+
+        <div class="staff-layout">
+            <%@ include file="sidebar.jsp" %>
+
+            <div class="staff-content">
+
+                <h1 class="dashboard-title">Send Notification</h1>
+
+                <form class="noti-form"
+                      action="${pageContext.request.contextPath}/staff/send-notification"
+                      method="post">
+
+                    <input type="hidden" name="action" value="sendNotification">
+
+                    <div class="noti-group">
+                        <label>Type:</label>
+                        <select name="title" required class="noti-input">
+                            <option value="">-- Select Title --</option>
+                            <option value="Booking Update">Booking Update</option>
+                            <option value="Payment Reminder">Payment Reminder</option>
+                            <option value="Contract Update">Contract Update</option>
+                            <option value="Driver License Notice">Driver License Notice</option>
+                            <option value="Rental Reminder">Rental Reminder</option>
+                            <option value="Promotion Notice">Promotion Notice</option>
+                            <option value="System Notice">System Notice</option>
+                            <option value="Customer Support">Customer Support</option>
+                        </select>
+                    </div>
+
+                    <div class="noti-group">
+                        <label>Content</label>
+                        <textarea class="noti-textarea" name="content" rows="4" required></textarea>
+                    </div>
+
+                    <div class="noti-group">
+                        <label>Send To</label><br>
+
+                        <div class="noti-radio-group">
+                            <label>
+                                <input type="radio" name="sendType" value="all"
+                                       onclick="toggleCustomer(false)" checked>
+                                All Customers
+                            </label>
+
+                            <label>
+                                <input type="radio" name="sendType" value="specific"
+                                       onclick="toggleCustomer(true)">
+                                Specific Customer
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="noti-group" id="customerSelectBox" style="display:none;">
+                        <label>Select Customer</label>
+
+                        <select class="noti-select" name="customerId">
+                            <option value="">-- Select Customer --</option>
+                            <c:forEach items="${customerList}" var="c">
+                                <option value="${c.customerId}">
+                                    ${c.fullName}
+                                </option>
+                            </c:forEach>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="noti-btn">
+                        Send
+                    </button>
+                </form>
+
+            </div>
+        </div>
+
+        <div id="notificationData"
+             data-success="${success}"
+             data-error="${error}"
+             data-redirect="${pageContext.request.contextPath}/staff/send-notification"
+             style="display:none;"></div>
+
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="${pageContext.request.contextPath}/assets/js/notification.js"></script>
+    </body>
+</html>

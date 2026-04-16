@@ -1,0 +1,172 @@
+/* admin-reports.css */
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f8f9fa;
+}
+
+/* Dashboard Title */
+.dashboard-title {
+    color: #2c3e50;
+    margin-bottom: 25px;
+    font-size: 28px;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 10px;
+}
+
+/* ==================== KPI NGANG ==================== */
+.dashboard-kpi {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+    margin: 25px 0 40px 0;
+}
+
+.kpi-card {
+    background: white;
+    border-radius: 12px;
+    padding: 22px 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    text-align: center;
+    min-height: 130px;
+    border: 1px solid #f0f0f0;
+    transition: all 0.3s ease;
+}
+
+.kpi-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+}
+
+.kpi-title {
+    font-size: 15px;
+    color: #555;
+    margin-bottom: 12px;
+    font-weight: 500;
+}
+
+.kpi-value {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.kpi-value.revenue     { color: #27ae60; }
+.kpi-value.trips       { color: #2c3e50; }
+.kpi-value.utilization { color: #3498db; }
+
+/* Filter Bar */
+.filter-bar {
+    margin: 20px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* Card & Grid */
+.card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.chart-container {
+    position: relative;
+    height: 280px;
+    margin: 15px 0;
+}
+
+.clickable-title {
+    cursor: pointer;
+    color: #2980b9;
+    transition: color 0.2s;
+}
+
+.clickable-title:hover {
+    color: #1f5f8c;
+    text-decoration: underline;
+}
+
+/* ==================== MODAL ==================== */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.75);
+    z-index: 99999;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: white;
+    width: 90%;
+    max-width: 1200px;
+    max-height: 90vh;
+    overflow: auto;
+    border-radius: 12px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.35);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 25px;
+    border-bottom: 1px solid #eee;
+    background: #f8f9fa;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+.modal-close {
+    font-size: 34px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #999;
+}
+
+.modal-close:hover {
+    color: #e74c3c;
+}
+
+.report-table, .booking-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+.report-table th, .booking-table th {
+    background: #2c3e50;
+    color: white;
+    padding: 14px 12px;
+    text-align: left;
+    font-weight: 600;
+}
+
+.report-table td, .booking-table td {
+    padding: 14px 12px;
+    border-bottom: 1px solid #eee;
+}
+
+.report-table tr:hover, .booking-table tr:hover {
+    background: #eef5ff;
+}
