@@ -3,15 +3,15 @@ package models;
 public class UserModel {
 
     private int accountId;
-    private Integer customerId; // có thể null (staff/admin)
-    private String role;         // CUSTOMER / STAFF / ADMIN
+    private Integer customerId; 
+    private String role;         
     private String status;
     private String email;
 
     public UserModel() {
     }
 
-    // ===== GETTERS & SETTERS =====
+   
 
     public int getAccountId() {
         return accountId;
@@ -53,7 +53,7 @@ public class UserModel {
         this.email = email;
     }
 
-    // ===== HELPER METHODS (RẤT TIỆN) =====
+   
 
     public boolean isCustomer() {
         return "CUSTOMER".equalsIgnoreCase(role);

@@ -47,7 +47,7 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-        // Chỉ cho CUSTOMER login ở trang này
+        
         if (account.getRoleId() != RoleConstants.CUSTOMER) {
             request.setAttribute("error", "Tài khoản Staff/Admin vui lòng đăng nhập tại Dashboard Login");
             request.getRequestDispatcher("/views/login.jsp")

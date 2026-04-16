@@ -16,7 +16,7 @@ public class AccountModel {
     public AccountModel() {
     }
 
-    // ===== GETTERS & SETTERS =====
+    
 
     public int getAccountId() {
         return accountId;
