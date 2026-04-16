@@ -11,7 +11,6 @@ import service.NotificationService;
 @WebServlet(name = "SendNotificationController", urlPatterns = {"/staff/send-notification"})
 public class SendNotificationController extends HttpServlet {
 
-    // Mở trang gửi notification
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

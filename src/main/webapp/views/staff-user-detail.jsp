@@ -8,8 +8,9 @@
         <title>User Detail</title>
         <link rel="stylesheet"
               href="${pageContext.request.contextPath}/assets/css/staff.css">
+
         <link rel="stylesheet"
-              href="${pageContext.request.contextPath}/assets/css/profile.css">
+              href="${pageContext.request.contextPath}/assets/css/user-detail.css">
     </head>
     <body >
 
@@ -17,71 +18,137 @@
 
             <%@ include file="sidebar.jsp" %>
 
+
             <div class="staff-content">
-                <div class="detail-container">
+                <div class="user-detail-page">
 
-                    <div class="detail-card">
-
-                        <!-- LEFT PROFILE ICON -->
-                        <div class="detail-image">
-                            <img src="${pageContext.request.contextPath}/assets/images/user.png"
-                                 alt="User Avatar">
-                        </div>
-
-                        <!-- RIGHT INFO -->
-                        <div class="detail-info">
-
-                            <h1>${customer.fullName}</h1>
-
-
-
-
-                            <div class="specs">
-                                <div><strong>Customer status:</strong> <span class="status-badge ${customer.status.toLowerCase()}">
-                                        ${customer.status}                               
-                                    </span></div>
-                                <div><strong>Email:</strong> ${customer.email}</div>
-                                <div><strong>Phone:</strong> ${customer.phone}</div>
-                                <div><strong>Date of Birth:</strong> ${customer.dob}</div>
-                                <div><strong>Address:</strong> ${customer.address}</div>
-                            </div>
-
+                    <div class="page-header">
+                        <div>
+                            <h1 class="page-title">User Detail</h1>
+                            <p class="page-subtitle">View customer profile and account information</p>
                         </div>
                     </div>
 
-                    <!-- SYSTEM INFO -->
-                    <div class="detail-description">
+                    <div class="user-profile-card">
+                        <div class="profile-left">
+                            <div class="avatar-wrapper">
+                                <img src="${pageContext.request.contextPath}/assets/images/user.png"
+                                     alt="User Avatar"
+                                     class="profile-avatar">
+                            </div>
+                        </div>
+
+                        <div class="profile-right">
+                            <div class="profile-top">
+                                <div>
+                                    <h2 class="user-name">${customer.fullName}</h2>
+                                    <p class="user-role">Customer Profile</p>
+                                </div>
+
+                                <span class="status-badge ${customer.status.toLowerCase()}">
+                                    ${customer.status}
+                                </span>
+                            </div>
+
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <span class="info-label">Email</span>
+                                    <span class="info-value">${customer.email}</span>
+                                </div>
+
+                                <div class="info-item">
+                                    <span class="info-label">Phone</span>
+                                    <span class="info-value">${customer.phone}</span>
+                                </div>
+
+                                <div class="info-item">
+                                    <span class="info-label">Date of Birth</span>
+                                    <span class="info-value">${customer.dob}</span>
+                                </div>
+
+                                <div class="info-item">
+                                    <span class="info-label">Address</span>
+                                    <span class="info-value">${customer.address}</span>
+                                </div>
+
+                                <div class="info-item">
+                                    <span class="info-label">Customer ID</span>
+                                    <span class="info-value">${customer.customerId}</span>
+                                </div>
+
+                                <div class="info-item">
+                                    <span class="info-label">Customer Status</span>
+                                    <span class="info-value">
+                                        <span class="status-badge ${customer.status.toLowerCase()}">
+                                            ${customer.status}
+                                        </span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="account-card">
+                        <div class="account-card-header">
+                            <div>
+                                <h3>Account Information</h3>
+                                <p>System account details and status management</p>
+                            </div>
+
+                            <c:if test="${sessionScope.ACCOUNT.roleId == 3}">
+                                <button class="edit-status-btn" onclick="openModal()">Edit Status</button>
+                            </c:if>
+                        </div>
+
                         <c:if test="${param.msg == 'success'}">
                             <div class="alert success">
-                                Cập nhật thành công!
+                                Updated successfully!
                             </div>
                         </c:if>
 
                         <c:if test="${param.msg == 'error'}">
                             <div class="alert error">
-                                Cập nhật thất bại!
+                                Update failed!
                             </div>
                         </c:if>
-                        <h2>Account Information</h2>
-                        <p><strong>Customer ID:</strong> ${customer.customerId}</p>
-                        <p><strong>Account status:</strong> <span class="status-badge ${customer.statusAccount.toLowerCase()}">
-                                ${customer.statusAccount}                               
-                                <button class="edit-main-btn" onclick="openModal()">Edit</button> </span></p>
 
-                        <p><strong>Account ID:</strong> ${customer.accountId}</p>
-                        <p><strong>Created At:</strong> ${customer.createdAt.toLocalDate()}</p>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">Account ID</span>
+                                <span class="info-value">${customer.accountId}</span>
+                            </div>
+
+                            <div class="info-item">
+                                <span class="info-label">Account Status</span>
+                                <span class="info-value">
+                                    <span class="status-badge ${customer.statusAccount.toLowerCase()}">
+                                        ${customer.statusAccount}
+                                    </span>
+                                </span>
+                            </div>
+
+                            <div class="info-item">
+                                <span class="info-label">Created At</span>
+                                <span class="info-value">${customer.createdAt.toLocalDate()}</span>
+                            </div>
+
+                            <div class="info-item">
+                                <span class="info-label">Linked Customer ID</span>
+                                <span class="info-value">${customer.customerId}</span>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="detail-actions">
-                        <a href="${pageContext.request.contextPath}/staff/users"
-                           class="btn-back">Back</a>
-
-
+                    <div class="page-actions">
+                        <a href="${pageContext.request.contextPath}/staff/users" class="btn-back-detail">
+                            ← Back to User List
+                        </a>
                     </div>
 
                 </div>
             </div>
         </div>
+
 
 
         <div id="updateModal" class="modal-overlay">
@@ -100,9 +167,9 @@
                                 Active
                             </option>
 
-                            <option value="LOCKED"
-                                    ${customer.statusAccount == 'LOCKED' ? 'selected disabled' : ''}>
-                                Locked
+                            <option value="BLOCKED"
+                                    ${customer.statusAccount == 'BLOCKED' ? 'selected disabled' : ''}>
+                                BLocked
                             </option>
                         </select>
                     </div>

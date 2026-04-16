@@ -8,15 +8,15 @@ public class VoucherModel {
     private int voucherId;
     private String code;
     private BigDecimal discount;
-    private String type; // 'PERCENT' or 'AMOUNT'
+    private String type; 
     private Date expireDate;
     private boolean status;
     private Date createdDate;
-    private int maxUses;           // <-- Thêm field
-    private int usedCount;         // <-- Thêm field
-    private BigDecimal minBookingAmount; // <-- Thêm field
+    private int maxUses;           
+    private int usedCount;        
+    private BigDecimal minBookingAmount; 
 
-    // Constructor đầy đủ cho CREATE
+   
     public VoucherModel(int maxUses, String code, BigDecimal discount, String type, Date expireDate, boolean status, BigDecimal minBookingAmount) {
         this.code = code;
         this.discount = discount;
@@ -25,7 +25,7 @@ public class VoucherModel {
         this.status = status;
         this.maxUses = maxUses;
         this.minBookingAmount = minBookingAmount;
-        this.usedCount = 0; // Mới tạo thì usedCount = 0
+        this.usedCount = 0; 
     }
 
     // Constructor cho UPDATE
@@ -42,7 +42,7 @@ public class VoucherModel {
         this.createdDate = createdDate;
     }
 
-    // Constructor từ database (khi đọc từ DB)
+    
     public VoucherModel(int voucherId, String code, BigDecimal discountValue, String discountType,
             Date startDate, Date endDate, String statusStr, Date createdDate, 
             int maxUses, int usedCount, BigDecimal minBookingAmount) {
@@ -58,7 +58,7 @@ public class VoucherModel {
         this.minBookingAmount = minBookingAmount;
     }
 
-    // Getters và Setters cho các field mới
+    
     public int getMaxUses() {
         return maxUses;
     }

@@ -63,5 +63,6 @@ public class WishlistService {
     }
 
     return "Remove failed!";
+    
 }
 }

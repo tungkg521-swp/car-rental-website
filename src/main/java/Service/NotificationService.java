@@ -16,7 +16,7 @@ public class NotificationService {
         int customerId = dao.getCustomerIdByAccountId(accountId);
 
         if (customerId == -1) {
-            return List.of(); // không có customer
+            return List.of(); 
         }
 
         return dao.findByCustomerId(customerId);

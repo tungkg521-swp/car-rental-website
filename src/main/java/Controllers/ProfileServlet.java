@@ -24,7 +24,6 @@ public class ProfileServlet extends HttpServlet {
     private final CustomerService customerService = new CustomerService();
     private final DriverLicenseService licenseService = new DriverLicenseService();
 
-    // Sửa lại path này theo máy của bạn
     private static final String LICENSE_UPLOAD_PATH
             = "C:/Users/ADMIN/Documents/SWP391/Project_License/license_images";
 
@@ -215,7 +214,6 @@ public class ProfileServlet extends HttpServlet {
         String idBackFile = saveImage(idBackPart, "cccd_back");
         dl.setNationalIdBack(idBackFile);
 
-        // merge ảnh: upload mới > draft session > DB cũ
         licenseService.mergeImageFields(dl, existing, draft);
 
         java.util.Map<String, String> errors = licenseService.validateDriverLicense(dl);
