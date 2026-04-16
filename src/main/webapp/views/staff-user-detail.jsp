@@ -8,14 +8,17 @@
         <title>User Detail</title>
         <link rel="stylesheet"
               href="${pageContext.request.contextPath}/assets/css/staff.css">
+
         <link rel="stylesheet"
               href="${pageContext.request.contextPath}/assets/css/profile.css">
+
     </head>
     <body >
 
         <div class="staff-layout">
 
             <%@ include file="sidebar.jsp" %>
+
 
             <div class="staff-content">
                 <div class="detail-container">
@@ -54,11 +57,13 @@
                         <c:if test="${param.msg == 'success'}">
                             <div class="alert success">
                                 Cập nhật thành công!
+
                             </div>
                         </c:if>
 
                         <c:if test="${param.msg == 'error'}">
                             <div class="alert error">
+
                                 Cập nhật thất bại!
                             </div>
                         </c:if>
@@ -75,6 +80,7 @@
                     <div class="detail-actions">
                         <a href="${pageContext.request.contextPath}/staff/users"
                            class="btn-back">Back</a>
+
 
 
                     </div>
@@ -103,6 +109,7 @@
                             <option value="LOCKED"
                                     ${customer.statusAccount == 'LOCKED' ? 'selected disabled' : ''}>
                                 Locked
+
                             </option>
                         </select>
                     </div>

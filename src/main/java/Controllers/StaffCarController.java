@@ -1,6 +1,8 @@
 package Controllers;
 
+
 import DALs.CarDAO;
+
 import Utils.RoleConstants;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -29,7 +31,9 @@ import service.CarService;
 )
 public class StaffCarController extends HttpServlet {
 
+
     private final CarDAO carDAO = new CarDAO();
+
 
     @Override
     protected void doGet(HttpServletRequest request,
@@ -41,7 +45,9 @@ public class StaffCarController extends HttpServlet {
         if ("getImages".equals(action)) {
             try {
                 int carId = Integer.parseInt(request.getParameter("id"));
+
                 List<String> images = carDAO.getCarImagesByCarId(carId);
+
 
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
@@ -64,7 +70,9 @@ public class StaffCarController extends HttpServlet {
         }
 
         if (action == null || action.equals("list")) {
+
             List<CarModel> carList = carDAO.findAllCars();
+
             request.setAttribute("carList", carList);
             request.getRequestDispatcher("/views/staff-cars-manager.jsp")
                     .forward(request, response);
@@ -78,9 +86,11 @@ public class StaffCarController extends HttpServlet {
             List<CarModel> carList;
 
             if (keyword != null && !keyword.trim().isEmpty()) {
+
                 carList = carDAO.searchCars(keyword);
             } else {
                 carList = carDAO.findAllCars();
+
             }
 
             if (status != null && !status.trim().isEmpty()) {
@@ -97,7 +107,9 @@ public class StaffCarController extends HttpServlet {
 
         if (action.equals("detail")) {
             int carId = Integer.parseInt(request.getParameter("id"));
+
             CarModel car = carDAO.findById(carId);
+
 
             request.setAttribute("car", car);
             request.getRequestDispatcher("/views/staff-cars-manager.jsp")
@@ -125,6 +137,7 @@ public class StaffCarController extends HttpServlet {
             }
 
             int carId = Integer.parseInt(request.getParameter("id"));
+
             CarModel car = carDAO.findById(carId);
 
             request.setAttribute("car", car);
@@ -160,6 +173,7 @@ public class StaffCarController extends HttpServlet {
             return;
         }
 
+
         if ("delete".equals(action)) {
             if (!isAdmin(request)) {
                 request.getSession().setAttribute("error", "Only admin can delete cars.");
@@ -169,6 +183,7 @@ public class StaffCarController extends HttpServlet {
             deleteCar(request, response);
             return;
         }
+
     }
 
     private boolean isAdmin(HttpServletRequest request) {
@@ -263,12 +278,14 @@ public class StaffCarController extends HttpServlet {
                     status
             );
 
+
             if (car == null || imageUrls == null || imageUrls.isEmpty()) {
                 request.setAttribute("error", "Please select at least one image!");
                 request.getRequestDispatcher("/views/staff-cars-manager.jsp").forward(request, response);
                 return;
             }
             boolean success = carDAO.addCarWithImages(car, imageUrls);
+
 
             if (success) {
                 request.getSession().setAttribute("message", "Car added successfully!");
@@ -306,6 +323,7 @@ public class StaffCarController extends HttpServlet {
             String status = request.getParameter("status");
 
             CarModel existingCar = carDAO.findById(carId);
+
             if (existingCar == null) {
                 response.sendRedirect(request.getContextPath() + "/staff/cars?action=list");
                 return;
@@ -369,6 +387,7 @@ public class StaffCarController extends HttpServlet {
                     status
             );
 
+
             if (car == null) {
                 request.setAttribute("error", "Invalid car data.");
                 request.getRequestDispatcher("/views/staff-cars-manager.jsp").forward(request, response);
@@ -404,7 +423,9 @@ public class StaffCarController extends HttpServlet {
 
         try {
             int carId = Integer.parseInt(request.getParameter("carId"));
+
             boolean success = carDAO.deleteCar(carId);
+
 
             if (success) {
                 request.getSession().setAttribute("message", "Car deleted successfully!");
@@ -420,4 +441,6 @@ public class StaffCarController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/staff/cars?action=list");
         }
     }
+
 }
+

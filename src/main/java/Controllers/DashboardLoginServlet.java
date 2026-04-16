@@ -31,10 +31,12 @@ public class DashboardLoginServlet extends HttpServlet {
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
+
         AccountDAO accountDAO = new AccountDAO();
         AccountModel account = accountDAO.findByEmail(email);
 
         if (account == null || !account.getPasswordHash().equals(password)) {
+
             request.setAttribute("error", "Email hoặc mật khẩu không đúng");
             request.getRequestDispatcher("/views/dashboard-login.jsp")
                     .forward(request, response);
@@ -57,6 +59,7 @@ public class DashboardLoginServlet extends HttpServlet {
 
         HttpSession session = request.getSession(true);
         session.setAttribute("ACCOUNT", account);
+
 
         accountDAO.updateLastLogin(account.getAccountId());
 
@@ -85,4 +88,6 @@ public class DashboardLoginServlet extends HttpServlet {
         request.getRequestDispatcher("/views/dashboard-login.jsp")
                 .forward(request, response);
     }
+
 }
+

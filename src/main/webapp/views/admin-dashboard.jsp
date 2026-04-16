@@ -1,4 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+
+
 <!DOCTYPE html>
 <html>
     <head>
@@ -7,6 +9,7 @@
 
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/staff.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/report.css">
+
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
         <script>
@@ -21,6 +24,7 @@
             <%@ include file="sidebar.jsp" %>
 
             <div class="staff-content" id="adminContentArea">
+
 
                 <h1 class="dashboard-title">Admin Dashboard</h1>
 
@@ -65,6 +69,7 @@
                     <div class="card">
                         <h3>System Role</h3>
                         <p>ADMIN</p>
+
                     </div>
                 </div>
 

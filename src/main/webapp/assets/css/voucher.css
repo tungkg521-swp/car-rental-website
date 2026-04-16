@@ -1,5 +1,6 @@
 /* ========== VOUCHER MANAGEMENT STYLES ========== */
 
+
 /* Layout */
 :root {
     --app-font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
@@ -97,6 +98,7 @@ body {
     text-align: center;
     border-bottom: 1px solid #334155;
 }
+
 
 
 /* Typography */

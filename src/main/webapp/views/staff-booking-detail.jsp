@@ -8,8 +8,10 @@
     <head>
         <meta charset="UTF-8">
         <title>Booking Detail</title>
+
         <link rel="stylesheet"
               href="${pageContext.request.contextPath}/assets/css/staff.css?v=3">
+
     </head>
 
     <body>
@@ -18,8 +20,10 @@
 
             <%@ include file="sidebar.jsp" %>
 
+
             <div class="staff-content detail-page">
                 <div class="detail-container">
+
 
                     <c:choose>
                         <c:when test="${not empty booking}">
@@ -169,6 +173,7 @@
 
                                     <c:if test="${param.changeRequest == 'success'}">
                                         <div class="info-message" style="color: green; font-weight: 600;">
+
                                             Car change request created successfully.
                                         </div>
                                     </c:if>
@@ -213,7 +218,9 @@
                                                 </div>
                                             </div>
 
+
                                             <p class="status-message" style="color: #b26a00;">
+
                                                 There is already a pending car change request for this booking.
                                             </p>
                                         </c:when>
@@ -226,13 +233,16 @@
                                                           class="inline-form"
                                                           style="display:block; margin-top:16px;">
 
+
                                                         <input type="hidden" name="action" value="create"/>
                                                         <input type="hidden" name="bookingId" value="${booking.bookingId}"/>
+
 
                                                         <div style="margin-bottom: 16px;">
                                                             <label for="newCarId"><strong>Select replacement car</strong></label><br/>
                                                             <select name="newCarId" id="newCarId" required
                                                                     style="width:100%; max-width:420px; padding:10px; margin-top:8px;">
+
                                                                 <option value="">-- Select car --</option>
                                                                 <c:forEach var="car" items="${replacementCars}">
                                                                     <option value="${car.carId}">
@@ -244,13 +254,17 @@
                                                             </select>
                                                         </div>
 
+
                                                         <div style="margin-bottom: 16px;">
                                                             <label for="reason"><strong>Reason</strong></label><br/>
+
                                                             <textarea name="reason"
                                                                       id="reason"
                                                                       rows="4"
                                                                       required
+
                                                                       style="width:100%; max-width:520px; padding:10px; margin-top:8px;"
+
                                                                       placeholder="Enter reason for changing car..."></textarea>
                                                         </div>
 

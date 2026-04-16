@@ -12,8 +12,8 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/car-detail.css?v=6">
 
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/wishlist.css?v=6">
-
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=22">
+
     </head>
 
 
@@ -24,6 +24,7 @@
 
 
         <jsp:include page="/views/includes/header.jsp"/>
+
 
         <section class="car-detail-page">
             <div class="container">
@@ -62,7 +63,6 @@
 
                         <h1>
                             ${car.modelName}
-
                         </h1>
 
                         <div class="price">

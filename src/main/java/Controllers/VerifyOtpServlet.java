@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+
 import java.time.LocalDateTime;
 
 public class VerifyOtpServlet extends HttpServlet {
@@ -18,24 +19,31 @@ public class VerifyOtpServlet extends HttpServlet {
     private static final String FORGOT_OTP_ATTEMPTS = "FORGOT_OTP_ATTEMPTS";
     private static final String FORGOT_MESSAGE = "FORGOT_MESSAGE";
 
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
 
         HttpSession session = request.getSession();
         String email = (String) session.getAttribute(FORGOT_EMAIL);
 
         if (email == null || email.trim().isEmpty()) {
+
             response.sendRedirect(request.getContextPath() + "/forgot-password");
             return;
         }
 
+
         String message = popForgotPasswordMessage(session);
+
         if (message != null) {
             request.setAttribute("message", message);
         }
 
+
         request.setAttribute("email", email);
+
         request.getRequestDispatcher("/views/verify-otp.jsp")
                 .forward(request, response);
     }
@@ -44,15 +52,18 @@ public class VerifyOtpServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+
         HttpSession session = request.getSession();
         String email = (String) session.getAttribute(FORGOT_EMAIL);
 
         if (email == null || email.trim().isEmpty()) {
+
             response.sendRedirect(request.getContextPath() + "/forgot-password");
             return;
         }
 
         String otp = request.getParameter("otp");
+
         String sessionOtp = (String) session.getAttribute(FORGOT_OTP);
         LocalDateTime expiredAt = (LocalDateTime) session.getAttribute(FORGOT_OTP_EXPIRED_AT);
         Integer attempts = (Integer) session.getAttribute(FORGOT_OTP_ATTEMPTS);
@@ -120,5 +131,6 @@ public class VerifyOtpServlet extends HttpServlet {
         }
         session.removeAttribute(FORGOT_MESSAGE);
         return message.toString();
+
     }
 }

@@ -16,8 +16,10 @@ import service.DriverLicenseService;
 @WebServlet(name = "StaffLicenseServlet", urlPatterns = {"/staff/licenses"})
 public class StaffLicenseServlet extends HttpServlet {
 
+
     private final DriverLicenseDAO driverLicenseDAO = new DriverLicenseDAO();
     private final CustomerDAO customerDAO = new CustomerDAO();
+
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -43,7 +45,6 @@ public class StaffLicenseServlet extends HttpServlet {
 
     private void viewList(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
         List<DriverLicenseModel> licenses = driverLicenseDAO.getRequestedLicenses();
         request.setAttribute("licenses", licenses);
         request.getRequestDispatcher("/views/staff-driver-licenses.jsp")
@@ -64,6 +65,7 @@ public class StaffLicenseServlet extends HttpServlet {
         }
 
         DriverLicenseModel license = driverLicenseDAO.getById(licenseId);
+
         if (license == null) {
             response.sendRedirect(request.getContextPath() + "/staff/licenses");
             return;
@@ -91,6 +93,7 @@ public class StaffLicenseServlet extends HttpServlet {
 
         boolean ok = false;
 
+
         DriverLicenseModel license = driverLicenseDAO.getById(licenseId);
 
         if (license != null) {
@@ -105,6 +108,7 @@ public class StaffLicenseServlet extends HttpServlet {
                     customerDAO.updateLicenseVerified(license.getCustomerId(), false);
                 }
             }
+
         }
 
         // quay về detail để thấy status mới (hoặc list cũng được)
@@ -115,4 +119,6 @@ public class StaffLicenseServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/views/staff-driver-licenses");
         }
     }
+
 }
+

@@ -2,6 +2,7 @@ package Controllers;
 
 import DALs.CarDAO;
 import DALs.MaintenanceDAO;
+
 import service.MaintenanceService;
 import java.io.IOException;
 import java.util.List;
@@ -15,7 +16,10 @@ import models.MaintenanceModel;
 @WebServlet("/staff/maintenance")
 public class StaffMaintenanceServlet extends HttpServlet {
 
+
     private final MaintenanceDAO maintenanceDAO = new MaintenanceDAO();
+
+
     private final CarDAO carDAO = new CarDAO();
 
     @Override
@@ -26,6 +30,7 @@ public class StaffMaintenanceServlet extends HttpServlet {
 
         if (action == null || action.equals("list")) {
             List<MaintenanceModel> maintenances = maintenanceDAO.findAll();
+
             request.setAttribute("maintenances", maintenances);
             request.getRequestDispatcher("/views/staff-maintenance.jsp").forward(request, response);
 
@@ -36,7 +41,9 @@ public class StaffMaintenanceServlet extends HttpServlet {
                 return;
             }
             int id = Integer.parseInt(idStr);
+
             MaintenanceModel maintenance = maintenanceDAO.findById(id);
+
             if (maintenance != null) {
                 request.setAttribute("maintenance", maintenance);
                 request.getRequestDispatcher("/views/staff-maintenance-detail.jsp").forward(request, response);
@@ -56,7 +63,9 @@ public class StaffMaintenanceServlet extends HttpServlet {
                 return;
             }
             int id = Integer.parseInt(idStr);
+
             MaintenanceModel maintenance = maintenanceDAO.findById(id);
+
             if (maintenance != null) {
                 request.setAttribute("maintenance", maintenance);
                 request.setAttribute("cars", carDAO.findAllCars());
@@ -70,6 +79,7 @@ public class StaffMaintenanceServlet extends HttpServlet {
             String idStr = request.getParameter("id");
             if (idStr != null && !idStr.trim().isEmpty()) {
                 int id = Integer.parseInt(idStr);
+
                 MaintenanceModel m = maintenanceDAO.findById(id);
                 boolean success = false;
                 if (m != null) {
@@ -78,6 +88,7 @@ public class StaffMaintenanceServlet extends HttpServlet {
                         carDAO.updateCarStatus(m.getCarId(), "AVAILABLE");
                     }
                 }
+
                 if (success) {
                     request.getSession().setAttribute("message", "Xóa lịch bảo dưỡng thành công!");
                 } else {
@@ -115,6 +126,7 @@ public class StaffMaintenanceServlet extends HttpServlet {
                 if (success) {
                     carDAO.updateCarStatus(m.getCarId(), "MAINTENANCE");
                 }
+
                 if (success) {
                     request.getSession().setAttribute("message", "Tạo lịch bảo dưỡng thành công! Xe đã chuyển sang MAINTENANCE.");
                 }
@@ -136,6 +148,7 @@ public class StaffMaintenanceServlet extends HttpServlet {
                 m.setEstimatedCost(new java.math.BigDecimal(request.getParameter("estimatedCost")));
                 m.setStatus(request.getParameter("status"));
 
+
                 boolean success = maintenanceDAO.update(m);
                 if (success) {
                     if ("COMPLETED".equalsIgnoreCase(m.getStatus()) || "CANCELLED".equalsIgnoreCase(m.getStatus())) {
@@ -144,6 +157,7 @@ public class StaffMaintenanceServlet extends HttpServlet {
                         carDAO.updateCarStatus(m.getCarId(), "MAINTENANCE");
                     }
                 }
+
                 if (success) {
                     request.getSession().setAttribute("message", "Cập nhật lịch bảo dưỡng thành công!");
                 }

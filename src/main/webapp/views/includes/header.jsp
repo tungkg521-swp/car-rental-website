@@ -32,6 +32,7 @@
             </c:if>
 
             <c:if test="${not empty sessionScope.ACCOUNT}">
+
                 <div class="customer-header-actions">
                     <a href="${pageContext.request.contextPath}/customer/bookings?action=list"
                        class="customer-action-btn booking-btn"
@@ -60,6 +61,7 @@
 
                     <a href="${pageContext.request.contextPath}/logout" class="logout">Logout</a>
                 </div>
+
             </c:if>
         </div>
     </div>

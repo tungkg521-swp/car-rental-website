@@ -253,6 +253,7 @@
 }
 :root {
     --app-font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+
 }
 
 
@@ -845,4 +846,5 @@
     .search-box button {
         height: 42px;
     }
+
 }

@@ -4,12 +4,14 @@
  */
 package Controllers;
 
+
 import DALs.BookingDAO;
 import DALs.CarDAO;
 import DALs.ContractDAO;
 import DALs.CustomerDAO;
 import DALs.PaymentDAO;
 import DALs.VoucherDAO;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -18,6 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.math.BigDecimal;
+
 import java.math.RoundingMode;
 import java.sql.Timestamp;
 import models.AccountModel;
@@ -34,6 +37,7 @@ public class PaymentServlet extends HttpServlet {
     private final ContractDAO contractDAO = new ContractDAO();
     private final CarDAO carDAO = new CarDAO();
     private final VoucherDAO voucherDAO = new VoucherDAO();
+
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -103,7 +107,9 @@ public class PaymentServlet extends HttpServlet {
             return;
         }
 
+
         BookingModel booking = bookingDAO.findById(bookingId, customer.getCustomerId());
+
         if (booking == null) {
             response.sendRedirect(request.getContextPath() + "/booking?action=list");
             return;
@@ -117,16 +123,20 @@ public class PaymentServlet extends HttpServlet {
         }
 
         // nếu quá hạn thì hủy
+
         if (isPaymentExpired(booking)) {
             bookingDAO.updateStatus(bookingId, "CANCELLED");
+
             response.sendRedirect(request.getContextPath()
                     + "/booking?action=detail&bookingId=" + bookingId + "&paymentStatus=expired");
             return;
         }
 
         BigDecimal total = booking.getTotalEstimatedPrice();
+
         BigDecimal deposit = calculateDeposit(total);
         BigDecimal remaining = calculateRemaining(total);
+
 
         request.setAttribute("booking", booking);
         request.setAttribute("depositAmount", deposit);
@@ -151,14 +161,18 @@ public class PaymentServlet extends HttpServlet {
             return;
         }
 
+
         BookingModel booking = bookingDAO.findById(bookingId, customer.getCustomerId());
+
         if (booking == null) {
             response.sendRedirect(request.getContextPath() + "/booking?action=list");
             return;
         }
 
+
         if (isPaymentExpired(booking)) {
             bookingDAO.updateStatus(bookingId, "CANCELLED");
+
             response.sendRedirect(request.getContextPath()
                     + "/booking?action=detail&bookingId=" + bookingId + "&paymentStatus=expired");
             return;
@@ -169,7 +183,9 @@ public class PaymentServlet extends HttpServlet {
             paymentMethod = "VNPAY";
         }
 
+
         boolean processed = processSandboxPayment(bookingId, paymentMethod, success);
+
 
         if (processed && success) {
             response.sendRedirect(request.getContextPath()
@@ -227,6 +243,7 @@ public class PaymentServlet extends HttpServlet {
 
         return customer;
     }
+
 
     private BigDecimal calculateDeposit(BigDecimal totalAmount) {
         if (totalAmount == null) {
@@ -374,4 +391,5 @@ public class PaymentServlet extends HttpServlet {
         boolean carUpdated = carDAO.updateStatus(booking.getCarId(), "BOOKED");
         return carUpdated;
     }
+
 }

@@ -4,7 +4,9 @@
  */
 package Controllers;
 
+
 import DALs.CustomerDAO;
+
 import service.CustomerService;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -22,8 +24,10 @@ import models.CustomerModel;
  */
 @WebServlet("/staff/users")
 public class StaffCustomerController extends HttpServlet {
+
     
     private final CustomerDAO customerDAO = new CustomerDAO();
+
 
     protected void doGet(HttpServletRequest request,
             HttpServletResponse response)
@@ -34,7 +38,9 @@ public class StaffCustomerController extends HttpServlet {
         // ===== LIST =====
         if (action == null || action.equals("list")) {
 
+
             List<CustomerModel> list = customerDAO.findAllCustomers();
+
             request.setAttribute("customerList", list);
 
             request.getRequestDispatcher("/views/staff-users.jsp")
@@ -44,7 +50,9 @@ public class StaffCustomerController extends HttpServlet {
 
             int id = Integer.parseInt(request.getParameter("id"));
 
+
             CustomerModel customer = customerDAO.findById(id);
+
 
             if (customer == null) {
                 response.sendRedirect(request.getContextPath() + "/staff/users");
@@ -69,7 +77,9 @@ public class StaffCustomerController extends HttpServlet {
         if (action.equals("search")) {
             String fullname = request.getParameter("namesearch");
             String status = request.getParameter("status");
+
             List<CustomerModel> list = customerDAO.searchCustomer(fullname, status);
+
             request.setAttribute("customerList", list);
 
             request.getRequestDispatcher("/views/staff-users.jsp")
@@ -81,7 +91,9 @@ public class StaffCustomerController extends HttpServlet {
             int idAccount = Integer.parseInt(request.getParameter("idAcc"));
             String status = request.getParameter("status");
            
+
             boolean success = customerDAO.updateStatusAccount(idAccount, status) > 0;
+
            
 
         if (success) {

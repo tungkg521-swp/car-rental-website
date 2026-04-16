@@ -250,9 +250,11 @@ public class CarDAO extends DBContext {
                         rs.getString("transmission"),
                         rs.getString("brand_name"),
                         rs.getString("type_name"),
+
                         rs.getString("image_url"), // SỬA: Lấy từ rs thay null
                         rs.getString("image_folder"),
                         rs.getString("description"), // SỬA: Lấy từ rs thay null (nếu không cần, bỏ select và dùng constructor khác)
+
                         rs.getString("status")
                 ));
             }
@@ -445,7 +447,7 @@ public class CarDAO extends DBContext {
                 String imageSql = "INSERT INTO cars_image (car_id, image_url, is_primary, created_at) VALUES (?, ?, ?, GETDATE())";
 
                 try (PreparedStatement imagePs = conn.prepareStatement(imageSql)) {
-                    // Đường dẫn đúng theo database: assets/images/cars/[folder]/[file]
+
                     String imagePath = "assets/images/cars/" + car.getImageFolder() + "/" + car.getImageUrl();
                     System.out.println("Saving image: " + imagePath);
 
@@ -511,11 +513,13 @@ public class CarDAO extends DBContext {
         throw new SQLException("Could not create brand: " + brandName);
     }
 
+
 // Sửa method getTypeId
     private int getTypeId(Connection conn, String typeName) throws SQLException {
         System.out.println("   getTypeId - typeName: " + typeName);
 
         // Tìm type
+
         String selectSql = "SELECT type_id FROM cars_type WHERE type_name = ?";
         try (PreparedStatement ps = conn.prepareStatement(selectSql)) {
             ps.setString(1, typeName.trim());
@@ -527,7 +531,7 @@ public class CarDAO extends DBContext {
             }
         }
 
-        // Nếu chưa có, thêm mới
+
         System.out.println("   Type chưa tồn tại, đang thêm mới...");
         String insertSql = "INSERT INTO cars_type (type_name) VALUES (?)";
         try (PreparedStatement ps = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
@@ -544,7 +548,7 @@ public class CarDAO extends DBContext {
         throw new SQLException("Could not create type: " + typeName);
     }
 
-    // Helper method để lấy type_id
+
     public boolean updateCar(CarModel car) {
         String sql = """
             UPDATE cars
@@ -592,7 +596,7 @@ public class CarDAO extends DBContext {
             conn = getConnection();
             conn.setAutoCommit(false);
 
-            // Xóa ảnh trong bảng cars_image trước
+
             String deleteImagesSql = "DELETE FROM cars_image WHERE car_id = ?";
             ps = conn.prepareStatement(deleteImagesSql);
             ps.setInt(1, carId);

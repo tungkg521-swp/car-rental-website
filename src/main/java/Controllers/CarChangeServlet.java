@@ -1,9 +1,11 @@
 package Controllers;
 
+
 import DALs.BookingDAO;
 import DALs.CarChangeRequestDAO;
 import DALs.CarDAO;
 import DALs.ContractDAO;
+
 import models.AccountModel;
 import models.CustomerModel;
 import models.StaffModel;
@@ -14,20 +16,24 @@ import jakarta.servlet.http.*;
 import java.io.IOException;
 
 import DALs.CustomerDAO;
+
 import java.util.List;
 import models.BookingModel;
 import models.CarChangeRequestModel;
 import models.CarModel;
 import models.ContractModel;
 
+
 @WebServlet(name = "CarChangeServlet", urlPatterns = {"/car-change"})
 public class CarChangeServlet extends HttpServlet {
+
 
     private final BookingDAO bookingDAO = new BookingDAO();
     private final CarDAO carDAO = new CarDAO();
     private final ContractDAO contractDAO = new ContractDAO();
     private final CarChangeRequestDAO requestDAO = new CarChangeRequestDAO();
     private final CustomerDAO customerDAO = new CustomerDAO();
+
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -76,7 +82,9 @@ public class CarChangeServlet extends HttpServlet {
 
         String reason = request.getParameter("reason");
 
+
         boolean result = createStaffRequest(bookingId, staffId, newCarId, reason);
+
 
         response.sendRedirect(
                 request.getContextPath()
@@ -101,6 +109,7 @@ public class CarChangeServlet extends HttpServlet {
             return;
         }
 
+
         CustomerModel customer = customerDAO.getByAccountId(account.getAccountId());
         if (customer == null) {
             response.sendRedirect(request.getContextPath() + "/login");
@@ -120,7 +129,9 @@ public class CarChangeServlet extends HttpServlet {
         String decision = request.getParameter("decision");
 
         boolean accept = "accept".equalsIgnoreCase(decision);
+
         boolean result = customerRespond(requestId, customerId, accept);
+
 
         String bookingId = request.getParameter("bookingId");
 
@@ -130,6 +141,7 @@ public class CarChangeServlet extends HttpServlet {
                 + "&changeResponse=" + (result ? "success" : "fail")
         );
     }
+
 
     private void markRefundCompleted(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
@@ -416,4 +428,5 @@ public class CarChangeServlet extends HttpServlet {
 
         return true;
     }
+
 }

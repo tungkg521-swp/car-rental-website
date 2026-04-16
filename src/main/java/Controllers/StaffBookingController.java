@@ -3,6 +3,7 @@ package Controllers;
 import DALs.BookingDAO;
 import DALs.CarChangeRequestDAO;
 import DALs.CarDAO;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -22,6 +23,7 @@ import service.CarChangeRequestService;
 @WebServlet("/staff/bookings")
 public class StaffBookingController extends HttpServlet {
 
+
     private final BookingDAO bookingDAO = new BookingDAO();
     private final CarChangeRequestDAO carChangeRequestDAO = new CarChangeRequestDAO();
     private final CarDAO carDAO = new CarDAO();
@@ -37,7 +39,9 @@ public class StaffBookingController extends HttpServlet {
         // ===== 1. VIEW LIST =====
         if (action == null || action.equals("list")) {
 
+
             List<BookingModel> list = bookingDAO.findAllBookings();
+
 
             request.setAttribute("bookingList", list);
 
@@ -50,7 +54,9 @@ public class StaffBookingController extends HttpServlet {
 
                 int id = Integer.parseInt(request.getParameter("id"));
 
+
                 BookingModel booking = bookingDAO.findById(id);
+
 
                 if (booking == null) {
                     System.out.println("lỗi idbooking");
@@ -61,9 +67,11 @@ public class StaffBookingController extends HttpServlet {
                 }
 
                 CarChangeRequestModel pendingRequest
+
                         = carChangeRequestDAO.getPendingByBookingId(id);
 
                 List<CarModel> replacementCars = getAvailableReplacementCars(id);
+
 
                 request.setAttribute("pendingCarChangeRequest", pendingRequest);
                 request.setAttribute("replacementCars", replacementCars);
@@ -116,9 +124,11 @@ public class StaffBookingController extends HttpServlet {
             boolean success = false;
 
             if ("approve".equals(action)) {
+
                 success = approveBooking(bookingId, staffId);
             } else if ("reject".equals(action)) {
                 success = rejectBooking(bookingId);
+
             }
             // quay lại detail
             response.sendRedirect(
@@ -135,6 +145,7 @@ public class StaffBookingController extends HttpServlet {
                     request.getContextPath() + "/staff/bookings");
         }
     }
+
 
     private boolean approveBooking(int bookingId, int staffId) {
         BookingModel booking = bookingDAO.getById(bookingId);
@@ -187,4 +198,5 @@ public class StaffBookingController extends HttpServlet {
                 booking.getEndDate()
         );
     }
+
 }

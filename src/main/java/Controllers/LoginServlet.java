@@ -13,6 +13,7 @@ import models.AccountModel;
 import models.CustomerModel;
 
 
+
 public class LoginServlet extends HttpServlet {
 
     @Override
@@ -29,10 +30,12 @@ public class LoginServlet extends HttpServlet {
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
+
         AccountDAO accountDAO = new AccountDAO();
         AccountModel account = accountDAO.findByEmail(email);
 
         if (account == null || !account.getPasswordHash().equals(password)) {
+
             request.setAttribute("error", "Email hoặc mật khẩu không đúng");
             request.getRequestDispatcher("/views/login.jsp")
                     .forward(request, response);
@@ -46,7 +49,9 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
+
         // Chỉ cho CUSTOMER login ở trang này
+
         if (account.getRoleId() != RoleConstants.CUSTOMER) {
             request.setAttribute("error", "Tài khoản Staff/Admin vui lòng đăng nhập tại Dashboard Login");
             request.getRequestDispatcher("/views/login.jsp")
@@ -70,8 +75,11 @@ public class LoginServlet extends HttpServlet {
 
         customerDAO.updateStatus(customer.getCustomerId(), "ACTIVE");
 
+
         accountDAO.updateLastLogin(account.getAccountId());
 
         response.sendRedirect(request.getContextPath() + "/home");
     }
+
 }
+

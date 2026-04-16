@@ -1,5 +1,6 @@
 package Controllers;
 
+
 import DALs.BookingDAO;
 import java.io.IOException;
 import java.time.temporal.ChronoUnit;
@@ -7,6 +8,7 @@ import java.util.List;
 
 import DALs.CarDAO;
 import DALs.ContractDAO;
+
 import DALs.CustomerDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -17,6 +19,11 @@ import models.CarModel;
 import models.ContractModel;
 import models.CustomerModel;
 
+import models.ContractModel;
+
+import models.ContractModel;
+
+
 
 @WebServlet("/staff/contracts")
 public class StaffContractController extends HttpServlet {
@@ -25,6 +32,7 @@ public class StaffContractController extends HttpServlet {
     private final CarDAO carDAO = new CarDAO();
     private final ContractDAO contractDAO = new ContractDAO();
     private final BookingDAO bookingDAO = new BookingDAO();
+
 
     // ================= GET =================
     @Override
@@ -39,6 +47,7 @@ public class StaffContractController extends HttpServlet {
 
             List<ContractModel> list = contractDAO.findAllContracts();
 
+
             request.setAttribute("contractList", list);
 
             request.getRequestDispatcher("/views/staff-contracts.jsp")
@@ -52,6 +61,7 @@ public class StaffContractController extends HttpServlet {
 
                 ContractModel contract
                         = contractDAO.getContractById(id);
+
 
                 if (contract == null) {
 
@@ -219,3 +229,4 @@ public class StaffContractController extends HttpServlet {
     }
 
 }
+

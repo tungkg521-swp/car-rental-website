@@ -21,12 +21,14 @@ public class ReviewServlet extends HttpServlet {
     private final CarDAO carDAO = new CarDAO();
     private final BookingDAO bookingDAO = new BookingDAO();
 
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         String contractParam = request.getParameter("contractId");
         String carParam = request.getParameter("carId");
+
 
         int carId;
         try {
@@ -53,6 +55,7 @@ public class ReviewServlet extends HttpServlet {
         request.setAttribute("reviews", reviews);
         request.setAttribute("carId", carId);
 
+
         request.getRequestDispatcher("views/review.jsp").forward(request, response);
     }
 
@@ -78,10 +81,13 @@ public class ReviewServlet extends HttpServlet {
         }
 
         if ("update".equals(action)) {
+
             if (customer == null) {
+
                 response.sendRedirect("login.jsp");
                 return;
             }
+
 
             String reviewIdStr = request.getParameter("reviewId");
             String ratingStr = request.getParameter("rating");
@@ -107,13 +113,16 @@ public class ReviewServlet extends HttpServlet {
 
             boolean isOwner = reviewDAO.isReviewOwner(reviewId, customer.getCustomerId());
             if (!isOwner) {
+
                 session.setAttribute("error", "You can only edit your own review.");
                 response.sendRedirect("cars?action=detail&carId=" + carId);
                 return;
             }
 
+
             boolean updated = reviewDAO.updateReview(reviewId, customer.getCustomerId(), rating, comment);
             if (!updated) {
+
                 session.setAttribute("error", "Update review failed.");
                 response.sendRedirect("cars?action=detail&carId=" + carId);
                 return;
@@ -124,7 +133,9 @@ public class ReviewServlet extends HttpServlet {
             return;
         }
 
+
         if (customer == null) {
+
             response.sendRedirect("login.jsp");
             return;
         }
@@ -149,10 +160,12 @@ public class ReviewServlet extends HttpServlet {
 
         int bookingId = bookingDAO.getCompletedBooking(customer.getCustomerId(), carId);
         if (bookingId == -1) {
+
             session.setAttribute("error", "You must rent this car before writing a review.");
             response.sendRedirect("cars?action=detail&carId=" + carId);
             return;
         }
+
 
         ReviewModel review = new ReviewModel(customer.getCustomerId(), carId, bookingId, rating, comment);
         boolean inserted = reviewDAO.insertReview(review);
@@ -162,6 +175,7 @@ public class ReviewServlet extends HttpServlet {
             response.sendRedirect("cars?action=detail&carId=" + carId);
             return;
         }
+
 
         session.setAttribute("success", "Review added successfully.");
         response.sendRedirect("cars?action=detail&carId=" + carId);

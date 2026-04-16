@@ -1055,6 +1055,7 @@ body.modal-open {
     .rental-modal-actions {
         justify-content: stretch;
     }
+
 }
 
 .wishlist-btn {
@@ -1301,4 +1302,5 @@ body.modal-open {
         font-size: 16px;
         border-radius: 16px;
     }
+
 }

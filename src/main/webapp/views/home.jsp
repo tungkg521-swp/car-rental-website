@@ -5,7 +5,9 @@
         <title>Car Rental</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=22">
+
     </head>
     <body>
 
@@ -36,6 +38,7 @@
                         </div>
                     </div>
                 </div>
+
 
 
                 <div class="hero-booking-wrap">
@@ -134,6 +137,7 @@
                 <div class="grid-12 recommend-grid">
                     <a class="col-3 car-info-card"
                        href="${pageContext.request.contextPath}/cars">
+
                         <img src="${pageContext.request.contextPath}/assets/images/cars/vf3/vf3_1.jpg" alt="VF3">
                         <div class="car-card-body">
                             <h4>VinFast VF3</h4>
@@ -143,6 +147,7 @@
 
                     <a class="col-3 car-info-card"
                        href="${pageContext.request.contextPath}/cars">
+
                         <img src="${pageContext.request.contextPath}/assets/images/cars/vf6_eco/vf6_eco_1.jpg" alt="VF6 Eco">
                         <div class="car-card-body">
                             <h4>VinFast VF6 Eco</h4>
@@ -151,7 +156,9 @@
                     </a>
 
                     <a class="col-3 car-info-card"
+
                        href="${pageContext.request.contextPath}/cars">
+
                         <img src="${pageContext.request.contextPath}/assets/images/cars/vf6_plus/vf6_plus_1.jpg" alt="VF6 Plus">
                         <div class="car-card-body">
                             <h4>VinFast VF6 Plus</h4>
@@ -160,7 +167,9 @@
                     </a>
 
                     <a class="col-3 car-info-card"
+
                        href="${pageContext.request.contextPath}/cars">
+
                         <img src="${pageContext.request.contextPath}/assets/images/cars/vf7_plus/vf7_plus_1.jpg" alt="VF7 Plus">
                         <div class="car-card-body">
                             <h4>VinFast VF7 Plus</h4>

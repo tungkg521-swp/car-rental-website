@@ -4,8 +4,10 @@
  */
 package Controllers;
 
+
 import DALs.BookingDAO;
 import DALs.CarDAO;
+
 import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -28,8 +30,10 @@ import service.BookingService;
  */
 public class CarListServlet extends HttpServlet {
 
+
     private final CarDAO carDAO = new CarDAO(); 
     private BookingDAO bookingDAO = new BookingDAO();
+
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -66,19 +70,23 @@ public class CarListServlet extends HttpServlet {
 
                 if (startDate.before(today) || !endDate.after(startDate)) {
                     request.setAttribute("dateError", "Ngày thuê không hợp lệ.");
+
                     cars = carDAO.findAllAvailableCars();
                 } else {
                     cars = carDAO.findAvailableCarsByDateRange(startDate, endDate);
+
                     request.setAttribute("startDate", startDateRaw);
                     request.setAttribute("endDate", endDateRaw);
                 }
             } catch (Exception e) {
                 request.setAttribute("dateError", "Ngày thuê không hợp lệ.");
+
                 cars = carDAO.findAllAvailableCars();
             }
 
         } else {
             cars = carDAO.findAllAvailableCars();
+
         }
 
         String keyword = request.getParameter("keyword");
@@ -106,12 +114,16 @@ public class CarListServlet extends HttpServlet {
             return;
         }
 
+
         CarModel car = carDAO.findById(carId);
+
         if (car == null) {
             response.sendRedirect(request.getContextPath() + "/cars");
             return;
         }
+
         List<Date[]> busyRanges = bookingDAO.getBusyDateRangesByCarId(carId);
+
 
         System.out.println("=== BUSY RANGES OF CAR " + carId + " ===");
         for (Date[] range : busyRanges) {
@@ -163,8 +175,10 @@ public class CarListServlet extends HttpServlet {
         String cleaned = (keyword == null) ? "" : keyword.trim().replaceAll("\\s+", " ");
 
         List<CarModel> list = cleaned.isEmpty()
+
                 ? carDAO.findAllAvailableCars()
                 : carDAO.searchCars(cleaned);
+
 
         list = keepCarsAvailableInDateRange(list, startDateRaw, endDateRaw);
 
@@ -206,7 +220,9 @@ public class CarListServlet extends HttpServlet {
                 ? new BigDecimal(maxPriceStr)
                 : null;
 
+
         List<CarModel> list = carDAO.filterCars(
+
                 keyword,
                 availableOnly,
                 brands,
@@ -261,7 +277,9 @@ public class CarListServlet extends HttpServlet {
         List<CarModel> filtered = new java.util.ArrayList<>();
 
         for (CarModel car : cars) {
+
             if (!carDAO.isCarBookedInRange(car.getCarId(), startDate, endDate)) {
+
                 filtered.add(car);
             }
         }

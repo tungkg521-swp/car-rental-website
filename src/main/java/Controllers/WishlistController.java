@@ -4,8 +4,10 @@
  */
 package Controllers;
 
+
 import DALs.CarDAO;
 import DALs.WishlistDAO;
+
 import models.WishlistModel;
 import service.WishlistService;
 import java.io.IOException;
@@ -20,14 +22,17 @@ import models.CarModel;
 import models.CustomerModel;
 
 
+
 /**
  *
  * @author Admin
  */
 public class WishlistController extends HttpServlet {
 
+
     private final WishlistDAO wishlistDAO = new WishlistDAO();
     private final CarDAO carDAO = new CarDAO();
+
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
@@ -59,7 +64,9 @@ public class WishlistController extends HttpServlet {
         if (action.equals("add")) {
             addWishlist(request, response);
         } else if (action.equals("delete")) {
+
             removeWishlist(request, response);
+
         } else {
             response.sendRedirect(request.getContextPath() + "/home");
         }
@@ -88,7 +95,9 @@ public class WishlistController extends HttpServlet {
 
         int customerId = customer.getCustomerId();
 
+
         List<WishlistModel> list = wishlistDAO.findByCustomerId(customerId);
+
 
         request.setAttribute("wishlist", list);
 
@@ -105,6 +114,7 @@ public class WishlistController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
+
         int customerId = customer.getCustomerId();
         int carId = Integer.parseInt(request.getParameter("carId"));
 
@@ -122,11 +132,13 @@ public class WishlistController extends HttpServlet {
             message = success ? "Added to wishlist successfully!" : "Something went wrong!";
         }
 
+
         if (message.equals("Added to wishlist successfully!")) {
             request.setAttribute("SUCCESS", message);
         } else {
             request.setAttribute("ERROR", message);
         }
+
         request.setAttribute("car", car);
 
         request.setAttribute("MESSAGE", message);
@@ -134,6 +146,7 @@ public class WishlistController extends HttpServlet {
                 .forward(request, response);
 
     }
+
 
     private void removeWishlist(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -174,4 +187,7 @@ public class WishlistController extends HttpServlet {
         request.setAttribute("wishlist", list);
         request.getRequestDispatcher("/views/wishlist.jsp").forward(request, response);
     }
+
+    
+  
 }

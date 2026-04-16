@@ -1,13 +1,16 @@
 package Controllers;
 
+
 import DALs.AccountDAO;
 import Utils.MailUtil;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+
 import java.time.LocalDateTime;
 import java.util.Random;
 import models.AccountModel;
@@ -24,12 +27,15 @@ public class ForgotPasswordServlet extends HttpServlet {
 
     private final AccountDAO accountDAO = new AccountDAO();
 
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         HttpSession session = request.getSession();
+
         String message = popForgotPasswordMessage(session);
+
 
         if (message != null) {
             request.setAttribute("message", message);
@@ -45,6 +51,7 @@ public class ForgotPasswordServlet extends HttpServlet {
 
         String email = request.getParameter("email");
         HttpSession session = request.getSession();
+
 
         if (email == null || email.trim().isEmpty()) {
             request.setAttribute("error", "Email is required.");
@@ -123,5 +130,6 @@ public class ForgotPasswordServlet extends HttpServlet {
         Random random = new Random();
         int value = 100000 + random.nextInt(900000);
         return String.valueOf(value);
+
     }
 }

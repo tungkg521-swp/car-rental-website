@@ -1,8 +1,10 @@
 package Controllers;
 
+
 import DALs.CustomerDAO;
 import DALs.DriverLicenseDAO;
 import DALs.ProfileDAO;
+
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -15,6 +17,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
+
 import java.time.Period;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -23,8 +26,10 @@ import models.CustomerModel;
 import models.DriverLicenseModel;
 
 
+
 @MultipartConfig
 public class ProfileServlet extends HttpServlet {
+
 
 
     private final ProfileDAO profileDAO = new ProfileDAO();
@@ -33,6 +38,7 @@ public class ProfileServlet extends HttpServlet {
     private static final String LICENSE_DRAFT_SESSION_KEY = "LICENSE_DRAFT";
 
     // Sửa lại path này theo máy của bạn
+
     private static final String LICENSE_UPLOAD_PATH
             = "C:/Users/ADMIN/Documents/SWP391/Project_License/license_images";
 
@@ -63,7 +69,9 @@ public class ProfileServlet extends HttpServlet {
             return;
         }
 
+
         CustomerModel customer = customerDAO.getByAccountId(account.getAccountId());
+
 
         if (customer == null) {
             response.sendRedirect(request.getContextPath() + "/login");
@@ -72,7 +80,9 @@ public class ProfileServlet extends HttpServlet {
 
         request.setAttribute("CUSTOMER_PROFILE", customer);
 
+
         DriverLicenseModel license = driverLicenseDAO.getByCustomerId(customer.getCustomerId());
+
         request.setAttribute("LICENSE", license);
 
         request.getRequestDispatcher("/views/profile.jsp")
@@ -128,13 +138,17 @@ public class ProfileServlet extends HttpServlet {
                 dob = LocalDate.parse(dobRaw);
             }
 
+
             boolean success = customerDAO.updateProfile(
+
                     account.getAccountId(),
                     fullName,
                     dob,
                     phone,
                     email
+
             ) > 0;
+
 
             if (success) {
                 response.sendRedirect(request.getContextPath() + "/customer/profile?msg=success");
@@ -147,6 +161,7 @@ public class ProfileServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/customer/profile?msg=error");
         }
     }
+
 
     private void updateLicense(HttpServletRequest request,
             HttpServletResponse response)
@@ -280,14 +295,18 @@ public class ProfileServlet extends HttpServlet {
             return;
         }
 
+
         CustomerModel customer = customerDAO.getByAccountId(account.getAccountId());
+
 
         if (customer == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
+
         String result = requestLicenseVerification(customer.getCustomerId());
+
         response.sendRedirect(request.getContextPath() + "/customer/profile?msg=" + mapLicenseMessage(result));
     }
 
@@ -315,7 +334,9 @@ public class ProfileServlet extends HttpServlet {
         String newPassword = request.getParameter("newPassword");
         String confirmPassword = request.getParameter("confirmPassword");
 
+
         String result = handleChangePassword(accountId, oldPassword, newPassword, confirmPassword);
+
 
         if ("SUCCESS".equals(result)) {
             request.getSession().setAttribute("success", "Đổi mật khẩu thành công!");
@@ -423,6 +444,7 @@ public class ProfileServlet extends HttpServlet {
                 return "error";
         }
     }
+
 
     private String handleChangePassword(int accountId, String oldPassword,
             String newPassword, String confirmPassword) {
@@ -707,4 +729,5 @@ public class ProfileServlet extends HttpServlet {
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }
+
 }

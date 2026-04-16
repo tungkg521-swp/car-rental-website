@@ -1,12 +1,15 @@
 package Controllers;
 
+
 import DALs.AccountDAO;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+
 
 public class ResetPasswordServlet extends HttpServlet {
 
@@ -20,19 +23,24 @@ public class ResetPasswordServlet extends HttpServlet {
 
     private final AccountDAO accountDAO = new AccountDAO();
 
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         HttpSession session = request.getSession();
+
         Boolean verified = (Boolean) session.getAttribute(FORGOT_OTP_VERIFIED);
 
         if (verified == null || !verified) {
+
             response.sendRedirect(request.getContextPath() + "/forgot-password");
             return;
         }
 
+
         request.setAttribute("email", session.getAttribute(FORGOT_EMAIL));
+
         request.getRequestDispatcher("/views/reset-password.jsp")
                 .forward(request, response);
     }
@@ -42,6 +50,7 @@ public class ResetPasswordServlet extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = request.getSession();
+
         Boolean verified = (Boolean) session.getAttribute(FORGOT_OTP_VERIFIED);
 
         if (verified == null || !verified) {
@@ -58,10 +67,12 @@ public class ResetPasswordServlet extends HttpServlet {
                 || confirmPassword == null || confirmPassword.trim().isEmpty()) {
             request.setAttribute("error", "Please enter all required fields.");
             request.setAttribute("email", email);
+
             request.getRequestDispatcher("/views/reset-password.jsp")
                     .forward(request, response);
             return;
         }
+
 
         if (!newPassword.equals(confirmPassword)) {
             request.setAttribute("error", "Confirm password does not match.");
@@ -124,3 +135,4 @@ public class ResetPasswordServlet extends HttpServlet {
         session.removeAttribute(FORGOT_MESSAGE);
     }
 }
+

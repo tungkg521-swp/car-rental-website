@@ -31,7 +31,7 @@ public class CustomerModel {
     public CustomerModel() {
     }
 
-    // ===== GETTERS & SETTERS =====
+
 
     public int getCustomerId() {
         return customerId;

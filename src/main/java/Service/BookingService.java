@@ -90,8 +90,7 @@ public class BookingService {
         boolean updatedStaff = bookingDAO.updateStaffId(bookingId, staffId);
         boolean updatedDeadline = bookingDAO.updatePaymentDeadline(bookingId, 24);
         boolean updatedStatus = bookingDAO.updateStatus(bookingId, "AWAITING_PAYMENT");
-        
-        
+
 
         return updatedStaff && updatedDeadline && updatedStatus;
     }

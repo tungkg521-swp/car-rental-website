@@ -4,14 +4,17 @@
  */
 package Controllers;
 
+
 import DALs.AccountDAO;
 import DALs.CustomerDAO;
 import Utils.RoleConstants;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+
 import java.time.LocalDate;
 import java.time.Period;
 import models.AccountModel;
@@ -23,11 +26,14 @@ public class RegisterServlet extends HttpServlet {
     private final AccountDAO accountDAO = new AccountDAO();
     private final CustomerDAO customerDAO = new CustomerDAO();
 
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+
         // Mở trang đăng ký
+
         request.getRequestDispatcher("/views/register.jsp").forward(request, response);
     }
 
@@ -85,9 +91,11 @@ public class RegisterServlet extends HttpServlet {
                 throw new Exception("Tạo hồ sơ khách hàng thất bại.");
             }
 
+
             response.sendRedirect("login");
 
         } catch (Exception e) {
+
             request.setAttribute("error", e.getMessage());
             refillRegisterForm(request, fullName, email, phone, address, dobStr);
             request.getRequestDispatcher("/views/register.jsp").forward(request, response);
@@ -155,4 +163,5 @@ public class RegisterServlet extends HttpServlet {
         request.setAttribute("address", address);
         request.setAttribute("dob", dobStr);
     }
+
 }

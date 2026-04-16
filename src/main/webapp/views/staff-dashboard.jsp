@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -39,9 +40,11 @@
             <div class="card">
                 <h3>Cars in Maintenance</h3>
                 <p>${maintenanceCars}</p>
+
             </div>
 
         </div>
+
 
         <!-- ===== SECOND ROW ===== -->
         <div class="dashboard-cards">
@@ -73,4 +76,5 @@
 </div>
 
 </body>
+
 </html>

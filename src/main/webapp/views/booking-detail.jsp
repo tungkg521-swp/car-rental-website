@@ -9,17 +9,20 @@
 
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style-base.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/booking-detail.css">
+
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=99">
     </head>
 
     <body>
         <jsp:include page="/views/includes/header.jsp"/>
 
+
         <section class="booking-detail-page"
                  data-cancel-status="${requestScope.cancelStatus}">
             <div class="container">
 
                 <div class="booking-detail-shell">
+
                     <!-- TOP BAR -->
                     <div class="detail-topbar">
                         <div class="topbar-left">

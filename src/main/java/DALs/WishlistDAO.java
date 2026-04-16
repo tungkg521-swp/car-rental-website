@@ -81,7 +81,9 @@ public class WishlistDAO extends DBContext{
 }
     
       public boolean exists(int customerId, int carId) {
+
         String sql = "SELECT 1 FROM wish_list WHERE customer_id = ? AND car_id = ?";
+
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, customerId);
             ps.setInt(2, carId);

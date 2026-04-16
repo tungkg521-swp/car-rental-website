@@ -1,6 +1,8 @@
 package Controllers;
 
+
 import DALs.ReviewDAO;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -8,13 +10,16 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+
 import java.util.List;
 import models.AccountModel;
 import models.ReviewModel;
+
 import service.ReviewService;
 
 @WebServlet(name = "AdminReviewServlet", urlPatterns = {"/admin/review"})
 public class AdminReviewServlet extends HttpServlet {
+
 
     private final ReviewDAO reviewDAO = new ReviewDAO();
 
@@ -28,6 +33,7 @@ public class AdminReviewServlet extends HttpServlet {
         String action = request.getParameter("action");
 
         if (action == null || action.equals("list")) {
+
             if (account == null) {
                 response.sendRedirect(request.getContextPath() + "/login.jsp");
                 return;
@@ -41,6 +47,7 @@ public class AdminReviewServlet extends HttpServlet {
 
             List<ReviewModel> reviews = reviewDAO.getAllReviews();
             request.setAttribute("reviews", reviews);
+
             request.getRequestDispatcher("/views/review-list.jsp").forward(request, response);
             return;
         }
@@ -60,6 +67,7 @@ public class AdminReviewServlet extends HttpServlet {
         String action = request.getParameter("action");
 
         if ("delete".equals(action)) {
+
             if (account == null) {
                 response.sendRedirect(request.getContextPath() + "/login.jsp");
                 return;
@@ -87,6 +95,7 @@ public class AdminReviewServlet extends HttpServlet {
             if (!deleted) {
                 session.setAttribute("error", "Delete review failed.");
                 response.sendRedirect(request.getContextPath() + "/admin/review?action=list");
+
                 return;
             }
 
@@ -115,4 +124,6 @@ public class AdminReviewServlet extends HttpServlet {
         session.setAttribute("error", "Action failed.");
         response.sendRedirect(request.getContextPath() + "/dashboard/admin");
     }
+
 }
+

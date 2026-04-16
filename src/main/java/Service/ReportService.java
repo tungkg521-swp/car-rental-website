@@ -1,3 +1,4 @@
+
 package service;
 
 import DALs.ReportDAO;
@@ -39,3 +40,4 @@ public class ReportService {
         return reportDAO.getVehicleUtilization(startDate, endDate);
     }
 }
+

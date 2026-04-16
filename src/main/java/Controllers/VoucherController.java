@@ -4,7 +4,9 @@ import models.AccountModel;
 import models.VoucherModel;
 import service.VoucherService;
 import Utils.RoleConstants;
+
 import DALs.VoucherDAO;
+
 
 import java.io.IOException;
 import java.sql.Date;
@@ -19,8 +21,10 @@ import jakarta.servlet.http.HttpSession;
 
 @WebServlet(name = "VoucherController", urlPatterns = {"/staff/vouchers"})
 public class VoucherController extends HttpServlet {
+
     
     private final VoucherDAO voucherDAO = new VoucherDAO();
+
 
     // Kiểm tra admin
     private boolean isAdmin(HttpServletRequest request) {
@@ -85,7 +89,9 @@ public class VoucherController extends HttpServlet {
     // List all vouchers
     private void listVouchers(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         List<VoucherModel> vouchers = voucherDAO.getAllVouchers();
+
         request.setAttribute("vouchers", vouchers);
         request.getRequestDispatcher("/views/voucher.jsp").forward(request, response);
     }
@@ -103,7 +109,9 @@ public class VoucherController extends HttpServlet {
         try {
             int voucherId = Integer.parseInt(voucherIdRaw);
 
+
             Object voucher = voucherDAO.findById(voucherId);
+
 
 
             if (voucher != null) {
@@ -141,7 +149,9 @@ public class VoucherController extends HttpServlet {
 
             // Kiểm tra code đã tồn tại
 
+
             Object existingVoucher = voucherDAO.findByCode(code);
+
 
             if (existingVoucher != null) {
                 request.setAttribute("error", "Voucher code already exists. Please use a different code.");
@@ -226,7 +236,9 @@ public class VoucherController extends HttpServlet {
 
             // Tạo voucher với đầy đủ thông tin
             VoucherModel newVoucher = new VoucherModel(maxUses, code, discount, type, expireDate, status, minBookingAmount);
+
             boolean success = voucherDAO.insert(newVoucher);
+
 
             if (success) {
                 request.getSession().setAttribute("message", "Voucher created successfully");
@@ -283,7 +295,9 @@ public class VoucherController extends HttpServlet {
             }
 
             VoucherModel updatedVoucher = new VoucherModel(voucherId, code, discount, type, expireDate, status, maxUses, minBookingAmount, null);
+
             boolean success = voucherDAO.update(updatedVoucher);
+
 
             if (success) {
                 request.getSession().setAttribute("message", "Voucher updated successfully");
@@ -312,7 +326,9 @@ public class VoucherController extends HttpServlet {
             }
 
             int voucherId = Integer.parseInt(voucherIdStr);
+
             boolean success = voucherDAO.delete(voucherId);
+
 
             if (success) {
                 request.getSession().setAttribute("message", "Voucher deleted successfully");
