@@ -91,6 +91,7 @@ public class BookingService {
         boolean updatedDeadline = bookingDAO.updatePaymentDeadline(bookingId, 24);
         boolean updatedStatus = bookingDAO.updateStatus(bookingId, "AWAITING_PAYMENT");
 
+
         return updatedStaff && updatedDeadline && updatedStatus;
     }
 

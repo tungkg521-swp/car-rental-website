@@ -13,11 +13,16 @@
 
         <link rel="stylesheet"
               href="${pageContext.request.contextPath}/assets/css/booking.css">
+        
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=22">
+
 
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     </head>
     <body>
+        
+        <jsp:include page="/views/includes/header.jsp"/>
 
         <div class="container my-4">
             <div class="container my-5">

@@ -6,13 +6,16 @@
 <html>
     <head>
         <title>My Bookings</title>
+        
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=99">
 
-        <!-- CSS RIÊNG CHO BOOKING LIST -->
         <link rel="stylesheet"
               href="${pageContext.request.contextPath}/assets/css/booking-list.css">
     </head>
 
     <body>
+        
+        <jsp:include page="/views/includes/header.jsp"/>
 
         <div class="booking-container">
             <div class="back-home">

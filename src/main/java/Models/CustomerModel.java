@@ -31,7 +31,7 @@ public class CustomerModel {
     public CustomerModel() {
     }
 
-    
+
 
     public int getCustomerId() {
         return customerId;

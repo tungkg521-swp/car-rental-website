@@ -16,7 +16,7 @@ public class AccountModel {
     public AccountModel() {
     }
 
-    
+
 
     public int getAccountId() {
         return accountId;

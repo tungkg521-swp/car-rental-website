@@ -12,7 +12,7 @@ public class ReviewModel {
     private String comment;
     private Date createdAt;
 
-    
+
     private String customerName;
 
     public ReviewModel() {
@@ -82,7 +82,7 @@ public class ReviewModel {
         this.createdAt = createdAt;
     }
 
-    
+
     public String getCustomerName() {
         return customerName;
     }

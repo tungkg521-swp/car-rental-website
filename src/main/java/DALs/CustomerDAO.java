@@ -255,13 +255,13 @@ public class CustomerDAO extends DBContext {
 
         List<Object> params = new ArrayList<>();
 
-       
+
         if (fullname != null && !fullname.trim().isEmpty()) {
             sql.append(" AND LOWER(c.full_name) LIKE ? ");
             params.add("%" + fullname.trim().toLowerCase() + "%");
         }
 
-        
+
         if (status != null && !status.equalsIgnoreCase("ALL")) {
             sql.append(" AND c.status = ? ");
             params.add(status);
@@ -269,7 +269,7 @@ public class CustomerDAO extends DBContext {
 
         try (PreparedStatement ps = connection.prepareStatement(sql.toString());) {
 
-            
+
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
             }
@@ -308,7 +308,9 @@ public class CustomerDAO extends DBContext {
     public int updateStatusAccount(int accountId, String status) {
         String sql = "UPDATE account SET status = ? WHERE account_id = ?";
 
-        try (PreparedStatement ps = connection.prepareStatement(sql);) {
+
+        try (PreparedStatement ps = connection.prepareStatement(sql.toString());) {
+
 
             ps.setString(1, status);
             ps.setInt(2, accountId);

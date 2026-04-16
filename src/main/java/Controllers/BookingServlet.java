@@ -1,6 +1,12 @@
 package Controllers;
 
+
+import DALs.BookingDAO;
+import DALs.CarChangeRequestDAO;
+import DALs.CarDAO;
 import DALs.CustomerDAO;
+import DALs.VoucherDAO;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,8 +36,13 @@ import service.CarChangeRequestService;
 
 public class BookingServlet extends HttpServlet {
 
-    private final BookingService bookingService = new BookingService();
-    private final CarChangeRequestService carChangeService = new CarChangeRequestService();
+    
+
+    private final BookingDAO bookingDAO = new BookingDAO();
+    private final CarDAO carDAO = new CarDAO();
+    private final VoucherDAO voucherDAO = new VoucherDAO();
+    private final CarChangeRequestDAO carChangeRequestDAO = new CarChangeRequestDAO();
+
 
     @Override
     protected void doGet(HttpServletRequest request,
@@ -136,8 +147,11 @@ public class BookingServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/cars");
             return;
         }
-        CarService carService = new CarService();
-        CarModel car = carService.getCarById(carId);
+
+
+        CarDAO carDAO = new CarDAO();
+        CarModel car = carDAO.findById(carId);
+
 
         if (!customer.isLicenseVerified()) {
             request.setAttribute("LICENSE_REQUIRED", true);
@@ -157,13 +171,17 @@ public class BookingServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/car-detail?carId=" + carId);
             return;
         }
-        if (bookingService.hasOverlapConfirmed(carId, startDate, endDate)) {
+
+        if (bookingDAO.hasBookingConflict(carId, startDate, endDate)) {
+
             request.setAttribute("BOOKING_ERROR", "Xe đang bận trong khoảng thời gian bạn chọn. Vui lòng chọn lịch khác.");
             request.setAttribute("car", car);
             request.setAttribute("startDate", startDateRaw);
             request.setAttribute("endDate", endDateRaw);
 
-            List<Date[]> busyRanges = bookingService.getBusyDateRangesByCarId(carId);
+
+            List<Date[]> busyRanges = bookingDAO.getBusyDateRangesByCarId(carId);
+
             List<String> busyDates = new ArrayList<>();
             for (Date[] range : busyRanges) {
                 LocalDate d = range[0].toLocalDate();
@@ -198,8 +216,9 @@ public class BookingServlet extends HttpServlet {
             return;
         }
 
-        VoucherService voucherService = new VoucherService();
-        List<VoucherModel> validVouchers = voucherService.getAvailableVouchers();
+
+        List<VoucherModel> validVouchers = voucherDAO.getActiveVouchers();
+
 
         request.setAttribute("account", account);
         request.setAttribute("customer", customer);
@@ -281,9 +300,10 @@ public class BookingServlet extends HttpServlet {
 
         Date today = Date.valueOf(LocalDate.now());
 
-        CarService carService = new CarService();
-        CarModel car = carService.getCarById(carId);
-        VoucherService voucherService = new VoucherService();
+
+        CarDAO carDAO = new CarDAO();
+        CarModel car = carDAO.findById(carId);
+
 
         if (car == null) {
             response.sendRedirect(request.getContextPath() + "/cars");
@@ -294,7 +314,9 @@ public class BookingServlet extends HttpServlet {
             request.setAttribute("errorMessage", "Không thể đặt xe trong ngày quá khứ");
             request.setAttribute("car", car);
             request.setAttribute("customer", customer);
-            request.setAttribute("vouchers", voucherService.getAvailableVouchers());
+
+            request.setAttribute("vouchers", voucherDAO.getActiveVouchers());
+
             request.setAttribute("startDate", startDateRaw);
             request.setAttribute("endDate", endDateRaw);
             request.getRequestDispatcher("/views/booking.jsp").forward(request, response);
@@ -305,7 +327,9 @@ public class BookingServlet extends HttpServlet {
             request.setAttribute("errorMessage", "Ngày trả xe phải sau ngày nhận xe");
             request.setAttribute("car", car);
             request.setAttribute("customer", customer);
-            request.setAttribute("vouchers", voucherService.getAvailableVouchers());
+
+            request.setAttribute("vouchers", voucherDAO.getActiveVouchers());
+
             request.setAttribute("startDate", startDateRaw);
             request.setAttribute("endDate", endDateRaw);
             request.getRequestDispatcher("/views/booking.jsp").forward(request, response);
@@ -317,31 +341,33 @@ public class BookingServlet extends HttpServlet {
             return;
         }
 
-        if (bookingService.hasOverlapConfirmed(carId, startDate, endDate)) {
+
+        if (bookingDAO.hasBookingConflict(carId, startDate, endDate)) {
             request.setAttribute("errorMessage", "Xe không khả dụng trong khoảng thời gian đã chọn.");
             request.setAttribute("car", car);
             request.setAttribute("customer", customer);
-            request.setAttribute("vouchers", voucherService.getAvailableVouchers());
+            request.setAttribute("vouchers", voucherDAO.getActiveVouchers());
+
             request.setAttribute("startDate", startDateRaw);
             request.setAttribute("endDate", endDateRaw);
             request.getRequestDispatcher("/views/booking.jsp").forward(request, response);
             return;
         }
 
-        BigDecimal totalPrice = bookingService.calculateTotalPrice(
-                startDate,
-                endDate,
-                car.getPricePerDay()
-        );
+
+        BigDecimal totalPrice = calculateTotalPrice(startDate, endDate, car.getPricePerDay());
 
         if (voucherId != null) {
-            VoucherModel voucher = voucherService.getVoucherById(voucherId);
+            VoucherModel voucher = voucherDAO.findById(voucherId);
+
 
             if (voucher == null || !"ACTIVE".equalsIgnoreCase(voucher.getStatus())) {
                 request.setAttribute("errorMessage", "Voucher không hợp lệ.");
                 request.setAttribute("car", car);
                 request.setAttribute("customer", customer);
-                request.setAttribute("vouchers", voucherService.getAvailableVouchers());
+
+                request.setAttribute("vouchers", voucherDAO.getActiveVouchers());
+
                 request.setAttribute("startDate", startDateRaw);
                 request.setAttribute("endDate", endDateRaw);
                 request.getRequestDispatcher("/views/booking.jsp").forward(request, response);
@@ -353,7 +379,9 @@ public class BookingServlet extends HttpServlet {
                 request.setAttribute("errorMessage", "Đơn thuê chưa đủ điều kiện áp dụng voucher.");
                 request.setAttribute("car", car);
                 request.setAttribute("customer", customer);
-                request.setAttribute("vouchers", voucherService.getAvailableVouchers());
+
+                request.setAttribute("vouchers", voucherDAO.getActiveVouchers());
+
                 request.setAttribute("startDate", startDateRaw);
                 request.setAttribute("endDate", endDateRaw);
                 request.getRequestDispatcher("/views/booking.jsp").forward(request, response);
@@ -398,7 +426,9 @@ public class BookingServlet extends HttpServlet {
         booking.setTotalEstimatedPrice(totalPrice);
 
         try {
-            int bookingId = bookingService.createBooking(booking);
+
+            int bookingId = bookingDAO.insert(booking);
+
             session.setAttribute("LAST_BOOKING", bookingId);
 
             response.sendRedirect(
@@ -437,7 +467,9 @@ public class BookingServlet extends HttpServlet {
             return;
         }
 
-        List<BookingModel> bookings = bookingService.getBookingsByCustomer(customer.getCustomerId());
+
+        List<BookingModel> bookings = bookingDAO.findByCustomerId(customer.getCustomerId());
+
 
         request.setAttribute("BOOKINGS", bookings);
         request.getRequestDispatcher("/views/booking-list.jsp").forward(request, response);
@@ -479,7 +511,9 @@ public class BookingServlet extends HttpServlet {
             return;
         }
 
-        BookingModel booking = bookingService.getBookingDetail(bookingId, customer.getCustomerId());
+
+        BookingModel booking = bookingDAO.findById(bookingId, customer.getCustomerId());
+
 
         if (booking == null) {
             request.setAttribute("error", "Booking not found");
@@ -488,7 +522,9 @@ public class BookingServlet extends HttpServlet {
         }
 
         CarChangeRequestModel pendingRequest
-                = carChangeService.getPendingRequestByBookingId(bookingId);
+
+                = carChangeRequestDAO.getPendingByBookingId(bookingId);
+
 
         request.setAttribute("pendingCarChangeRequest", pendingRequest);
 
@@ -535,10 +571,9 @@ public class BookingServlet extends HttpServlet {
             return;
         }
 
-        boolean success = bookingService.cancelBooking(
-                bookingId,
-                customer.getCustomerId()
-        );
+
+        boolean success = cancelBookingByCustomer(bookingId, customer.getCustomerId());
+
 
         if (success) {
             response.sendRedirect(
@@ -605,10 +640,9 @@ public class BookingServlet extends HttpServlet {
             return;
         }
 
-        boolean success = bookingService.deleteCancelledBooking(
-                bookingId,
-                customer.getCustomerId()
-        );
+
+        boolean success = deleteCancelledBookingByCustomer(bookingId, customer.getCustomerId());
+
 
         if (success) {
             response.sendRedirect(request.getContextPath() + "/booking?action=list");
@@ -619,4 +653,49 @@ public class BookingServlet extends HttpServlet {
             );
         }
     }
+
+
+    private BigDecimal calculateTotalPrice(Date startDate, Date endDate, BigDecimal pricePerDay) {
+        long days = java.time.temporal.ChronoUnit.DAYS.between(
+                startDate.toLocalDate(),
+                endDate.toLocalDate()
+        );
+
+        if (days < 1) {
+            days = 1;
+        }
+
+        return pricePerDay.multiply(BigDecimal.valueOf(days));
+    }
+
+    private boolean cancelBookingByCustomer(int bookingId, int customerId) {
+        BookingModel booking = bookingDAO.findById(bookingId, customerId);
+
+        if (booking == null) {
+            return false;
+        }
+
+        if (!"PENDING_APPROVAL".equalsIgnoreCase(booking.getStatus())
+                && !"AWAITING_PAYMENT".equalsIgnoreCase(booking.getStatus())) {
+            return false;
+        }
+
+        return bookingDAO.updateStatus(bookingId, "CANCELLED");
+    }
+    
+    
+    private boolean deleteCancelledBookingByCustomer(int bookingId, int customerId) {
+    BookingModel booking = bookingDAO.findById(bookingId, customerId);
+
+    if (booking == null) {
+        return false;
+    }
+
+    if (!"CANCELLED".equalsIgnoreCase(booking.getStatus())) {
+        return false;
+    }
+
+    return bookingDAO.deleteBooking(bookingId, customerId);
+}
+
 }

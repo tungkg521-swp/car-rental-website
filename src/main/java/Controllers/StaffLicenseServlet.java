@@ -1,5 +1,7 @@
 package Controllers;
 
+import DALs.CustomerDAO;
+import DALs.DriverLicenseDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -14,7 +16,10 @@ import service.DriverLicenseService;
 @WebServlet(name = "StaffLicenseServlet", urlPatterns = {"/staff/licenses"})
 public class StaffLicenseServlet extends HttpServlet {
 
-    private final DriverLicenseService driverLicenseService = new DriverLicenseService();
+
+    private final DriverLicenseDAO driverLicenseDAO = new DriverLicenseDAO();
+    private final CustomerDAO customerDAO = new CustomerDAO();
+
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -40,8 +45,7 @@ public class StaffLicenseServlet extends HttpServlet {
 
     private void viewList(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        List<DriverLicenseModel> licenses = driverLicenseService.getRequestedLicenses();
+        List<DriverLicenseModel> licenses = driverLicenseDAO.getRequestedLicenses();
         request.setAttribute("licenses", licenses);
         request.getRequestDispatcher("/views/staff-driver-licenses.jsp")
                 .forward(request, response);
@@ -60,7 +64,8 @@ public class StaffLicenseServlet extends HttpServlet {
             return;
         }
 
-        DriverLicenseModel license = driverLicenseService.getLicenseDetail(licenseId);
+        DriverLicenseModel license = driverLicenseDAO.getById(licenseId);
+
         if (license == null) {
             response.sendRedirect(request.getContextPath() + "/staff/licenses");
             return;
@@ -88,10 +93,22 @@ public class StaffLicenseServlet extends HttpServlet {
 
         boolean ok = false;
 
-        if ("approve".equals(action)) {
-            ok = driverLicenseService.approve(licenseId);
-        } else if ("reject".equals(action)) {
-            ok = driverLicenseService.reject(licenseId);
+
+        DriverLicenseModel license = driverLicenseDAO.getById(licenseId);
+
+        if (license != null) {
+            if ("approve".equals(action)) {
+                ok = driverLicenseDAO.updateStatus(licenseId, "APPROVED");
+                if (ok) {
+                    customerDAO.updateLicenseVerified(license.getCustomerId(), true);
+                }
+            } else if ("reject".equals(action)) {
+                ok = driverLicenseDAO.updateStatus(licenseId, "REJECTED");
+                if (ok) {
+                    customerDAO.updateLicenseVerified(license.getCustomerId(), false);
+                }
+            }
+
         }
 
         // quay về detail để thấy status mới (hoặc list cũng được)
@@ -102,4 +119,6 @@ public class StaffLicenseServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/views/staff-driver-licenses");
         }
     }
+
 }
+

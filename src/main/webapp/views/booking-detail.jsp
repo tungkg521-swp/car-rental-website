@@ -9,11 +9,13 @@
 
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style-base.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/booking-detail.css">
+
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=99">
     </head>
 
     <body>
+        <jsp:include page="/views/includes/header.jsp"/>
 
-        <jsp:include page="includes/header.jsp"/>
 
         <section class="booking-detail-page"
                  data-cancel-status="${requestScope.cancelStatus}">
@@ -27,7 +29,6 @@
                             <p class="page-kicker">Customer Booking</p>
                             <h1>Booking Detail</h1>
                         </div>
-
                         <div class="topbar-right">
                             <div class="booking-code-card">
                                 <span class="booking-code-label">Booking ID</span>

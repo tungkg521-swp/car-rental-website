@@ -1055,4 +1055,252 @@ body.modal-open {
     .rental-modal-actions {
         justify-content: stretch;
     }
+
+}
+
+.wishlist-btn {
+    margin-top: 14px;
+    height: 60px;
+    font-size: 18px;
+    font-weight: 700;
+    border-radius: 18px;
+    background: #ffffff;
+    color: #e11d48;
+    border: 2px solid #fecdd3;
+    box-shadow: 0 10px 24px rgba(225, 29, 72, 0.08);
+}
+
+.wishlist-btn:hover {
+    background: #fff1f2;
+    border-color: #fb7185;
+    color: #be123c;
+    transform: translateY(-1px);
+}
+
+
+/* ===== RENTAL CALENDAR UI IMPROVE ===== */
+
+.rental-calendar-box {
+    border: 1px solid #e5e7eb;
+    border-radius: 22px;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
+}
+
+.rental-calendar-box h3 {
+    font-size: 22px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+/* ô chọn ngày ban đầu */
+.rental-summary-trigger {
+    border: 1px solid #dbe2ea;
+    border-radius: 16px;
+    background: #ffffff;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.rental-summary-trigger:hover {
+    border-color: #22c55e;
+    box-shadow: 0 8px 20px rgba(34, 197, 94, 0.10);
+}
+
+.rental-summary-col {
+    padding: 18px 20px;
+}
+
+.rental-summary-label {
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.rental-summary-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+/* modal chọn lịch */
+.rental-time-modal-content {
+    border-radius: 24px;
+    padding: 30px 26px 22px;
+}
+
+.rental-time-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+/* khung calendar */
+#rentalCalendar .flatpickr-calendar.inline {
+    border: 1px solid #e5e7eb;
+    border-radius: 20px;
+    padding: 18px 18px 14px;
+    background: #ffffff;
+}
+
+/* tháng / năm */
+#rentalCalendar .flatpickr-current-month,
+#rentalCalendar .flatpickr-current-month .flatpickr-monthDropdown-months,
+#rentalCalendar .flatpickr-current-month input.cur-year {
+    font-size: 18px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+/* weekday */
+#rentalCalendar .flatpickr-weekday {
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+/* từng ngày */
+#rentalCalendar .flatpickr-day {
+    width: 44px;
+    max-width: 44px;
+    height: 44px;
+    line-height: 44px;
+    border-radius: 14px;
+    border: none;
+    font-size: 15px;
+    font-weight: 600;
+    color: #111827;
+    transition: all 0.15s ease;
+}
+
+/* hôm nay */
+#rentalCalendar .flatpickr-day.today {
+    border: 1.5px solid #22c55e;
+    color: #16a34a;
+    background: #f0fdf4;
+}
+
+/* hover ngày trống */
+#rentalCalendar .flatpickr-day:hover {
+    background: #f3f4f6;
+    color: #111827;
+}
+
+/* ngày được chọn */
+#rentalCalendar .flatpickr-day.selected,
+#rentalCalendar .flatpickr-day.startRange,
+#rentalCalendar .flatpickr-day.endRange {
+    background: #22c55e !important;
+    color: #ffffff !important;
+    border-radius: 14px;
+    font-weight: 700;
+}
+
+/* ngày nằm trong khoảng đã chọn */
+#rentalCalendar .flatpickr-day.inRange {
+    background: #dcfce7 !important;
+    color: #166534 !important;
+    border-radius: 14px;
+    box-shadow: none;
+}
+
+/* ===== NGÀY BẬN / KHÔNG CHỌN ĐƯỢC ===== */
+#rentalCalendar .flatpickr-day.busy-day {
+    background: #ef4444 !important;
+    color: #ffffff !important;
+    border: 1px solid #dc2626 !important;
+    font-weight: 800 !important;
+    cursor: not-allowed !important;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18);
+    position: relative;
+}
+
+/* thêm dấu gạch chéo nhẹ cho dễ nhận ra */
+#rentalCalendar .flatpickr-day.busy-day::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 8px;
+    right: 8px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.9);
+    transform: rotate(-25deg);
+    border-radius: 999px;
+}
+
+/* hover vào ngày bận vẫn giữ đỏ */
+#rentalCalendar .flatpickr-day.busy-day:hover {
+    background: #dc2626 !important;
+    color: #ffffff !important;
+}
+
+/* ngày bị disable / không được chọn */
+#rentalCalendar .flatpickr-day.flatpickr-disabled,
+#rentalCalendar .flatpickr-day.notAllowed {
+    background: #f3f4f6 !important;
+    color: #9ca3af !important;
+    cursor: not-allowed !important;
+    opacity: 1 !important;
+}
+
+/* ngày tháng trước/sau */
+#rentalCalendar .flatpickr-day.prevMonthDay,
+#rentalCalendar .flatpickr-day.nextMonthDay {
+    color: #cbd5e1 !important;
+    opacity: 1 !important;
+}
+
+/* phần ngày đã chọn */
+.selected-period {
+    margin: 14px 0 16px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #334155;
+}
+
+.selected-period strong {
+    color: #0f172a;
+}
+
+/* nút xác nhận */
+.rental-confirm-btn {
+    min-width: 160px;
+    border-radius: 14px;
+    padding: 14px 24px;
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    font-size: 16px;
+    font-weight: 800;
+    box-shadow: 0 12px 22px rgba(34, 197, 94, 0.18);
+}
+
+.rental-confirm-btn:hover {
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+}
+
+/* mobile */
+@media (max-width: 768px) {
+    #rentalCalendar .flatpickr-day {
+        width: 40px;
+        max-width: 40px;
+        height: 40px;
+        line-height: 40px;
+        border-radius: 12px;
+        font-size: 14px;
+    }
+
+    .rental-time-title {
+        font-size: 21px;
+    }
+
+    .wishlist-btn {
+        height: 54px;
+        font-size: 16px;
+        border-radius: 16px;
+    }
+
 }

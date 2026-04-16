@@ -3,6 +3,9 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
+
+<!-- ================= PROFILE CARD ================= -->
+
 <div class="profile-card">
 
     <div class="card-header">
@@ -42,6 +45,8 @@
         </div>
     </div>
 </div>
+
+<!-- ================= DRIVER LICENSE ================= -->
 
 <div class="profile-card license-card">
 
@@ -93,6 +98,7 @@
 
 
 
+        <!-- ================= GPLX IMAGES ================= -->
 
         <h3 style="margin-top:20px;">Ảnh giấy phép lái xe</h3>
         <div class="license-images">
@@ -150,6 +156,8 @@
                 </c:if>
             </div>
         </div>
+
+        <!-- ================= VERIFY IMAGES ================= -->
 
         <h3 style="margin-top:30px;">Ảnh xác minh chính chủ</h3>
         <div class="license-images">
@@ -240,6 +248,9 @@
 
 
 
+
+        <!-- ================= FORM INFO ================= -->
+
         <div class="form-group" style="margin-bottom:16px;">
             <label>Số GPLX</label>
             <input type="text"
@@ -328,6 +339,8 @@
         </button>
     </form>
 </div>
+
+<!-- ================= MODAL UPDATE PROFILE ================= -->
 
 <div id="updateModal" class="modal-overlay">
     <div class="modal-box">

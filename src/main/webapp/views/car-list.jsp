@@ -1,3 +1,4 @@
+
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
@@ -9,7 +10,8 @@
         <meta charset="UTF-8">
         <title>Danh sách xe</title>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style-base.css?v=2">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/car-list.css?v=2">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/car-list.css?v=3">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=22">
     </head>
     <body>
         <!-- HEADER -->
@@ -159,37 +161,60 @@
 
                 <!-- CAR LIST -->
                 <main class="car-list">
-                    <div class="list-header">
+                    <div class="modern-list-header">
+                        <div class="list-header-top">
+                            <div class="list-title-wrap">
+                                <p class="list-kicker">AUTOMOBILI RENTAL CAR</p>
+                                <h1 class="list-title">Danh sách xe cho hành trình của bạn</h1>
+                                <p class="list-subtitle">
+                                    Chọn thời gian thuê để xem những mẫu xe đang phù hợp và sẵn sàng.
+                                </p>
+                            </div>
+                        </div>
+
                         <c:if test="${not empty dateError}">
-                            <div class="alert alert-danger">${dateError}</div>
+                            <div class="alert alert-danger modern-alert">${dateError}</div>
                         </c:if>
 
-                        <form action="${pageContext.request.contextPath}/cars" method="get" class="mb-4">
-                            <input type="hidden" name="action" value="list">
-                            <input type="hidden" name="keyword" value="${not empty keyword ? keyword : param.keyword}">
+                        <div class="booking-bar">
+                            <form action="${pageContext.request.contextPath}/cars" method="get" class="booking-bar-form">
+                                <input type="hidden" name="action" value="list">
+                                <input type="hidden" name="keyword" value="${not empty keyword ? keyword : param.keyword}">
 
-                            <div style="display:flex; gap:12px; align-items:end; flex-wrap:wrap;">
-                                <div>
-                                    <label>Pick-up date</label>
-                                    <input type="date" name="startDate" value="${not empty startDate ? startDate : param.startDate}" required>
+                                <div class="booking-bar-grid">
+                                    <div class="booking-bar-field">
+                                        <label>Ngày nhận xe</label>
+                                        <input type="date" name="startDate"
+                                               value="${not empty startDate ? startDate : param.startDate}" required>
+                                    </div>
+
+                                    <div class="booking-bar-field">
+                                        <label>Ngày trả xe</label>
+                                        <input type="date" name="endDate"
+                                               value="${not empty endDate ? endDate : param.endDate}" required>
+                                    </div>
+
+                                    <div class="booking-bar-submit">
+                                        <button type="submit" class="booking-update-btn">Cập nhật</button>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label>Return date</label>
-                                    <input type="date" name="endDate" value="${not empty endDate ? endDate : param.endDate}" required>
-                                </div>
-                                <div>
-                                    <button type="submit" class="btn btn-dark">Update</button>
-                                </div>
+                            </form>
+                        </div>
+
+                        <div class="car-result-toolbar">
+                            <div class="car-result-count">
+                                <h2>${cars.size()} xe có sẵn để thuê</h2>
+                                <span>Hiển thị các mẫu xe phù hợp với thời gian bạn đã chọn</span>
                             </div>
-                        </form>
-                        <h2>${cars.size()} xe có sẵn để thuê</h2>
-                        <div class="list-actions">
-                            <select>
-                                <option>Giá thấp nhất</option>
-                                <option>Giá cao nhất</option>
-                                <option>Mới nhất</option>
-                            </select>
-                            <button type="button">Xem bản đồ</button>
+
+                            <div class="list-actions modern-list-actions">
+                                <select>
+                                    <option>Giá thấp nhất</option>
+                                    <option>Giá cao nhất</option>
+                                    <option>Mới nhất</option>
+                                </select>
+                                <button type="button">Xem bản đồ</button>
+                            </div>
                         </div>
                     </div>
                     <div class="car-grid">
@@ -214,4 +239,5 @@
             </div>
         </section>
     </body>
+
 </html>

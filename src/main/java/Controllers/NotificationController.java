@@ -1,5 +1,9 @@
 package Controllers;
 
+
+import DALs.AccountDAO;
+import DALs.NotificationDAO;
+
 import models.NotificationModel;
 import service.NotificationService;
 import jakarta.servlet.ServletException;
@@ -10,7 +14,10 @@ import models.AccountModel;
 
 public class NotificationController extends HttpServlet {
 
-    NotificationService service = new NotificationService();
+
+    private final NotificationDAO notificationDAO = new NotificationDAO();
+    private final AccountDAO accountDAO = new AccountDAO();
+
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -21,7 +28,13 @@ public class NotificationController extends HttpServlet {
             return;
         }
         int accountId = acc.getAccountId();
-        List<NotificationModel> list = service.getNotificationsByAccount(accountId);
+
+        int customerId = notificationDAO.getCustomerIdByAccountId(accountId);
+        List<NotificationModel> list = customerId == -1
+                ? java.util.List.of()
+                : notificationDAO.findByCustomerId(customerId);
+        
+
         request.setAttribute("notifications", list);
         request.getRequestDispatcher("/views/notifications.jsp")
                 .forward(request, response);

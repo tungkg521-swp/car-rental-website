@@ -4,6 +4,10 @@
  */
 package Controllers;
 
+
+import DALs.AccountDAO;
+import DALs.NotificationDAO;
+
 import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -22,7 +26,10 @@ import service.NotificationService;
 @WebServlet(name = "StaffNotificationController", urlPatterns = {"/staff/notification"})
 public class StaffNotificationController extends HttpServlet {
 
-    NotificationService service = new NotificationService();
+
+    private final NotificationDAO notificationDAO = new NotificationDAO();
+    private final AccountDAO accountDAO = new AccountDAO();
+
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -38,7 +45,12 @@ public class StaffNotificationController extends HttpServlet {
 
         int accountId = acc.getAccountId();
 
-        List<NotificationModel> list = service.getStaffNotifications(accountId);
+
+        List<NotificationModel> list = accountDAO.isStaff(accountId)
+        ? notificationDAO.findForStaff()
+        : java.util.List.of();
+        
+
         if (list.isEmpty()) {
             response.sendRedirect("home.jsp");
             return;

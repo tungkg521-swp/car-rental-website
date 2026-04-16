@@ -12,6 +12,7 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/car-detail.css?v=6">
 
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/wishlist.css?v=6">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=22">
 
     </head>
 
@@ -22,7 +23,8 @@
     <body data-context-path="${pageContext.request.contextPath}">
 
 
-        <jsp:include page="includes/header.jsp"/>
+        <jsp:include page="/views/includes/header.jsp"/>
+
 
         <section class="car-detail-page">
             <div class="container">
@@ -61,7 +63,6 @@
 
                         <h1>
                             ${car.modelName}
-                           
                         </h1>
 
                         <div class="price">
@@ -276,5 +277,31 @@
         <script src="${pageContext.request.contextPath}/assets/js/verify-license.js"></script>
         <script src="${pageContext.request.contextPath}/assets/js/wishlist.js"></script>
         <script src="${pageContext.request.contextPath}/assets/js/edit-review.js"></script>
+
+
+        <c:if test="${LICENSE_REQUIRED}">
+            <div id="verifyModal" class="verify-modal" style="display:flex;">
+                <div class="verify-box">
+                    <div class="verify-icon">!</div>
+                    <p>
+                        Bạn cần <b>xác minh bằng lái xe</b> trước khi đặt xe.
+                    </p>
+
+                    <div class="verify-actions">
+                        <a href="${pageContext.request.contextPath}/customer/profile"
+                           class="verify-btn primary">
+                            Đi tới xác minh
+                        </a>
+
+                        <button type="button"
+                                class="verify-btn secondary"
+                                onclick="document.getElementById('verifyModal').style.display = 'none'">
+                            Đóng
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </c:if>
+
     </body>
 </html>

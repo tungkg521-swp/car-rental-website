@@ -1,5 +1,7 @@
+
 package Controllers;
 
+import DALs.ReportDAO;
 import com.google.gson.Gson;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -7,7 +9,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import models.ReportModel;
-import service.ReportService;
+
 
 import java.io.IOException;
 import java.util.List;
@@ -24,7 +26,9 @@ import java.util.Map;
 })
 public class ReportController extends HttpServlet {
 
-    private final ReportService reportService = new ReportService();
+    private final ReportDAO reportDAO = new ReportDAO();
+
+
     private final Gson gson = new Gson();
 
     @Override
@@ -38,31 +42,31 @@ public class ReportController extends HttpServlet {
         try {
             // ==================== JSON ENDPOINTS ====================
             if ("/admin/report-summary".equals(path)) {
-                Map<String, Object> summary = reportService.getReportSummary(startDate, endDate);
+                Map<String, Object> summary = reportDAO.getReportSummary(startDate, endDate);
                 sendJsonResponse(response, summary);
 
             } else if ("/admin/trip-detail".equals(path)) {
-                List<ReportModel> trips = reportService.getAllRentalReports(startDate, endDate);
+                List<ReportModel> trips = reportDAO.findAllRentalReports(startDate, endDate);
                 sendJsonResponse(response, trips);
 
             } else if ("/admin/revenue-chart".equals(path)) {
-                List<ReportModel> revenueData = reportService.getRevenueByDate(startDate, endDate);
+                List<ReportModel> revenueData = reportDAO.findRevenueByDate(startDate, endDate);
                 sendJsonResponse(response, revenueData);
 
             } else if ("/admin/vehicle-utilization".equals(path)) {
-                Map<String, Object> utilizationData = reportService.getVehicleUtilization(startDate, endDate);
+                Map<String, Object> utilizationData = reportDAO.getVehicleUtilization(startDate, endDate);
                 sendJsonResponse(response, utilizationData);
                 // ==================== JSP FORWARD ENDPOINTS ====================
             } else if ("/admin/rental-report-content".equals(path)) {
-                List<ReportModel> list = reportService.getAllRentalReports(startDate, endDate);
+                List<ReportModel> list = reportDAO.findAllRentalReports(startDate, endDate);
                 forwardToJSP(request, response, list, "RENTAL");
 
             } else if ("/admin/usage-report-content".equals(path)) {
-                List<ReportModel> list = reportService.getVehicleUsageReports(startDate, endDate);
+                List<ReportModel> list = reportDAO.findVehicleUsageReports(startDate, endDate);
                 forwardToJSP(request, response, list, "USAGE");
 
             } else if ("/admin/revenue-report-content".equals(path)) {
-                List<ReportModel> list = reportService.getRevenueReports(startDate, endDate);
+                List<ReportModel> list = reportDAO.findRevenueReports(startDate, endDate);
                 forwardToJSP(request, response, list, "REVENUE");
 
             } else {

@@ -1,6 +1,103 @@
 /* ========== VOUCHER MANAGEMENT STYLES ========== */
 
 
+/* Layout */
+:root {
+    --app-font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+.staff-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+}
+
+
+.staff-sidebar {
+    width: 260px;
+    height: 100vh;
+    background: #1e293b;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-header {
+    padding: 20px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 18px;
+    border-bottom: 1px solid #334155;
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex: 1;
+}
+
+.sidebar-menu li {
+    border-bottom: 1px solid #334155;
+}
+
+.sidebar-menu li a {
+    display: flex;
+    align-items: center;
+    padding: 14px 20px;
+    text-decoration: none;
+    color: #2c2a28;
+    transition: 0.3s;
+}
+
+.sidebar-menu li a:hover {
+    background: #334155;
+    color: #fff;
+}
+
+.sidebar-menu .icon {
+    margin-right: 10px;
+}
+
+.sidebar-footer {
+    padding: 15px;
+    text-align: center;
+    border-top: 1px solid #334155;
+}
+
+.staff-layout {
+    display: flex;
+}
+
+/* SIDEBAR */
+.staff-sidebar {
+    width: 260px;
+    height: 100vh;
+    background: #eaf2f8;
+    color: #2c2a28;
+}
+
+/* CONTENT */
+.staff-content {
+    flex: 1;
+    padding: 40px;
+    background: white;
+    min-height: 100vh;
+}
+
+.sidebar-header {
+    padding: 25px 20px;
+    text-align: center;
+    border-bottom: 1px solid #334155;
+}
 
 
 

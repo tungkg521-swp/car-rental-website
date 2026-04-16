@@ -5,7 +5,9 @@
         <title>Car Rental</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=21">
+
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=22">
+
     </head>
     <body>
 
@@ -38,51 +40,33 @@
                 </div>
 
 
-                <div class="hero-booking-panel">
-                    <p class="hero-kicker">AUTOMOBILI RENTAL CAR</p>
 
-                    <h2 class="hero-booking-title">
-                        THUÊ XE DỄ DÀNG<br>
-                        CHO MỌI HÀNH TRÌNH
-                    </h2>
-
-                    <p class="hero-booking-subtitle">
-                        Chọn ngày thuê và trả xe để tìm những mẫu xe đang khả dụng cho lịch trình của bạn.
-                    </p>
-
-                    <form action="${pageContext.request.contextPath}/cars" method="get" class="hero-booking-form">
-                        <input type="hidden" name="action" value="list">
-
-                        <div class="hero-booking-grid">
-                            <div class="hero-field">
-                                <label for="startDate">Pick-up date</label>
-                                <input type="date" id="startDate" name="startDate" required>
-                            </div>
-
-                            <div class="hero-field">
-                                <label for="endDate">Return date</label>
-                                <input type="date" id="endDate" name="endDate" required>
-                            </div>
-
-                            <div class="hero-field hero-field-submit">
-                                <button type="submit" class="hero-search-btn">Tìm xe ngay</button>
-                            </div>
+                <div class="hero-booking-wrap">
+                    <div class="hero-booking-panel">
+                        <div class="hero-booking-top">
+                            <p class="hero-kicker">AUTOMOBILI RENTAL CAR</p>
+                            <h2 class="hero-booking-title">Tìm xe phù hợp cho hành trình của bạn</h2>
                         </div>
-                    </form>
-                </div>
-                        <!-- Row 2 -->
 
-                <div class="grid-12 hero-summary">
-                    <div class="col-4">
-                        <h3>Luxury Meets<br>Performance</h3>
-                    </div>
+                        <form action="${pageContext.request.contextPath}/cars" method="get" class="hero-booking-form">
+                            <input type="hidden" name="action" value="list">
 
+                            <div class="hero-booking-grid">
+                                <div class="hero-field">
+                                    <label for="startDate">Ngày nhận xe</label>
+                                    <input type="date" id="startDate" name="startDate" required>
+                                </div>
 
+                                <div class="hero-field">
+                                    <label for="endDate">Ngày trả xe</label>
+                                    <input type="date" id="endDate" name="endDate" required>
+                                </div>
 
-                    <div class="col-4 cta">
-                        <a href="${pageContext.request.contextPath}/cars" class="btn-primary">
-                            BOOK NOW
-                        </a>
+                                <div class="hero-field hero-field-submit">
+                                    <button type="submit" class="hero-search-btn">Tìm xe ngay</button>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -152,7 +136,8 @@
 
                 <div class="grid-12 recommend-grid">
                     <a class="col-3 car-info-card"
-                    href="${pageContext.request.contextPath}/cars">
+                       href="${pageContext.request.contextPath}/cars">
+
                         <img src="${pageContext.request.contextPath}/assets/images/cars/vf3/vf3_1.jpg" alt="VF3">
                         <div class="car-card-body">
                             <h4>VinFast VF3</h4>
@@ -161,7 +146,8 @@
                     </a>
 
                     <a class="col-3 car-info-card"
-               href="${pageContext.request.contextPath}/cars">
+                       href="${pageContext.request.contextPath}/cars">
+
                         <img src="${pageContext.request.contextPath}/assets/images/cars/vf6_eco/vf6_eco_1.jpg" alt="VF6 Eco">
                         <div class="car-card-body">
                             <h4>VinFast VF6 Eco</h4>
@@ -170,7 +156,9 @@
                     </a>
 
                     <a class="col-3 car-info-card"
-                   href="${pageContext.request.contextPath}/cars">
+
+                       href="${pageContext.request.contextPath}/cars">
+
                         <img src="${pageContext.request.contextPath}/assets/images/cars/vf6_plus/vf6_plus_1.jpg" alt="VF6 Plus">
                         <div class="car-card-body">
                             <h4>VinFast VF6 Plus</h4>
@@ -179,7 +167,9 @@
                     </a>
 
                     <a class="col-3 car-info-card"
-                     href="${pageContext.request.contextPath}/cars">
+
+                       href="${pageContext.request.contextPath}/cars">
+
                         <img src="${pageContext.request.contextPath}/assets/images/cars/vf7_plus/vf7_plus_1.jpg" alt="VF7 Plus">
                         <div class="car-card-body">
                             <h4>VinFast VF7 Plus</h4>
