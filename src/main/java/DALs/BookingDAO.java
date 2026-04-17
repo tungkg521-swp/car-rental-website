@@ -544,7 +544,7 @@ public class BookingDAO extends DBContext {
             SELECT 1
             FROM booking
             WHERE car_id = ?
-            AND status IN ('AWAITING_PAYMENT', 'CONFIRMED', 'ACTIVE')
+            AND status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'ACTIVE')
             AND start_date <= ?
             AND end_date >= ?
              """;
@@ -572,7 +572,7 @@ public class BookingDAO extends DBContext {
         SELECT start_date, end_date
         FROM booking
         WHERE car_id = ?
-          AND status IN ('AWAITING_PAYMENT', 'CONFIRMED', 'ACTIVE')
+          AND status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'ACTIVE')
         ORDER BY start_date
     """;
 
@@ -682,7 +682,7 @@ public class BookingDAO extends DBContext {
         FROM booking
         WHERE car_id = ?
           AND booking_id <> ?
-          AND status IN ('AWAITING_PAYMENT', 'CONFIRMED', 'ACTIVE')
+          AND status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'ACTIVE')
           AND start_date <= ?
           AND end_date >= ?
     """;

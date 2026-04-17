@@ -1,6 +1,5 @@
 package Controllers;
 
-
 import DALs.BookingDAO;
 import DALs.CarChangeRequestDAO;
 import DALs.CarDAO;
@@ -36,13 +35,10 @@ import service.CarChangeRequestService;
 
 public class BookingServlet extends HttpServlet {
 
-    
-
     private final BookingDAO bookingDAO = new BookingDAO();
     private final CarDAO carDAO = new CarDAO();
     private final VoucherDAO voucherDAO = new VoucherDAO();
     private final CarChangeRequestDAO carChangeRequestDAO = new CarChangeRequestDAO();
-
 
     @Override
     protected void doGet(HttpServletRequest request,
@@ -148,10 +144,8 @@ public class BookingServlet extends HttpServlet {
             return;
         }
 
-
         CarDAO carDAO = new CarDAO();
         CarModel car = carDAO.findById(carId);
-
 
         if (!customer.isLicenseVerified()) {
             request.setAttribute("LICENSE_REQUIRED", true);
@@ -178,7 +172,6 @@ public class BookingServlet extends HttpServlet {
             request.setAttribute("car", car);
             request.setAttribute("startDate", startDateRaw);
             request.setAttribute("endDate", endDateRaw);
-
 
             List<Date[]> busyRanges = bookingDAO.getBusyDateRangesByCarId(carId);
 
@@ -216,9 +209,7 @@ public class BookingServlet extends HttpServlet {
             return;
         }
 
-
         List<VoucherModel> validVouchers = voucherDAO.getActiveVouchers();
-
 
         request.setAttribute("account", account);
         request.setAttribute("customer", customer);
@@ -300,10 +291,8 @@ public class BookingServlet extends HttpServlet {
 
         Date today = Date.valueOf(LocalDate.now());
 
-
         CarDAO carDAO = new CarDAO();
         CarModel car = carDAO.findById(carId);
-
 
         if (car == null) {
             response.sendRedirect(request.getContextPath() + "/cars");
@@ -341,7 +330,6 @@ public class BookingServlet extends HttpServlet {
             return;
         }
 
-
         if (bookingDAO.hasBookingConflict(carId, startDate, endDate)) {
             request.setAttribute("errorMessage", "Xe không khả dụng trong khoảng thời gian đã chọn.");
             request.setAttribute("car", car);
@@ -354,12 +342,10 @@ public class BookingServlet extends HttpServlet {
             return;
         }
 
-
         BigDecimal totalPrice = calculateTotalPrice(startDate, endDate, car.getPricePerDay());
 
         if (voucherId != null) {
             VoucherModel voucher = voucherDAO.findById(voucherId);
-
 
             if (voucher == null || !"ACTIVE".equalsIgnoreCase(voucher.getStatus())) {
                 request.setAttribute("errorMessage", "Voucher không hợp lệ.");
@@ -417,7 +403,7 @@ public class BookingServlet extends HttpServlet {
         booking.setBookingDate(new Timestamp(System.currentTimeMillis()));
         booking.setStartDate(startDate);
         booking.setEndDate(endDate);
-        booking.setStatus("PENDING_APPROVAL");
+        booking.setStatus("AWAITING_PAYMENT");
 
         booking.setNote(note);
         booking.setDepositAmount(depositAmount);
@@ -432,7 +418,7 @@ public class BookingServlet extends HttpServlet {
             session.setAttribute("LAST_BOOKING", bookingId);
 
             response.sendRedirect(
-                    request.getContextPath() + "/booking?action=detail&bookingId=" + bookingId + "&created=1"
+                    request.getContextPath() + "/payment?action=create&bookingId=" + bookingId + "&created=1"
             );
         } catch (Exception e) {
             e.printStackTrace();
@@ -467,9 +453,7 @@ public class BookingServlet extends HttpServlet {
             return;
         }
 
-
         List<BookingModel> bookings = bookingDAO.findByCustomerId(customer.getCustomerId());
-
 
         request.setAttribute("BOOKINGS", bookings);
         request.getRequestDispatcher("/views/booking-list.jsp").forward(request, response);
@@ -511,9 +495,7 @@ public class BookingServlet extends HttpServlet {
             return;
         }
 
-
         BookingModel booking = bookingDAO.findById(bookingId, customer.getCustomerId());
-
 
         if (booking == null) {
             request.setAttribute("error", "Booking not found");
@@ -522,9 +504,7 @@ public class BookingServlet extends HttpServlet {
         }
 
         CarChangeRequestModel pendingRequest
-
                 = carChangeRequestDAO.getPendingByBookingId(bookingId);
-
 
         request.setAttribute("pendingCarChangeRequest", pendingRequest);
 
@@ -571,9 +551,7 @@ public class BookingServlet extends HttpServlet {
             return;
         }
 
-
         boolean success = cancelBookingByCustomer(bookingId, customer.getCustomerId());
-
 
         if (success) {
             response.sendRedirect(
@@ -640,9 +618,7 @@ public class BookingServlet extends HttpServlet {
             return;
         }
 
-
         boolean success = deleteCancelledBookingByCustomer(bookingId, customer.getCustomerId());
-
 
         if (success) {
             response.sendRedirect(request.getContextPath() + "/booking?action=list");
@@ -653,7 +629,6 @@ public class BookingServlet extends HttpServlet {
             );
         }
     }
-
 
     private BigDecimal calculateTotalPrice(Date startDate, Date endDate, BigDecimal pricePerDay) {
         long days = java.time.temporal.ChronoUnit.DAYS.between(
@@ -682,20 +657,19 @@ public class BookingServlet extends HttpServlet {
 
         return bookingDAO.updateStatus(bookingId, "CANCELLED");
     }
-    
-    
+
     private boolean deleteCancelledBookingByCustomer(int bookingId, int customerId) {
-    BookingModel booking = bookingDAO.findById(bookingId, customerId);
+        BookingModel booking = bookingDAO.findById(bookingId, customerId);
 
-    if (booking == null) {
-        return false;
+        if (booking == null) {
+            return false;
+        }
+
+        if (!"CANCELLED".equalsIgnoreCase(booking.getStatus())) {
+            return false;
+        }
+
+        return bookingDAO.deleteBooking(bookingId, customerId);
     }
-
-    if (!"CANCELLED".equalsIgnoreCase(booking.getStatus())) {
-        return false;
-    }
-
-    return bookingDAO.deleteBooking(bookingId, customerId);
-}
 
 }

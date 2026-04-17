@@ -112,6 +112,13 @@
                                         </form>
                                     </c:if>
 
+                                    <c:if test="${booking.status == 'AWAITING_PAYMENT'}">
+                                        <div class="info-message">
+                                            This booking is waiting for customer payment.
+                                        </div>
+                                    </c:if>
+
+
                                     <div class="info-list compact-list">
                                         <div class="info-item-block">
                                             <strong>Booking Date</strong>

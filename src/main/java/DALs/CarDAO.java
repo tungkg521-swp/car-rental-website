@@ -951,7 +951,7 @@ public class CarDAO extends DBContext {
           AND c.car_id NOT IN (
               SELECT bk.car_id
               FROM booking bk
-              WHERE bk.status IN ('AWAITING_PAYMENT', 'CONFIRMED', 'ACTIVE')
+              WHERE bk.status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'ACTIVE')
                 AND bk.start_date <= ?
                 AND bk.end_date >= ?
           )
@@ -994,7 +994,7 @@ public class CarDAO extends DBContext {
         SELECT 1
         FROM booking
         WHERE car_id = ?
-          AND status IN ('CONFIRMED', 'ACTIVE')
+          AND status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'ACTIVE')
           AND start_date <= ?
           AND end_date >= ?
     """;
@@ -1048,7 +1048,7 @@ public class CarDAO extends DBContext {
               SELECT 1
               FROM booking bk
               WHERE bk.car_id = c.car_id
-                AND bk.status IN ('AWAITING_PAYMENT', 'CONFIRMED', 'ACTIVE')
+                AND bk.status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'ACTIVE')
                 AND bk.start_date <= ?
                 AND bk.end_date >= ?
           )
