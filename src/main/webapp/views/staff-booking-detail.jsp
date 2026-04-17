@@ -1,4 +1,3 @@
-
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
@@ -11,7 +10,8 @@
 
         <link rel="stylesheet"
               href="${pageContext.request.contextPath}/assets/css/staff.css?v=3">
-
+        <link rel="stylesheet"
+              href="${pageContext.request.contextPath}/assets/css/staff-booking.css?v=1">
     </head>
 
     <body>
@@ -20,22 +20,60 @@
 
             <%@ include file="sidebar.jsp" %>
 
+            <div class="staff-content booking-detail-page">
+                <div class="booking-detail-shell">
 
-            <div class="staff-content detail-page">
-                <div class="detail-container">
-
+                   
 
                     <c:choose>
                         <c:when test="${not empty booking}">
 
-                            <div class="detail-card">
-                                <div class="detail-info">
+                            <!-- HERO SUMMARY -->
+                            <div class="booking-hero-card">
+                                <div class="booking-hero-left">
+                                    <div class="booking-id-row">
+                                        <h2>Booking #${booking.bookingId}</h2>
+                                        <span class="status-badge ${fn:toLowerCase(booking.status)}">
+                                            ${booking.status}
+                                        </span>
+                                    </div>
 
-                                    <h1>Booking #${booking.bookingId}</h1>
+                                    <p class="booking-hero-text">
+                                        Review booking progress, customer details, selected car, and rental duration.
+                                    </p>
+                                </div>
 
-                                    <span class="status-badge ${fn:toLowerCase(booking.status)}">
-                                        ${booking.status}
-                                    </span>
+                                <div class="booking-hero-right">
+                                    <div class="hero-stat">
+                                        <span class="hero-stat-label">Booking Date</span>
+                                        <span class="hero-stat-value">${booking.bookingDate}</span>
+                                    </div>
+
+                                    <div class="hero-stat">
+                                        <span class="hero-stat-label">Start Date</span>
+                                        <span class="hero-stat-value">${booking.startDate}</span>
+                                    </div>
+
+                                    <div class="hero-stat">
+                                        <span class="hero-stat-label">End Date</span>
+                                        <span class="hero-stat-value">${booking.endDate}</span>
+                                    </div>
+
+                                    <div class="hero-stat">
+                                        <span class="hero-stat-label">Total</span>
+                                        <span class="hero-stat-value">
+                                            <fmt:formatNumber value="${booking.totalEstimatedPrice}" pattern="#,###"/>
+                                            VND
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- MAIN GRID -->
+                            <div class="booking-detail-grid">
+
+                                <div class="detail-panel">
+                                    <h3>Booking Status</h3>
 
                                     <c:if test="${booking.status == 'REJECTED'}">
                                         <p class="status-message rejected">
@@ -43,10 +81,16 @@
                                         </p>
                                     </c:if>
 
+                                    <c:if test="${booking.status == 'AWAITING_PAYMENT'}">
+                                        <div class="info-message">
+                                            This booking has been approved and is waiting for customer payment.
+                                        </div>
+                                    </c:if>
+
                                     <c:if test="${booking.status == 'PENDING_APPROVAL'}">
                                         <form method="post"
                                               action="${pageContext.request.contextPath}/staff/bookings"
-                                              class="inline-form">
+                                              class="action-form">
 
                                             <input type="hidden" name="bookingId" value="${booking.bookingId}"/>
 
@@ -67,119 +111,126 @@
                                             </button>
                                         </form>
                                     </c:if>
+
                                     <c:if test="${booking.status == 'AWAITING_PAYMENT'}">
                                         <div class="info-message">
                                             This booking is waiting for customer payment.
                                         </div>
                                     </c:if>
 
-                                    <div class="specs">
+
+                                    <div class="info-list compact-list">
+                                        <div class="info-item-block">
+                                            <strong>Booking Date</strong>
+                                            <p>${booking.bookingDate}</p>
+                                        </div>
+
+                                        <div class="info-item-block">
+                                            <strong>Start Date</strong>
+                                            <p>${booking.startDate}</p>
+                                        </div>
+
+                                        <div class="info-item-block">
+                                            <strong>End Date</strong>
+                                            <p>${booking.endDate}</p>
+                                        </div>
+
+                                        <div class="info-item-block">
+                                            <strong>Total</strong>
+                                            <p class="price-highlight">
+                                                <fmt:formatNumber value="${booking.totalEstimatedPrice}" pattern="#,###"/>
+                                                VND
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="detail-panel">
+                                    <h3>Customer Information</h3>
+
+                                    <div class="info-grid">
                                         <div>
-                                            <strong>Booking Date:</strong>
-                                            ${booking.bookingDate}
+                                            <strong>Name</strong>
+                                            <p>${booking.customerName}</p>
                                         </div>
 
                                         <div>
-                                            <strong>Start Date:</strong>
-                                            ${booking.startDate}
+                                            <strong>Email</strong>
+                                            <p>${booking.customerEmail}</p>
                                         </div>
 
                                         <div>
-                                            <strong>End Date:</strong>
-                                            ${booking.endDate}
+                                            <strong>Phone</strong>
+                                            <p>${booking.customerPhone}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="detail-panel">
+                                    <h3>Car Information</h3>
+
+                                    <div class="car-info-block">
+                                        <img src="${pageContext.request.contextPath}/assets/images/cars/${booking.imageFolder}/${booking.imageFolder}_1.jpg"
+                                             class="car-preview-large"
+                                             alt="Car Image">
+
+                                        <div class="info-grid">
+                                            <div>
+                                                <strong>Model</strong>
+                                                <p>${booking.carName}</p>
+                                            </div>
+
+                                            <div>
+                                                <strong>Price / Day</strong>
+                                                <p>
+                                                    <fmt:formatNumber value="${booking.pricePerDay}" pattern="#,###"/>
+                                                    VND
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="detail-panel">
+                                    <h3>Rental Summary</h3>
+
+                                    <div class="info-grid">
+                                        <div>
+                                            <strong>Start Date</strong>
+                                            <p>${booking.startDate}</p>
                                         </div>
 
                                         <div>
-                                            <strong>Total:</strong>
-                                            <fmt:formatNumber value="${booking.totalEstimatedPrice}" pattern="#,###"/>
-                                            VND
+                                            <strong>End Date</strong>
+                                            <p>${booking.endDate}</p>
+                                        </div>
+
+                                        <div>
+                                            <strong>Total Price</strong>
+                                            <p class="price-highlight">
+                                                <fmt:formatNumber value="${booking.totalEstimatedPrice}" pattern="#,###"/>
+                                                VND
+                                            </p>
                                         </div>
                                     </div>
-
                                 </div>
+
                             </div>
 
-                            <div class="detail-description">
-                                <h2>👤 Customer Information</h2>
-
-                                <div class="info-grid">
-                                    <div>
-                                        <strong>Name</strong>
-                                        <p>${booking.customerName}</p>
-                                    </div>
-
-                                    <div>
-                                        <strong>Email</strong>
-                                        <p>${booking.customerEmail}</p>
-                                    </div>
-
-                                    <div>
-                                        <strong>Phone</strong>
-                                        <p>${booking.customerPhone}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="detail-description">
-                                <h2>🚗 Car Information</h2>
-
-                                <div class="info-grid">
-                                    <img src="${pageContext.request.contextPath}/assets/images/cars/${booking.imageFolder}/${booking.imageFolder}_1.jpg"
-                                         class="car-preview"
-                                         alt="Car Image">
-
-                                    <div>
-                                        <strong>Model</strong>
-                                        <p>${booking.carName}</p>
-                                    </div>
-
-                                    <div>
-                                        <strong>Price / Day</strong>
-                                        <p>
-                                            <fmt:formatNumber value="${booking.pricePerDay}" pattern="#,###"/>
-                                            VND
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="detail-description">
-                                <h2>📅 Rental Summary</h2>
-
-                                <div class="info-grid">
-                                    <div>
-                                        <strong>Start Date</strong>
-                                        <p>${booking.startDate}</p>
-                                    </div>
-
-                                    <div>
-                                        <strong>End Date</strong>
-                                        <p>${booking.endDate}</p>
-                                    </div>
-
-                                    <div>
-                                        <strong>Total Price</strong>
-                                        <p class="price-highlight">
-                                            <fmt:formatNumber value="${booking.totalEstimatedPrice}" pattern="#,###"/>
-                                            VND
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
+                            <!-- CAR CHANGE REQUEST -->
                             <c:if test="${booking.status == 'AWAITING_PAYMENT' || booking.status == 'CONFIRMED'}">
-                                <div class="detail-description">
-                                    <h2>🔄 Car Change Request</h2>
+                                <div class="detail-panel full-width-panel">
+                                    <h3>Car Change Request</h3>
+                                    <p class="section-note">Manage replacement vehicle requests for this booking.</p>
 
                                     <c:if test="${param.changeRequest == 'success'}">
-                                        <div class="info-message" style="color: green; font-weight: 600;">
-
+                                        <div class="message-success">
                                             Car change request created successfully.
                                         </div>
                                     </c:if>
 
                                     <c:if test="${param.changeRequest == 'fail'}">
-                                        <div class="info-message" style="color: red; font-weight: 600;">
+                                        <div class="message-error">
                                             Failed to create car change request.
                                         </div>
                                     </c:if>
@@ -218,9 +269,7 @@
                                                 </div>
                                             </div>
 
-
-                                            <p class="status-message" style="color: #b26a00;">
-
+                                            <p class="status-message pending-note">
                                                 There is already a pending car change request for this booking.
                                             </p>
                                         </c:when>
@@ -230,19 +279,14 @@
                                                 <c:when test="${not empty replacementCars}">
                                                     <form method="post"
                                                           action="${pageContext.request.contextPath}/car-change"
-                                                          class="inline-form"
-                                                          style="display:block; margin-top:16px;">
-
+                                                          class="change-request-form">
 
                                                         <input type="hidden" name="action" value="create"/>
                                                         <input type="hidden" name="bookingId" value="${booking.bookingId}"/>
 
-
-                                                        <div style="margin-bottom: 16px;">
-                                                            <label for="newCarId"><strong>Select replacement car</strong></label><br/>
-                                                            <select name="newCarId" id="newCarId" required
-                                                                    style="width:100%; max-width:420px; padding:10px; margin-top:8px;">
-
+                                                        <div class="form-field">
+                                                            <label for="newCarId"><strong>Select replacement car</strong></label>
+                                                            <select name="newCarId" id="newCarId" required class="form-control">
                                                                 <option value="">-- Select car --</option>
                                                                 <c:forEach var="car" items="${replacementCars}">
                                                                     <option value="${car.carId}">
@@ -254,17 +298,13 @@
                                                             </select>
                                                         </div>
 
-
-                                                        <div style="margin-bottom: 16px;">
-                                                            <label for="reason"><strong>Reason</strong></label><br/>
-
+                                                        <div class="form-field">
+                                                            <label for="reason"><strong>Reason</strong></label>
                                                             <textarea name="reason"
                                                                       id="reason"
                                                                       rows="4"
                                                                       required
-
-                                                                      style="width:100%; max-width:520px; padding:10px; margin-top:8px;"
-
+                                                                      class="form-textarea"
                                                                       placeholder="Enter reason for changing car..."></textarea>
                                                         </div>
 
@@ -287,52 +327,60 @@
                                 </div>
                             </c:if>
 
-                            <div class="detail-actions">
+                            <!-- FOOTER ACTIONS -->
+                            <div class="page-footer-actions">
 
-                                <c:if test="${booking.status == 'REFUND_PENDING'}">
-                                    <form method="post"
-                                          action="${pageContext.request.contextPath}/car-change"
-                                          class="inline-form">
-                                        <input type="hidden" name="action" value="refund"/>
-                                        <input type="hidden" name="bookingId" value="${booking.bookingId}"/>
+                                <div class="left-actions">
+                                    <c:if test="${booking.status == 'REFUND_PENDING'}">
+                                        <form method="post"
+                                              action="${pageContext.request.contextPath}/car-change"
+                                              class="inline-form">
+                                            <input type="hidden" name="action" value="refund"/>
+                                            <input type="hidden" name="bookingId" value="${booking.bookingId}"/>
 
-                                        <button type="submit"
-                                                class="btn btn-danger"
-                                                onclick="return confirm('Confirm that refund has been completed?');">
-                                            Mark Refund Completed
-                                        </button>
-                                    </form>
-                                </c:if>
+                                            <button type="submit"
+                                                    class="btn btn-danger"
+                                                    onclick="return confirm('Confirm that refund has been completed?');">
+                                                Mark Refund Completed
+                                            </button>
+                                        </form>
+                                    </c:if>
 
-                                <c:if test="${booking.status == 'CONFIRMED' && not empty pendingCarChangeRequest}">
-                                    <form method="post"
-                                          action="${pageContext.request.contextPath}/car-change"
-                                          class="inline-form">
-                                        <input type="hidden" name="action" value="staffRejectRefund"/>
-                                        <input type="hidden" name="bookingId" value="${booking.bookingId}"/>
+                                    <c:if test="${booking.status == 'CONFIRMED' && not empty pendingCarChangeRequest}">
+                                        <form method="post"
+                                              action="${pageContext.request.contextPath}/car-change"
+                                              class="inline-form">
+                                            <input type="hidden" name="action" value="staffRejectRefund"/>
+                                            <input type="hidden" name="bookingId" value="${booking.bookingId}"/>
 
-                                        <button type="submit"
-                                                class="btn btn-warning"
-                                                onclick="return confirm('Reject on behalf of customer and mark refunded at counter?');">
-                                            Reject & Refund at Counter
-                                        </button>
-                                    </form>
-                                </c:if>
+                                            <button type="submit"
+                                                    class="btn btn-warning"
+                                                    onclick="return confirm('Reject on behalf of customer and mark refunded at counter?');">
+                                                Reject & Refund at Counter
+                                            </button>
+                                        </form>
+                                    </c:if>
+                                </div>
 
-                                <a href="${pageContext.request.contextPath}/staff/bookings" class="btn-back">
-                                    Back
-                                </a>
+                                <div class="right-actions">
+                                    <a href="${pageContext.request.contextPath}/staff/bookings" class="btn-back">
+                                        Back to Booking List
+                                    </a>
+                                </div>
                             </div>
 
                         </c:when>
 
                         <c:otherwise>
-                            <div class="detail-card">
-                                <p style="text-align:center; padding:20px;">Booking not found.</p>
-                                <div class="detail-actions">
-                                    <a href="${pageContext.request.contextPath}/staff/bookings" class="btn-back">
-                                        Back
-                                    </a>
+                            <div class="detail-panel empty-panel">
+                                <p class="empty-message">Booking not found.</p>
+
+                                <div class="page-footer-actions">
+                                    <div class="right-actions">
+                                        <a href="${pageContext.request.contextPath}/staff/bookings" class="btn-back">
+                                            Back to Booking List
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </c:otherwise>
