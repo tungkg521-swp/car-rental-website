@@ -636,3 +636,152 @@
         font-size: 24px;
     }
 }
+
+.car-change-customer-card {
+    margin-top: 22px;
+    padding: 22px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+}
+
+.car-change-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.car-change-header h3 {
+    margin: 0 0 6px;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.car-change-header p {
+    margin: 0;
+    color: #6b7280;
+    line-height: 1.5;
+}
+
+.change-status-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.status-pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-done {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.change-meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.change-meta-item {
+    padding: 14px;
+    border-radius: 14px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+}
+
+.change-meta-item.full-width {
+    grid-column: 1 / -1;
+}
+
+.change-meta-item span {
+    display: block;
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 4px;
+}
+
+.change-meta-item p {
+    margin: 0;
+    font-weight: 600;
+    color: #111827;
+}
+
+.change-car-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 20px;
+}
+
+.change-car-box {
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    background: #fff;
+    overflow: hidden;
+}
+
+.change-car-box.recommended {
+    border: 1px solid #bfdbfe;
+    background: #f8fbff;
+}
+
+.change-car-title {
+    padding: 14px 16px;
+    font-weight: 700;
+    font-size: 16px;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
+}
+
+.change-car-box.recommended .change-car-title {
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.change-car-image-wrap {
+    width: 100%;
+    height: 220px;
+    background: #f3f4f6;
+    overflow: hidden;
+}
+
+.change-car-image-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.change-car-info {
+    padding: 16px;
+}
+
+.change-car-info p {
+    margin: 8px 0;
+    color: #111827;
+}
+
+.change-action-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 900px) {
+    .car-change-header,
+    .change-car-compare,
+    .change-meta-grid {
+        grid-template-columns: 1fr;
+        flex-direction: column;
+    }
+}
