@@ -111,7 +111,7 @@ public class StaffLicenseServlet extends HttpServlet {
 
         }
 
-        // quay về detail để thấy status mới (hoặc list cũng được)
+      
         if (ok) {
             response.sendRedirect(request.getContextPath()
                     + "/staff/licenses?action=detail&licenseId=" + licenseId);

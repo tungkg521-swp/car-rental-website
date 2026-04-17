@@ -2,7 +2,6 @@ package Controllers;
 
 import models.AccountModel;
 import models.VoucherModel;
-import service.VoucherService;
 import Utils.RoleConstants;
 
 import DALs.VoucherDAO;
@@ -26,7 +25,7 @@ public class VoucherController extends HttpServlet {
     private final VoucherDAO voucherDAO = new VoucherDAO();
 
 
-    // Kiểm tra admin
+    
     private boolean isAdmin(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         if (session == null) return false;
@@ -86,7 +85,7 @@ public class VoucherController extends HttpServlet {
         }
     }
 
-    // List all vouchers
+    
     private void listVouchers(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
@@ -125,7 +124,7 @@ public class VoucherController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/staff/vouchers?action=list");
         }
     }
-    // Create new voucher
+    
     private void createVoucher(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
@@ -138,7 +137,7 @@ public class VoucherController extends HttpServlet {
             String maxUsesStr = request.getParameter("maxUses");
             String minBookingAmountStr = request.getParameter("minBookingAmount");
 
-            // Validate input
+           
             if (code == null || code.trim().isEmpty() || discountStr == null || discountStr.trim().isEmpty()
                     || type == null || type.isEmpty() || expireDateStr == null || expireDateStr.isEmpty()
                     || maxUsesStr == null || maxUsesStr.isEmpty() || minBookingAmountStr == null || minBookingAmountStr.isEmpty()) {
@@ -147,7 +146,7 @@ public class VoucherController extends HttpServlet {
                 return;
             }
 
-            // Kiểm tra code đã tồn tại
+            
 
 
             Object existingVoucher = voucherDAO.findByCode(code);
@@ -159,7 +158,7 @@ public class VoucherController extends HttpServlet {
                 return;
             }
 
-            // Parse discount
+            
             java.math.BigDecimal discount;
             try {
                 discount = new java.math.BigDecimal(discountStr);
@@ -180,7 +179,7 @@ public class VoucherController extends HttpServlet {
                 return;
             }
 
-            // Parse maxUses
+            
             int maxUses;
             try {
                 maxUses = Integer.parseInt(maxUsesStr);
@@ -195,7 +194,7 @@ public class VoucherController extends HttpServlet {
                 return;
             }
 
-            // Parse minBookingAmount
+            
             java.math.BigDecimal minBookingAmount;
             try {
                 minBookingAmount = new java.math.BigDecimal(minBookingAmountStr);
@@ -210,7 +209,7 @@ public class VoucherController extends HttpServlet {
                 return;
             }
 
-            // Parse date
+            
             Date expireDate;
             try {
                 expireDate = Date.valueOf(expireDateStr);
@@ -226,7 +225,7 @@ public class VoucherController extends HttpServlet {
                 return;
             }
 
-            // Parse status
+            
             boolean status;
             if (statusStr == null || statusStr.isEmpty()) {
                 status = true;
@@ -234,7 +233,7 @@ public class VoucherController extends HttpServlet {
                 status = "ACTIVE".equalsIgnoreCase(statusStr) || "1".equals(statusStr);
             }
 
-            // Tạo voucher với đầy đủ thông tin
+            
             VoucherModel newVoucher = new VoucherModel(maxUses, code, discount, type, expireDate, status, minBookingAmount);
 
             boolean success = voucherDAO.insert(newVoucher);
@@ -255,7 +254,7 @@ public class VoucherController extends HttpServlet {
         }
     }
 
-    // Update existing voucher
+    
     private void updateVoucher(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
@@ -269,7 +268,7 @@ public class VoucherController extends HttpServlet {
             String maxUsesStr = request.getParameter("maxUses");
             String minBookingAmountStr = request.getParameter("minBookingAmount");
 
-            // Validate input
+            
             if (voucherIdStr == null || voucherIdStr.isEmpty() || code == null || code.isEmpty()
                     || discountStr == null || discountStr.isEmpty() || type == null || type.isEmpty()
                     || expireDateStr == null || expireDateStr.isEmpty()) {
@@ -283,7 +282,7 @@ public class VoucherController extends HttpServlet {
             Date expireDate = Date.valueOf(expireDateStr);
             boolean status = "ACTIVE".equalsIgnoreCase(statusStr) || "1".equals(statusStr);
             
-            // Parse maxUses và minBookingAmount (có thể null khi update)
+            
             int maxUses = 0;
             if (maxUsesStr != null && !maxUsesStr.isEmpty()) {
                 maxUses = Integer.parseInt(maxUsesStr);

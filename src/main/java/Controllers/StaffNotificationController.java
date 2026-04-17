@@ -84,6 +84,6 @@ public class StaffNotificationController extends HttpServlet {
     @Override
     public String getServletInfo() {
         return "Short description";
-    }// </editor-fold>
+    }
 
 }

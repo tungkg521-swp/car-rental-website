@@ -3,7 +3,6 @@ package Controllers;
 import DALs.CarDAO;
 import DALs.MaintenanceDAO;
 
-import service.MaintenanceService;
 import java.io.IOException;
 import java.util.List;
 import jakarta.servlet.ServletException;

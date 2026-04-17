@@ -18,13 +18,13 @@ public class HomeServlet extends HttpServlet {
         String uri = request.getRequestURI();
         String contextPath = request.getContextPath();
 
-        // Luôn chuẩn hóa root thành /home
+       
         if (uri.equals(contextPath) || uri.equals(contextPath + "/")) {
             response.sendRedirect(contextPath + "/home");
             return;
         }
 
-        // Nếu staff/admin quay về /home thì coi như về guest home
+     
         HttpSession session = request.getSession(false);
         if (session != null) {
             AccountModel account = (AccountModel) session.getAttribute("ACCOUNT");
