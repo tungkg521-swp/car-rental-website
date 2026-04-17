@@ -1,8 +1,8 @@
 package Controllers;
 
-
 import DALs.BookingDAO;
 import DALs.CarChangeRequestDAO;
+import DALs.CarCheckDAO;
 import DALs.CarDAO;
 import DALs.ContractDAO;
 
@@ -20,20 +20,33 @@ import DALs.CustomerDAO;
 import java.util.List;
 import models.BookingModel;
 import models.CarChangeRequestModel;
+import models.CarCheckModel;
 import models.CarModel;
 import models.ContractModel;
 
-
 @WebServlet(name = "CarChangeServlet", urlPatterns = {"/car-change"})
 public class CarChangeServlet extends HttpServlet {
-
 
     private final BookingDAO bookingDAO = new BookingDAO();
     private final CarDAO carDAO = new CarDAO();
     private final ContractDAO contractDAO = new ContractDAO();
     private final CarChangeRequestDAO requestDAO = new CarChangeRequestDAO();
     private final CustomerDAO customerDAO = new CustomerDAO();
+    private final CarCheckDAO carCheckDAO = new CarCheckDAO();
 
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String action = request.getParameter("action");
+
+        if ("form".equals(action)) {
+            showChangeForm(request, response);
+            return;
+        }
+
+        response.sendRedirect(request.getContextPath() + "/staff/bookings");
+    }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -50,6 +63,62 @@ public class CarChangeServlet extends HttpServlet {
         } else if ("staffRejectRefund".equals(action)) {
             rejectAndRefundByStaff(request, response);
         }
+    }
+
+    private void showChangeForm(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("STAFF") == null) {
+            response.sendRedirect(request.getContextPath() + "/dashboard-login");
+            return;
+        }
+
+        int bookingId;
+        try {
+            bookingId = Integer.parseInt(request.getParameter("bookingId"));
+        } catch (Exception e) {
+            response.sendRedirect(request.getContextPath() + "/staff/bookings");
+            return;
+        }
+
+        BookingModel booking = bookingDAO.getById(bookingId);
+        if (booking == null || !"CONFIRMED".equalsIgnoreCase(booking.getStatus())) {
+            response.sendRedirect(request.getContextPath() + "/staff/bookings?action=detail&id=" + bookingId);
+            return;
+        }
+
+        ContractModel contract = contractDAO.getContractByBookingId(bookingId);
+        if (contract == null || !"CREATED".equalsIgnoreCase(contract.getContractStatus())) {
+            response.sendRedirect(request.getContextPath() + "/staff/bookings?action=detail&id=" + bookingId);
+            return;
+        }
+
+        CustomerModel customer = customerDAO.findById(booking.getCustomerId());
+        CarModel currentCar = carDAO.findById(booking.getCarId());
+
+        if (currentCar == null) {
+            response.sendRedirect(request.getContextPath()
+                    + "/staff/contracts?action=checkForm&id=" + contract.getContractId());
+            return;
+        }
+
+        CarCheckModel latestCheck = carCheckDAO.getLatestCheckByContractId(contract.getContractId());
+        if (latestCheck == null || !"NOT_OK".equalsIgnoreCase(latestCheck.getCheckResult())) {
+            response.sendRedirect(request.getContextPath() + "/staff/contracts?action=checkForm&id=" + contract.getContractId());
+            return;
+        }
+
+        List<CarModel> replacementCars = getAvailableReplacementCars(bookingId);
+
+        request.setAttribute("customer", customer);
+        request.setAttribute("currentCar", currentCar);
+        request.setAttribute("booking", booking);
+        request.setAttribute("contract", contract);
+        request.setAttribute("latestCarCheck", latestCheck);
+        request.setAttribute("replacementCars", replacementCars);
+
+        request.getRequestDispatcher("/views/staff-car-change.jsp").forward(request, response);
     }
 
     private void createRequest(HttpServletRequest request, HttpServletResponse response)
@@ -82,15 +151,27 @@ public class CarChangeServlet extends HttpServlet {
 
         String reason = request.getParameter("reason");
 
+        if (reason == null || reason.trim().isEmpty()) {
+            reason = "Current car failed pre-delivery check.";
+        }
 
         boolean result = createStaffRequest(bookingId, staffId, newCarId, reason);
 
+        ContractModel contract = contractDAO.getContractByBookingId(bookingId);
 
-        response.sendRedirect(
-                request.getContextPath()
-                + "/staff/bookings?action=detail&id=" + bookingId
-                + "&changeRequest=" + (result ? "success" : "fail")
-        );
+        if (contract != null) {
+            response.sendRedirect(
+                    request.getContextPath()
+                    + "/staff/contracts?action=checkForm&id=" + contract.getContractId()
+                    + "&changeRequest=" + (result ? "success" : "fail")
+            );
+        } else {
+            response.sendRedirect(
+                    request.getContextPath()
+                    + "/staff/bookings?action=detail&id=" + bookingId
+                    + "&changeRequest=" + (result ? "success" : "fail")
+            );
+        }
     }
 
     private void respondRequest(HttpServletRequest request, HttpServletResponse response)
@@ -108,7 +189,6 @@ public class CarChangeServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
-
 
         CustomerModel customer = customerDAO.getByAccountId(account.getAccountId());
         if (customer == null) {
@@ -132,7 +212,6 @@ public class CarChangeServlet extends HttpServlet {
 
         boolean result = customerRespond(requestId, customerId, accept);
 
-
         String bookingId = request.getParameter("bookingId");
 
         response.sendRedirect(
@@ -141,7 +220,6 @@ public class CarChangeServlet extends HttpServlet {
                 + "&changeResponse=" + (result ? "success" : "fail")
         );
     }
-
 
     private void markRefundCompleted(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
@@ -221,8 +299,21 @@ public class CarChangeServlet extends HttpServlet {
             return false;
         }
 
-        if (!"AWAITING_PAYMENT".equalsIgnoreCase(booking.getStatus())
-                && !"CONFIRMED".equalsIgnoreCase(booking.getStatus())) {
+        if (!"CONFIRMED".equalsIgnoreCase(booking.getStatus())) {
+            return false;
+        }
+
+        ContractModel contract = contractDAO.getContractByBookingId(bookingId);
+        if (contract == null) {
+            return false;
+        }
+
+        if (!"CREATED".equalsIgnoreCase(contract.getContractStatus())) {
+            return false;
+        }
+
+        CarCheckModel latestCheck = carCheckDAO.getLatestCheckByContractId(contract.getContractId());
+        if (latestCheck == null || !"NOT_OK".equalsIgnoreCase(latestCheck.getCheckResult())) {
             return false;
         }
 
@@ -281,31 +372,38 @@ public class CarChangeServlet extends HttpServlet {
             return false;
         }
 
+        if (!"CONFIRMED".equalsIgnoreCase(booking.getStatus())) {
+            return false;
+        }
+
+        ContractModel contract = contractDAO.getContractByBookingId(booking.getBookingId());
+        if (contract == null) {
+            return false;
+        }
+
+        if (!"CREATED".equalsIgnoreCase(contract.getContractStatus())) {
+            return false;
+        }
+
+        CarCheckModel latestCheck = carCheckDAO.getLatestCheckByContractId(contract.getContractId());
+        if (latestCheck == null || !"NOT_OK".equalsIgnoreCase(latestCheck.getCheckResult())) {
+            return false;
+        }
+
         if (!accept) {
             boolean requestUpdated = requestDAO.updateStatus(requestId, "REJECTED");
             if (!requestUpdated) {
                 return false;
             }
 
-            if ("CONFIRMED".equalsIgnoreCase(booking.getStatus())) {
-                ContractModel contract = contractDAO.getContractByBookingId(booking.getBookingId());
+            boolean contractCancelled = contractDAO.updateContractStatus(contract.getContractId(), "CANCELLED");
+            if (!contractCancelled) {
+                return false;
+            }
 
-                if (contract != null && "CREATED".equalsIgnoreCase(contract.getContractStatus())) {
-                    boolean contractCancelled = contractDAO.updateContractStatus(contract.getContractId(), "CANCELLED");
-                    if (!contractCancelled) {
-                        return false;
-                    }
-                }
-
-                boolean bookingUpdated = bookingDAO.updateStatus(booking.getBookingId(), "REFUND_PENDING");
-                if (!bookingUpdated) {
-                    return false;
-                }
-            } else if ("AWAITING_PAYMENT".equalsIgnoreCase(booking.getStatus())) {
-                boolean bookingUpdated = bookingDAO.updateStatus(booking.getBookingId(), "CANCELLED");
-                if (!bookingUpdated) {
-                    return false;
-                }
+            boolean bookingUpdated = bookingDAO.updateStatus(booking.getBookingId(), "REFUND_PENDING");
+            if (!bookingUpdated) {
+                return false;
             }
 
             return true;
@@ -349,30 +447,16 @@ public class CarChangeServlet extends HttpServlet {
     }
 
     private boolean applyCarChange(BookingModel booking, int newCarId) {
-        int oldCarId = booking.getCarId();
-
         boolean bookingUpdated = bookingDAO.updateCarId(booking.getBookingId(), newCarId);
         if (!bookingUpdated) {
             return false;
         }
 
-        if ("CONFIRMED".equalsIgnoreCase(booking.getStatus())) {
-            boolean oldCarUpdated = carDAO.updateStatus(oldCarId, "AVAILABLE");
-            if (!oldCarUpdated) {
+        ContractModel contract = contractDAO.getContractByBookingId(booking.getBookingId());
+        if (contract != null && "CREATED".equalsIgnoreCase(contract.getContractStatus())) {
+            boolean contractUpdated = contractDAO.updateCarId(contract.getContractId(), newCarId);
+            if (!contractUpdated) {
                 return false;
-            }
-
-            boolean newCarUpdated = carDAO.updateStatus(newCarId, "BOOKED");
-            if (!newCarUpdated) {
-                return false;
-            }
-
-            ContractModel contract = contractDAO.getContractByBookingId(booking.getBookingId());
-            if (contract != null && "CREATED".equalsIgnoreCase(contract.getContractStatus())) {
-                boolean contractUpdated = contractDAO.updateCarId(contract.getContractId(), newCarId);
-                if (!contractUpdated) {
-                    return false;
-                }
             }
         }
 

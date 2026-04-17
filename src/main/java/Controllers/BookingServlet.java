@@ -508,6 +508,14 @@ public class BookingServlet extends HttpServlet {
 
         request.setAttribute("pendingCarChangeRequest", pendingRequest);
 
+        if (pendingRequest != null) {
+            CarModel oldCar = carDAO.findById(pendingRequest.getOldCarId());
+            CarModel newCar = carDAO.findById(pendingRequest.getNewCarId());
+
+            request.setAttribute("oldCarChangeCar", oldCar);
+            request.setAttribute("newCarChangeCar", newCar);
+        }
+
         String cancelStatus = request.getParameter("cancelStatus");
         request.setAttribute("cancelStatus", cancelStatus);
         request.setAttribute("booking", booking);
