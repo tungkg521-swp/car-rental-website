@@ -45,7 +45,7 @@ public class CarModel {
                     String fuelType, String transmission,
                     String brandName, String typeName,
                     String imageUrl, String imageFolder,
-                    String description, String status) {
+                    String description, String status,String plateNumber) {
 
         this.carId = carId;
         this.modelName = modelName;
@@ -60,6 +60,7 @@ public class CarModel {
         this.imageFolder = imageFolder;
         this.description = description;
         this.status = status;
+        this.plateNumber = plateNumber;
     }
 
     // ===== GETTERS =====

@@ -36,7 +36,8 @@ public class CarDAO extends DBContext {
             t.type_name,
             i.image_url,
             c.image_folder,
-            c.status
+            c.status,
+            c.plate_number
         FROM cars c
         LEFT JOIN brand b 
             ON c.brand_id = b.brand_id
@@ -65,7 +66,8 @@ public class CarDAO extends DBContext {
                         rs.getString("image_url"),
                         rs.getString("image_folder"),
                         null,
-                        rs.getString("status")
+                        rs.getString("status"),
+                        rs.getString("plate_number")
                 ));
             }
 
@@ -93,7 +95,9 @@ public class CarDAO extends DBContext {
 
             c.image_folder,
             c.description,
-            c.status
+            c.status,
+            c.plate_number
+               
         FROM cars c
 
         LEFT JOIN brand b 
@@ -125,7 +129,9 @@ public class CarDAO extends DBContext {
                         rs.getString("image_url"),
                         rs.getString("image_folder"),
                         rs.getString("description"),
-                        rs.getString("status")
+                        rs.getString("status"),
+                        rs.getString("plate_number")
+                        
                 );
             }
 
@@ -153,7 +159,8 @@ public class CarDAO extends DBContext {
             i.image_url,
             c.image_folder,
             c.description,
-            c.status
+            c.status,
+            c.plate_number
         FROM cars c
         LEFT JOIN brand b 
             ON c.brand_id = b.brand_id
@@ -180,7 +187,9 @@ public class CarDAO extends DBContext {
                         rs.getString("image_url"),
                         rs.getString("image_folder"),
                         rs.getString("description"),
-                        rs.getString("status")
+                        rs.getString("status"),
+                         rs.getString("plate_number")
+                        
                 ));
             }
 
@@ -228,6 +237,7 @@ public class CarDAO extends DBContext {
             c.image_folder,
             c.description,  -- THÊM: Nếu cần description (optional, nhưng constructor có)
             c.status
+            c.plate_number
         FROM cars c  -- SỬA: cars lowercase để nhất quán
         JOIN brand b ON c.brand_id = b.brand_id
         JOIN cars_type ct ON c.type_id = ct.type_id
@@ -255,7 +265,8 @@ public class CarDAO extends DBContext {
                         rs.getString("image_folder"),
                         rs.getString("description"), // SỬA: Lấy từ rs thay null (nếu không cần, bỏ select và dùng constructor khác)
 
-                        rs.getString("status")
+                        rs.getString("status"),
+                        rs.getString("plate_number")
                 ));
             }
             System.out.println("Result size = " + list.size());
@@ -282,7 +293,7 @@ public class CarDAO extends DBContext {
         SELECT 
             c.car_id, c.model_name, c.model_year, c.price_per_day, c.seat_count,
             c.fuel_type, c.transmission, b.brand_name, ct.type_name,
-            i.image_url, c.image_folder, c.description, c.status
+            i.image_url, c.image_folder, c.description, c.status,c.plate_number
         FROM cars c
         JOIN brand b ON c.brand_id = b.brand_id
         JOIN cars_type ct ON c.type_id = ct.type_id
@@ -382,7 +393,9 @@ public class CarDAO extends DBContext {
                         rs.getString("image_url"),
                         rs.getString("image_folder"),
                         rs.getString("description"),
-                        rs.getString("status")
+                        rs.getString("status"),
+                        rs.getString("plate_number")
+                        
                 ));
             }
         } catch (Exception e) {
@@ -663,7 +676,7 @@ public class CarDAO extends DBContext {
             ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             ps.setInt(1, brandId);
             ps.setInt(2, typeId);
-            ps.setString(3, plateNumber);
+            ps.setString(3, car.getPlateNumber());
             ps.setString(4, car.getModelName());
             ps.setInt(5, car.getModelYear());
             ps.setBigDecimal(6, car.getPricePerDay());
@@ -772,6 +785,7 @@ public class CarDAO extends DBContext {
                 type_id = ?,
                 description = ?,
                 status = ?
+                plate_number = ?
             WHERE car_id = ?
         """;
 
@@ -786,7 +800,8 @@ public class CarDAO extends DBContext {
             ps.setInt(8, typeId);
             ps.setString(9, car.getDescription());
             ps.setString(10, car.getStatus());
-            ps.setInt(11, car.getCarId());
+             ps.setString(11, car.getPlateNumber());
+            ps.setInt(12, car.getCarId());
 
             int updatedRows = ps.executeUpdate();
             ps.close();
@@ -942,7 +957,8 @@ public class CarDAO extends DBContext {
             t.type_name,
             i.image_url,
             c.image_folder,
-            c.status
+            c.status,
+            c.plate_number
         FROM cars c
         LEFT JOIN brand b ON c.brand_id = b.brand_id
         LEFT JOIN cars_type t ON c.type_id = t.type_id
@@ -978,7 +994,8 @@ public class CarDAO extends DBContext {
                         rs.getString("image_url"),
                         rs.getString("image_folder"),
                         null,
-                        rs.getString("status")
+                        rs.getString("status"),
+                        rs.getString("plate_number")
                 ));
             }
 
@@ -1036,7 +1053,8 @@ public class CarDAO extends DBContext {
             c.plate_number,
             c.image_folder,
             c.description,
-            c.status
+            c.status,
+            c.plate_number
         FROM cars c
         JOIN brand b ON c.brand_id = b.brand_id
         JOIN cars_type t ON c.type_id = t.type_id
@@ -1086,7 +1104,9 @@ public class CarDAO extends DBContext {
                         null,
                         rs.getString("image_folder"),
                         rs.getString("description"),
-                        rs.getString("status")
+                        rs.getString("status"),
+                        rs.getString("plate_number")
+                        
                 ));
             }
         }

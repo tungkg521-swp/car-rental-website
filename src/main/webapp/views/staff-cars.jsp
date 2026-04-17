@@ -41,6 +41,7 @@
                                 <th>ID</th>
                                 <th>Model</th>
                                 <th>Brand</th>
+                                <th>Plate Number</th>
                                 <th>Year</th>
                                 <th>Price/Day</th>
                                 <th>Status</th>
@@ -55,6 +56,7 @@
                                     <td>${car.carId}</td>
                                     <td>${car.modelName}</td>
                                     <td>${car.brandName}</td>
+                                    <td>${car.plateNumber}</td>
                                     <td>${car.modelYear}</td>
                                     <td>$${car.pricePerDay}</td>
 
