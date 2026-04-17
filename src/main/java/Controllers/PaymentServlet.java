@@ -115,14 +115,13 @@ public class PaymentServlet extends HttpServlet {
             return;
         }
 
-        // chỉ cho mở payment page khi đang chờ thanh toán
         if (!"AWAITING_PAYMENT".equalsIgnoreCase(booking.getStatus())) {
             response.sendRedirect(request.getContextPath()
                     + "/booking?action=detail&bookingId=" + bookingId + "&paymentStatus=invalid");
             return;
         }
 
-        // nếu quá hạn thì hủy
+
 
         if (isPaymentExpired(booking)) {
             bookingDAO.updateStatus(bookingId, "CANCELLED");
@@ -315,13 +314,13 @@ public class PaymentServlet extends HttpServlet {
         }
 
         if (success) {
-            boolean confirmed = confirmBookingAfterSuccessfulPayment(bookingId);
+            boolean updated = bookingDAO.updateStatus(bookingId, "PENDING_APPROVAL");
 
-            if (confirmed && booking.getVoucherId() != null) {
+            if (updated && booking.getVoucherId() != null) {
                 voucherDAO.updateVoucherQuantity(booking.getVoucherId());
             }
 
-            return confirmed;
+            return updated;
         }
 
         return true;

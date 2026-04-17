@@ -147,29 +147,56 @@
                             <c:choose>
                                 <c:when test="${contract.contractStatus eq 'CREATED'}">
 
-                                    <form method="post"
-                                          action="${pageContext.request.contextPath}/staff/contracts"
-                                          class="action-form">
+                                    <a class="btn btn-primary"
+                                       href="${pageContext.request.contextPath}/staff/contracts?action=checkForm&id=${contract.contractId}">
+                                        Check Car Before Delivery
+                                    </a>
 
-                                        <input type="hidden"
-                                               name="contractId"
-                                               value="${contract.contractId}"/>
+                                    <c:if test="${not empty latestCarCheck and latestCarCheck.checkResult eq 'OK'}">
+                                        <form method="post"
+                                              action="${pageContext.request.contextPath}/staff/contracts"
+                                              class="action-form">
 
-                                        <button class="btn btn-success"
-                                                type="submit"
-                                                name="action"
-                                                value="activate">
-                                            Handover Car
-                                        </button>
+                                            <input type="hidden"
+                                                   name="contractId"
+                                                   value="${contract.contractId}"/>
 
-                                        <button class="btn btn-danger"
-                                                type="submit"
-                                                name="action"
-                                                value="cancel"
-                                                onclick="return confirm('Are you sure you want to cancel this contract?');">
-                                            Cancel
-                                        </button>
-                                    </form>
+                                            <button class="btn btn-success"
+                                                    type="submit"
+                                                    name="action"
+                                                    value="activate"
+                                                    onclick="return confirm('Deliver this car now?');">
+                                                Handover Car
+                                            </button>
+
+                                            <button class="btn btn-danger"
+                                                    type="submit"
+                                                    name="action"
+                                                    value="cancel"
+                                                    onclick="return confirm('Are you sure you want to cancel this contract?');">
+                                                Cancel
+                                            </button>
+                                        </form>
+                                    </c:if>
+
+                                    <c:if test="${empty latestCarCheck or latestCarCheck.checkResult ne 'OK'}">
+                                        <form method="post"
+                                              action="${pageContext.request.contextPath}/staff/contracts"
+                                              class="action-form">
+
+                                            <input type="hidden"
+                                                   name="contractId"
+                                                   value="${contract.contractId}"/>
+
+                                            <button class="btn btn-danger"
+                                                    type="submit"
+                                                    name="action"
+                                                    value="cancel"
+                                                    onclick="return confirm('Are you sure you want to cancel this contract?');">
+                                                Cancel
+                                            </button>
+                                        </form>
+                                    </c:if>
 
                                 </c:when>
 

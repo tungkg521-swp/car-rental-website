@@ -69,7 +69,7 @@
                                     </c:if>
                                     <c:if test="${booking.status == 'AWAITING_PAYMENT'}">
                                         <div class="info-message">
-                                            This booking has been approved and is waiting for customer payment.
+                                            This booking is waiting for customer payment.
                                         </div>
                                     </c:if>
 
