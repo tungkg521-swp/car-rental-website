@@ -10,7 +10,7 @@ import models.DriverLicenseModel;
 
 public class DriverLicenseDAO extends DBContext {
 
-    // ================= GET BY CUSTOMER =================
+ 
     public DriverLicenseModel getByCustomerId(int customerId) {
 
         String sql = "SELECT * FROM driver_license WHERE customer_id = ?";
@@ -48,7 +48,7 @@ public class DriverLicenseDAO extends DBContext {
                 dl.setImageBack(rs.getString("image_back"));
                 dl.setStatus(rs.getString("status"));
 
-                // ===== NEW VERIFY IMAGES =====
+       
                 dl.setSelfieImage(rs.getString("selfie_img"));
                 dl.setNationalIdFront(rs.getString("id_front_img"));
                 dl.setNationalIdBack(rs.getString("id_back_img"));
@@ -73,7 +73,7 @@ public class DriverLicenseDAO extends DBContext {
         return null;
     }
 
-    // ================= INSERT =================
+
     public int insert(DriverLicenseModel dl) throws Exception {
 
         String sql = "INSERT INTO driver_license "
@@ -114,7 +114,7 @@ public class DriverLicenseDAO extends DBContext {
         return ps.executeUpdate();
     }
 
-    // ================= UPDATE =================
+   
     public int update(DriverLicenseModel dl) throws Exception {
 
         String sql = "UPDATE driver_license SET "
@@ -156,7 +156,7 @@ public class DriverLicenseDAO extends DBContext {
         return ps.executeUpdate();
     }
 
-    // ================= UPDATE STATUS BY CUSTOMER =================
+ 
     public void updateStatusCus(int customerId, String status) throws Exception {
 
         String sql = "UPDATE driver_license "
@@ -169,7 +169,7 @@ public class DriverLicenseDAO extends DBContext {
         ps.executeUpdate();
     }
 
-    // ================= LIST REQUESTED =================
+   
     public List<DriverLicenseModel> getRequestedLicenses() {
 
         List<DriverLicenseModel> list = new ArrayList<>();
@@ -207,7 +207,7 @@ public class DriverLicenseDAO extends DBContext {
         return list;
     }
 
-    // ================= GET BY ID =================
+   
     public DriverLicenseModel getById(int licenseId) {
 
         String sql = "SELECT * FROM driver_license WHERE license_id = ?";
@@ -247,7 +247,7 @@ public class DriverLicenseDAO extends DBContext {
                 dl.setImageBack(rs.getString("image_back"));
                 dl.setStatus(rs.getString("status"));
 
-                // ===== NEW VERIFY IMAGES =====
+                
                 dl.setSelfieImage(rs.getString("selfie_img"));
                 dl.setNationalIdFront(rs.getString("id_front_img"));
                 dl.setNationalIdBack(rs.getString("id_back_img"));
@@ -272,7 +272,7 @@ public class DriverLicenseDAO extends DBContext {
         return null;
     }
 
-    // ================= UPDATE STATUS BY LICENSE =================
+    
     public boolean updateStatus(int licenseId, String status) {
         String sql = """
             UPDATE driver_license

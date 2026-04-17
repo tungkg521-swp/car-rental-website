@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.List;
 
 import models.DriverLicenseModel;
-import service.DriverLicenseService;
+
 
 @WebServlet(name = "StaffLicenseServlet", urlPatterns = {"/staff/licenses"})
 public class StaffLicenseServlet extends HttpServlet {

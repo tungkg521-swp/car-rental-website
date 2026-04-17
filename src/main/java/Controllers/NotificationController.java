@@ -5,7 +5,7 @@ import DALs.AccountDAO;
 import DALs.NotificationDAO;
 
 import models.NotificationModel;
-import service.NotificationService;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
 import java.io.IOException;

@@ -67,11 +67,3 @@
     </div>
 </header>
 
-<%
-    service.NotificationService ns = new service.NotificationService();
-    models.AccountModel acc = (models.AccountModel) session.getAttribute("ACCOUNT");
-    if (acc != null) {
-        java.util.List list = ns.getNotificationsByAccount(acc.getAccountId());
-        request.setAttribute("notifications", list);
-    }
-%>

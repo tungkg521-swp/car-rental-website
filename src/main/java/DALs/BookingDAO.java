@@ -297,7 +297,9 @@ public class BookingDAO extends DBContext {
             b.start_date,
             b.end_date,
             b.total_estimated_price,
-            b.status
+            b.status,
+            ca.plate_number
+                     
         FROM booking b
         JOIN customer c ON b.customer_id = c.customer_id
         JOIN cars ca ON b.car_id = ca.car_id
@@ -316,7 +318,7 @@ public class BookingDAO extends DBContext {
                 booking.setEndDate(rs.getDate("end_date"));
                 booking.setTotalEstimatedPrice(rs.getBigDecimal("total_estimated_price"));
                 booking.setStatus(rs.getString("status"));
-
+                booking.setPlateNumber(rs.getString("plate_number"));
                 list.add(booking);
             }
 
@@ -347,7 +349,8 @@ public class BookingDAO extends DBContext {
 
         car.model_name,
         car.price_per_day,
-        car.image_folder
+        car.image_folder,
+         car.plate_number
 
     FROM booking b
     JOIN customer c ON b.customer_id = c.customer_id
@@ -382,6 +385,7 @@ public class BookingDAO extends DBContext {
                 booking.setDepositAmount(rs.getBigDecimal("deposit_amount"));
                 booking.setRemainingAmount(rs.getBigDecimal("remaining_amount"));
                 booking.setPaymentDeadline(rs.getTimestamp("payment_deadline"));
+                booking.setPlateNumber(rs.getString("plate_number"));
                 return booking;
             }
 

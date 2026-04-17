@@ -77,6 +77,11 @@
                                     <p>${car.modelName}</p>
                                 </div>
 
+                                  <div>
+                                    <span class="label">Plate Number</span>
+                                    <p>${car.plateNumber}</p>
+                                </div>
+                                
                                 <div>
                                     <span class="label">Daily Price</span>
                                     <fmt:formatNumber value="${contract.dailyPrice}" type="number"/> VND

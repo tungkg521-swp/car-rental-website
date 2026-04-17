@@ -187,7 +187,7 @@ public class NotificationDAO {
 
         NotificationDAO dao = new NotificationDAO();
 
-        int customerId = 1; // đổi ID theo database
+        int customerId = 1; 
 
         List<NotificationModel> list = dao.findByCustomerId(customerId);
 
