@@ -111,20 +111,37 @@ function initRentalCalendar() {
             showMonths: 2,
             monthSelectorType: "static",
             disable: busyDates,
-            onReady: function (selectedDates, dateStr, instance) {
+
+            onDayCreate: function (dObj, dStr, instance, dayElem) {
+                if (!dayElem || !dayElem.dateObj) {
+                    return;
+                }
+
+                const dateText = formatLocalDate(dayElem.dateObj);
+                if (busyDateSet.has(dateText)) {
+                    dayElem.classList.add("busy-day");
+                }
+            },
+
+            onReady: function (selectedDates) {
                 syncSelectedDates(selectedDates);
-                markBusyDays(instance);
                 updateSelectedDisplay();
             },
-            onMonthChange: function (selectedDates, dateStr, instance) {
-                markBusyDays(instance);
+
+            onMonthChange: function () {
+                setTimeout(function () {
+                    fp.redraw();
+                }, 0);
             },
-            onYearChange: function (selectedDates, dateStr, instance) {
-                markBusyDays(instance);
+
+            onYearChange: function () {
+                setTimeout(function () {
+                    fp.redraw();
+                }, 0);
             },
-            onChange: function (selectedDates, dateStr, instance) {
+
+            onChange: function (selectedDates) {
                 syncSelectedDates(selectedDates);
-                markBusyDays(instance);
                 updateSelectedDisplay();
             }
         });
@@ -137,7 +154,6 @@ function initRentalCalendar() {
         setTimeout(function () {
             createCalendar();
             fp.redraw();
-            markBusyDays(fp);
         }, 100);
     }
 
@@ -251,27 +267,7 @@ function initRentalCalendar() {
         closeModal();
     }
 
-    function markBusyDays(instance) {
-        if (!instance || !instance.daysContainer) {
-            return;
-        }
-
-        const dayElements = instance.daysContainer.querySelectorAll(".flatpickr-day");
-
-        dayElements.forEach(function (dayEl) {
-            dayEl.classList.remove("busy-day");
-
-            const dateObj = dayEl.dateObj;
-            if (!dateObj) {
-                return;
-            }
-
-            const dateText = formatLocalDate(dateObj);
-            if (busyDateSet.has(dateText)) {
-                dayEl.classList.add("busy-day");
-            }
-        });
-    }
+        
 
     if (openButton) {
         openButton.addEventListener("click", function (event) {

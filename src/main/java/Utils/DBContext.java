@@ -11,7 +11,7 @@ public class DBContext {
             + "databaseName=CarRentalDB1;"
             + "user=sa;"
 
-            + "password=;"
+            + "password=123456;"
 
             + "encrypt=true;"
             + "trustServerCertificate=true;";

@@ -441,13 +441,7 @@ body.modal-open {
 
 
 
-#rentalCalendar .flatpickr-day.flatpickr-disabled,
-#rentalCalendar .flatpickr-day.notAllowed,
-#rentalCalendar .flatpickr-day.prevMonthDay,
-#rentalCalendar .flatpickr-day.nextMonthDay {
-    color: #c4c4c4;
-    opacity: 1;
-}
+
 
 #rentalCalendar .flatpickr-day.selected:hover,
 #rentalCalendar .flatpickr-day.startRange:hover,
@@ -456,18 +450,8 @@ body.modal-open {
     color: #fff;
 }
 
-#rentalCalendar .flatpickr-day.busy-day {
-    background: #ef4444 !important;
-    color: #fff !important;
-    border: 1px solid #dc2626 !important;
-    font-weight: 700;
-    opacity: 1 !important;
-}
 
-#rentalCalendar .flatpickr-day.busy-day:hover {
-    background: #dc2626 !important;
-    color: #fff !important;
-}
+
 
 .selected-period {
     margin: 12px 0 14px;
@@ -1206,38 +1190,45 @@ body.modal-open {
 }
 
 /* ===== NGÀY BẬN / KHÔNG CHỌN ĐƯỢC ===== */
-#rentalCalendar .flatpickr-day.busy-day {
+.flatpickr-day.busy-day,
+.flatpickr-day.busy-day.flatpickr-disabled,
+.flatpickr-day.busy-day.notAllowed,
+.flatpickr-day.busy-day.flatpickr-disabled.notAllowed {
     background: #ef4444 !important;
     color: #ffffff !important;
     border: 1px solid #dc2626 !important;
     font-weight: 800 !important;
     cursor: not-allowed !important;
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18);
+    opacity: 1 !important;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
     position: relative;
 }
 
-/* thêm dấu gạch chéo nhẹ cho dễ nhận ra */
-#rentalCalendar .flatpickr-day.busy-day::after {
+.flatpickr-day.busy-day::after,
+.flatpickr-day.busy-day.flatpickr-disabled::after,
+.flatpickr-day.busy-day.notAllowed::after,
+.flatpickr-day.busy-day.flatpickr-disabled.notAllowed::after {
     content: "";
     position: absolute;
     top: 50%;
     left: 8px;
     right: 8px;
     height: 2px;
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.92);
     transform: rotate(-25deg);
     border-radius: 999px;
 }
 
-/* hover vào ngày bận vẫn giữ đỏ */
-#rentalCalendar .flatpickr-day.busy-day:hover {
+.flatpickr-day.busy-day:hover,
+.flatpickr-day.busy-day.flatpickr-disabled:hover,
+.flatpickr-day.busy-day.notAllowed:hover,
+.flatpickr-day.busy-day.flatpickr-disabled.notAllowed:hover {
     background: #dc2626 !important;
     color: #ffffff !important;
 }
 
-/* ngày bị disable / không được chọn */
-#rentalCalendar .flatpickr-day.flatpickr-disabled,
-#rentalCalendar .flatpickr-day.notAllowed {
+.flatpickr-day.flatpickr-disabled:not(.busy-day),
+.flatpickr-day.notAllowed:not(.busy-day) {
     background: #f3f4f6 !important;
     color: #9ca3af !important;
     cursor: not-allowed !important;
