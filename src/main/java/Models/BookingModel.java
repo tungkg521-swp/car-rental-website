@@ -21,6 +21,7 @@ public class BookingModel {
     private BigDecimal totalEstimatedPrice;
 
     private String carName;
+    private String plateNumber;
     private String imageFolder;
 
     private String customerName;
@@ -52,6 +53,15 @@ public class BookingModel {
         return customerId;
     }
 
+    public String getPlateNumber() {
+        return plateNumber;
+    }
+
+    public void setPlateNumber(String plateNumber) {
+        this.plateNumber = plateNumber;
+    }
+
+    
     public void setCustomerId(int customerId) {
         this.customerId = customerId;
     }

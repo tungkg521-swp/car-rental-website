@@ -19,8 +19,7 @@ import models.CarChangeRequestModel;
 import models.CarModel;
 import models.ContractModel;
 import models.StaffModel;
-import service.BookingService;
-import service.CarChangeRequestService;
+
 
 @WebServlet("/staff/bookings")
 public class StaffBookingController extends HttpServlet {
@@ -30,7 +29,7 @@ public class StaffBookingController extends HttpServlet {
     private final CarDAO carDAO = new CarDAO();
     private final ContractDAO contractDAO = new ContractDAO();
 
-    // ================= GET =================
+   
     @Override
     protected void doGet(HttpServletRequest request,
             HttpServletResponse response)
@@ -38,7 +37,7 @@ public class StaffBookingController extends HttpServlet {
 
         String action = request.getParameter("action");
 
-        // ===== 1. VIEW LIST =====
+      
         if (action == null || action.equals("list")) {
 
             List<BookingModel> list = bookingDAO.findAllBookings();
@@ -47,7 +46,7 @@ public class StaffBookingController extends HttpServlet {
 
             request.getRequestDispatcher("/views/staff-booking.jsp")
                     .forward(request, response);
-        } // ===== 2. VIEW DETAIL =====
+        } 
         else if ("detail".equals(action)) {
 
             try {
@@ -84,7 +83,7 @@ public class StaffBookingController extends HttpServlet {
                 response.sendRedirect(
                         request.getContextPath() + "/staff/bookings");
             }
-        } // ===== DEFAULT =====
+        } 
         else {
 
             response.sendRedirect(
@@ -92,7 +91,7 @@ public class StaffBookingController extends HttpServlet {
         }
     }
 
-    // ================= POST =================
+    
     @Override
     protected void doPost(HttpServletRequest request,
             HttpServletResponse response)
@@ -104,7 +103,7 @@ public class StaffBookingController extends HttpServlet {
 
             int bookingId = Integer.parseInt(request.getParameter("bookingId"));
 
-            // ===== lấy staffId từ session =====
+            
             HttpSession session = request.getSession();
 
             StaffModel staff = (StaffModel) session.getAttribute("STAFF");
@@ -116,7 +115,7 @@ public class StaffBookingController extends HttpServlet {
 
             int staffId = staff.getStaffId();
 
-            // ===== APPROVE BOOKING =====
+           
             boolean success = false;
 
             if ("approve".equals(action)) {
@@ -126,7 +125,7 @@ public class StaffBookingController extends HttpServlet {
                 success = rejectBooking(bookingId);
 
             }
-            // quay lại detail
+            
             response.sendRedirect(
                     request.getContextPath()
                     + "/staff/bookings?action=detail&id=" + bookingId

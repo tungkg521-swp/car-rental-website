@@ -413,16 +413,16 @@ public class CarDAO extends DBContext {
         try {
             conn = getConnection();
 
-            // 1. Kiểm tra brand
+            
             int brandId = getBrandId(conn, car.getBrandName());
 
-            // 2. Kiểm tra type
+   
             int typeId = getTypeId(conn, car.getTypeName());
 
-            // 3. Tạo plate_number tạm
+          
             String plateNumber = "TEMP-" + System.currentTimeMillis();
 
-            // 4. Thêm xe mới
+            
             String sql = "INSERT INTO cars (brand_id, type_id, plate_number, model_name, model_year, "
                     + "price_per_day, status, created_at, seat_count, fuel_type, transmission, "
                     + "description, image_folder) "
@@ -448,14 +448,14 @@ public class CarDAO extends DBContext {
                 return false;
             }
 
-            // Lấy ID xe vừa tạo
+            
             rs = ps.getGeneratedKeys();
             int carId = 0;
             if (rs.next()) {
                 carId = rs.getInt(1);
             }
 
-            // 5. Lưu ảnh chính vào bảng cars_image
+           
             if (carId > 0 && car.getImageUrl() != null) {
                 String imageSql = "INSERT INTO cars_image (car_id, image_url, is_primary, created_at) VALUES (?, ?, ?, GETDATE())";
 
@@ -492,25 +492,25 @@ public class CarDAO extends DBContext {
             }
         }
     }
-// Sửa method getBrandId
+
 
     private int getBrandId(Connection conn, String brandName) throws SQLException {
         System.out.println("   getBrandId - brandName: " + brandName);
 
-        // Tìm brand
+
         String selectSql = "SELECT brand_id FROM brand WHERE brand_name = ?";
         try (PreparedStatement ps = conn.prepareStatement(selectSql)) {
             ps.setString(1, brandName.trim());
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 int id = rs.getInt("brand_id");
-                System.out.println("   Tìm thấy brand ID: " + id);
+                
                 return id;
             }
         }
 
-        // Nếu chưa có, thêm mới
-        System.out.println("   Brand chưa tồn tại, đang thêm mới...");
+    
+       
         String insertSql = "INSERT INTO brand (brand_name) VALUES (?)";
         try (PreparedStatement ps = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, brandName.trim());
@@ -518,7 +518,7 @@ public class CarDAO extends DBContext {
             ResultSet rs = ps.getGeneratedKeys();
             if (rs.next()) {
                 int id = rs.getInt(1);
-                System.out.println("   Đã thêm brand mới với ID: " + id);
+                
                 return id;
             }
         }
@@ -527,11 +527,11 @@ public class CarDAO extends DBContext {
     }
 
 
-// Sửa method getTypeId
-    private int getTypeId(Connection conn, String typeName) throws SQLException {
-        System.out.println("   getTypeId - typeName: " + typeName);
 
-        // Tìm type
+    private int getTypeId(Connection conn, String typeName) throws SQLException {
+        
+
+    
 
         String selectSql = "SELECT type_id FROM cars_type WHERE type_name = ?";
         try (PreparedStatement ps = conn.prepareStatement(selectSql)) {
@@ -539,13 +539,13 @@ public class CarDAO extends DBContext {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 int id = rs.getInt("type_id");
-                System.out.println("   Tìm thấy type ID: " + id);
+              
                 return id;
             }
         }
 
 
-        System.out.println("   Type chưa tồn tại, đang thêm mới...");
+        
         String insertSql = "INSERT INTO cars_type (type_name) VALUES (?)";
         try (PreparedStatement ps = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, typeName.trim());
@@ -553,7 +553,7 @@ public class CarDAO extends DBContext {
             ResultSet rs = ps.getGeneratedKeys();
             if (rs.next()) {
                 int id = rs.getInt(1);
-                System.out.println("   Đã thêm type mới với ID: " + id);
+                
                 return id;
             }
         }
@@ -616,7 +616,7 @@ public class CarDAO extends DBContext {
             ps.executeUpdate();
             ps.close();
 
-            // Sau đó xóa xe
+           
             String deleteCarSql = "DELETE FROM cars WHERE car_id = ?";
             ps = conn.prepareStatement(deleteCarSql);
             ps.setInt(1, carId);

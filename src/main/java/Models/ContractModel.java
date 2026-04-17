@@ -37,6 +37,7 @@ public class ContractModel {
     private String customerEmail;
     private String customerPhone;
     private String carName;
+ 
 
     public ContractModel() {
     }
@@ -48,6 +49,8 @@ public class ContractModel {
     public void setContractId(int contractId) {
         this.contractId = contractId;
     }
+
+ 
 
     public int getBookingId() {
         return bookingId;

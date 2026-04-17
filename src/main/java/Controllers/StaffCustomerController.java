@@ -7,7 +7,7 @@ package Controllers;
 
 import DALs.CustomerDAO;
 
-import service.CustomerService;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -35,7 +35,7 @@ public class StaffCustomerController extends HttpServlet {
 
         String action = request.getParameter("action");
 
-        // ===== LIST =====
+  
         if (action == null || action.equals("list")) {
 
 
@@ -45,7 +45,7 @@ public class StaffCustomerController extends HttpServlet {
 
             request.getRequestDispatcher("/views/staff-users.jsp")
                     .forward(request, response);
-        } // ===== DETAIL =====
+        } 
         else if (action.equals("detail")) {
 
             int id = Integer.parseInt(request.getParameter("id"));

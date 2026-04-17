@@ -119,7 +119,7 @@ public class ContractDAO extends DBContext{
                     contract.setCustomerEmail(rs.getString("customer_email"));
                     contract.setCustomerPhone(rs.getString("customer_phone"));
                     contract.setCarName(rs.getString("car_name"));
-
+                   
                     return contract;
                 }
             }

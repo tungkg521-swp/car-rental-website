@@ -2,9 +2,9 @@ package DALs;
 
 import Utils.DBContext;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+
 import java.sql.SQLException;
-import models.AccountModel;
+
 
 public class ProfileDAO extends DBContext {
 

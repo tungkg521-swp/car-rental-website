@@ -23,7 +23,7 @@
             <div class="staff-content booking-detail-page">
                 <div class="booking-detail-shell">
 
-                   
+
 
                     <c:choose>
                         <c:when test="${not empty booking}">
@@ -179,7 +179,10 @@
                                                 <strong>Model</strong>
                                                 <p>${booking.carName}</p>
                                             </div>
-
+                                            <div>
+                                                <strong>Plate Number</strong>
+                                                <p>${booking.plateNumber}</p>
+                                            </div>
                                             <div>
                                                 <strong>Price / Day</strong>
                                                 <p>

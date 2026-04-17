@@ -20,7 +20,7 @@ public class VoucherDAO extends DBContext {
         super();
     }
 
-    // Get all vouchers
+
 
    public List<VoucherModel> getAllVouchers() {
     List<VoucherModel> list = new ArrayList<>();
@@ -83,7 +83,7 @@ public class VoucherDAO extends DBContext {
     return list;
 }
 
-    // Find voucher by ID
+
     public VoucherModel findById(int voucherId) {
         String sql = """
             SELECT voucher_id, code, discount_type, discount_value, start_date, end_date, 
@@ -105,7 +105,7 @@ public class VoucherDAO extends DBContext {
         return null;
     }
 
-    // Find voucher by code (ĐÃ SỬA LỖI)
+
     public VoucherModel findByCode(String code) {
         String sql = """
             SELECT voucher_id, code, discount_type, discount_value, start_date, end_date, 
@@ -115,7 +115,7 @@ public class VoucherDAO extends DBContext {
             """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, code); // QUAN TRỌNG: Set parameter
+            ps.setString(1, code); 
             
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -128,7 +128,7 @@ public class VoucherDAO extends DBContext {
         return null;
     }
 
-    // Insert new voucher
+
    public boolean insert(VoucherModel voucher) {
 
     String sql = """
@@ -145,11 +145,11 @@ public class VoucherDAO extends DBContext {
         ps.setBigDecimal(3, voucher.getDiscount());
         ps.setDate(4, voucher.getExpireDate());
 
-        // ⚠ QUAN TRỌNG: DB là varchar(20)
+        
         ps.setString(5, voucher.isStatus() ? "active" : "inactive");
 
         ps.setInt(6, voucher.getMaxUses());
-        ps.setInt(7, 0); // used_count mặc định 0
+        ps.setInt(7, 0);
         ps.setBigDecimal(8, voucher.getMinBookingAmount());
 
         int result = ps.executeUpdate();
@@ -161,7 +161,7 @@ public class VoucherDAO extends DBContext {
     }
     return false;
 }
-    // Update existing voucher
+ 
    public boolean update(VoucherModel voucher) {
 
     String sql = """
@@ -183,7 +183,7 @@ public class VoucherDAO extends DBContext {
         ps.setBigDecimal(3, voucher.getDiscount());
         ps.setDate(4, voucher.getExpireDate());
 
-        // ⚠ FIX
+      
         ps.setString(5, voucher.isStatus() ? "active" : "inactive");
 
         ps.setInt(6, voucher.getMaxUses());
@@ -217,7 +217,7 @@ public class VoucherDAO extends DBContext {
     return false;
 }
     
-    // Delete voucher
+
     public boolean delete(int voucherId) {
         String sql = "DELETE FROM voucher WHERE voucher_id = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -229,7 +229,7 @@ public class VoucherDAO extends DBContext {
         return false;
     }
 
-    // Helper method to map ResultSet to VoucherModel
+    
     private VoucherModel mapResultSetToVoucher(ResultSet rs) throws SQLException {
         return new VoucherModel(
             rs.getInt("voucher_id"),
@@ -247,7 +247,7 @@ public class VoucherDAO extends DBContext {
         );
     }
 
-    // Parse status from database to string
+    
     private String parseStatus(Object statusObj) {
         if (statusObj == null) return "inactive";
         
@@ -267,7 +267,7 @@ public class VoucherDAO extends DBContext {
         return "inactive";
     }
 
-    // Kiểm tra code đã tồn tại chưa
+   
     public boolean existsByCode(String code) {
         String sql = "SELECT COUNT(*) FROM voucher WHERE code = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {

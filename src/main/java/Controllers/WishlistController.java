@@ -9,7 +9,7 @@ import DALs.CarDAO;
 import DALs.WishlistDAO;
 
 import models.WishlistModel;
-import service.WishlistService;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -81,7 +81,7 @@ public class WishlistController extends HttpServlet {
     @Override
     public String getServletInfo() {
         return "Short description";
-    }// </editor-fold>
+    }
 
     private void viewWishlist(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

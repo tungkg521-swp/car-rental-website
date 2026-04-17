@@ -47,9 +47,9 @@ public class MaintenanceDAO extends DBContext {
                 m.setUpdatedAt(rs.getTimestamp("updated_at") != null ? rs.getTimestamp("updated_at").toLocalDateTime() : null);
                 list.add(m);
             }
-//         System.out.println("findAll() found " + list.size() + " maintenances");  // ← DEBUG
+
         } catch (SQLException e) {
-            //System.err.println("Error in findAll: " + e.getMessage());
+           
             e.printStackTrace();
         }
         return list;
@@ -89,7 +89,7 @@ public class MaintenanceDAO extends DBContext {
         m.setCarId(rs.getInt("car_id"));
         m.setModelName(rs.getString("model_name"));
         m.setLicensePlate(rs.getString("license_plate"));
-        m.setCarImageUrl(rs.getString("car_image_url"));        // ← ĐÃ CÓ
+        m.setCarImageUrl(rs.getString("car_image_url"));       
         m.setMaintenanceType(rs.getString("maintenance_type"));
         m.setScheduledDate(rs.getDate("scheduled_date"));
         m.setMileageScheduled(rs.getInt("mileage_scheduled"));
@@ -162,6 +162,6 @@ public class MaintenanceDAO extends DBContext {
             return false;
         }
     }
-    // Nếu sau này cần thêm hàm findOverdue, cancel, etc. thì bổ sung ở đây
+
 
 }

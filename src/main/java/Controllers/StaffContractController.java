@@ -29,7 +29,7 @@ public class StaffContractController extends HttpServlet {
     private final BookingDAO bookingDAO = new BookingDAO();
     private final CarCheckDAO carCheckDAO = new CarCheckDAO();
 
-    // ================= GET =================
+
     @Override
     protected void doGet(HttpServletRequest request,
             HttpServletResponse response)
@@ -37,7 +37,7 @@ public class StaffContractController extends HttpServlet {
 
         String action = request.getParameter("action");
 
-        // ===== LIST CONTRACT =====
+      
         if (action == null || "list".equals(action)) {
 
             List<ContractModel> list = contractDAO.findAllContracts();
@@ -46,7 +46,7 @@ public class StaffContractController extends HttpServlet {
 
             request.getRequestDispatcher("/views/staff-contracts.jsp")
                     .forward(request, response);
-        } // ===== CONTRACT DETAIL =====
+        } 
         else if ("detail".equals(action)) {
 
             try {
@@ -64,15 +64,15 @@ public class StaffContractController extends HttpServlet {
                     return;
                 }
 
-                // ===== LOAD CUSTOMER =====
+             
                 CustomerModel customer
                         = customerDAO.findById(contract.getCustomerId());
 
-                // ===== LOAD CAR =====
+               
                 CarModel car
                         = carDAO.findById(contract.getCarId());
 
-                // ===== CALCULATE RENTAL DAYS =====
+              
                 long days = ChronoUnit.DAYS.between(
                         contract.getContractStartDate().toLocalDate(),
                         contract.getContractEndDate().toLocalDate()
@@ -161,7 +161,7 @@ public class StaffContractController extends HttpServlet {
         }
     }
 
-    // ================= POST =================
+
     @Override
     protected void doPost(HttpServletRequest request,
             HttpServletResponse response)
@@ -232,7 +232,7 @@ public class StaffContractController extends HttpServlet {
                 return false;
             }
 
-            // Chưa có lần check mới nhất OK thì không được giao xe
+            
             if (!carCheckDAO.hasLatestCheckOk(contractId)) {
                 return false;
             }

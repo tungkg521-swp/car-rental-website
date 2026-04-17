@@ -11,7 +11,7 @@ import models.ReportModel;
 
 public class ReportDAO extends DBContext {
 
-    // ==================== RENTAL REPORT ====================
+
     public List<ReportModel> findAllRentalReports(String startDate, String endDate) {
         List<ReportModel> list = new ArrayList<>();
         StringBuilder sql = new StringBuilder("""
@@ -87,7 +87,7 @@ public class ReportDAO extends DBContext {
         return list;
     }
 
-    // ==================== USAGE REPORT ====================
+
     public List<ReportModel> findVehicleUsageReports(String startDate, String endDate) {
         List<ReportModel> list = new ArrayList<>();
         StringBuilder sql = new StringBuilder("""
@@ -156,7 +156,7 @@ public class ReportDAO extends DBContext {
         return list;
     }
 
-    // ==================== REVENUE REPORT (CHI TIẾT) ====================
+    
     public List<ReportModel> findRevenueReports(String startDate, String endDate) {
         List<ReportModel> list = new ArrayList<>();
         StringBuilder sql = new StringBuilder("""
@@ -233,7 +233,7 @@ public class ReportDAO extends DBContext {
         return list;
     }
 
-  // ==================== REVENUE CHART  ====================
+
 public List<ReportModel> findRevenueByDate(String startDate, String endDate) {
     List<ReportModel> list = new ArrayList<>();
 
@@ -290,11 +290,11 @@ public List<ReportModel> findRevenueByDate(String startDate, String endDate) {
     return list;
 }
 
-    // ==================== VEHICLE UTILIZATION ====================
+
     public Map<String, Object> getVehicleUtilization(String startDate, String endDate) {
         Map<String, Object> result = new HashMap<>();
 
-        // Pie Chart: Phân bổ trạng thái xe
+      
         String pieSql = """
         SELECT 
             COUNT(CASE WHEN c.status = 'RENTED' OR rc.contract_status IN ('ACTIVE', 'ONGOING') THEN 1 END) AS rented,
@@ -308,7 +308,7 @@ public List<ReportModel> findRevenueByDate(String startDate, String endDate) {
             AND rc.contract_status IN ('ACTIVE', 'ONGOING')
         """;
 
-        // Bar Chart: Top 10 xe sử dụng nhiều nhất
+       
         String barSql = """
         SELECT TOP 10
             c.plate_number,
@@ -340,7 +340,7 @@ public List<ReportModel> findRevenueByDate(String startDate, String endDate) {
         """;
 
         try {
-            // Pie Chart
+     
             try (PreparedStatement ps = connection.prepareStatement(pieSql)) {
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
@@ -353,7 +353,7 @@ public List<ReportModel> findRevenueByDate(String startDate, String endDate) {
                 }
             }
 
-            // Bar Chart
+        
             try (PreparedStatement ps = connection.prepareStatement(barSql)) {
                 for (int i = 0; i < params.size(); i++) {
                     ps.setObject(i + 1, params.get(i));
@@ -379,7 +379,7 @@ public List<ReportModel> findRevenueByDate(String startDate, String endDate) {
         return result;
     }
 
-    // ==================== SUMMARY KPI  ====================
+    
     public Map<String, Object> getReportSummary(String startDate, String endDate) {
         Map<String, Object> summary = new HashMap<>();
 
@@ -419,8 +419,8 @@ public List<ReportModel> findRevenueByDate(String startDate, String endDate) {
                     int totalRentalDays = rs.getInt("totalRentalDays");
                     int totalCars = rs.getInt("totalCars");
 
-                    // Tính số ngày trong kỳ
-                    int periodDays = 30; // mặc định
+                    
+                    int periodDays = 30; 
                     if (startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
                         try {
                             java.time.LocalDate s = java.sql.Date.valueOf(startDate).toLocalDate();
@@ -431,15 +431,15 @@ public List<ReportModel> findRevenueByDate(String startDate, String endDate) {
                         }
                     }
 
-                    // Công thức Utilization 
+                     
                     double utilization = (totalCars > 0)
                             ? (double) totalRentalDays / (totalCars * periodDays) * 100
                             : 0.0;
 
                     summary.put("totalRevenue", totalRevenue);
                     summary.put("totalTrips", totalTrips);
-                    summary.put("utilization", Math.round(utilization * 10.0) / 10.0); // 1 chữ số thập phân
-                    summary.put("periodDays", periodDays);   // truyền thêm để JS dùng nếu cần
+                    summary.put("utilization", Math.round(utilization * 10.0) / 10.0);
+                    summary.put("periodDays", periodDays);  
                 }
             }
         } catch (Exception e) {

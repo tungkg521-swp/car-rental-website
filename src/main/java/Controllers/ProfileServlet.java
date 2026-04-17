@@ -9,7 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.UUID;
-import service.ProfileService;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.HttpServlet;
@@ -37,7 +37,7 @@ public class ProfileServlet extends HttpServlet {
     private final DriverLicenseDAO driverLicenseDAO = new DriverLicenseDAO();
     private static final String LICENSE_DRAFT_SESSION_KEY = "LICENSE_DRAFT";
 
-    // Sửa lại path này theo máy của bạn
+  
 
     private static final String LICENSE_UPLOAD_PATH
             = "C:/Users/ADMIN/Documents/SWP391/Project_License/license_images";
@@ -238,7 +238,7 @@ public class ProfileServlet extends HttpServlet {
             String idBackFile = saveImage(idBackPart, "cccd_back");
             dl.setNationalIdBack(idBackFile);
 
-            // merge ảnh: upload mới > draft session > DB cũ
+          
             mergeImageFields(dl, existing, draft);
 
             Map<String, String> errors = validateDriverLicense(dl);

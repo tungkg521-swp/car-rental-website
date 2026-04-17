@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.List;
 
 import models.DriverLicenseModel;
-import service.DriverLicenseService;
+
 
 @WebServlet(name = "StaffLicenseServlet", urlPatterns = {"/staff/licenses"})
 public class StaffLicenseServlet extends HttpServlet {
@@ -111,7 +111,7 @@ public class StaffLicenseServlet extends HttpServlet {
 
         }
 
-        // quay về detail để thấy status mới (hoặc list cũng được)
+      
         if (ok) {
             response.sendRedirect(request.getContextPath()
                     + "/staff/licenses?action=detail&licenseId=" + licenseId);
