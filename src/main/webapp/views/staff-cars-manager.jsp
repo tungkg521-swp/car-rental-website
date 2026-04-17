@@ -7,10 +7,10 @@
 <html>
     <head>
         <meta charset="UTF-8">
-           <title>Car Manager</title>
+        <title>Car Manager</title>
         <link rel="stylesheet" 
               href="${pageContext.request.contextPath}/assets/css/staff.css">
-     
+
         <link rel="stylesheet" 
               href="${pageContext.request.contextPath}/assets/css/staff-cars-manager.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -81,6 +81,7 @@
                                         <th>Image</th>
                                         <th>Model</th>
                                         <th>Brand</th>
+                                        <th>Plate Number</th>
                                         <th>Year</th>
                                         <th>Price/Day</th>
                                         <th>Status</th>
@@ -106,6 +107,7 @@
                                                     </td>
                                                     <td><strong>${car.modelName}</strong></td>
                                                     <td>${car.brandName}</td>
+                                                    <td>${car.plateNumber}</td>
                                                     <td>${car.modelYear}</td>
                                                     <td><fmt:formatNumber value="${car.pricePerDay}" type="currency" currencySymbol="$"/></td>
                                                     <td>
@@ -229,6 +231,12 @@
                                            placeholder="e.g., SUV, Sedan" value="${car.typeName}">
                                 </div>
 
+                                <div class="form-group">
+                                    <label>Plate number *</label>
+                                    <input type="text" name="platenumber" required 
+                                           placeholder="e.g., VF3-001" value="${car.plateNumber}">
+                                </div>
+
                                 <div class="form-group full-width">
                                     <label>Car Images *</label>
                                     <input type="file" name="carImages" multiple required accept="image/*" 
@@ -322,6 +330,10 @@
                                             <i class="fas fa-tag"></i>
                                             <strong>Type:</strong> ${car.typeName}
                                         </div>
+                                        <div class="spec-item">
+                                            <i class="fas fa-id-card"></i>
+                                            <strong>Plate Number:</strong> ${car.plateNumber}
+                                        </div>
                                     </div>
 
                                     <div class="description-section">
@@ -398,6 +410,12 @@
                                 <div class="form-group">
                                     <label>Type *</label>
                                     <input type="text" name="typeName" value="${car.typeName}" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Plate number *</label>
+                                    <input type="text" name="platenumber" required 
+                                           placeholder="e.g., VF3-001" value="${car.plateNumber}">
                                 </div>
                             </div>
 

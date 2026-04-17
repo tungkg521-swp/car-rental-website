@@ -86,6 +86,7 @@
                                     <span><i class="bi bi-lightning"></i> ${car.fuelType}</span>
                                     <span><i class="bi bi-gear"></i> ${car.transmission}</span>
                                     <span><i class="bi bi-calendar"></i> ${car.modelYear}</span>
+                                    <span><i class="bi bi-credit-card-2-front"></i> ${car.plateNumber}</span>
                                 </div>
 
                                 <div class="price-box mt-3">

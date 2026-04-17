@@ -141,6 +141,7 @@
                                 <div>⚙ ${car.transmission}</div>
                                 <div>⛽ ${car.fuelType}</div>
                                 <div>📅 Năm ${car.modelYear}</div>
+                                <div>🔢 ${car.plateNumber}</div>
                                 <c:if test="${not empty car.typeName}">
                                     <div>🚘 ${car.typeName}</div>
                                 </c:if>

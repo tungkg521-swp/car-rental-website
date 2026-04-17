@@ -211,6 +211,7 @@ public class StaffCarController extends HttpServlet {
             String typeName = request.getParameter("typeName");
             String description = request.getParameter("description");
             String status = request.getParameter("status");
+            String plateNumber = request.getParameter("plateNumber");
 
             String imageFolder = modelName.toLowerCase()
                     .replaceAll("\\s+", "_")
@@ -275,7 +276,7 @@ public class StaffCarController extends HttpServlet {
                     imageUrls.get(0),
                     imageFolder,
                     description,
-                    status
+                    status,plateNumber
             );
 
 
@@ -321,6 +322,7 @@ public class StaffCarController extends HttpServlet {
             String typeName = request.getParameter("typeName");
             String description = request.getParameter("description");
             String status = request.getParameter("status");
+            String plateNumber =request.getParameter("plateNumber");
 
             CarModel existingCar = carDAO.findById(carId);
 
@@ -384,7 +386,7 @@ public class StaffCarController extends HttpServlet {
                     imageUrl,
                     imageFolder,
                     description,
-                    status
+                    status,plateNumber
             );
 
 

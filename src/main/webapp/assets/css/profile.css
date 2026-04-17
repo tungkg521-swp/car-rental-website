@@ -1,72 +1,11 @@
 /* =============================
    PROFILE PAGE
 ============================= */
-
-:root {
-    --app-font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-}
-
-body {
-    background: #f3f4f6;
-    margin: 0;
-    font-family: var(--app-font-family);
-}
 .profile-wrapper {
     display: flex;
     gap: 40px;
     margin: 60px auto;
     max-width: 1200px;
-}
-
-/* =============================
-   SIDEBAR
-============================= */
-
-.profile-sidebar {
-    width: 280px;
-}
-
-.sidebar-title {
-    font-size: 32px;
-    font-weight: 700;
-    margin-bottom: 30px;
-}
-
-.sidebar-menu {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.sidebar-item {
-    margin-bottom: 12px;
-}
-
-.sidebar-item a {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 16px 18px;
-    text-decoration: none;
-    color: #333;
-    border-radius: 10px;
-    font-size: 18px;
-    transition: 0.2s;
-}
-
-.sidebar-item a:hover {
-    background: #ececec;
-}
-
-.sidebar-item.active a {
-    background: #ffffff;
-    border-left: 4px solid #22c55e;
-    font-weight: 600;
-}
-
-.sidebar-item.logout a {
-    color: #e53935;
-    font-weight: 600;
 }
 
 
