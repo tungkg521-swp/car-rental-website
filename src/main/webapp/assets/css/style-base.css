@@ -1,11 +1,12 @@
 /* =========================
    RESET + BASE
-   ========================= */
+========================= */
 * {
   box-sizing: border-box;
 }
+
 :root {
-    --app-font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --app-font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
 }
 
 html,
@@ -15,7 +16,7 @@ body {
 }
 
 body {
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-family: var(--app-font-family);
   background: #fff;
   color: #111;
 }
@@ -25,9 +26,21 @@ a {
   color: inherit;
 }
 
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
 /* =========================
    CONTAINER
-   ========================= */
+========================= */
 .container {
   max-width: 1440px;
   margin: 0 auto;
@@ -36,10 +49,7 @@ a {
 
 /* =========================
    HEADER
-   ========================= */
-/* =========================
-   HEADER
-   ========================= */
+========================= */
 .site-header {
   height: 102px;
   background: #0a7c3b;
@@ -53,8 +63,8 @@ a {
   align-items: center;
 }
 
-/* LEFT */
-.brand-left {
+.brand-left,
+.brand {
   justify-self: start;
   text-align: left;
   color: #fff;
@@ -76,7 +86,7 @@ a {
   font-weight: 500;
 }
 
-/* CENTER */
+.nav-main,
 .nav-main.nav-center {
   display: flex;
   justify-content: center;
@@ -89,17 +99,19 @@ a {
   white-space: nowrap;
 }
 
+.nav-main a,
 .nav-main.nav-center a {
   opacity: 0.85;
   transition: opacity 0.2s ease;
 }
 
+.nav-main a:hover,
 .nav-main.nav-center a:hover {
   opacity: 1;
 }
 
-/* RIGHT */
-.auth-right {
+.auth-right,
+.auth {
   display: flex;
   justify-self: end;
   justify-content: flex-end;
@@ -127,23 +139,10 @@ a {
   font-size: 14px;
   font-weight: 700;
 }
-/* =========================
-   BUTTON
-   ========================= */
-.btn-primary {
-  border: none;
-  border-radius: 999px;
-  padding: 14px 28px;
-  background: #fff;
-  color: #000;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  cursor: pointer;
-}
 
 /* =========================
    FOOTER
-   ========================= */
+========================= */
 .site-footer {
   background: #000;
   color: #fff;
@@ -186,7 +185,7 @@ a {
 
 /* =========================
    RESPONSIVE
-   ========================= */
+========================= */
 @media (max-width: 1200px) {
   .container {
     padding: 0 40px;
@@ -196,7 +195,6 @@ a {
     gap: 20px;
   }
 
-  .nav-left,
   .nav-main {
     gap: 18px;
     font-size: 13px;
@@ -219,9 +217,9 @@ a {
     gap: 14px;
   }
 
-  .nav-left,
   .nav-main,
-  .header-right {
+  .auth-right,
+  .auth {
     justify-content: center;
     flex-wrap: wrap;
   }
