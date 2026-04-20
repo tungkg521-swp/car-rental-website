@@ -236,7 +236,7 @@ public class CarDAO extends DBContext {
             i.image_url,  -- THÊM: Lấy image_url
             c.image_folder,
             c.description,  -- THÊM: Nếu cần description (optional, nhưng constructor có)
-            c.status
+            c.status,
             c.plate_number
         FROM cars c  -- SỬA: cars lowercase để nhất quán
         JOIN brand b ON c.brand_id = b.brand_id
@@ -784,7 +784,7 @@ public class CarDAO extends DBContext {
                 brand_id = ?,
                 type_id = ?,
                 description = ?,
-                status = ?
+                status = ?,
                 plate_number = ?
             WHERE car_id = ?
         """;
