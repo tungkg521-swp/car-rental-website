@@ -5,18 +5,14 @@ import DALs.CarChangeRequestDAO;
 import DALs.CarCheckDAO;
 import DALs.CarDAO;
 import DALs.ContractDAO;
-
 import models.AccountModel;
 import models.CustomerModel;
 import models.StaffModel;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.IOException;
-
 import DALs.CustomerDAO;
-
 import java.util.List;
 import models.BookingModel;
 import models.CarChangeRequestModel;

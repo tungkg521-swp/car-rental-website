@@ -761,7 +761,7 @@ public class CarDAO extends DBContext {
                 brand_id = ?,
                 type_id = ?,
                 description = ?,
-                status = ?
+                status = ?,
                 plate_number = ?
             WHERE car_id = ?
         """;

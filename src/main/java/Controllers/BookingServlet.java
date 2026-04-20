@@ -7,7 +7,6 @@ import DALs.CarDAO;
 import DALs.ContractDAO;
 import DALs.CustomerDAO;
 import DALs.VoucherDAO;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;

@@ -233,7 +233,7 @@
 
                                 <div class="form-group">
                                     <label>Plate number *</label>
-                                    <input type="text" name="platenumber" required 
+                                    <input type="text" name="plateNumber" required 
                                            placeholder="e.g., VF3-001" value="${car.plateNumber}">
                                 </div>
 
@@ -414,7 +414,7 @@
 
                                 <div class="form-group">
                                     <label>Plate number *</label>
-                                    <input type="text" name="platenumber" required 
+                                    <input type="text" name="plateNumber" required 
                                            placeholder="e.g., VF3-001" value="${car.plateNumber}">
                                 </div>
                             </div>
