@@ -230,7 +230,7 @@ public class ContractDAO extends DBContext {
                     contract.setCustomerConfirmNote(rs.getString("customer_confirm_note"));
                     contract.setCustomerConfirmTime(rs.getTimestamp("customer_confirm_time"));
                     contract.setNoShowNote(rs.getString("no_show_note"));
-                    
+
                     return contract;
                 }
             }
@@ -264,17 +264,15 @@ public class ContractDAO extends DBContext {
         String sql = "UPDATE rental_contract "
                 + "SET customer_confirmed = ?, "
                 + "    customer_confirm_note = ?, "
-                + "    customer_confirm_time = CURRENT_TIMESTAMP, "
-                + "    contract_status = ? "
+                + "    customer_confirm_time = CURRENT_TIMESTAMP "
                 + "WHERE contract_id = ? "
                 + "  AND contract_status = ?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setBoolean(1, true);
             ps.setString(2, note);
-            ps.setString(3, "ACTIVE");
-            ps.setInt(4, contractId);
-            ps.setString(5, "WAITING_CUSTOMER_CONFIRM");
+            ps.setInt(3, contractId);
+            ps.setString(4, "WAITING_CUSTOMER_CONFIRM");
 
             return ps.executeUpdate() > 0;
         } catch (Exception e) {

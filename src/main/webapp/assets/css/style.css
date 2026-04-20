@@ -50,10 +50,11 @@ img {
 }
 
 .header-inner {
-  height: 100%;
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  align-items: center;
+    height: 100%;
+    display: grid;
+    grid-template-columns: 1fr 520px 1fr;  /* cột giữa cố định rộng hơn */
+    align-items: center;
+    column-gap: 24px;
 }
 
 /* LEFT: LOGO */
@@ -81,24 +82,31 @@ img {
 }
 
 /* CENTER: MENU */
+/* CENTER: MENU */
 .nav-main,
 .nav-main.nav-center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 42px;
-  font-size: 14px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #fff;
-  white-space: nowrap;
+    display: flex;
+    justify-content: space-between;   /* đổi từ center sang space-between */
+    align-items: center;
+    width: 100%;
+    max-width: 420px;                 /* thêm để menu có vùng riêng */
+    margin: 0 auto;                   /* căn giữa hẳn */
+    gap: 0;                           /* bỏ gap cũ */
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #fff;
+    white-space: nowrap;
 }
 
 .nav-main a,
 .nav-main.nav-center a {
-  display: inline-block;
-  opacity: 0.85;
-  transition: opacity 0.2s ease;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 110px;                 /* mỗi mục có độ rộng gần đều nhau */
+    opacity: 0.85;
+    transition: opacity 0.2s ease;
 }
 
 .nav-main a:hover,
