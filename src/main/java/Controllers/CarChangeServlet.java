@@ -288,8 +288,8 @@ public class CarChangeServlet extends HttpServlet {
                 oldCar.getCarId(),
                 oldCar.getTypeName(),
                 oldCar.getPricePerDay(),
-                booking.getStartDate(),
-                booking.getEndDate()
+                booking.getStartTime(),
+                booking.getEndTime()
         );
     }
 
@@ -330,8 +330,8 @@ public class CarChangeServlet extends HttpServlet {
                 oldCar.getCarId(),
                 oldCar.getTypeName(),
                 oldCar.getPricePerDay(),
-                booking.getStartDate(),
-                booking.getEndDate()
+                booking.getStartTime(),
+                booking.getEndTime()
         );
 
         boolean found = false;
@@ -433,8 +433,8 @@ public class CarChangeServlet extends HttpServlet {
                 oldCar.getCarId(),
                 oldCar.getTypeName(),
                 oldCar.getPricePerDay(),
-                booking.getStartDate(),
-                booking.getEndDate()
+                booking.getStartTime(),
+                booking.getEndTime()
         );
 
         for (CarModel car : replacementCars) {

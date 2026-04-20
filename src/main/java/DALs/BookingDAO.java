@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Utils.DBContext;
+import java.sql.Timestamp;
 import models.BookingModel;
 
 public class BookingDAO extends DBContext {
@@ -18,7 +19,7 @@ public class BookingDAO extends DBContext {
 
         String sql = """
         INSERT INTO booking
-        (customer_id, car_id, voucher_id, booking_date, start_date, end_date,
+        (customer_id, car_id, voucher_id, booking_date, start_time, end_time,
          status, note, deposit_amount, remaining_amount, payment_deadline, total_estimated_price)
         VALUES (?, ?, ?, SYSDATETIME(), ?, ?, ?, ?, ?, ?, ?, ?)
     """;
@@ -34,8 +35,8 @@ public class BookingDAO extends DBContext {
                 ps.setNull(3, Types.INTEGER);
             }
 
-            ps.setDate(4, booking.getStartDate());
-            ps.setDate(5, booking.getEndDate());
+            ps.setTimestamp(4, booking.getStartTime());
+            ps.setTimestamp(5, booking.getEndTime());
             ps.setString(6, booking.getStatus());
             ps.setString(7, booking.getNote());
 
@@ -97,8 +98,8 @@ public class BookingDAO extends DBContext {
                 }
 
                 booking.setBookingDate(rs.getTimestamp("booking_date"));
-                booking.setStartDate(rs.getDate("start_date"));
-                booking.setEndDate(rs.getDate("end_date"));
+                booking.setStartTime(rs.getTimestamp("start_time"));
+                booking.setEndTime(rs.getTimestamp("end_time"));
                 booking.setStatus(rs.getString("status"));
                 booking.setNote(rs.getString("note"));
                 booking.setStaffId(rs.getInt("staff_id"));
@@ -106,6 +107,10 @@ public class BookingDAO extends DBContext {
                 booking.setDepositAmount(rs.getBigDecimal("deposit_amount"));
                 booking.setRemainingAmount(rs.getBigDecimal("remaining_amount"));
                 booking.setPaymentDeadline(rs.getTimestamp("payment_deadline"));
+                booking.setCustomerCheckStatus(rs.getString("customer_check_status"));
+                booking.setCustomerCheckReason(rs.getString("customer_check_reason"));
+                booking.setCustomerCheckNote(rs.getString("customer_check_note"));
+                booking.setCustomerCheckedAt(rs.getTimestamp("customer_checked_at"));
                 return booking;
             }
         } catch (SQLException e) {
@@ -120,10 +125,10 @@ public class BookingDAO extends DBContext {
         List<BookingModel> list = new ArrayList<>();
 
         String sql = """
-        SELECT 
+        SELECT
             b.booking_id,
-            b.start_date,
-            b.end_date,
+            b.start_time,
+            b.end_time,
             b.status,
             b.total_estimated_price,
             c.model_name AS car_name,
@@ -145,8 +150,8 @@ public class BookingDAO extends DBContext {
                 BookingModel booking = new BookingModel();
 
                 booking.setBookingId(rs.getInt("booking_id"));
-                booking.setStartDate(rs.getDate("start_date"));
-                booking.setEndDate(rs.getDate("end_date"));
+                booking.setStartTime(rs.getTimestamp("start_time"));
+                booking.setEndTime(rs.getTimestamp("end_time"));
                 booking.setStatus(rs.getString("status"));
                 booking.setTotalEstimatedPrice(rs.getBigDecimal("total_estimated_price"));
                 booking.setCarName(rs.getString("car_name"));
@@ -166,11 +171,11 @@ public class BookingDAO extends DBContext {
     public BookingModel findById(int bookingId, int customerId) {
 
         String sql = """
-        SELECT 
+        SELECT
             b.booking_id,
             b.booking_date,
-            b.start_date,
-            b.end_date,
+            b.start_time,
+            b.end_time,
             b.status,
             b.note,
             b.total_estimated_price,
@@ -210,8 +215,8 @@ public class BookingDAO extends DBContext {
 
                 booking.setBookingId(rs.getInt("booking_id"));
                 booking.setBookingDate(rs.getTimestamp("booking_date"));
-                booking.setStartDate(rs.getDate("start_date"));
-                booking.setEndDate(rs.getDate("end_date"));
+                booking.setStartTime(rs.getTimestamp("start_time"));
+                booking.setEndTime(rs.getTimestamp("end_time"));
                 booking.setStatus(rs.getString("status"));
                 booking.setNote(rs.getString("note"));
 
@@ -290,16 +295,16 @@ public class BookingDAO extends DBContext {
         List<BookingModel> list = new ArrayList<>();
 
         String sql = """
-        SELECT 
+        SELECT
             b.booking_id,
             c.full_name,
             ca.model_name,
-            b.start_date,
-            b.end_date,
+            b.start_time,
+            b.end_time,
             b.total_estimated_price,
             b.status,
             ca.plate_number
-                     
+
         FROM booking b
         JOIN customer c ON b.customer_id = c.customer_id
         JOIN cars ca ON b.car_id = ca.car_id
@@ -314,8 +319,8 @@ public class BookingDAO extends DBContext {
                 booking.setBookingId(rs.getInt("booking_id"));
                 booking.setCustomerName(rs.getString("full_name"));
                 booking.setCarName(rs.getString("model_name"));
-                booking.setStartDate(rs.getDate("start_date"));
-                booking.setEndDate(rs.getDate("end_date"));
+                booking.setStartTime(rs.getTimestamp("start_time"));
+                booking.setEndTime(rs.getTimestamp("end_time"));
                 booking.setTotalEstimatedPrice(rs.getBigDecimal("total_estimated_price"));
                 booking.setStatus(rs.getString("status"));
                 booking.setPlateNumber(rs.getString("plate_number"));
@@ -332,11 +337,11 @@ public class BookingDAO extends DBContext {
     public BookingModel findById(int bookingId) {
 
         String sql = """
-    SELECT 
+    SELECT
         b.booking_id,
         b.booking_date,
-        b.start_date,
-        b.end_date,
+        b.start_time,
+        b.end_time,
         b.status,
         b.note,
         b.total_estimated_price,
@@ -369,8 +374,8 @@ public class BookingDAO extends DBContext {
 
                 booking.setBookingId(rs.getInt("booking_id"));
                 booking.setBookingDate(rs.getTimestamp("booking_date"));
-                booking.setStartDate(rs.getDate("start_date"));
-                booking.setEndDate(rs.getDate("end_date"));
+                booking.setStartTime(rs.getTimestamp("start_time"));
+                booking.setEndTime(rs.getTimestamp("end_time"));
                 booking.setStatus(rs.getString("status"));
                 booking.setNote(rs.getString("note"));
                 booking.setTotalEstimatedPrice(rs.getBigDecimal("total_estimated_price"));
@@ -427,12 +432,12 @@ public class BookingDAO extends DBContext {
     public BookingModel getBookingForContract(int bookingId) {
 
         String sql = """
-        SELECT 
+        SELECT
             b.booking_id,
             b.customer_id,
             b.car_id,
-            b.start_date,
-            b.end_date,
+            b.start_time,
+            b.end_time,
             b.total_estimated_price,
             b.status,
             car.price_per_day
@@ -452,8 +457,8 @@ public class BookingDAO extends DBContext {
                 booking.setBookingId(rs.getInt("booking_id"));
                 booking.setCustomerId(rs.getInt("customer_id"));
                 booking.setCarId(rs.getInt("car_id"));
-                booking.setStartDate(rs.getDate("start_date"));
-                booking.setEndDate(rs.getDate("end_date"));
+                booking.setStartTime(rs.getTimestamp("start_time"));
+                booking.setEndTime(rs.getTimestamp("end_time"));
                 booking.setStatus(rs.getString("status"));
                 booking.setTotalEstimatedPrice(rs.getBigDecimal("total_estimated_price"));
                 booking.setPricePerDay(rs.getBigDecimal("price_per_day"));
@@ -468,22 +473,22 @@ public class BookingDAO extends DBContext {
         return null;
     }
 
-    public boolean hasOverlapConfirmed(int carId, Date startDate, Date endDate) {
+    public boolean hasOverlapConfirmed(int carId, Timestamp startTime, Timestamp endTime) {
 
         String sql = """
         SELECT 1
         FROM booking
         WHERE car_id = ?
           AND status = 'CONFIRMED'
-          AND start_date <= ?
-          AND end_date >= ?
+          AND start_time < ?
+          AND end_time > ?
     """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
             ps.setInt(1, carId);
-            ps.setDate(2, endDate);
-            ps.setDate(3, startDate);
+            ps.setTimestamp(2, endTime);
+            ps.setTimestamp(3, startTime);
 
             ResultSet rs = ps.executeQuery();
             return rs.next();
@@ -497,25 +502,25 @@ public class BookingDAO extends DBContext {
 
     public void rejectOverlappingBookings(
             int carId,
-            Date startDate,
-            Date endDate,
+            Timestamp startTime,
+            Timestamp endTime,
             int confirmedBookingId) {
 
         String sql = """
         UPDATE booking
         SET status = 'REJECTED'
         WHERE car_id = ?
-          AND booking_id <> ?        
-          AND start_date <= ?
-          AND end_date >= ?
+          AND booking_id <> ?
+          AND start_time < ?
+          AND end_time > ?
     """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
             ps.setInt(1, carId);
             ps.setInt(2, confirmedBookingId);
-            ps.setDate(3, endDate);
-            ps.setDate(4, startDate);
+            ps.setTimestamp(3, endTime);
+            ps.setTimestamp(4, startTime);
 
             ps.executeUpdate();
 
@@ -542,22 +547,22 @@ public class BookingDAO extends DBContext {
         return false;
     }
 
-    public boolean hasBookingConflict(int carId, Date startDate, Date endDate) {
+    public boolean hasBookingConflict(int carId, Timestamp startTime, Timestamp endTime) {
 
         String sql = """
             SELECT 1
             FROM booking
             WHERE car_id = ?
             AND status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'ACTIVE')
-            AND start_date <= ?
-            AND end_date >= ?
+            AND start_time < ?
+            AND end_time > ?
              """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
             ps.setInt(1, carId);
-            ps.setDate(2, endDate);
-            ps.setDate(3, startDate);
+            ps.setTimestamp(2, endTime);
+            ps.setTimestamp(3, startTime);
 
             ResultSet rs = ps.executeQuery();
             return rs.next();
@@ -569,15 +574,15 @@ public class BookingDAO extends DBContext {
         return false;
     }
 
-    public List<Date[]> getBusyDateRangesByCarId(int carId) {
-        List<Date[]> ranges = new ArrayList<>();
+    public List<Timestamp[]> getBusyDateRangesByCarId(int carId) {
+        List<Timestamp[]> ranges = new ArrayList<>();
 
         String sql = """
-        SELECT start_date, end_date
+        SELECT start_time, end_time
         FROM booking
         WHERE car_id = ?
           AND status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'ACTIVE')
-        ORDER BY start_date
+        ORDER BY start_time
     """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -585,9 +590,9 @@ public class BookingDAO extends DBContext {
 
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                Date startDate = rs.getDate("start_date");
-                Date endDate = rs.getDate("end_date");
-                ranges.add(new Date[]{startDate, endDate});
+                Timestamp startTime = rs.getTimestamp("start_time");
+                Timestamp endTime = rs.getTimestamp("end_time");
+                ranges.add(new Timestamp[]{startTime, endTime});
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -611,12 +616,12 @@ public class BookingDAO extends DBContext {
 
     public BookingModel findByIdForCarChange(int bookingId, int customerId) {
         String sql = """
-        SELECT 
+        SELECT
             b.booking_id,
             b.car_id,
             b.booking_date,
-            b.start_date,
-            b.end_date,
+            b.start_time,
+            b.end_time,
             b.status,
             b.note,
             b.total_estimated_price,
@@ -650,8 +655,8 @@ public class BookingDAO extends DBContext {
                 booking.setBookingId(rs.getInt("booking_id"));
                 booking.setCarId(rs.getInt("car_id"));
                 booking.setBookingDate(rs.getTimestamp("booking_date"));
-                booking.setStartDate(rs.getDate("start_date"));
-                booking.setEndDate(rs.getDate("end_date"));
+                booking.setStartTime(rs.getTimestamp("start_time"));
+                booking.setEndTime(rs.getTimestamp("end_time"));
                 booking.setStatus(rs.getString("status"));
                 booking.setNote(rs.getString("note"));
                 booking.setTotalEstimatedPrice(rs.getBigDecimal("total_estimated_price"));
@@ -679,7 +684,7 @@ public class BookingDAO extends DBContext {
 
     }
 
-    public boolean hasBookingConflictExcludeBooking(int carId, Date startDate, Date endDate, int excludeBookingId) {
+    public boolean hasBookingConflictExcludeBooking(int carId, Timestamp startTime, Timestamp endTime, int excludeBookingId) {
 
         String sql = """
         SELECT 1
@@ -687,20 +692,52 @@ public class BookingDAO extends DBContext {
         WHERE car_id = ?
           AND booking_id <> ?
           AND status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'ACTIVE')
-          AND start_date <= ?
-          AND end_date >= ?
+          AND start_time < ?
+          AND end_time > ?
     """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, carId);
             ps.setInt(2, excludeBookingId);
-            ps.setDate(3, endDate);
-            ps.setDate(4, startDate);
+            ps.setTimestamp(3, endTime);
+            ps.setTimestamp(4, startTime);
 
             ResultSet rs = ps.executeQuery();
             return rs.next();
 
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public boolean updateCustomerCheck(
+            int bookingId,
+            int customerId,
+            String status,
+            String reason,
+            String note) {
+
+        String sql = """
+        UPDATE booking
+        SET customer_check_status = ?,
+            customer_check_reason = ?,
+            customer_check_note = ?,
+            customer_checked_at = SYSDATETIME()
+        WHERE booking_id = ?
+          AND customer_id = ?
+    """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setString(2, reason);
+            ps.setString(3, note);
+            ps.setInt(4, bookingId);
+            ps.setInt(5, customerId);
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
             e.printStackTrace();
         }
 

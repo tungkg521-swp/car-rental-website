@@ -12,14 +12,15 @@ import java.sql.Timestamp;
  * @author ADMIN
  */
 public class ContractModel {
+
     private int contractId;
     private int bookingId;
     private int customerId;
     private int staffId;
     private int carId;
 
-    private Date contractStartDate;
-    private Date contractEndDate;
+    private Timestamp contractStartTime;
+    private Timestamp contractEndTime;
 
     private String contractStatus;
 
@@ -37,7 +38,12 @@ public class ContractModel {
     private String customerEmail;
     private String customerPhone;
     private String carName;
- 
+
+    private Integer handoverCheckId;
+    private Boolean customerConfirmed;
+    private String customerConfirmNote;
+    private Timestamp customerConfirmTime;
+    private String noShowNote;
 
     public ContractModel() {
     }
@@ -49,8 +55,6 @@ public class ContractModel {
     public void setContractId(int contractId) {
         this.contractId = contractId;
     }
-
- 
 
     public int getBookingId() {
         return bookingId;
@@ -84,20 +88,20 @@ public class ContractModel {
         this.carId = carId;
     }
 
-    public Date getContractStartDate() {
-        return contractStartDate;
+    public Timestamp getContractStartTime() {
+        return contractStartTime;
     }
 
-    public void setContractStartDate(Date contractStartDate) {
-        this.contractStartDate = contractStartDate;
+    public void setContractStartTime(Timestamp contractStartTime) {
+        this.contractStartTime = contractStartTime;
     }
 
-    public Date getContractEndDate() {
-        return contractEndDate;
+    public Timestamp getContractEndTime() {
+        return contractEndTime;
     }
 
-    public void setContractEndDate(Date contractEndDate) {
-        this.contractEndDate = contractEndDate;
+    public void setContractEndTime(Timestamp contractEndTime) {
+        this.contractEndTime = contractEndTime;
     }
 
     public String getContractStatus() {
@@ -187,4 +191,46 @@ public class ContractModel {
     public void setCarName(String carName) {
         this.carName = carName;
     }
+
+    public Integer getHandoverCheckId() {
+        return handoverCheckId;
+    }
+
+    public void setHandoverCheckId(Integer handoverCheckId) {
+        this.handoverCheckId = handoverCheckId;
+    }
+
+    public Boolean getCustomerConfirmed() {
+        return customerConfirmed;
+    }
+
+    public void setCustomerConfirmed(Boolean customerConfirmed) {
+        this.customerConfirmed = customerConfirmed;
+    }
+
+    public String getCustomerConfirmNote() {
+        return customerConfirmNote;
+    }
+
+    public void setCustomerConfirmNote(String customerConfirmNote) {
+        this.customerConfirmNote = customerConfirmNote;
+    }
+
+    public Timestamp getCustomerConfirmTime() {
+        return customerConfirmTime;
+    }
+
+    public void setCustomerConfirmTime(Timestamp customerConfirmTime) {
+        this.customerConfirmTime = customerConfirmTime;
+    }
+
+    public String getNoShowNote() {
+        return noShowNote;
+    }
+
+    public void setNoShowNote(String noShowNote) {
+        this.noShowNote = noShowNote;
+    }
+    
+    
 }

@@ -58,8 +58,76 @@
                                 </div>
 
                                 <div class="hero-field">
+                                    <label>Giờ nhận xe</label>
+                                    <div class="time-dropdown" data-target="startHour">
+                                        <button type="button" class="time-dropdown-toggle">Chọn giờ</button>
+                                        <div class="time-dropdown-menu">
+                                            <div class="time-option" data-value="00:00">00:00</div>
+                                            <div class="time-option" data-value="01:00">01:00</div>
+                                            <div class="time-option" data-value="02:00">02:00</div>
+                                            <div class="time-option" data-value="03:00">03:00</div>
+                                            <div class="time-option" data-value="04:00">04:00</div>
+                                            <div class="time-option" data-value="05:00">05:00</div>
+                                            <div class="time-option" data-value="06:00">06:00</div>
+                                            <div class="time-option" data-value="07:00">07:00</div>
+                                            <div class="time-option" data-value="08:00">08:00</div>
+                                            <div class="time-option" data-value="09:00">09:00</div>
+                                            <div class="time-option" data-value="10:00">10:00</div>
+                                            <div class="time-option" data-value="11:00">11:00</div>
+                                            <div class="time-option" data-value="12:00">12:00</div>
+                                            <div class="time-option" data-value="13:00">13:00</div>
+                                            <div class="time-option" data-value="14:00">14:00</div>
+                                            <div class="time-option" data-value="15:00">15:00</div>
+                                            <div class="time-option" data-value="16:00">16:00</div>
+                                            <div class="time-option" data-value="17:00">17:00</div>
+                                            <div class="time-option" data-value="18:00">18:00</div>
+                                            <div class="time-option" data-value="19:00">19:00</div>
+                                            <div class="time-option" data-value="20:00">20:00</div>
+                                            <div class="time-option" data-value="21:00">21:00</div>
+                                            <div class="time-option" data-value="22:00">22:00</div>
+                                            <div class="time-option" data-value="23:00">23:00</div>
+                                        </div>
+                                        <input type="hidden" name="startHour" id="startHour" required>
+                                    </div>
+                                </div>
+
+                                <div class="hero-field">
                                     <label for="endDate">Ngày trả xe</label>
                                     <input type="date" id="endDate" name="endDate" required>
+                                </div>
+
+                                <div class="hero-field">
+                                    <label>Giờ trả xe</label>
+                                    <div class="time-dropdown" data-target="endHour">
+                                        <button type="button" class="time-dropdown-toggle">Chọn giờ</button>
+                                        <div class="time-dropdown-menu">
+                                            <div class="time-option" data-value="00:00">00:00</div>
+                                            <div class="time-option" data-value="01:00">01:00</div>
+                                            <div class="time-option" data-value="02:00">02:00</div>
+                                            <div class="time-option" data-value="03:00">03:00</div>
+                                            <div class="time-option" data-value="04:00">04:00</div>
+                                            <div class="time-option" data-value="05:00">05:00</div>
+                                            <div class="time-option" data-value="06:00">06:00</div>
+                                            <div class="time-option" data-value="07:00">07:00</div>
+                                            <div class="time-option" data-value="08:00">08:00</div>
+                                            <div class="time-option" data-value="09:00">09:00</div>
+                                            <div class="time-option" data-value="10:00">10:00</div>
+                                            <div class="time-option" data-value="11:00">11:00</div>
+                                            <div class="time-option" data-value="12:00">12:00</div>
+                                            <div class="time-option" data-value="13:00">13:00</div>
+                                            <div class="time-option" data-value="14:00">14:00</div>
+                                            <div class="time-option" data-value="15:00">15:00</div>
+                                            <div class="time-option" data-value="16:00">16:00</div>
+                                            <div class="time-option" data-value="17:00">17:00</div>
+                                            <div class="time-option" data-value="18:00">18:00</div>
+                                            <div class="time-option" data-value="19:00">19:00</div>
+                                            <div class="time-option" data-value="20:00">20:00</div>
+                                            <div class="time-option" data-value="21:00">21:00</div>
+                                            <div class="time-option" data-value="22:00">22:00</div>
+                                            <div class="time-option" data-value="23:00">23:00</div>
+                                        </div>
+                                        <input type="hidden" name="endHour" id="endHour" required>
+                                    </div>
                                 </div>
 
                                 <div class="hero-field hero-field-submit">

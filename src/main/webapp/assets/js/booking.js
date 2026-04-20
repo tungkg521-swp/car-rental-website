@@ -1,29 +1,35 @@
 // ================= GLOBAL FUNCTION =================
 function validateBooking() {
-    const start = document.getElementById("startDate")?.value;
-    const end = document.getElementById("endDate")?.value;
+    const start = getStartDateTimeValue();
+    const end = getEndDateTimeValue();
 
     if (!start || !end) {
-        alert("Vui lòng chọn đầy đủ ngày thuê");
+        alert("Vui lòng chọn đầy đủ thời gian thuê");
         return false;
     }
 
-    const [sy, sm, sd] = start.split("-").map(Number);
-    const [ey, em, ed] = end.split("-").map(Number);
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const now = new Date();
 
-    const startDate = new Date(sy, sm - 1, sd);
-    const endDate = new Date(ey, em - 1, ed);
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    if (startDate < today) {
-        alert("Ngày thuê không được nhỏ hơn ngày hiện tại");
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        alert("Thời gian thuê không hợp lệ");
         return false;
     }
 
-    if (endDate < startDate) {
-        alert("Ngày trả không được nhỏ hơn ngày thuê");
+    if (startDate < now) {
+        alert("Thời gian nhận xe không được nhỏ hơn thời điểm hiện tại");
+        return false;
+    }
+
+    if (endDate <= startDate) {
+        alert("Thời gian trả xe phải sau thời gian nhận xe");
+        return false;
+    }
+
+    const minMillis = 60 * 60 * 1000;
+    if (endDate - startDate < minMillis) {
+        alert("Thời gian thuê tối thiểu là 1 giờ");
         return false;
     }
 
@@ -41,12 +47,45 @@ function formatMoney(number) {
     return Number(number || 0).toLocaleString("vi-VN");
 }
 
-function formatDateVN(dateStr) {
-    if (!dateStr) {
-        return "--/--/----";
+function getStartDateTimeValue() {
+    const startDate = document.getElementById("startDate")?.value || "";
+    const startHour = document.getElementById("startHour")?.value || "";
+
+    if (!startDate || !startHour) {
+        return "";
     }
-    const [y, m, d] = dateStr.split("-");
-    return `${d}/${m}/${y}`;
+
+    return startDate + "T" + startHour;
+}
+
+function getEndDateTimeValue() {
+    const endDate = document.getElementById("endDate")?.value || "";
+    const endHour = document.getElementById("endHour")?.value || "";
+
+    if (!endDate || !endHour) {
+        return "";
+    }
+
+    return endDate + "T" + endHour;
+}
+
+function formatDateTimeVN(dateStr) {
+    if (!dateStr) {
+        return "--/--/---- --:--";
+    }
+
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) {
+        return "--/--/---- --:--";
+    }
+
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    const hour = String(date.getHours()).padStart(2, "0");
+    const minute = String(date.getMinutes()).padStart(2, "0");
+
+    return `${day}/${month}/${year} ${hour}:${minute}`;
 }
 
 function calculateDepositAmount(total) {
@@ -57,28 +96,83 @@ function calculateRemainingAmount(total) {
     return Number(total || 0) - calculateDepositAmount(total);
 }
 
-function calculateRentalDays(startValue, endValue) {
+function calculateBookingPrice(startValue, endValue, pricePerDay) {
     if (!startValue || !endValue) {
-        return 0;
+        return {
+            total: 0,
+            subtotal: 0,
+            billableText: "0"
+        };
     }
 
-    const [sy, sm, sd] = startValue.split("-").map(Number);
-    const [ey, em, ed] = endValue.split("-").map(Number);
+    const startDate = new Date(startValue);
+    const endDate = new Date(endValue);
+    const now = new Date();
 
-    const startDate = new Date(sy, sm - 1, sd);
-    const endDate = new Date(ey, em - 1, ed);
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    if (startDate < today || endDate <= startDate) {
-        return 0;
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        return {
+            total: 0,
+            subtotal: 0,
+            billableText: "0"
+        };
     }
 
-    const diff = endDate - startDate;
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    if (startDate < now || endDate <= startDate) {
+        return {
+            total: 0,
+            subtotal: 0,
+            billableText: "0"
+        };
+    }
 
-    return days;
+    const diffMinutes = Math.floor((endDate - startDate) / (1000 * 60));
+    if (diffMinutes < 60) {
+        return {
+            total: 0,
+            subtotal: 0,
+            billableText: "0"
+        };
+    }
+
+    const pricePerHour = pricePerDay / 24;
+    const halfDayPrice = pricePerDay / 2;
+
+    const fullDays = Math.floor(diffMinutes / 1440);
+    const remainMinutes = diffMinutes % 1440;
+
+    let total = fullDays * pricePerDay;
+    let billableText = fullDays > 0 ? `${fullDays} ngày` : "";
+
+    if (remainMinutes > 0) {
+        if (remainMinutes <= 360) {
+            const remainHours = remainMinutes / 60;
+            total += remainHours * pricePerHour;
+
+            const hourText = Number.isInteger(remainHours)
+                ? `${remainHours} giờ`
+                : `${remainHours.toFixed(2)} giờ`;
+
+            billableText = billableText
+                ? `${billableText} + ${hourText}`
+                : hourText;
+        } else if (remainMinutes <= 720) {
+            total += halfDayPrice;
+            billableText = billableText
+                ? `${billableText} + nửa ngày`
+                : "nửa ngày";
+        } else {
+            total += pricePerDay;
+            billableText = billableText
+                ? `${billableText} + 1 ngày`
+                : "1 ngày";
+        }
+    }
+
+    return {
+        total: total,
+        subtotal: total,
+        billableText: billableText || "0"
+    };
 }
 
 function buildVoucherOptionText(option) {
@@ -198,7 +292,7 @@ function resetSummary() {
         priceText.innerText = "0 VND";
     }
     if (daysText) {
-        daysText.innerText = "0 ngày";
+        daysText.innerText = "0";
     }
     if (subtotalText) {
         subtotalText.innerText = "0 VND";
@@ -225,7 +319,9 @@ function resetSummary() {
 
 function calculateBookingSummary() {
     const startDateInput = document.getElementById("startDate");
+    const startHourInput = document.getElementById("startHour");
     const endDateInput = document.getElementById("endDate");
+    const endHourInput = document.getElementById("endHour");
     const pricePerDayRaw = document.getElementById("pricePerDayRaw");
     const voucherSelect = document.getElementById("voucherSelect");
 
@@ -238,22 +334,22 @@ function calculateBookingSummary() {
     const totalEstimatedPrice = document.getElementById("totalEstimatedPrice");
     const voucherHint = document.getElementById("voucherHint");
 
-    if (!startDateInput || !endDateInput || !pricePerDayRaw) {
+    if (!startDateInput || !startHourInput || !endDateInput || !endHourInput || !pricePerDayRaw) {
         return;
     }
 
-    const startValue = startDateInput.value;
-    const endValue = endDateInput.value;
+    const startValue = getStartDateTimeValue();
+    const endValue = getEndDateTimeValue();
     const pricePerDay = parseFloat(pricePerDayRaw.value) || 0;
 
-    const days = calculateRentalDays(startValue, endValue);
+    const pricing = calculateBookingPrice(startValue, endValue, pricePerDay);
 
-    if (days <= 0) {
+    if (pricing.total <= 0) {
         resetSummary();
         return;
     }
 
-    const subtotal = days * pricePerDay;
+    const subtotal = pricing.subtotal;
 
     updateVoucherOptions(subtotal);
 
@@ -316,7 +412,7 @@ function calculateBookingSummary() {
         priceText.innerText = formatMoney(pricePerDay) + " VND";
     }
     if (daysText) {
-        daysText.innerText = days + " ngày";
+        daysText.innerText = pricing.billableText;
     }
     if (subtotalText) {
         subtotalText.innerText = formatMoney(subtotal) + " VND";
@@ -336,20 +432,19 @@ function calculateBookingSummary() {
 }
 
 function fillConfirmModal() {
-    const startValue = document.getElementById("startDate")?.value || "";
-    const endValue = document.getElementById("endDate")?.value || "";
+    const startValue = getStartDateTimeValue();
+    const endValue = getEndDateTimeValue();
     const noteValue = document.getElementById("bookingNote")?.value?.trim() || "";
 
     const pricePerDay = parseFloat(document.getElementById("pricePerDayRaw")?.value) || 0;
+    const pricing = calculateBookingPrice(startValue, endValue, pricePerDay);
     const total = parseFloat(document.getElementById("totalEstimatedPrice")?.value) || 0;
 
     const subtotalText = document.getElementById("subtotalText")?.innerText || "0 VND";
     const discountText = document.getElementById("discountText")?.innerText || "-0 VND";
     const voucherCodeText = document.getElementById("voucherCodeText")?.innerText || "Không có";
 
-    const days = calculateRentalDays(startValue, endValue);
-
-    if (!startValue || !endValue || days <= 0) {
+    if (!startValue || !endValue || pricing.total <= 0) {
         return;
     }
 
@@ -374,17 +469,17 @@ function fillConfirmModal() {
     const confirmNoteBox = document.getElementById("confirmNoteBox");
 
     if (confirmStartDate) {
-        confirmStartDate.innerText = formatDateVN(startValue);
+        confirmStartDate.innerText = formatDateTimeVN(startValue);
     }
     if (confirmEndDate) {
-        confirmEndDate.innerText = formatDateVN(endValue);
+        confirmEndDate.innerText = formatDateTimeVN(endValue);
     }
 
     if (confirmPricePerDay) {
         confirmPricePerDay.innerText = formatMoney(pricePerDay) + " VND";
     }
     if (confirmDays) {
-        confirmDays.innerText = days + " ngày";
+        confirmDays.innerText = pricing.billableText;
     }
     if (confirmTotal) {
         confirmTotal.innerText = formatMoney(total) + " VND";
@@ -394,7 +489,7 @@ function fillConfirmModal() {
         confirmPricePerDay2.innerText = formatMoney(pricePerDay) + " VND";
     }
     if (confirmDays2) {
-        confirmDays2.innerText = days + " ngày";
+        confirmDays2.innerText = pricing.billableText;
     }
     if (confirmSubtotal) {
         confirmSubtotal.innerText = subtotalText;
@@ -437,32 +532,27 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 3000);
 
     const startDateInput = document.getElementById("startDate");
+    const startHourInput = document.getElementById("startHour");
     const endDateInput = document.getElementById("endDate");
+    const endHourInput = document.getElementById("endHour");
     const voucherSelect = document.getElementById("voucherSelect");
     const bookingForm = document.getElementById("bookingForm");
     const openConfirmBtn = document.getElementById("openConfirmBtn");
     const finalSubmitBtn = document.getElementById("finalSubmitBtn");
     const agreePolicy = document.getElementById("agreePolicy");
 
-    if (!startDateInput || !endDateInput) {
+    if (!startDateInput || !startHourInput || !endDateInput || !endHourInput) {
         return;
     }
 
-    const today = new Date().toISOString().split("T")[0];
+    const today = new Date().toISOString().slice(0, 10);
     startDateInput.setAttribute("min", today);
     endDateInput.setAttribute("min", today);
 
-    startDateInput.addEventListener("change", function () {
-        endDateInput.setAttribute("min", startDateInput.value || today);
-
-        if (endDateInput.value && endDateInput.value < startDateInput.value) {
-            endDateInput.value = "";
-        }
-
-        calculateBookingSummary();
-    });
-
+    startDateInput.addEventListener("change", calculateBookingSummary);
+    startHourInput.addEventListener("change", calculateBookingSummary);
     endDateInput.addEventListener("change", calculateBookingSummary);
+    endHourInput.addEventListener("change", calculateBookingSummary);
 
     if (voucherSelect) {
         voucherSelect.addEventListener("change", calculateBookingSummary);

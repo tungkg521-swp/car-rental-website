@@ -18,7 +18,8 @@
 
 
         <section class="booking-detail-page"
-                 data-cancel-status="${requestScope.cancelStatus}">
+                 data-cancel-status="${requestScope.cancelStatus}"
+                 data-handover-status="${sessionScope.handoverStatus}">
             <div class="container">
 
                 <div class="booking-detail-shell">
@@ -157,17 +158,22 @@
                                 </div>
 
                                 <div class="info-row">
-                                    <span class="info-label">Start Date</span>
+                                    <span class="info-label">Start Time</span>
                                     <span class="info-value">
-                                        <fmt:formatDate value="${booking.startDate}" pattern="dd/MM/yyyy"/>
+                                        <fmt:formatDate value="${booking.startTime}" pattern="dd/MM/yyyy HH:mm"/>
                                     </span>
                                 </div>
 
                                 <div class="info-row">
-                                    <span class="info-label">End Date</span>
+                                    <span class="info-label">End Time</span>
                                     <span class="info-value">
-                                        <fmt:formatDate value="${booking.endDate}" pattern="dd/MM/yyyy"/>
+                                        <fmt:formatDate value="${booking.endTime}" pattern="dd/MM/yyyy HH:mm"/>
                                     </span>
+                                </div>
+
+                                <div class="info-row">
+                                    <span class="info-label">Rental Duration</span>
+                                    <span class="info-value">${rentalDurationText}</span>
                                 </div>
 
                                 <div class="info-row total-row">
@@ -307,6 +313,95 @@
                                             </form>
                                         </div>
                                     </c:if>
+                                </div>
+                            </c:if>
+
+                            <c:if test="${not empty contract and (contract.contractStatus eq 'WAITING_CUSTOMER_CONFIRM' or contract.contractStatus eq 'ACTIVE' or contract.contractStatus eq 'COMPLETED')}">
+                                <div class="note-box">
+                                    <div class="note-title">Pre-Delivery Check Information</div>
+
+                                    <c:choose>
+                                        <c:when test="${not empty handoverCheck}">
+                                            <div class="info-card" style="margin-top: 12px;">
+                                                <div class="info-row">
+                                                    <span class="info-label">Check Result</span>
+                                                    <span class="info-value">${handoverCheck.checkResult}</span>
+                                                </div>
+
+                                                <div class="info-row">
+                                                    <span class="info-label">Fuel Level</span>
+                                                    <span class="info-value">${handoverCheck.fuelLevel}</span>
+                                                </div>
+
+                                                <div class="info-row">
+                                                    <span class="info-label">Exterior Note</span>
+                                                    <span class="info-value">${handoverCheck.exteriorNote}</span>
+                                                </div>
+
+                                                <div class="info-row">
+                                                    <span class="info-label">Interior Note</span>
+                                                    <span class="info-value">${handoverCheck.interiorNote}</span>
+                                                </div>
+
+                                                <div class="info-row">
+                                                    <span class="info-label">Staff Note</span>
+                                                    <span class="info-value">${handoverCheck.note}</span>
+                                                </div>
+                                            </div>
+                                        </c:when>
+
+                                        <c:otherwise>
+                                            <p>No pre-delivery inspection information yet.</p>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
+                            </c:if>
+
+                            <c:if test="${canCustomerConfirm}">
+                                <div class="note-box">
+                                    <div class="note-title">Vehicle Handover Confirmation</div>
+
+                                    <form method="post"
+                                          action="${pageContext.request.contextPath}/booking"
+                                          id="customerHandoverForm">
+
+                                        <input type="hidden" name="bookingId" value="${booking.bookingId}">
+                                        <input type="hidden" name="contractId" value="${contract.contractId}">
+
+                                        <div style="margin: 14px 0;">
+                                            <label style="display:block; margin-bottom:10px;">
+                                                <input type="checkbox" id="reviewedCheck">
+                                                I have reviewed the vehicle condition.
+                                            </label>
+
+                                            <label style="display:block; margin-bottom:10px;">
+                                                <input type="checkbox" id="agreeReceive">
+                                                I agree to receive this vehicle.
+                                            </label>
+                                        </div>
+
+                                        <div class="note-title" style="margin-bottom:8px;">Customer Note</div>
+                                        <textarea name="customerNote"
+                                                  style="width:100%; min-height:100px; border:1px solid #ddd; border-radius:8px; padding:12px; resize:vertical;"></textarea>
+
+                                        <div class="action-buttons" style="margin-top:16px;">
+                                            <button type="submit"
+                                                    name="action"
+                                                    value="confirmHandover"
+                                                    class="btn btn-primary"
+                                                    onclick="return validateCustomerConfirm();">
+                                                Confirm Vehicle Handover
+                                            </button>
+
+                                            <button type="submit"
+                                                    name="action"
+                                                    value="rejectHandover"
+                                                    class="btn btn-danger"
+                                                    onclick="return confirm('Are you sure you want to reject this vehicle?');">
+                                                Reject Vehicle
+                                            </button>
+                                        </div>
+                                    </form>
                                 </div>
                             </c:if>
 
