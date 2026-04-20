@@ -43,30 +43,32 @@
                                      alt="${car.modelName} image ${i}">
                             </c:forEach>
                         </div>
-
-                    </div>
-
-                    <!-- RIGHT INFO -->
-                    <div class="car-summary">
-
                         <c:if test="${not empty BOOKING_ERROR}">
                             <div class="alert alert-danger">${BOOKING_ERROR}</div>
                         </c:if>
 
-                        <h1>${car.modelName}</h1>
+                        <h1> ${car.modelName}</h1>
 
-                        <div class="price">
-                            <fmt:formatNumber value="${car.pricePerDay}" pattern="#,###"/> VND / day
-                        </div>
+
 
                         <c:if test="${not empty car.description}">
                             <div class="badge">
                                 ${car.description}
                             </div>
                         </c:if>
+                    </div>
+
+                    <!-- RIGHT INFO -->
+                    <div class="car-summary">
+
+
 
                         <div class="rental-calendar-box">
 
+                            <div class="price">
+                                <fmt:formatNumber value="${car.pricePerDay}" pattern="#,###"/> VND / day
+                            </div>
+                            
                             <h3>Chọn thời gian thuê</h3>
 
                             <c:if test="${not empty BOOKING_ERROR}">
@@ -91,7 +93,7 @@
                                 <div class="rental-summary-trigger" id="openRentalModal" role="button" tabindex="0">
                                     <div class="rental-summary-grid">
                                         <div class="rental-summary-col">
-                                            <div class="rental-summary-label">Nhận xe</div>
+                                            <div class="rental-summary-value">Nhận xe</div>
                                             <div class="rental-summary-value" id="displayStartDate">
                                                 <c:choose>
                                                     <c:when test="${(not empty startDate or not empty param.startDate) and (not empty startHour or not empty param.startHour)}">
@@ -103,7 +105,7 @@
                                         </div>
 
                                         <div class="rental-summary-col">
-                                            <div class="rental-summary-label">Trả xe</div>
+                                            <div class="rental-summary-value">Trả xe</div>
                                             <div class="rental-summary-value" id="displayEndDate">
                                                 <c:choose>
                                                     <c:when test="${(not empty endDate or not empty param.endDate) and (not empty endHour or not empty param.endHour)}">

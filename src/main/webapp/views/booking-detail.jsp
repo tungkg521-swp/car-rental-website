@@ -136,7 +136,7 @@
                             <!-- INFO GRID -->
                             <div class="info-card">
                                 <div class="info-row">
-                                    <span class="info-label">Customer</span>
+                                    <span class="info-label">Họ và tên</span>
                                     <span class="info-value">${booking.customerName}</span>
                                 </div>
 
@@ -146,34 +146,36 @@
                                 </div>
 
                                 <div class="info-row">
-                                    <span class="info-label">Phone</span>
+                                    <span class="info-label">Số điện thoại</span>
                                     <span class="info-value">${booking.customerPhone}</span>
                                 </div>
 
                                 <div class="info-row">
-                                    <span class="info-label">Booking Date</span>
+                                    <span class="info-label">Ngày Đặt </span>
                                     <span class="info-value">
                                         <fmt:formatDate value="${booking.bookingDate}" pattern="dd/MM/yyyy HH:mm"/>
                                     </span>
                                 </div>
 
                                 <div class="info-row">
-                                    <span class="info-label">Start Time</span>
+                                    <span class="info-label">Ngày nhận </span>
                                     <span class="info-value">
                                         <fmt:formatDate value="${booking.startTime}" pattern="dd/MM/yyyy HH:mm"/>
                                     </span>
                                 </div>
 
                                 <div class="info-row">
-                                    <span class="info-label">End Time</span>
+                                    <span class="info-label">Ngày trả</span>
                                     <span class="info-value">
                                         <fmt:formatDate value="${booking.endTime}" pattern="dd/MM/yyyy HH:mm"/>
                                     </span>
                                 </div>
 
                                 <div class="info-row">
-                                    <span class="info-label">Rental Duration</span>
-                                    <span class="info-value">${rentalDurationText}</span>
+                                    <span class="info-label">Tiền cọc và dằn xe</span>
+                                   
+                                    <fmt:formatNumber value="${booking.depositAmount+10000000}" type="number" groupingUsed="true"/>
+                                        VND
                                 </div>
 
                                 <div class="info-row total-row">

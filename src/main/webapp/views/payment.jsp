@@ -54,11 +54,11 @@
                     </p>
 
                     <div class="price-box-main">
-                        <div class="label">Tiền cọc cần thanh toán</div>
+                        <div class="label">Tiền cọc và dằn xe cần thanh toán</div>
                         <div class="value">
-                            <fmt:formatNumber value="${depositAmount}" pattern="#,###"/> VND
+                            <fmt:formatNumber value="${depositAmount+10000000}" pattern="#,###"/> VND
                         </div>
-                        <div class="sub">Thanh toán trước 30% để giữ xe</div>
+                        <div class="sub">Thanh toán trước 30% và tiền dằn xe để giữ xe</div>
                     </div>
 
                     <div class="mini-summary">
@@ -150,11 +150,17 @@
                                     <fmt:formatNumber value="${remainingAmount}" pattern="#,###"/> VND
                                 </strong>
                             </div>
-
+ 
+                                <div class="summary-row deposit">
+                                <span>Tiền dằn xe cần thanh toán ngay</span>
+                                <strong>
+                                    <fmt:formatNumber value="10000000" pattern="#,###"/> VND
+                                </strong>
+                            </div>
                             <div class="summary-row total">
                                 <span>Xác nhận thanh toán</span>
                                 <strong>
-                                    <fmt:formatNumber value="${depositAmount}" pattern="#,###"/> VND
+                                    <fmt:formatNumber value="${depositAmount+10000000}" pattern="#,###"/> VND
                                 </strong>
                             </div>
 
