@@ -1,6 +1,5 @@
 package Controllers;
 
-
 import DALs.CarDAO;
 
 import Utils.RoleConstants;
@@ -22,7 +21,6 @@ import java.util.List;
 import models.AccountModel;
 import models.CarModel;
 
-
 @WebServlet("/staff/cars")
 @MultipartConfig(
         fileSizeThreshold = 1024 * 1024,
@@ -31,9 +29,7 @@ import models.CarModel;
 )
 public class StaffCarController extends HttpServlet {
 
-
     private final CarDAO carDAO = new CarDAO();
-
 
     @Override
     protected void doGet(HttpServletRequest request,
@@ -47,7 +43,6 @@ public class StaffCarController extends HttpServlet {
                 int carId = Integer.parseInt(request.getParameter("id"));
 
                 List<String> images = carDAO.getCarImagesByCarId(carId);
-
 
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
@@ -109,7 +104,6 @@ public class StaffCarController extends HttpServlet {
             int carId = Integer.parseInt(request.getParameter("id"));
 
             CarModel car = carDAO.findById(carId);
-
 
             request.setAttribute("car", car);
             request.getRequestDispatcher("/views/staff-cars-manager.jsp")
@@ -173,7 +167,6 @@ public class StaffCarController extends HttpServlet {
             return;
         }
 
-
         if ("delete".equals(action)) {
             if (!isAdmin(request)) {
                 request.getSession().setAttribute("error", "Only admin can delete cars.");
@@ -212,7 +205,14 @@ public class StaffCarController extends HttpServlet {
             String description = request.getParameter("description");
             String status = request.getParameter("status");
             String plateNumber = request.getParameter("plateNumber");
+            plateNumber = plateNumber != null ? plateNumber.trim() : "";
 
+            if (carDAO.existsPlateNumber(plateNumber)) {
+                request.getSession().setAttribute("error",
+                        "Plate number already exists. Please enter another plate number.");
+                response.sendRedirect(request.getContextPath() + "/staff/cars?action=add");
+                return;
+            }
             String imageFolder = modelName.toLowerCase()
                     .replaceAll("\\s+", "_")
                     .replaceAll("vinfast_", "")
@@ -276,9 +276,8 @@ public class StaffCarController extends HttpServlet {
                     imageUrls.get(0),
                     imageFolder,
                     description,
-                    status,plateNumber
+                    status, plateNumber
             );
-
 
             if (car == null || imageUrls == null || imageUrls.isEmpty()) {
                 request.setAttribute("error", "Please select at least one image!");
@@ -286,7 +285,6 @@ public class StaffCarController extends HttpServlet {
                 return;
             }
             boolean success = carDAO.addCarWithImages(car, imageUrls);
-
 
             if (success) {
                 request.getSession().setAttribute("message", "Car added successfully!");
@@ -322,8 +320,15 @@ public class StaffCarController extends HttpServlet {
             String typeName = request.getParameter("typeName");
             String description = request.getParameter("description");
             String status = request.getParameter("status");
-            String plateNumber =request.getParameter("plateNumber");
+            String plateNumber = request.getParameter("plateNumber");
+            plateNumber = plateNumber != null ? plateNumber.trim() : "";
 
+            if (carDAO.existsPlateNumber(plateNumber)) {
+                request.getSession().setAttribute("error",
+                        "Plate number already exists. Please enter another plate number.");
+                response.sendRedirect(request.getContextPath() + "/staff/cars?action=add");
+                return;
+            }
             CarModel existingCar = carDAO.findById(carId);
 
             if (existingCar == null) {
@@ -386,9 +391,8 @@ public class StaffCarController extends HttpServlet {
                     imageUrl,
                     imageFolder,
                     description,
-                    status,plateNumber
+                    status, plateNumber
             );
-
 
             if (car == null) {
                 request.setAttribute("error", "Invalid car data.");
@@ -428,7 +432,6 @@ public class StaffCarController extends HttpServlet {
 
             boolean success = carDAO.deleteCar(carId);
 
-
             if (success) {
                 request.getSession().setAttribute("message", "Car deleted successfully!");
             } else {
@@ -445,4 +448,3 @@ public class StaffCarController extends HttpServlet {
     }
 
 }
-

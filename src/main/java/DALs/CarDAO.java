@@ -1092,4 +1092,33 @@ public class CarDAO extends DBContext {
 
         return list;
     }
+
+    public boolean existsPlateNumber(String plateNumber) {
+        String sql = "SELECT 1 FROM cars WHERE plate_number = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, plateNumber);
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public boolean existsPlateNumberExceptId(String plateNumber, int carId) {
+        String sql = "SELECT 1 FROM cars WHERE plate_number = ? AND car_id <> ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, plateNumber);
+            ps.setInt(2, carId);
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
 }
