@@ -7,7 +7,7 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <title>Car Manager</title>
+        <title>Manage Cars</title>
         <link rel="stylesheet" 
               href="${pageContext.request.contextPath}/assets/css/staff.css">
 
@@ -101,7 +101,7 @@
                                                                      alt="${car.modelName}" class="table-image">
                                                             </c:when>
                                                             <c:otherwise>
-                                                                <div class="no-image">No Image</div>
+                                                                <div class="no-image">Không có ảnh</div>
                                                             </c:otherwise>
                                                         </c:choose>
                                                     </td>
@@ -109,7 +109,7 @@
                                                     <td>${car.brandName}</td>
                                                     <td>${car.plateNumber}</td>
                                                     <td>${car.modelYear}</td>
-                                                    <td><fmt:formatNumber value="${car.pricePerDay}" type="currency" currencySymbol="$"/></td>
+                                                    <td><fmt:formatNumber value="${car.pricePerDay}" type="number" groupingUsed="true"/> VND</td>
                                                     <td>
                                                         <span class="status-badge ${car.status.toLowerCase()}">
                                                             ${car.status}
@@ -129,7 +129,7 @@
                                                         <c:if test="${isAdmin}">
                                                             <form class="delete-form" method="POST" 
                                                                   action="${pageContext.request.contextPath}/staff/cars"
-                                                                  onsubmit="return confirm('Are you sure you want to delete this car?');">
+                                                                  onsubmit="return confirm('Bạn có chắc muốn xóa xe này không?');">
                                                                 <input type="hidden" name="action" value="delete">
                                                                 <input type="hidden" name="carId" value="${car.carId}">
                                                                 <button type="submit" class="btn-delete" title="Delete">
@@ -144,9 +144,9 @@
                                         <c:otherwise>
                                             <tr>
                                                 <td colspan="8" class="no-data">
-                                                    No cars found.
+                                                    Không tìm thấy xe nào.
                                                     <c:if test="${isAdmin}">
-                                                        <a href="?action=add">Add your first car</a>
+                                                        <a href="?action=add">Thêm xe đầu tiên</a>
                                                     </c:if>
                                                 </td>
                                             </tr>
@@ -188,9 +188,9 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label>Price Per Day ($) *</label>
+                                    <label>Price Per Day *</label>
                                     <input type="number" name="pricePerDay" step="0.01" min="0" required
-                                           placeholder="50.00" value="${car.pricePerDay}">
+                                           placeholder="500000" value="${car.pricePerDay}">
                                 </div>
 
                                 <div class="form-group">
@@ -243,7 +243,7 @@
                                            class="file-input">
                                     <small class="help-text">
                                         <i class="fas fa-info-circle"></i> 
-                                        Hold Ctrl/Cmd to select multiple files. First image will be used as primary.
+                                        Giữ Ctrl/Cmd để chọn nhiều ảnh. Ảnh đầu tiên sẽ được dùng làm ảnh chính.
                                     </small>
                                 </div>
 
@@ -306,7 +306,7 @@
                                     <span class="status-badge ${car.status.toLowerCase()}">${car.status}</span>
 
                                     <div class="price-tag">
-                                        <fmt:formatNumber value="${car.pricePerDay}" type="currency" currencySymbol="$"/> / day
+                                        <fmt:formatNumber value="${car.pricePerDay}" type="number" groupingUsed="true"/> VND / day
                                     </div>
 
                                     <div class="specs-grid">
@@ -375,7 +375,7 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label>Price Per Day ($) *</label>
+                                    <label>Price Per Day *</label>
                                     <input type="number" name="pricePerDay" step="0.01" value="${car.pricePerDay}" required>
                                 </div>
 
@@ -433,7 +433,7 @@
                                 <input type="file" name="carImages" multiple accept="image/*" class="file-input">
                                 <small class="help-text">
                                     <i class="fas fa-info-circle"></i> 
-                                    Hold Ctrl/Cmd to select multiple files. New images will be added to existing ones.
+                                    Giữ Ctrl/Cmd để chọn nhiều ảnh. Ảnh mới sẽ được thêm vào ảnh hiện có.
                                 </small>
                             </div>
 
@@ -466,9 +466,7 @@
         </div>
 
         <!-- JavaScript -->
-        <!-- JavaScript -->
         <script>
-            // Load current images for edit mode
             <c:if test="${param.action == 'edit' && not empty car}">
             fetch('${pageContext.request.contextPath}/staff/cars?action=getImages&id=${car.carId}')
                         .then(response => response.json())
@@ -479,10 +477,9 @@
                                 const imgDiv = document.createElement('div');
                                 imgDiv.className = 'current-image-item';
 
-                                // Tạo nội dung bằng cách nối chuỗi thay vì dùng template literal
                                 let html = '<img src="${pageContext.request.contextPath}/' + img + '" alt="Car Image">';
                                 if (index === 0) {
-                                    html += '<span class="primary-badge">Primary</span>';
+                                    html += '<span class="primary-badge">Ảnh chính</span>';
                                 }
 
                                 imgDiv.innerHTML = html;
@@ -491,7 +488,6 @@
                         });
             </c:if>
 
-                // Load thumbnails for detail mode
             <c:if test="${param.action == 'detail' && not empty car}">
                 const mainImage = document.getElementById('mainCarImage');
                 const thumbnailList = document.getElementById('thumbnailList');
