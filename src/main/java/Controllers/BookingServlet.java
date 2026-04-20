@@ -877,8 +877,6 @@ public class BookingServlet extends HttpServlet {
         boolean success = contractDAO.confirmCustomerHandover(contractId, customerNote);
 
         if (success) {
-            bookingDAO.updateStatus(bookingId, "ACTIVE");
-            carDAO.updateStatus(contract.getCarId(), "RENTING");
             session.setAttribute("handoverStatus", "confirm_success");
         } else {
             session.setAttribute("handoverStatus", "confirm_fail");

@@ -116,27 +116,27 @@
                             <h2>Pre-Delivery Check Information</h2>
 
                             <c:choose>
-                                <c:when test="${not empty latestCarCheck and latestCarCheck.checkResult ne 'RETURN_CHECK'}">
+                                <c:when test="${not empty preDeliveryCheck}">
                                     <div class="info-table">
                                         <div class="info-row">
                                             <div class="info-label">Check Result</div>
-                                            <div class="info-value">${latestCarCheck.checkResult}</div>
+                                            <div class="info-value">${preDeliveryCheck.checkResult}</div>
                                         </div>
                                         <div class="info-row">
                                             <div class="info-label">Fuel Level</div>
-                                            <div class="info-value">${latestCarCheck.fuelLevel}</div>
+                                            <div class="info-value">${preDeliveryCheck.fuelLevel}</div>
                                         </div>
                                         <div class="info-row">
                                             <div class="info-label">Exterior Note</div>
-                                            <div class="info-value">${latestCarCheck.exteriorNote}</div>
+                                            <div class="info-value">${preDeliveryCheck.exteriorNote}</div>
                                         </div>
                                         <div class="info-row">
                                             <div class="info-label">Interior Note</div>
-                                            <div class="info-value">${latestCarCheck.interiorNote}</div>
+                                            <div class="info-value">${preDeliveryCheck.interiorNote}</div>
                                         </div>
                                         <div class="info-row">
                                             <div class="info-label">Staff Note</div>
-                                            <div class="info-value">${latestCarCheck.note}</div>
+                                            <div class="info-value">${preDeliveryCheck.note}</div>
                                         </div>
                                     </div>
                                 </c:when>
@@ -157,10 +157,10 @@
                                 <h2>Return Check Information</h2>
 
                                 <c:choose>
-                                    <c:when test="${not empty latestCarCheck and latestCarCheck.checkResult eq 'RETURN_CHECK'}">
+                                    <c:when test="${not empty returnCheck}">
                                         <ul class="check-list">
-                                            <c:if test="${not empty latestCarCheck.exteriorNote}">
-                                                <c:forTokens items="${latestCarCheck.exteriorNote}" delims="|" var="issue">
+                                            <c:if test="${not empty returnCheck.exteriorNote}">
+                                                <c:forTokens items="${returnCheck.exteriorNote}" delims="|" var="issue">
                                                     <li>${issue}</li>
                                                     </c:forTokens>
                                                 </c:if>
@@ -260,7 +260,7 @@
                                     <form method="post"
                                           action="${pageContext.request.contextPath}/staff/contracts"
                                           style="display:inline-block;"
-                                          onsubmit="return validateSendToCustomer(${not empty latestCarCheck and latestCarCheck.checkResult eq 'OK'});">
+                                          onsubmit="return validateSendToCustomer(${not empty preDeliveryCheck and preDeliveryCheck.checkResult eq 'OK'});">
                                         <input type="hidden" name="action" value="sendToCustomer">
                                         <input type="hidden" name="contractId" value="${contract.contractId}">
 
@@ -286,22 +286,39 @@
                                 </c:when>
 
                                 <c:when test="${contract.contractStatus eq 'WAITING_CUSTOMER_CONFIRM'}">
-                                    <button type="button" class="btn-action btn-check" disabled>
-                                        Waiting Customer Confirm
-                                    </button>
 
-                                    <form method="post"
-                                          action="${pageContext.request.contextPath}/staff/contracts"
-                                          style="display:inline-block;">
-                                        <input type="hidden" name="action" value="markNoShow">
-                                        <input type="hidden" name="contractId" value="${contract.contractId}">
+                                    <c:choose>
+                                        <c:when test="${contract.customerConfirmed eq true}">
+                                            <form method="post"
+                                                  action="${pageContext.request.contextPath}/staff/contracts"
+                                                  style="display:inline-block;"
+                                                  onsubmit="return confirm('Deliver this car now?');">
+                                                <input type="hidden" name="action" value="deliverCar">
+                                                <input type="hidden" name="contractId" value="${contract.contractId}">
 
-                                        <button type="submit"
-                                                class="btn-action btn-complete"
-                                                onclick="return confirm('Mark this customer as no-show?');">
-                                            Mark No-show
-                                        </button>
-                                    </form>
+                                                <button type="submit"
+                                                        class="btn-action btn-complete">
+                                                    Deliver Car
+                                                </button>
+                                            </form>
+                                        </c:when>
+
+                                        <c:otherwise>
+                                            <form method="post"
+                                                  action="${pageContext.request.contextPath}/staff/contracts"
+                                                  style="display:inline-block;">
+                                                <input type="hidden" name="action" value="markNoShow">
+                                                <input type="hidden" name="contractId" value="${contract.contractId}">
+
+                                                <button type="submit"
+                                                        class="btn-action btn-complete"
+                                                        onclick="return confirm('Mark this customer as no-show?');">
+                                                    Mark No-show
+                                                </button>
+                                            </form>
+                                        </c:otherwise>
+                                    </c:choose>
+
                                 </c:when>
 
                                 <c:when test="${contract.contractStatus eq 'ACTIVE'}">
@@ -557,11 +574,17 @@
         </div>
 
         <div id="savedBeforeCheckData"
-             data-exterior-note="${not empty latestCarCheck and latestCarCheck.checkResult ne 'RETURN_CHECK' ? latestCarCheck.exteriorNote : ''}"
-             data-interior-note="${not empty latestCarCheck and latestCarCheck.checkResult ne 'RETURN_CHECK' ? latestCarCheck.interiorNote : ''}"
-             data-fuel-level="${not empty latestCarCheck and latestCarCheck.checkResult ne 'RETURN_CHECK' ? latestCarCheck.fuelLevel : ''}"
-             data-check-result="${not empty latestCarCheck and latestCarCheck.checkResult ne 'RETURN_CHECK' ? latestCarCheck.checkResult : ''}"
-             data-note="${not empty latestCarCheck and latestCarCheck.checkResult ne 'RETURN_CHECK' ? latestCarCheck.note : ''}"
+             data-exterior-note="${not empty preDeliveryCheck ? preDeliveryCheck.exteriorNote : ''}"
+             data-interior-note="${not empty preDeliveryCheck ? preDeliveryCheck.interiorNote : ''}"
+             data-fuel-level="${not empty preDeliveryCheck ? preDeliveryCheck.fuelLevel : ''}"
+             data-check-result="${not empty preDeliveryCheck ? preDeliveryCheck.checkResult : ''}"
+             data-note="${not empty preDeliveryCheck ? preDeliveryCheck.note : ''}"
+             style="display:none;">
+        </div>
+
+        <div id="preDeliveryIssueSeedData"
+             data-exterior-note="${not empty preDeliveryCheck ? preDeliveryCheck.exteriorNote : ''}"
+             data-interior-note="${not empty preDeliveryCheck ? preDeliveryCheck.interiorNote : ''}"
              style="display:none;">
         </div>
 

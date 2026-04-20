@@ -112,17 +112,20 @@ public class StaffContractController extends HttpServlet {
                     rentalDurationText = "0 minute";
                 }
 
-                CarCheckModel latestCarCheck = carCheckDAO.getLatestCheckByContractId(contract.getContractId());
+                CarCheckModel preDeliveryCheck
+                        = carCheckDAO.getLatestPreDeliveryCheckByContractId(contract.getContractId());
 
-                boolean hasReturnCheck = latestCarCheck != null
-                        && "RETURN_CHECK".equalsIgnoreCase(latestCarCheck.getCheckResult());
+                CarCheckModel returnCheck
+                        = carCheckDAO.getLatestReturnCheckByContractId(contract.getContractId());
 
-                List<String> savedIssueTypes = parseSavedIssueTypes(latestCarCheck);
-                List<String> savedDescriptions = parseSavedDescriptions(latestCarCheck);
-                List<Long> savedAmounts = parseSavedAmounts(latestCarCheck);
+                boolean hasReturnCheck = returnCheck != null;
 
-                List<String> extraChargeTypes = parseReturnFeeTypes(latestCarCheck);
-                List<Long> extraChargeAmounts = parseReturnFeeAmounts(latestCarCheck);
+                List<String> savedIssueTypes = parseSavedIssueTypes(returnCheck);
+                List<String> savedDescriptions = parseSavedDescriptions(returnCheck);
+                List<Long> savedAmounts = parseSavedAmounts(returnCheck);
+
+                List<String> extraChargeTypes = parseReturnFeeTypes(returnCheck);
+                List<Long> extraChargeAmounts = parseReturnFeeAmounts(returnCheck);
 
                 long extraChargeTotal = 0;
                 for (Long amount : extraChargeAmounts) {
@@ -139,7 +142,8 @@ public class StaffContractController extends HttpServlet {
                 request.setAttribute("scheduleConflict", scheduleConflict);
                 request.setAttribute("hasReturnCheck", hasReturnCheck);
                 request.setAttribute("rentalDurationText", rentalDurationText);
-                request.setAttribute("latestCarCheck", latestCarCheck);
+                request.setAttribute("preDeliveryCheck", preDeliveryCheck);
+                request.setAttribute("returnCheck", returnCheck);
                 request.setAttribute("extraChargeTypes", extraChargeTypes);
                 request.setAttribute("extraChargeAmounts", extraChargeAmounts);
                 request.setAttribute("extraChargeTotal", extraChargeTotal);
@@ -259,6 +263,9 @@ public class StaffContractController extends HttpServlet {
                 success = completeContract(contractId, carNextStatus);
             } else if ("cancel".equals(action)) {
                 success = updateContractStatus(contractId, "CANCELLED");
+            } else if ("deliverCar".equals(action)) {
+                success = deliverCar(contractId);
+
             } else if ("saveReturnCheck".equals(action)) {
                 saveReturnCheck(request, response);
                 return;
@@ -301,16 +308,6 @@ public class StaffContractController extends HttpServlet {
 
         if ("ACTIVE".equalsIgnoreCase(status)) {
             if (!"WAITING_CUSTOMER_CONFIRM".equalsIgnoreCase(currentStatus)) {
-                return false;
-            }
-        }
-
-        if ("ACTIVE".equalsIgnoreCase(status)) {
-            if (!"CREATED".equalsIgnoreCase(currentStatus)) {
-                return false;
-            }
-
-            if (!carCheckDAO.hasLatestCheckOk(contractId)) {
                 return false;
             }
         }
@@ -582,6 +579,24 @@ public class StaffContractController extends HttpServlet {
         }
     }
 
+    private boolean deliverCar(int contractId) {
+        ContractModel contract = contractDAO.getContractById(contractId);
+
+        if (contract == null) {
+            return false;
+        }
+
+        if (!"WAITING_CUSTOMER_CONFIRM".equalsIgnoreCase(contract.getContractStatus())) {
+            return false;
+        }
+
+        if (contract.getCustomerConfirmed() == null || !contract.getCustomerConfirmed()) {
+            return false;
+        }
+
+        return updateContractStatus(contractId, "ACTIVE");
+    }
+
     private String buildSafeFieldSuffix(String issue) {
         return issue.replace(" ", "_");
     }
@@ -599,9 +614,8 @@ public class StaffContractController extends HttpServlet {
     }
 
     private boolean hasReturnCheck(int contractId) {
-        CarCheckModel latestCarCheck = carCheckDAO.getLatestCheckByContractId(contractId);
-        return latestCarCheck != null
-                && "RETURN_CHECK".equalsIgnoreCase(latestCarCheck.getCheckResult());
+        CarCheckModel returnCheck = carCheckDAO.getLatestReturnCheckByContractId(contractId);
+        return returnCheck != null;
     }
 
     private List<String> parseReturnFeeTypes(CarCheckModel latestCarCheck) {
@@ -819,7 +833,7 @@ public class StaffContractController extends HttpServlet {
             return false;
         }
 
-        CarCheckModel latestCarCheck = carCheckDAO.getLatestCheckByContractId(contractId);
+        CarCheckModel latestCarCheck = carCheckDAO.getLatestPreDeliveryCheckByContractId(contractId);
         if (latestCarCheck == null) {
             return false;
         }
