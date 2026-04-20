@@ -6,12 +6,22 @@ function openCheckFeesModal() {
         form.reset();
     }
 
-    restoreSavedReturnCheckData();
+    const savedData = getSavedReturnCheckData();
+    const hasSavedReturnCheck = savedData.issues && savedData.issues.length > 0;
+
+    if (hasSavedReturnCheck) {
+        restoreSavedReturnCheckData();
+    } else {
+        applyPreDeliverySeedToReturnCheck();
+    }
 
     if (modal) {
         modal.classList.add("show");
         renderSelectedIssues();
-        applySavedFeeValues();
+
+        if (hasSavedReturnCheck) {
+            applySavedFeeValues();
+        }
     }
 }
 
@@ -362,4 +372,59 @@ function validateSendToCustomer(isOkCheck) {
     }
 
     return confirm("Send this handover check to customer?");
+}
+
+function normalizeIssueName(issue) {
+    if (!issue) {
+        return "";
+    }
+
+    const trimmed = issue.trim();
+
+    if (trimmed === "Scratch") {
+        return "Exterior scratch";
+    }
+
+    if (trimmed === "Seat damage" || trimmed === "Dashboard issue") {
+        return "Interior damage";
+    }
+
+    return trimmed;
+}
+
+function getPreDeliverySeedIssues() {
+    const seed = document.getElementById("preDeliveryIssueSeedData");
+
+    if (!seed) {
+        return [];
+    }
+
+    const exteriorIssues = parseIssueText(seed.dataset.exteriorNote || "");
+    const interiorIssues = parseIssueText(seed.dataset.interiorNote || "");
+
+    const allIssues = exteriorIssues
+        .concat(interiorIssues)
+        .map(normalizeIssueName);
+
+    return allIssues.filter(function (issue, index) {
+        return allIssues.indexOf(issue) === index;
+    });
+}
+
+
+
+function applyPreDeliverySeedToReturnCheck() {
+    const seedIssues = getPreDeliverySeedIssues();
+
+    if (!seedIssues || seedIssues.length === 0) {
+        return;
+    }
+
+    const checkboxes = document.querySelectorAll('input[name="issueTypes"]');
+
+    checkboxes.forEach(function (checkbox) {
+        if (seedIssues.includes(checkbox.value)) {
+            checkbox.checked = true;
+        }
+    });
 }

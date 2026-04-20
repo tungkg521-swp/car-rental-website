@@ -115,35 +115,77 @@ public class CarCheckDAO extends DBContext {
         }
         return false;
     }
-    
+
     public CarCheckModel getCheckById(int checkId) {
-    String sql = "SELECT * FROM car_check WHERE check_id = ?";
+        String sql = "SELECT * FROM car_check WHERE check_id = ?";
 
-    try (PreparedStatement ps = connection.prepareStatement(sql)) {
-        ps.setInt(1, checkId);
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, checkId);
 
-        try (ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                CarCheckModel check = new CarCheckModel();
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    CarCheckModel check = new CarCheckModel();
 
-                check.setCheckId(rs.getInt("check_id"));
-                check.setContractId(rs.getInt("contract_id"));
-                check.setCarId(rs.getInt("car_id"));
-                check.setCheckedBy(rs.getInt("checked_by"));
-                check.setCheckTime(rs.getTimestamp("check_time"));
-                check.setFuelLevel(rs.getString("fuel_level"));
-                check.setExteriorNote(rs.getString("exterior_note"));
-                check.setInteriorNote(rs.getString("interior_note"));
-                check.setCheckResult(rs.getString("check_result"));
-                check.setNote(rs.getString("note"));
+                    check.setCheckId(rs.getInt("check_id"));
+                    check.setContractId(rs.getInt("contract_id"));
+                    check.setCarId(rs.getInt("car_id"));
+                    check.setCheckedBy(rs.getInt("checked_by"));
+                    check.setCheckTime(rs.getTimestamp("check_time"));
+                    check.setFuelLevel(rs.getString("fuel_level"));
+                    check.setExteriorNote(rs.getString("exterior_note"));
+                    check.setInteriorNote(rs.getString("interior_note"));
+                    check.setCheckResult(rs.getString("check_result"));
+                    check.setNote(rs.getString("note"));
 
-                return check;
+                    return check;
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-    } catch (Exception e) {
-        e.printStackTrace();
+
+        return null;
     }
 
-    return null;
-}
+    public CarCheckModel getLatestPreDeliveryCheckByContractId(int contractId) {
+        String sql = "SELECT TOP 1 * FROM car_check "
+                + "WHERE contract_id = ? "
+                + "AND check_result <> 'RETURN_CHECK' "
+                + "ORDER BY check_time DESC, check_id DESC";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, contractId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapResultSet(rs);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public CarCheckModel getLatestReturnCheckByContractId(int contractId) {
+        String sql = "SELECT TOP 1 * FROM car_check "
+                + "WHERE contract_id = ? "
+                + "AND check_result = 'RETURN_CHECK' "
+                + "ORDER BY check_time DESC, check_id DESC";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, contractId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapResultSet(rs);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
 }
