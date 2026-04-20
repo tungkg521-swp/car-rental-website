@@ -27,8 +27,10 @@
                     <div class="search-box">
                         <form action="${pageContext.request.contextPath}/cars" method="get">
                             <input type="hidden" name="action" value="search"/>
-                            <input type="hidden" name="startDate" value="${not empty startDate ? startDate : param.startDate}"/>
-                            <input type="hidden" name="endDate" value="${not empty endDate ? endDate : param.endDate}"/>
+                            <input type="hidden" name="startDate" value="${not empty startDate ? fn:substring(startDate,0,10) : param.startDate}"/>
+                            <input type="hidden" name="startHour" value="${not empty startDate ? fn:substring(startDate,11,16) : param.startHour}"/>
+                            <input type="hidden" name="endDate" value="${not empty endDate ? fn:substring(endDate,0,10) : param.endDate}"/>
+                            <input type="hidden" name="endHour" value="${not empty endDate ? fn:substring(endDate,11,16) : param.endHour}"/>
 
                             <input type="text" name="keyword" placeholder="Tìm kiếm xe..." value="${not empty keyword ? keyword : param.keyword}">
                             <button type="submit">Tìm</button>
@@ -39,12 +41,18 @@
                     <form action="${pageContext.request.contextPath}/cars" method="get">
                         <input type="hidden" name="action" value="filter"/>
                         <input type="hidden" name="keyword" value="${not empty keyword ? keyword : param.keyword}"/>
-                        <input type="hidden" name="startDate" value="${not empty startDate ? startDate : param.startDate}"/>
-                        <input type="hidden" name="endDate" value="${not empty endDate ? endDate : param.endDate}"/>
+                        <input type="hidden" name="startDate" value="${not empty startDate ? fn:substring(startDate,0,10) : param.startDate}"/>
+                        <input type="hidden" name="startHour" value="${not empty startDate ? fn:substring(startDate,11,16) : param.startHour}"/>
+                        <input type="hidden" name="endDate" value="${not empty endDate ? fn:substring(endDate,0,10) : param.endDate}"/>
+                        <input type="hidden" name="endHour" value="${not empty endDate ? fn:substring(endDate,11,16) : param.endHour}"/>
 
                         <div class="filter-header">
                             <h3>Lọc theo</h3>
-                            <a href="${pageContext.request.contextPath}/cars?action=list&startDate=${not empty startDate ? startDate : param.startDate}&endDate=${not empty endDate ? endDate : param.endDate}"
+                            <a href="${pageContext.request.contextPath}/cars?action=list
+                               &startDate=${not empty startDate ? fn:substring(startDate,0,10) : param.startDate}
+                               &startHour=${not empty startDate ? fn:substring(startDate,11,16) : param.startHour}
+                               &endDate=${not empty endDate ? fn:substring(endDate,0,10) : param.endDate}
+                               &endHour=${not empty endDate ? fn:substring(endDate,11,16) : param.endHour}"
                                class="reset">
                                 Xóa tất cả
                             </a>
@@ -179,24 +187,49 @@
                         <div class="booking-bar">
                             <form action="${pageContext.request.contextPath}/cars" method="get" class="booking-bar-form">
                                 <input type="hidden" name="action" value="list">
-                                <input type="hidden" name="keyword" value="${not empty keyword ? keyword : param.keyword}">
 
-                                <div class="booking-bar-grid">
-                                    <div class="booking-bar-field">
-                                        <label>Ngày nhận xe</label>
-                                        <input type="date" name="startDate"
-                                               value="${not empty startDate ? startDate : param.startDate}" required>
-                                    </div>
+                                <div class="booking-bar-item">
+                                    <label>Ngày nhận xe</label>
+                                    <input type="date" name="startDate"
+                                           value="${not empty startDate ? fn:substring(startDate,0,10) : param.startDate}" required>
+                                </div>
 
-                                    <div class="booking-bar-field">
-                                        <label>Ngày trả xe</label>
-                                        <input type="date" name="endDate"
-                                               value="${not empty endDate ? endDate : param.endDate}" required>
-                                    </div>
+                                <div class="booking-bar-item">
+                                    <label>Giờ nhận xe</label>
+                                    <select name="startHour" required>
+                                        <option value="">Chọn giờ</option>
+                                        <c:forEach var="h" begin="0" end="23">
+                                            <fmt:formatNumber value="${h}" pattern="00" var="hourText" />
+                                            <option value="${hourText}:00"
+                                                    ${param.startHour == hourText.concat(':00') ? 'selected' : ''}>
+                                                ${hourText}:00
+                                            </option>
+                                        </c:forEach>
+                                    </select>
+                                </div>
 
-                                    <div class="booking-bar-submit">
-                                        <button type="submit" class="booking-update-btn">Cập nhật</button>
-                                    </div>
+                                <div class="booking-bar-item">
+                                    <label>Ngày trả xe</label>
+                                    <input type="date" name="endDate"
+                                           value="${not empty endDate ? fn:substring(endDate,0,10) : param.endDate}" required>
+                                </div>
+
+                                <div class="booking-bar-item">
+                                    <label>Giờ trả xe</label>
+                                    <select name="endHour" required>
+                                        <option value="">Chọn giờ</option>
+                                        <c:forEach var="h" begin="0" end="23">
+                                            <fmt:formatNumber value="${h}" pattern="00" var="hourText" />
+                                            <option value="${hourText}:00"
+                                                    ${param.endHour == hourText.concat(':00') ? 'selected' : ''}>
+                                                ${hourText}:00
+                                            </option>
+                                        </c:forEach>
+                                    </select>
+                                </div>
+
+                                <div class="booking-bar-item booking-bar-action">
+                                    <button type="submit" class="booking-search-btn">Tìm xe</button>
                                 </div>
                             </form>
                         </div>
@@ -219,7 +252,8 @@
                     </div>
                     <div class="car-grid">
                         <c:forEach var="car" items="${cars}">
-                            <a href="${pageContext.request.contextPath}/cars?action=detail&carId=${car.carId}&startDate=${startDate}&endDate=${endDate}" class="car-card-link">
+                            <a href="${pageContext.request.contextPath}/cars?action=detail&carId=${car.carId}&startDate=${not empty startDate ? fn:substring(startDate,0,10) : param.startDate}&startHour=${param.startHour}&endDate=${not empty endDate ? fn:substring(endDate,0,10) : param.endDate}&endHour=${param.endHour}" class="car-card-link">
+
                                 <div class="car-card">
                                     <div class="car-img">
                                         <img src="${car.imageUrl}" alt="${car.modelName}">

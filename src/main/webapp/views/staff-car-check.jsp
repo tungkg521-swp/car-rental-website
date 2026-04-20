@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <!DOCTYPE html>
 <html>
@@ -155,7 +156,11 @@
 
                             <div class="summary-item">
                                 <span>Rental Period</span>
-                                <p>${contract.contractStartDate} → ${contract.contractEndDate}</p>
+                                <p>
+                                <fmt:formatDate value="${contract.contractStartTime}" pattern="dd/MM/yyyy HH:mm"/>
+                                →
+                                <fmt:formatDate value="${contract.contractEndTime}" pattern="dd/MM/yyyy HH:mm"/>
+                                </p>
                             </div>
 
                             <div class="system-check-box">
@@ -197,7 +202,7 @@
                                                 ${latestCarCheck.checkResult}
                                             </span>
                                         </p>
-                                        <p><strong>Time:</strong> ${latestCarCheck.checkTime}</p>
+                                        <p><strong>Time:</strong> <fmt:formatDate value="${latestCarCheck.checkTime}" pattern="dd/MM/yyyy HH:mm"/></p>
                                         <p><strong>Fuel:</strong> ${latestCarCheck.fuelLevel}</p>
                                         <p><strong>Exterior:</strong> ${latestCarCheck.exteriorNote}</p>
                                         <p><strong>Interior:</strong> ${latestCarCheck.interiorNote}</p>

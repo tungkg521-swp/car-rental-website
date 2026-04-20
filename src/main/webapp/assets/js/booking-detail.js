@@ -35,6 +35,35 @@ function closePopup() {
     }
 }
 
+function validateCustomerConfirm() {
+    const reviewed = document.getElementById("reviewedCheck");
+    const agree = document.getElementById("agreeReceive");
+
+    if (!reviewed || !agree) {
+        return true;
+    }
+
+    if (!reviewed.checked) {
+        showPopup(
+            "warning",
+            "Confirmation Required",
+            "Please confirm that you have reviewed the vehicle condition."
+        );
+        return false;
+    }
+
+    if (!agree.checked) {
+        showPopup(
+            "warning",
+            "Confirmation Required",
+            "Please confirm that you agree to receive this vehicle."
+        );
+        return false;
+    }
+
+    return confirm("Confirm vehicle handover?");
+}
+
 /* GALLERY */
 let galleryImages = [];
 let currentImageIndex = 0;
@@ -93,8 +122,8 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
-    /* POPUP CANCEL */
     const cancelStatus = bookingPage.dataset.cancelStatus;
+    const handoverStatus = bookingPage.dataset.handoverStatus;
 
     if (cancelStatus === "success") {
         showPopup(
@@ -116,6 +145,32 @@ document.addEventListener("DOMContentLoaded", function () {
         );
     }
 
+    if (handoverStatus === "confirm_success") {
+        showPopup(
+            "success",
+            "Handover Confirmed",
+            "Vehicle handover has been confirmed successfully."
+        );
+    } else if (handoverStatus === "confirm_fail") {
+        showPopup(
+            "error",
+            "Confirmation Failed",
+            "Failed to confirm vehicle handover."
+        );
+    } else if (handoverStatus === "reject_success") {
+        showPopup(
+            "success",
+            "Vehicle Rejected",
+            "You have rejected the vehicle handover successfully."
+        );
+    } else if (handoverStatus === "reject_fail") {
+        showPopup(
+            "error",
+            "Reject Failed",
+            "Failed to reject vehicle handover."
+        );
+    }
+
     const overlay = document.getElementById("popupOverlay");
     if (overlay) {
         overlay.addEventListener("click", function (event) {
@@ -125,7 +180,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    /* GALLERY INIT */
     const thumbs = document.querySelectorAll(".thumb");
     const mainImage = document.getElementById("mainCarImage");
 

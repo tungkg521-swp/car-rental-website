@@ -110,14 +110,14 @@
                             <div class="info-item">
                                 <span>Ngày bắt đầu</span>
                                 <strong>
-                                    <fmt:formatDate value="${booking.startDate}" pattern="dd/MM/yyyy"/>
+                                    <fmt:formatDate value="${booking.startTime}" pattern="dd/MM/yyyy HH:mm"/>
                                 </strong>
                             </div>
 
                             <div class="info-item">
                                 <span>Ngày kết thúc</span>
                                 <strong>
-                                    <fmt:formatDate value="${booking.endDate}" pattern="dd/MM/yyyy"/>
+                                    <fmt:formatDate value="${booking.endTime}" pattern="dd/MM/yyyy HH:mm"/>
                                 </strong>
                             </div>
                         </div>

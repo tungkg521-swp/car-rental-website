@@ -46,17 +46,23 @@
                                 <div class="booking-hero-right">
                                     <div class="hero-stat">
                                         <span class="hero-stat-label">Booking Date</span>
-                                        <span class="hero-stat-value">${booking.bookingDate}</span>
+                                        <span class="hero-stat-value">
+                                            <fmt:formatDate value="${booking.bookingDate}" pattern="dd/MM/yyyy HH:mm"/>
+                                        </span>
                                     </div>
 
                                     <div class="hero-stat">
-                                        <span class="hero-stat-label">Start Date</span>
-                                        <span class="hero-stat-value">${booking.startDate}</span>
+                                        <span class="hero-stat-label">Start Time</span>
+                                        <span class="hero-stat-value">
+                                            <fmt:formatDate value="${booking.startTime}" pattern="dd/MM/yyyy HH:mm"/>
+                                        </span>
                                     </div>
 
                                     <div class="hero-stat">
-                                        <span class="hero-stat-label">End Date</span>
-                                        <span class="hero-stat-value">${booking.endDate}</span>
+                                        <span class="hero-stat-label">End Time</span>
+                                        <span class="hero-stat-value">
+                                            <fmt:formatDate value="${booking.endTime}" pattern="dd/MM/yyyy HH:mm"/>
+                                        </span>
                                     </div>
 
                                     <div class="hero-stat">
@@ -122,17 +128,17 @@
                                     <div class="info-list compact-list">
                                         <div class="info-item-block">
                                             <strong>Booking Date</strong>
-                                            <p>${booking.bookingDate}</p>
+                                            <p><fmt:formatDate value="${booking.bookingDate}" pattern="dd/MM/yyyy HH:mm"/></p>
                                         </div>
 
                                         <div class="info-item-block">
-                                            <strong>Start Date</strong>
-                                            <p>${booking.startDate}</p>
+                                            <strong>Start Time</strong>
+                                            <p><fmt:formatDate value="${booking.startTime}" pattern="dd/MM/yyyy HH:mm"/></p>
                                         </div>
 
                                         <div class="info-item-block">
-                                            <strong>End Date</strong>
-                                            <p>${booking.endDate}</p>
+                                            <strong>End Time</strong>
+                                            <p><fmt:formatDate value="${booking.endTime}" pattern="dd/MM/yyyy HH:mm"/></p>
                                         </div>
 
                                         <div class="info-item-block">
@@ -200,12 +206,12 @@
                                     <div class="info-grid">
                                         <div>
                                             <strong>Start Date</strong>
-                                            <p>${booking.startDate}</p>
+                                            <p><fmt:formatDate value="${booking.startTime}" pattern="dd/MM/yyyy HH:mm"/></p>
                                         </div>
 
                                         <div>
                                             <strong>End Date</strong>
-                                            <p>${booking.endDate}</p>
+                                            <p><fmt:formatDate value="${booking.endTime}" pattern="dd/MM/yyyy HH:mm"/></p>
                                         </div>
 
                                         <div>
