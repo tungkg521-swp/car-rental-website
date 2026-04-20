@@ -16,11 +16,11 @@ import models.ContractModel;
  *
  * @author ADMIN
  */
-public class ContractDAO extends DBContext{
+public class ContractDAO extends DBContext {
 
     public boolean createContract(ContractModel contract) {
         String sql = "INSERT INTO rental_contract "
-                + "(booking_id, customer_id, staff_id, car_id, contract_start_date, contract_end_date, "
+                + "(booking_id, customer_id, staff_id, car_id, contract_start_time, contract_end_time, "
                 + "contract_status, daily_price, deposit_amount, total_amount, signed_at, created_at, note) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE(), ?)";
 
@@ -30,8 +30,8 @@ public class ContractDAO extends DBContext{
             ps.setInt(2, contract.getCustomerId());
             ps.setInt(3, contract.getStaffId());
             ps.setInt(4, contract.getCarId());
-            ps.setDate(5, contract.getContractStartDate());
-            ps.setDate(6, contract.getContractEndDate());
+            ps.setTimestamp(5, contract.getContractStartTime());
+            ps.setTimestamp(6, contract.getContractEndTime());
             ps.setString(7, contract.getContractStatus());
             ps.setDouble(8, contract.getDailyPrice());
             ps.setDouble(9, contract.getDepositAmount());
@@ -50,7 +50,7 @@ public class ContractDAO extends DBContext{
     public List<ContractModel> findAllContracts() {
         List<ContractModel> list = new ArrayList<>();
 
-        String sql = "SELECT rc.contract_id, rc.booking_id, rc.contract_start_date, rc.contract_end_date, "
+        String sql = "SELECT rc.contract_id, rc.booking_id, rc.contract_start_time, rc.contract_end_time, "
                 + "rc.contract_status, rc.total_amount, "
                 + "c.full_name AS customer_name, "
                 + "car.model_name AS car_name "
@@ -59,15 +59,14 @@ public class ContractDAO extends DBContext{
                 + "JOIN cars car ON rc.car_id = car.car_id "
                 + "ORDER BY rc.contract_id DESC";
 
-        try (PreparedStatement ps = connection.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 ContractModel contract = new ContractModel();
                 contract.setContractId(rs.getInt("contract_id"));
                 contract.setBookingId(rs.getInt("booking_id"));
-                contract.setContractStartDate(rs.getDate("contract_start_date"));
-                contract.setContractEndDate(rs.getDate("contract_end_date"));
+                contract.setContractStartTime(rs.getTimestamp("contract_start_time"));
+                contract.setContractEndTime(rs.getTimestamp("contract_end_time"));
                 contract.setContractStatus(rs.getString("contract_status"));
                 contract.setTotalAmount(rs.getDouble("total_amount"));
                 contract.setCustomerName(rs.getString("customer_name"));
@@ -105,8 +104,8 @@ public class ContractDAO extends DBContext{
                     contract.setCustomerId(rs.getInt("customer_id"));
                     contract.setStaffId(rs.getInt("staff_id"));
                     contract.setCarId(rs.getInt("car_id"));
-                    contract.setContractStartDate(rs.getDate("contract_start_date"));
-                    contract.setContractEndDate(rs.getDate("contract_end_date"));
+                    contract.setContractStartTime(rs.getTimestamp("contract_start_time"));
+                    contract.setContractEndTime(rs.getTimestamp("contract_end_time"));
                     contract.setContractStatus(rs.getString("contract_status"));
                     contract.setDailyPrice(rs.getDouble("daily_price"));
                     contract.setDepositAmount(rs.getDouble("deposit_amount"));
@@ -119,7 +118,13 @@ public class ContractDAO extends DBContext{
                     contract.setCustomerEmail(rs.getString("customer_email"));
                     contract.setCustomerPhone(rs.getString("customer_phone"));
                     contract.setCarName(rs.getString("car_name"));
-                   
+
+                    contract.setHandoverCheckId((Integer) rs.getObject("handover_check_id"));
+                    contract.setCustomerConfirmed((Boolean) rs.getObject("customer_confirmed"));
+                    contract.setCustomerConfirmNote(rs.getString("customer_confirm_note"));
+                    contract.setCustomerConfirmTime(rs.getTimestamp("customer_confirm_time"));
+                    contract.setNoShowNote(rs.getString("no_show_note"));
+
                     return contract;
                 }
             }
@@ -165,66 +170,139 @@ public class ContractDAO extends DBContext{
 
         return false;
     }
+
     public int getCarIdByContractId(int contractId) {
-    String sql = "SELECT car_id FROM rental_contract WHERE contract_id = ?";
+        String sql = "SELECT car_id FROM rental_contract WHERE contract_id = ?";
 
-    try (PreparedStatement ps = connection.prepareStatement(sql)) {
-        ps.setInt(1, contractId);
-        ResultSet rs = ps.executeQuery();
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, contractId);
+            ResultSet rs = ps.executeQuery();
 
-        if (rs.next()) {
-            return rs.getInt("car_id");
-        }
-    } catch (Exception e) {
-        e.printStackTrace();
-    }
-
-    return -1;
-}
-
-public boolean updateCarId(int contractId, int newCarId) {
-    String sql = "UPDATE rental_contract SET car_id = ? WHERE contract_id = ?";
-
-    try (PreparedStatement ps = connection.prepareStatement(sql)) {
-        ps.setInt(1, newCarId);
-        ps.setInt(2, contractId);
-        return ps.executeUpdate() > 0;
-    } catch (Exception e) {
-        e.printStackTrace();
-    }
-    return false;
-}
-
-public ContractModel getContractByBookingId(int bookingId) {
-    String sql = "SELECT * FROM rental_contract WHERE booking_id = ?";
-
-    try (PreparedStatement ps = connection.prepareStatement(sql)) {
-        ps.setInt(1, bookingId);
-
-        try (ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
-                ContractModel contract = new ContractModel();
-                contract.setContractId(rs.getInt("contract_id"));
-                contract.setBookingId(rs.getInt("booking_id"));
-                contract.setCustomerId(rs.getInt("customer_id"));
-                contract.setStaffId(rs.getInt("staff_id"));
-                contract.setCarId(rs.getInt("car_id"));
-                contract.setContractStartDate(rs.getDate("contract_start_date"));
-                contract.setContractEndDate(rs.getDate("contract_end_date"));
-                contract.setContractStatus(rs.getString("contract_status"));
-                contract.setDailyPrice(rs.getDouble("daily_price"));
-                contract.setDepositAmount(rs.getDouble("deposit_amount"));
-                contract.setTotalAmount(rs.getDouble("total_amount"));
-                contract.setSignedAt(rs.getTimestamp("signed_at"));
-                contract.setCreatedAt(rs.getTimestamp("created_at"));
-                contract.setNote(rs.getString("note"));
-                return contract;
+                return rs.getInt("car_id");
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-    } catch (Exception e) {
-        e.printStackTrace();
+
+        return -1;
     }
 
-    return null;
-}
+    public boolean updateCarId(int contractId, int newCarId) {
+        String sql = "UPDATE rental_contract SET car_id = ? WHERE contract_id = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, newCarId);
+            ps.setInt(2, contractId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public ContractModel getContractByBookingId(int bookingId) {
+        String sql = "SELECT * FROM rental_contract WHERE booking_id = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, bookingId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    ContractModel contract = new ContractModel();
+                    contract.setContractId(rs.getInt("contract_id"));
+                    contract.setBookingId(rs.getInt("booking_id"));
+                    contract.setCustomerId(rs.getInt("customer_id"));
+                    contract.setStaffId(rs.getInt("staff_id"));
+                    contract.setCarId(rs.getInt("car_id"));
+                    contract.setContractStartTime(rs.getTimestamp("contract_start_time"));
+                    contract.setContractEndTime(rs.getTimestamp("contract_end_time"));
+                    contract.setContractStatus(rs.getString("contract_status"));
+                    contract.setDailyPrice(rs.getDouble("daily_price"));
+                    contract.setDepositAmount(rs.getDouble("deposit_amount"));
+                    contract.setTotalAmount(rs.getDouble("total_amount"));
+                    contract.setSignedAt(rs.getTimestamp("signed_at"));
+                    contract.setCreatedAt(rs.getTimestamp("created_at"));
+                    contract.setNote(rs.getString("note"));
+
+                    contract.setHandoverCheckId((Integer) rs.getObject("handover_check_id"));
+                    contract.setCustomerConfirmed((Boolean) rs.getObject("customer_confirmed"));
+                    contract.setCustomerConfirmNote(rs.getString("customer_confirm_note"));
+                    contract.setCustomerConfirmTime(rs.getTimestamp("customer_confirm_time"));
+                    contract.setNoShowNote(rs.getString("no_show_note"));
+
+                    return contract;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public boolean updateContractForCustomerConfirm(int contractId, String status, int handoverCheckId) {
+        String sql = "UPDATE rental_contract "
+                + "SET contract_status = ?, handover_check_id = ?, customer_confirmed = NULL, "
+                + "customer_confirm_note = NULL, customer_confirm_time = NULL "
+                + "WHERE contract_id = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setInt(2, handoverCheckId);
+            ps.setInt(3, contractId);
+
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public boolean confirmCustomerHandover(int contractId, String note) {
+        String sql = "UPDATE rental_contract "
+                + "SET customer_confirmed = ?, "
+                + "    customer_confirm_note = ?, "
+                + "    customer_confirm_time = CURRENT_TIMESTAMP "
+                + "WHERE contract_id = ? "
+                + "  AND contract_status = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setBoolean(1, true);
+            ps.setString(2, note);
+            ps.setInt(3, contractId);
+            ps.setString(4, "WAITING_CUSTOMER_CONFIRM");
+
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public boolean rejectCustomerHandover(int contractId, String note) {
+        String sql = "UPDATE rental_contract "
+                + "SET customer_confirmed = ?, "
+                + "    customer_confirm_note = ?, "
+                + "    customer_confirm_time = CURRENT_TIMESTAMP, "
+                + "    contract_status = ? "
+                + "WHERE contract_id = ? "
+                + "  AND contract_status = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setBoolean(1, false);
+            ps.setString(2, note);
+            ps.setString(3, "CANCELLED");
+            ps.setInt(4, contractId);
+            ps.setString(5, "WAITING_CUSTOMER_CONFIRM");
+
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
 }

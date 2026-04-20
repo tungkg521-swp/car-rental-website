@@ -14,6 +14,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.time.Duration;
+import java.util.ArrayList;
 import models.CarCheckModel;
 import models.CarModel;
 import models.ContractModel;
@@ -29,7 +31,6 @@ public class StaffContractController extends HttpServlet {
     private final BookingDAO bookingDAO = new BookingDAO();
     private final CarCheckDAO carCheckDAO = new CarCheckDAO();
 
-
     @Override
     protected void doGet(HttpServletRequest request,
             HttpServletResponse response)
@@ -37,7 +38,6 @@ public class StaffContractController extends HttpServlet {
 
         String action = request.getParameter("action");
 
-      
         if (action == null || "list".equals(action)) {
 
             List<ContractModel> list = contractDAO.findAllContracts();
@@ -46,8 +46,7 @@ public class StaffContractController extends HttpServlet {
 
             request.getRequestDispatcher("/views/staff-contracts.jsp")
                     .forward(request, response);
-        } 
-        else if ("detail".equals(action)) {
+        } else if ("detail".equals(action)) {
 
             try {
 
@@ -64,27 +63,95 @@ public class StaffContractController extends HttpServlet {
                     return;
                 }
 
-             
                 CustomerModel customer
                         = customerDAO.findById(contract.getCustomerId());
 
-               
                 CarModel car
                         = carDAO.findById(contract.getCarId());
 
-              
-                long days = ChronoUnit.DAYS.between(
-                        contract.getContractStartDate().toLocalDate(),
-                        contract.getContractEndDate().toLocalDate()
-                ) + 1;
+                boolean maintenanceBlocked = "MAINTENANCE".equalsIgnoreCase(car.getStatus());
 
-                CarCheckModel latestCarCheck = carCheckDAO.getLatestCheckByContractId(contract.getContractId());
+                boolean scheduleConflict = bookingDAO.hasBookingConflictExcludeBooking(
+                        contract.getCarId(),
+                        contract.getContractStartTime(),
+                        contract.getContractEndTime(),
+                        contract.getBookingId()
+                );
+
+                Duration duration = Duration.between(
+                        contract.getContractStartTime().toLocalDateTime(),
+                        contract.getContractEndTime().toLocalDateTime()
+                );
+
+                long totalMinutes = duration.toMinutes();
+                long totalDays = totalMinutes / (24 * 60);
+                long remainingHours = (totalMinutes % (24 * 60)) / 60;
+                long remainingMinutes = totalMinutes % 60;
+
+                String rentalDurationText = "";
+
+                if (totalDays > 0) {
+                    rentalDurationText += totalDays + " day" + (totalDays > 1 ? "s" : "");
+                }
+
+                if (remainingHours > 0) {
+                    if (!rentalDurationText.isEmpty()) {
+                        rentalDurationText += " ";
+                    }
+                    rentalDurationText += remainingHours + " hour" + (remainingHours > 1 ? "s" : "");
+                }
+
+                if (remainingMinutes > 0) {
+                    if (!rentalDurationText.isEmpty()) {
+                        rentalDurationText += " ";
+                    }
+                    rentalDurationText += remainingMinutes + " minute" + (remainingMinutes > 1 ? "s" : "");
+                }
+
+                if (rentalDurationText.isEmpty()) {
+                    rentalDurationText = "0 minute";
+                }
+
+                CarCheckModel preDeliveryCheck
+                        = carCheckDAO.getLatestPreDeliveryCheckByContractId(contract.getContractId());
+
+                CarCheckModel returnCheck
+                        = carCheckDAO.getLatestReturnCheckByContractId(contract.getContractId());
+
+                boolean hasReturnCheck = returnCheck != null;
+
+                List<String> savedIssueTypes = parseSavedIssueTypes(returnCheck);
+                List<String> savedDescriptions = parseSavedDescriptions(returnCheck);
+                List<Long> savedAmounts = parseSavedAmounts(returnCheck);
+
+                List<String> extraChargeTypes = parseReturnFeeTypes(returnCheck);
+                List<Long> extraChargeAmounts = parseReturnFeeAmounts(returnCheck);
+
+                long extraChargeTotal = 0;
+                for (Long amount : extraChargeAmounts) {
+                    extraChargeTotal += amount;
+                }
+
+                long remainingRentalAmount = Math.round(contract.getTotalAmount() - contract.getDepositAmount());
+                long finalAmountDue = remainingRentalAmount + extraChargeTotal;
 
                 request.setAttribute("contract", contract);
                 request.setAttribute("customer", customer);
                 request.setAttribute("car", car);
-                request.setAttribute("rentalDays", days);
-                request.setAttribute("latestCarCheck", latestCarCheck);
+                request.setAttribute("maintenanceBlocked", maintenanceBlocked);
+                request.setAttribute("scheduleConflict", scheduleConflict);
+                request.setAttribute("hasReturnCheck", hasReturnCheck);
+                request.setAttribute("rentalDurationText", rentalDurationText);
+                request.setAttribute("preDeliveryCheck", preDeliveryCheck);
+                request.setAttribute("returnCheck", returnCheck);
+                request.setAttribute("extraChargeTypes", extraChargeTypes);
+                request.setAttribute("extraChargeAmounts", extraChargeAmounts);
+                request.setAttribute("extraChargeTotal", extraChargeTotal);
+                request.setAttribute("remainingRentalAmount", remainingRentalAmount);
+                request.setAttribute("finalAmountDue", finalAmountDue);
+                request.setAttribute("savedIssueTypes", savedIssueTypes);
+                request.setAttribute("savedDescriptions", savedDescriptions);
+                request.setAttribute("savedAmounts", savedAmounts);
 
                 request.getRequestDispatcher("/views/staff-contract-detail.jsp")
                         .forward(request, response);
@@ -127,8 +194,8 @@ public class StaffContractController extends HttpServlet {
 
                 boolean scheduleConflict = bookingDAO.hasBookingConflictExcludeBooking(
                         contract.getCarId(),
-                        contract.getContractStartDate(),
-                        contract.getContractEndDate(),
+                        contract.getContractStartTime(),
+                        contract.getContractEndTime(),
                         contract.getBookingId()
                 );
 
@@ -161,7 +228,6 @@ public class StaffContractController extends HttpServlet {
         }
     }
 
-
     @Override
     protected void doPost(HttpServletRequest request,
             HttpServletResponse response)
@@ -180,11 +246,29 @@ public class StaffContractController extends HttpServlet {
                 success = saveCarCheck(request);
             } else if ("activate".equals(action)) {
                 success = updateContractStatus(contractId, "ACTIVE");
+            } else if ("sendToCustomer".equals(action)) {
+                success = sendToCustomerConfirm(contractId);
+            } else if ("markNoShow".equals(action)) {
+                success = markCustomerNoShow(contractId);
             } else if ("complete".equals(action)) {
                 String carNextStatus = request.getParameter("carNextStatus");
+
+                if (!hasReturnCheck(contractId)) {
+                    request.getSession().setAttribute("error",
+                            "Please inspect the vehicle first before completing the return.");
+                    response.sendRedirect(request.getContextPath()
+                            + "/staff/contracts?action=detail&id=" + contractId);
+                    return;
+                }
                 success = completeContract(contractId, carNextStatus);
             } else if ("cancel".equals(action)) {
                 success = updateContractStatus(contractId, "CANCELLED");
+            } else if ("deliverCar".equals(action)) {
+                success = deliverCar(contractId);
+
+            } else if ("saveReturnCheck".equals(action)) {
+                saveReturnCheck(request, response);
+                return;
             }
 
             if (success) {
@@ -193,15 +277,9 @@ public class StaffContractController extends HttpServlet {
                 request.getSession().setAttribute("error", "Failed to update contract status.");
             }
 
-            if ("saveCheck".equals(action)) {
-                response.sendRedirect(
-                        request.getContextPath()
-                        + "/staff/contracts?action=checkForm&id=" + contractId);
-            } else {
-                response.sendRedirect(
-                        request.getContextPath()
-                        + "/staff/contracts?action=detail&id=" + contractId);
-            }
+            response.sendRedirect(
+                    request.getContextPath()
+                    + "/staff/contracts?action=detail&id=" + contractId);
 
         } catch (Exception e) {
 
@@ -219,21 +297,17 @@ public class StaffContractController extends HttpServlet {
             return false;
         }
 
+        String currentStatus = contract.getContractStatus();
+
         if (!"ACTIVE".equalsIgnoreCase(status)
+                && !"WAITING_CUSTOMER_CONFIRM".equalsIgnoreCase(status)
                 && !"COMPLETED".equalsIgnoreCase(status)
                 && !"CANCELLED".equalsIgnoreCase(status)) {
             return false;
         }
 
-        String currentStatus = contract.getContractStatus();
-
         if ("ACTIVE".equalsIgnoreCase(status)) {
-            if (!"CREATED".equalsIgnoreCase(currentStatus)) {
-                return false;
-            }
-
-            
-            if (!carCheckDAO.hasLatestCheckOk(contractId)) {
+            if (!"WAITING_CUSTOMER_CONFIRM".equalsIgnoreCase(currentStatus)) {
                 return false;
             }
         }
@@ -245,6 +319,7 @@ public class StaffContractController extends HttpServlet {
 
         if ("CANCELLED".equalsIgnoreCase(status)
                 && !("CREATED".equalsIgnoreCase(currentStatus)
+                || "WAITING_CUSTOMER_CONFIRM".equalsIgnoreCase(currentStatus)
                 || "ACTIVE".equalsIgnoreCase(currentStatus))) {
             return false;
         }
@@ -254,12 +329,17 @@ public class StaffContractController extends HttpServlet {
             return false;
         }
 
-        if ("ACTIVE".equalsIgnoreCase(status)) {
+        if ("WAITING_CUSTOMER_CONFIRM".equalsIgnoreCase(status)) {
+            bookingDAO.updateStatus(contract.getBookingId(), "WAITING_CUSTOMER_CONFIRM");
+
+        } else if ("ACTIVE".equalsIgnoreCase(status)) {
             carDAO.updateStatus(contract.getCarId(), "RENTING");
             bookingDAO.updateStatus(contract.getBookingId(), "ACTIVE");
+
         } else if ("COMPLETED".equalsIgnoreCase(status)) {
             carDAO.updateStatus(contract.getCarId(), "AVAILABLE");
             bookingDAO.updateStatus(contract.getBookingId(), "COMPLETED");
+
         } else if ("CANCELLED".equalsIgnoreCase(status)) {
             carDAO.updateStatus(contract.getCarId(), "AVAILABLE");
             bookingDAO.updateStatus(contract.getBookingId(), "CANCELLED");
@@ -276,6 +356,10 @@ public class StaffContractController extends HttpServlet {
         }
 
         if (!"ACTIVE".equalsIgnoreCase(contract.getContractStatus())) {
+            return false;
+        }
+
+        if (!hasReturnCheck(contractId)) {
             return false;
         }
 
@@ -331,16 +415,19 @@ public class StaffContractController extends HttpServlet {
             }
 
             String fuelLevel = request.getParameter("fuelLevel");
-            String exteriorNote = request.getParameter("exteriorNote");
-            String interiorNote = request.getParameter("interiorNote");
+            String[] exteriorIssues = request.getParameterValues("exteriorIssues");
+            String[] interiorIssues = request.getParameterValues("interiorIssues");
             String userNote = request.getParameter("note");
+
+            String exteriorNote = joinIssueArray(exteriorIssues);
+            String interiorNote = joinIssueArray(interiorIssues);
 
             boolean maintenanceBlocked = "MAINTENANCE".equalsIgnoreCase(car.getStatus());
 
             boolean scheduleConflict = bookingDAO.hasBookingConflictExcludeBooking(
                     contract.getCarId(),
-                    contract.getContractStartDate(),
-                    contract.getContractEndDate(),
+                    contract.getContractStartTime(),
+                    contract.getContractEndTime(),
                     contract.getBookingId()
             );
 
@@ -388,6 +475,422 @@ public class StaffContractController extends HttpServlet {
             e.printStackTrace();
             return false;
         }
+    }
+
+    private void saveReturnCheck(HttpServletRequest request, HttpServletResponse response)
+            throws IOException, ServletException {
+        try {
+            int contractId = Integer.parseInt(request.getParameter("contractId"));
+
+            ContractModel contract = contractDAO.getContractById(contractId);
+            if (contract == null) {
+                request.getSession().setAttribute("error", "Contract not found.");
+                response.sendRedirect(request.getContextPath() + "/staff/contracts");
+                return;
+            }
+
+            if (!"ACTIVE".equalsIgnoreCase(contract.getContractStatus())) {
+                request.getSession().setAttribute("error", "Only ACTIVE contracts can save return check.");
+                response.sendRedirect(request.getContextPath() + "/staff/contracts?action=detail&id=" + contractId);
+                return;
+            }
+
+            HttpSession session = request.getSession(false);
+            if (session == null) {
+                response.sendRedirect(request.getContextPath() + "/staff/contracts");
+                return;
+            }
+
+            StaffModel staff = (StaffModel) session.getAttribute("STAFF");
+            if (staff == null) {
+                request.getSession().setAttribute("error", "Staff session not found.");
+                response.sendRedirect(request.getContextPath() + "/staff/contracts");
+                return;
+            }
+
+            String[] issueTypes = request.getParameterValues("issueTypes");
+            if (issueTypes == null || issueTypes.length == 0) {
+                request.getSession().setAttribute("error", "Please select at least one issue.");
+                response.sendRedirect(request.getContextPath() + "/staff/contracts?action=detail&id=" + contractId);
+                return;
+            }
+
+            StringBuilder exteriorNoteBuilder = new StringBuilder();
+            StringBuilder noteBuilder = new StringBuilder();
+            double totalExtraFee = 0;
+
+            for (String issue : issueTypes) {
+                String safeSuffix = buildSafeFieldSuffix(issue);
+
+                String description = request.getParameter("description_" + safeSuffix);
+                String amountRaw = request.getParameter("amount_" + safeSuffix);
+
+                long amount = 0;
+                if (amountRaw != null && !amountRaw.trim().isEmpty()) {
+                    amount = Long.parseLong(amountRaw.trim());
+                    if (amount < 0) {
+                        request.getSession().setAttribute("error", "Amount must be greater than or equal to 0.");
+                        response.sendRedirect(request.getContextPath() + "/staff/contracts?action=detail&id=" + contractId);
+                        return;
+                    }
+                }
+
+                if (exteriorNoteBuilder.length() > 0) {
+                    exteriorNoteBuilder.append(" | ");
+                }
+                exteriorNoteBuilder.append(issue);
+
+                if (noteBuilder.length() > 0) {
+                    noteBuilder.append(" | ");
+                }
+                noteBuilder.append(buildDisplayFeeLine(issue, description, amount));
+
+                totalExtraFee += amount;
+            }
+
+            CarCheckModel check = new CarCheckModel();
+            check.setContractId(contract.getContractId());
+            check.setCarId(contract.getCarId());
+            check.setCheckedBy(staff.getStaffId());
+            check.setFuelLevel("FULL");
+            check.setExteriorNote(exteriorNoteBuilder.toString());
+            check.setInteriorNote("");
+            check.setCheckResult("RETURN_CHECK");
+            check.setNote(noteBuilder.toString());
+
+            boolean saved = carCheckDAO.addCheck(check);
+
+            if (saved) {
+                request.getSession().setAttribute("message", "Return check saved successfully.");
+            } else {
+                request.getSession().setAttribute("error", "Failed to save return check.");
+            }
+
+            response.sendRedirect(request.getContextPath() + "/staff/contracts?action=detail&id=" + contractId);
+
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            request.getSession().setAttribute("error", "Invalid amount format.");
+            response.sendRedirect(request.getContextPath() + "/staff/contracts");
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.getSession().setAttribute("error", "Failed to save return check.");
+            response.sendRedirect(request.getContextPath() + "/staff/contracts");
+        }
+    }
+
+    private boolean deliverCar(int contractId) {
+        ContractModel contract = contractDAO.getContractById(contractId);
+
+        if (contract == null) {
+            return false;
+        }
+
+        if (!"WAITING_CUSTOMER_CONFIRM".equalsIgnoreCase(contract.getContractStatus())) {
+            return false;
+        }
+
+        if (contract.getCustomerConfirmed() == null || !contract.getCustomerConfirmed()) {
+            return false;
+        }
+
+        return updateContractStatus(contractId, "ACTIVE");
+    }
+
+    private String buildSafeFieldSuffix(String issue) {
+        return issue.replace(" ", "_");
+    }
+
+    private String buildDisplayFeeLine(String issue, String description, long amount) {
+        StringBuilder line = new StringBuilder();
+        line.append(issue);
+
+        if (description != null && !description.trim().isEmpty()) {
+            line.append(": ").append(description.trim());
+        }
+
+        line.append(" - ").append(amount).append(" VND");
+        return line.toString();
+    }
+
+    private boolean hasReturnCheck(int contractId) {
+        CarCheckModel returnCheck = carCheckDAO.getLatestReturnCheckByContractId(contractId);
+        return returnCheck != null;
+    }
+
+    private List<String> parseReturnFeeTypes(CarCheckModel latestCarCheck) {
+        List<String> feeTypes = new ArrayList<>();
+
+        if (latestCarCheck == null) {
+            return feeTypes;
+        }
+
+        if (!"RETURN_CHECK".equalsIgnoreCase(latestCarCheck.getCheckResult())) {
+            return feeTypes;
+        }
+
+        String note = latestCarCheck.getNote();
+        if (note == null || note.trim().isEmpty()) {
+            return feeTypes;
+        }
+
+        String[] parts = note.split("\\|");
+
+        for (String rawPart : parts) {
+            String part = rawPart.trim();
+            if (part.isEmpty()) {
+                continue;
+            }
+
+            int lastDashIndex = part.lastIndexOf(" - ");
+            if (lastDashIndex == -1) {
+                continue;
+            }
+
+            String leftPart = part.substring(0, lastDashIndex).trim();
+
+            int colonIndex = leftPart.indexOf(":");
+            String type;
+            if (colonIndex != -1) {
+                type = leftPart.substring(0, colonIndex).trim();
+            } else {
+                type = leftPart.trim();
+            }
+
+            feeTypes.add(type);
+        }
+
+        return feeTypes;
+    }
+
+    private List<Long> parseReturnFeeAmounts(CarCheckModel latestCarCheck) {
+        List<Long> feeAmounts = new ArrayList<>();
+
+        if (latestCarCheck == null) {
+            return feeAmounts;
+        }
+
+        if (!"RETURN_CHECK".equalsIgnoreCase(latestCarCheck.getCheckResult())) {
+            return feeAmounts;
+        }
+
+        String note = latestCarCheck.getNote();
+        if (note == null || note.trim().isEmpty()) {
+            return feeAmounts;
+        }
+
+        String[] parts = note.split("\\|");
+
+        for (String rawPart : parts) {
+            String part = rawPart.trim();
+            if (part.isEmpty()) {
+                continue;
+            }
+
+            try {
+                int lastDashIndex = part.lastIndexOf(" - ");
+                if (lastDashIndex == -1) {
+                    continue;
+                }
+
+                String rightPart = part.substring(lastDashIndex + 3).trim();
+                rightPart = rightPart.replace("VND", "").trim().replace(",", "");
+
+                long amount = Long.parseLong(rightPart);
+                feeAmounts.add(amount);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return feeAmounts;
+    }
+
+    private List<String> parseSavedIssueTypes(CarCheckModel latestCarCheck) {
+        List<String> issueTypes = new ArrayList<>();
+
+        if (latestCarCheck == null) {
+            return issueTypes;
+        }
+
+        if (!"RETURN_CHECK".equalsIgnoreCase(latestCarCheck.getCheckResult())) {
+            return issueTypes;
+        }
+
+        String exteriorNote = latestCarCheck.getExteriorNote();
+        if (exteriorNote == null || exteriorNote.trim().isEmpty()) {
+            return issueTypes;
+        }
+
+        String[] parts = exteriorNote.split("\\|");
+        for (String rawPart : parts) {
+            String part = rawPart.trim();
+            if (!part.isEmpty()) {
+                issueTypes.add(part);
+            }
+        }
+
+        return issueTypes;
+    }
+
+    private List<String> parseSavedDescriptions(CarCheckModel latestCarCheck) {
+        List<String> descriptions = new ArrayList<>();
+
+        if (latestCarCheck == null) {
+            return descriptions;
+        }
+
+        if (!"RETURN_CHECK".equalsIgnoreCase(latestCarCheck.getCheckResult())) {
+            return descriptions;
+        }
+
+        String note = latestCarCheck.getNote();
+        if (note == null || note.trim().isEmpty()) {
+            return descriptions;
+        }
+
+        String[] parts = note.split("\\|");
+
+        for (String rawPart : parts) {
+            String part = rawPart.trim();
+            if (part.isEmpty()) {
+                descriptions.add("");
+                continue;
+            }
+
+            int lastDashIndex = part.lastIndexOf(" - ");
+            if (lastDashIndex == -1) {
+                descriptions.add("");
+                continue;
+            }
+
+            String leftPart = part.substring(0, lastDashIndex).trim();
+
+            int colonIndex = leftPart.indexOf(":");
+            if (colonIndex != -1) {
+                descriptions.add(leftPart.substring(colonIndex + 1).trim());
+            } else {
+                descriptions.add("");
+            }
+        }
+
+        return descriptions;
+    }
+
+    private List<Long> parseSavedAmounts(CarCheckModel latestCarCheck) {
+        List<Long> amounts = new ArrayList<>();
+
+        if (latestCarCheck == null) {
+            return amounts;
+        }
+
+        if (!"RETURN_CHECK".equalsIgnoreCase(latestCarCheck.getCheckResult())) {
+            return amounts;
+        }
+
+        String note = latestCarCheck.getNote();
+        if (note == null || note.trim().isEmpty()) {
+            return amounts;
+        }
+
+        String[] parts = note.split("\\|");
+
+        for (String rawPart : parts) {
+            String part = rawPart.trim();
+            if (part.isEmpty()) {
+                amounts.add(0L);
+                continue;
+            }
+
+            try {
+                int lastDashIndex = part.lastIndexOf(" - ");
+                if (lastDashIndex == -1) {
+                    amounts.add(0L);
+                    continue;
+                }
+
+                String rightPart = part.substring(lastDashIndex + 3).trim();
+                rightPart = rightPart.replace("VND", "").trim().replace(",", "");
+
+                amounts.add(Long.parseLong(rightPart));
+            } catch (Exception e) {
+                amounts.add(0L);
+            }
+        }
+
+        return amounts;
+    }
+
+    private boolean sendToCustomerConfirm(int contractId) {
+        ContractModel contract = contractDAO.getContractById(contractId);
+
+        if (contract == null) {
+            return false;
+        }
+
+        if (!"CREATED".equalsIgnoreCase(contract.getContractStatus())) {
+            return false;
+        }
+
+        CarCheckModel latestCarCheck = carCheckDAO.getLatestPreDeliveryCheckByContractId(contractId);
+        if (latestCarCheck == null) {
+            return false;
+        }
+
+        if (!"OK".equalsIgnoreCase(latestCarCheck.getCheckResult())) {
+            return false;
+        }
+
+        return contractDAO.updateContractForCustomerConfirm(
+                contractId,
+                "WAITING_CUSTOMER_CONFIRM",
+                latestCarCheck.getCheckId()
+        );
+    }
+
+    private boolean markCustomerNoShow(int contractId) {
+        ContractModel contract = contractDAO.getContractById(contractId);
+
+        if (contract == null) {
+            return false;
+        }
+
+        if (!"WAITING_CUSTOMER_CONFIRM".equalsIgnoreCase(contract.getContractStatus())) {
+            return false;
+        }
+
+        boolean updated = contractDAO.updateContractStatus(contractId, "CANCELLED");
+        if (!updated) {
+            return false;
+        }
+
+        bookingDAO.updateStatus(contract.getBookingId(), "CANCELLED");
+        carDAO.updateStatus(contract.getCarId(), "AVAILABLE");
+
+        return true;
+    }
+
+    private String joinIssueArray(String[] issues) {
+        if (issues == null || issues.length == 0) {
+            return "";
+        }
+
+        StringBuilder builder = new StringBuilder();
+
+        for (String issue : issues) {
+            if (issue == null || issue.trim().isEmpty()) {
+                continue;
+            }
+
+            if (builder.length() > 0) {
+                builder.append(" | ");
+            }
+
+            builder.append(issue.trim());
+        }
+
+        return builder.toString();
     }
 
 }

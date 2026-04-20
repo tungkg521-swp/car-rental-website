@@ -12,6 +12,7 @@ import java.util.List;
 
 import Utils.DBContext;
 import static Utils.DBContext.getConnection;
+import java.sql.Timestamp;
 import models.CarModel;
 
 public class CarDAO extends DBContext {
@@ -131,7 +132,6 @@ public class CarDAO extends DBContext {
                         rs.getString("description"),
                         rs.getString("status"),
                         rs.getString("plate_number")
-                        
                 );
             }
 
@@ -188,8 +188,7 @@ public class CarDAO extends DBContext {
                         rs.getString("image_folder"),
                         rs.getString("description"),
                         rs.getString("status"),
-                         rs.getString("plate_number")
-                        
+                        rs.getString("plate_number")
                 ));
             }
 
@@ -260,7 +259,6 @@ public class CarDAO extends DBContext {
                         rs.getString("transmission"),
                         rs.getString("brand_name"),
                         rs.getString("type_name"),
-
                         rs.getString("image_url"), // SỬA: Lấy từ rs thay null
                         rs.getString("image_folder"),
                         rs.getString("description"), // SỬA: Lấy từ rs thay null (nếu không cần, bỏ select và dùng constructor khác)
@@ -395,7 +393,6 @@ public class CarDAO extends DBContext {
                         rs.getString("description"),
                         rs.getString("status"),
                         rs.getString("plate_number")
-                        
                 ));
             }
         } catch (Exception e) {
@@ -413,16 +410,12 @@ public class CarDAO extends DBContext {
         try {
             conn = getConnection();
 
-            
             int brandId = getBrandId(conn, car.getBrandName());
 
-   
             int typeId = getTypeId(conn, car.getTypeName());
 
-          
             String plateNumber = "TEMP-" + System.currentTimeMillis();
 
-            
             String sql = "INSERT INTO cars (brand_id, type_id, plate_number, model_name, model_year, "
                     + "price_per_day, status, created_at, seat_count, fuel_type, transmission, "
                     + "description, image_folder) "
@@ -448,14 +441,12 @@ public class CarDAO extends DBContext {
                 return false;
             }
 
-            
             rs = ps.getGeneratedKeys();
             int carId = 0;
             if (rs.next()) {
                 carId = rs.getInt(1);
             }
 
-           
             if (carId > 0 && car.getImageUrl() != null) {
                 String imageSql = "INSERT INTO cars_image (car_id, image_url, is_primary, created_at) VALUES (?, ?, ?, GETDATE())";
 
@@ -493,10 +484,8 @@ public class CarDAO extends DBContext {
         }
     }
 
-
     private int getBrandId(Connection conn, String brandName) throws SQLException {
         System.out.println("   getBrandId - brandName: " + brandName);
-
 
         String selectSql = "SELECT brand_id FROM brand WHERE brand_name = ?";
         try (PreparedStatement ps = conn.prepareStatement(selectSql)) {
@@ -504,13 +493,11 @@ public class CarDAO extends DBContext {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 int id = rs.getInt("brand_id");
-                
+
                 return id;
             }
         }
 
-    
-       
         String insertSql = "INSERT INTO brand (brand_name) VALUES (?)";
         try (PreparedStatement ps = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, brandName.trim());
@@ -518,7 +505,7 @@ public class CarDAO extends DBContext {
             ResultSet rs = ps.getGeneratedKeys();
             if (rs.next()) {
                 int id = rs.getInt(1);
-                
+
                 return id;
             }
         }
@@ -526,12 +513,7 @@ public class CarDAO extends DBContext {
         throw new SQLException("Could not create brand: " + brandName);
     }
 
-
-
     private int getTypeId(Connection conn, String typeName) throws SQLException {
-        
-
-    
 
         String selectSql = "SELECT type_id FROM cars_type WHERE type_name = ?";
         try (PreparedStatement ps = conn.prepareStatement(selectSql)) {
@@ -539,13 +521,11 @@ public class CarDAO extends DBContext {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 int id = rs.getInt("type_id");
-              
+
                 return id;
             }
         }
 
-
-        
         String insertSql = "INSERT INTO cars_type (type_name) VALUES (?)";
         try (PreparedStatement ps = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, typeName.trim());
@@ -553,14 +533,13 @@ public class CarDAO extends DBContext {
             ResultSet rs = ps.getGeneratedKeys();
             if (rs.next()) {
                 int id = rs.getInt(1);
-                
+
                 return id;
             }
         }
 
         throw new SQLException("Could not create type: " + typeName);
     }
-
 
     public boolean updateCar(CarModel car) {
         String sql = """
@@ -609,14 +588,12 @@ public class CarDAO extends DBContext {
             conn = getConnection();
             conn.setAutoCommit(false);
 
-
             String deleteImagesSql = "DELETE FROM cars_image WHERE car_id = ?";
             ps = conn.prepareStatement(deleteImagesSql);
             ps.setInt(1, carId);
             ps.executeUpdate();
             ps.close();
 
-           
             String deleteCarSql = "DELETE FROM cars WHERE car_id = ?";
             ps = conn.prepareStatement(deleteCarSql);
             ps.setInt(1, carId);
@@ -800,7 +777,7 @@ public class CarDAO extends DBContext {
             ps.setInt(8, typeId);
             ps.setString(9, car.getDescription());
             ps.setString(10, car.getStatus());
-             ps.setString(11, car.getPlateNumber());
+            ps.setString(11, car.getPlateNumber());
             ps.setInt(12, car.getCarId());
 
             int updatedRows = ps.executeUpdate();
@@ -941,7 +918,7 @@ public class CarDAO extends DBContext {
         }
     }
 
-    public List<CarModel> findAvailableCarsByDateRange(Date startDate, Date endDate) {
+    public List<CarModel> findAvailableCarsByDateRange(Timestamp startTime, Timestamp endTime) {
         List<CarModel> list = new ArrayList<>();
 
         String sql = """
@@ -968,15 +945,15 @@ public class CarDAO extends DBContext {
               SELECT bk.car_id
               FROM booking bk
               WHERE bk.status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'ACTIVE')
-                AND bk.start_date <= ?
-                AND bk.end_date >= ?
+                AND bk.start_time < ?
+                AND bk.end_time > ?
           )
         ORDER BY c.car_id DESC
     """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setDate(1, endDate);
-            ps.setDate(2, startDate);
+            ps.setTimestamp(1, endTime);
+            ps.setTimestamp(2, startTime);
 
             ResultSet rs = ps.executeQuery();
 
@@ -1006,20 +983,20 @@ public class CarDAO extends DBContext {
         return list;
     }
 
-    public boolean isCarBookedInRange(int carId, Date startDate, Date endDate) {
+    public boolean isCarBookedInRange(int carId, Timestamp startTime, Timestamp endTime) {
         String sql = """
         SELECT 1
         FROM booking
         WHERE car_id = ?
           AND status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'ACTIVE')
-          AND start_date <= ?
-          AND end_date >= ?
+          AND start_time < ?
+          AND end_time > ?
     """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, carId);
-            ps.setDate(2, endDate);
-            ps.setDate(3, startDate);
+            ps.setTimestamp(2, endTime);
+            ps.setTimestamp(3, startTime);
 
             ResultSet rs = ps.executeQuery();
             return rs.next();
@@ -1031,15 +1008,15 @@ public class CarDAO extends DBContext {
     }
 
     public List<CarModel> getAvailableReplacementCars(
-        int oldCarId,
-        String typeName,
-        BigDecimal pricePerDay,
-        Date startDate,
-        Date endDate
-) {
-    List<CarModel> list = new ArrayList<>();
+            int oldCarId,
+            String typeName,
+            BigDecimal pricePerDay,
+            Timestamp startTime,
+            Timestamp endTime
+    ) {
+        List<CarModel> list = new ArrayList<>();
 
-    String sql = """
+        String sql = """
         SELECT
             c.car_id,
             c.model_name,
@@ -1067,53 +1044,52 @@ public class CarDAO extends DBContext {
               FROM booking bk
               WHERE bk.car_id = c.car_id
                 AND bk.status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'ACTIVE')
-                AND bk.start_date <= ?
-                AND bk.end_date >= ?
+                AND bk.start_time < ?
+                AND bk.end_time > ?
           )
           AND NOT EXISTS (
               SELECT 1
               FROM maintenance_record m
               WHERE m.car_id = c.car_id
-                AND CAST(m.start_time AS DATE) <= ?
-                AND CAST(ISNULL(m.end_time, '9999-12-31') AS DATE) >= ?
+                AND m.start_time < ?
+                AND ISNULL(m.end_time, '9999-12-31') >= ?
                 AND m.status IN ('OPEN', 'IN_PROGRESS')
           )
     """;
 
-    try (PreparedStatement ps = connection.prepareStatement(sql)) {
-        ps.setInt(1, oldCarId);
-        ps.setString(2, typeName);
-        ps.setBigDecimal(3, pricePerDay);
-        ps.setDate(4, endDate);
-        ps.setDate(5, startDate);
-        ps.setDate(6, endDate);
-        ps.setDate(7, startDate);
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, oldCarId);
+            ps.setString(2, typeName);
+            ps.setBigDecimal(3, pricePerDay);
+            ps.setTimestamp(4, endTime);
+            ps.setTimestamp(5, startTime);
+            ps.setTimestamp(6, endTime);
+            ps.setTimestamp(7, startTime);
 
-        try (ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                list.add(new CarModel(
-                        rs.getInt("car_id"),
-                        rs.getString("model_name"),
-                        rs.getInt("model_year"),
-                        rs.getBigDecimal("price_per_day"),
-                        rs.getInt("seat_count"),
-                        rs.getString("fuel_type"),
-                        rs.getString("transmission"),
-                        rs.getString("brand_name"),
-                        rs.getString("type_name"),
-                        null,
-                        rs.getString("image_folder"),
-                        rs.getString("description"),
-                        rs.getString("status"),
-                        rs.getString("plate_number")
-                        
-                ));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(new CarModel(
+                            rs.getInt("car_id"),
+                            rs.getString("model_name"),
+                            rs.getInt("model_year"),
+                            rs.getBigDecimal("price_per_day"),
+                            rs.getInt("seat_count"),
+                            rs.getString("fuel_type"),
+                            rs.getString("transmission"),
+                            rs.getString("brand_name"),
+                            rs.getString("type_name"),
+                            null,
+                            rs.getString("image_folder"),
+                            rs.getString("description"),
+                            rs.getString("status"),
+                            rs.getString("plate_number")
+                    ));
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-    } catch (Exception e) {
-        e.printStackTrace();
-    }
 
-    return list;
-}
+        return list;
+    }
 }

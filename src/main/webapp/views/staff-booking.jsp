@@ -28,8 +28,8 @@
                                 <th>ID</th>
                                 <th>Customer</th>
                                 <th>Car</th>
-                                <th>Start</th>
-                                <th>End</th>
+                                <th>Start Time</th>
+                                <th>End Time</th>
                                 <th>Total</th>
                                 <th>Status</th>
                                 <th>Action</th>
@@ -44,8 +44,8 @@
                                             <td>${b.bookingId}</td>
                                             <td>${b.customerName}</td>
                                             <td>${b.carName}</td>
-                                            <td>${b.startDate}</td>
-                                            <td>${b.endDate}</td>
+                                            <td><fmt:formatDate value="${b.startTime}" pattern="dd/MM/yyyy HH:mm"/></td>
+                                            <td><fmt:formatDate value="${b.endTime}" pattern="dd/MM/yyyy HH:mm"/></td>
                                             <td>
                                                 <fmt:formatNumber value="${b.totalEstimatedPrice}" pattern="#,###" />
                                                 VND

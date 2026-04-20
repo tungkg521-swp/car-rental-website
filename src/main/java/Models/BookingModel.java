@@ -13,8 +13,8 @@ public class BookingModel {
     private Integer voucherId;        // nullable
 
     private Timestamp bookingDate;
-    private Date startDate;
-    private Date endDate;
+    private Timestamp startTime;
+    private Timestamp endTime;
 
     private String status;
     private String note;
@@ -34,6 +34,14 @@ public class BookingModel {
     private BigDecimal depositAmount;
     private BigDecimal remainingAmount;
     private Timestamp paymentDeadline;
+    
+    
+    private String customerCheckStatus;
+private String customerCheckReason;
+private String customerCheckNote;
+private Timestamp customerCheckedAt;
+
+
 // getter + setter
     // ===== CONSTRUCTOR =====
 
@@ -61,7 +69,6 @@ public class BookingModel {
         this.plateNumber = plateNumber;
     }
 
-    
     public void setCustomerId(int customerId) {
         this.customerId = customerId;
     }
@@ -98,20 +105,20 @@ public class BookingModel {
         this.bookingDate = bookingDate;
     }
 
-    public Date getStartDate() {
-        return startDate;
+    public Timestamp getStartTime() {
+        return startTime;
     }
 
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
+    public void setStartTime(Timestamp startTime) {
+        this.startTime = startTime;
     }
 
-    public Date getEndDate() {
-        return endDate;
+    public Timestamp getEndTime() {
+        return endTime;
     }
 
-    public void setEndDate(Date endDate) {
-        this.endDate = endDate;
+    public void setEndTime(Timestamp endTime) {
+        this.endTime = endTime;
     }
 
     public String getStatus() {
@@ -218,4 +225,37 @@ public class BookingModel {
         this.paymentDeadline = paymentDeadline;
     }
 
+    public String getCustomerCheckStatus() {
+        return customerCheckStatus;
+    }
+
+    public void setCustomerCheckStatus(String customerCheckStatus) {
+        this.customerCheckStatus = customerCheckStatus;
+    }
+
+    public String getCustomerCheckReason() {
+        return customerCheckReason;
+    }
+
+    public void setCustomerCheckReason(String customerCheckReason) {
+        this.customerCheckReason = customerCheckReason;
+    }
+
+    public String getCustomerCheckNote() {
+        return customerCheckNote;
+    }
+
+    public void setCustomerCheckNote(String customerCheckNote) {
+        this.customerCheckNote = customerCheckNote;
+    }
+
+    public Timestamp getCustomerCheckedAt() {
+        return customerCheckedAt;
+    }
+
+    public void setCustomerCheckedAt(Timestamp customerCheckedAt) {
+        this.customerCheckedAt = customerCheckedAt;
+    }
+
+    
 }

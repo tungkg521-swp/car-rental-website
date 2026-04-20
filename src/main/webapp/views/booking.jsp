@@ -1,6 +1,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <!DOCTYPE html>
 <html lang="vi">
@@ -13,7 +14,7 @@
 
         <link rel="stylesheet"
               href="${pageContext.request.contextPath}/assets/css/booking.css">
-        
+
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=22">
 
 
@@ -21,7 +22,7 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     </head>
     <body>
-        
+
         <jsp:include page="/views/includes/header.jsp"/>
 
         <div class="container my-4">
@@ -33,7 +34,7 @@
                     </div>
                 </c:if>
 
-                <a href="${pageContext.request.contextPath}/cars?action=detail&carId=${car.carId}&startDate=${startDate}&endDate=${endDate}"
+                <a href="${pageContext.request.contextPath}/cars?action=detail&carId=${car.carId}&startDate=${fn:substring(startDate,0,10)}&startHour=${fn:substring(startDate,11,16)}&endDate=${fn:substring(endDate,0,10)}&endHour=${fn:substring(endDate,11,16)}"
                    class="back-link">
                     <span class="bi bi-arrow-left">Quay lại</span>
                 </a>
@@ -110,25 +111,46 @@
 
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <label>Từ ngày</label>
+                                        <label>Ngày nhận xe</label>
                                         <input type="date"
                                                name="startDate"
                                                id="startDate"
                                                class="form-control"
                                                required
-                                               value="${startDate}"
+                                               value="${fn:substring(startDate,0,10)}"
                                                readonly>
-
-
                                     </div>
+
                                     <div class="col-md-6">
-                                        <label>Đến ngày</label>
+                                        <label>Giờ nhận xe</label>
+                                        <input type="time"
+                                               name="startHour"
+                                               id="startHour"
+                                               class="form-control"
+                                               required
+                                               value="${fn:substring(startDate,11,16)}"
+                                               readonly>
+                                    </div>
+
+                                    <div class="col-md-6 mt-3">
+                                        <label>Ngày trả xe</label>
                                         <input type="date"
                                                name="endDate"
                                                id="endDate"
                                                class="form-control"
                                                required
-                                               value="${endDate}"
+                                               value="${fn:substring(endDate,0,10)}"
+                                               readonly>
+                                    </div>
+
+                                    <div class="col-md-6 mt-3">
+                                        <label>Giờ trả xe</label>
+                                        <input type="time"
+                                               name="endHour"
+                                               id="endHour"
+                                               class="form-control"
+                                               required
+                                               value="${fn:substring(endDate,11,16)}"
                                                readonly>
                                     </div>
                                 </div>

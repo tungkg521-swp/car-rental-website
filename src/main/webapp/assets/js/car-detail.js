@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
     initRentalCalendar();
     initVerifyModalAutoOpen();
     initReviewEditButtons();
+    renderBusyTimeRanges();
 });
 
 /* =========================
@@ -59,25 +60,41 @@ function initGallery() {
 }
 
 /* =========================
- RENTAL CALENDAR
+ RENTAL CALENDAR + HOUR SELECT
  ========================= */
 function initRentalCalendar() {
     const openButton = document.getElementById("openRentalModal");
     const modal = document.getElementById("rentalTimeModal");
     const closeButton = document.getElementById("closeRentalModal");
     const confirmButton = document.getElementById("confirmRentalSelection");
-    const calendarEl = document.getElementById("rentalCalendar");
+    const bookingButton = document.getElementById("bookNowBtn");
+
+    const bookingForm = document.getElementById("bookingFromDetailForm");
 
     const startInput = document.getElementById("startDate");
+    const startHourInput = document.getElementById("startHour");
     const endInput = document.getElementById("endDate");
+    const endHourInput = document.getElementById("endHour");
+
+    const calendarEl = document.getElementById("rentalCalendar");
+    const modalStartHour = document.getElementById("modalStartHour");
+    const modalEndHour = document.getElementById("modalEndHour");
 
     const startDisplay = document.getElementById("displayStartDate");
     const endDisplay = document.getElementById("displayEndDate");
     const selectedPeriodValue = document.getElementById("selectedPeriodValue");
-    const bookingButton = document.getElementById("bookNowBtn");
     const errorBox = document.getElementById("calendarDateError");
 
-    if (!modal || !calendarEl || !startInput || !endInput) {
+    if (
+            !modal ||
+            !calendarEl ||
+            !startInput ||
+            !startHourInput ||
+            !endInput ||
+            !endHourInput ||
+            !modalStartHour ||
+            !modalEndHour
+            ) {
         return;
     }
 
@@ -86,6 +103,8 @@ function initRentalCalendar() {
 
     let tempStartDate = startInput.value || "";
     let tempEndDate = endInput.value || "";
+    let tempStartHour = startHourInput.value || "00:00";
+    let tempEndHour = endHourInput.value || "23:59";
 
     let fp = null;
 
@@ -94,12 +113,12 @@ function initRentalCalendar() {
             return;
         }
 
-        const initialDates = [];
+        const defaultDates = [];
         if (tempStartDate) {
-            initialDates.push(tempStartDate);
+            defaultDates.push(tempStartDate);
         }
         if (tempEndDate) {
-            initialDates.push(tempEndDate);
+            defaultDates.push(tempEndDate);
         }
 
         fp = flatpickr(calendarEl, {
@@ -107,11 +126,9 @@ function initRentalCalendar() {
             mode: "range",
             minDate: "today",
             dateFormat: "Y-m-d",
-            defaultDate: initialDates,
+            defaultDate: defaultDates,
             showMonths: 2,
             monthSelectorType: "static",
-            disable: busyDates,
-
             onDayCreate: function (dObj, dStr, instance, dayElem) {
                 if (!dayElem || !dayElem.dateObj) {
                     return;
@@ -122,26 +139,10 @@ function initRentalCalendar() {
                     dayElem.classList.add("busy-day");
                 }
             },
-
-            onReady: function (selectedDates) {
-                syncSelectedDates(selectedDates);
-                updateSelectedDisplay();
-            },
-
-            onMonthChange: function () {
-                setTimeout(function () {
-                    fp.redraw();
-                }, 0);
-            },
-
-            onYearChange: function () {
-                setTimeout(function () {
-                    fp.redraw();
-                }, 0);
-            },
-
             onChange: function (selectedDates) {
-                syncSelectedDates(selectedDates);
+                tempStartDate = selectedDates[0] ? formatLocalDate(selectedDates[0]) : "";
+                tempEndDate = selectedDates[1] ? formatLocalDate(selectedDates[1]) : "";
+                hideCalendarError();
                 updateSelectedDisplay();
             }
         });
@@ -151,9 +152,11 @@ function initRentalCalendar() {
         modal.classList.add("show");
         document.body.classList.add("modal-open");
 
+        modalStartHour.value = tempStartHour || "00:00";
+        modalEndHour.value = tempEndHour || "23:59";
+
         setTimeout(function () {
             createCalendar();
-            fp.redraw();
         }, 100);
     }
 
@@ -179,33 +182,23 @@ function initRentalCalendar() {
         errorBox.style.display = "none";
     }
 
-    function syncSelectedDates(selectedDates) {
-        hideCalendarError();
-
-        if (!selectedDates || selectedDates.length === 0) {
-            tempStartDate = "";
-            tempEndDate = "";
-            return;
-        }
-
-        tempStartDate = selectedDates[0] ? formatLocalDate(selectedDates[0]) : "";
-        tempEndDate = selectedDates[1] ? formatLocalDate(selectedDates[1]) : "";
-    }
-
     function updateSelectedDisplay() {
+        const startText = tempStartDate && tempStartHour ? tempStartDate + "T" + tempStartHour : "";
+        const endText = tempEndDate && tempEndHour ? tempEndDate + "T" + tempEndHour : "";
+
         if (startDisplay) {
-            startDisplay.textContent = tempStartDate || "Chọn ngày nhận xe";
+            startDisplay.textContent = startText ? formatDateTimeVN(startText) : "Chọn ngày giờ nhận xe";
         }
 
         if (endDisplay) {
-            endDisplay.textContent = tempEndDate || "Chọn ngày trả xe";
+            endDisplay.textContent = endText ? formatDateTimeVN(endText) : "Chọn ngày giờ trả xe";
         }
 
         if (selectedPeriodValue) {
-            if (tempStartDate && tempEndDate) {
-                selectedPeriodValue.textContent = tempStartDate + " đến " + tempEndDate;
-            } else if (tempStartDate) {
-                selectedPeriodValue.textContent = tempStartDate;
+            if (startText && endText) {
+                selectedPeriodValue.textContent = formatDateTimeVN(startText) + " đến " + formatDateTimeVN(endText);
+            } else if (startText) {
+                selectedPeriodValue.textContent = formatDateTimeVN(startText);
             } else {
                 selectedPeriodValue.textContent = "Chưa chọn thời gian thuê";
             }
@@ -220,54 +213,72 @@ function initRentalCalendar() {
         }
 
         const isCarAvailable = bookingButton.dataset.carAvailable === "true";
-        const hasFullDate = tempStartDate !== "" && tempEndDate !== "";
-        const canBook = isCarAvailable && hasFullDate;
+        const hasFullSelection = !!(tempStartDate && tempStartHour && tempEndDate && tempEndHour);
 
-        bookingButton.disabled = !canBook;
-        bookingButton.classList.toggle("disabled", !canBook);
-    }
-
-    function hasBusyDateInRange(startDateText, endDateText) {
-        if (!startDateText || !endDateText) {
-            return false;
-        }
-
-        const startDate = new Date(startDateText + "T00:00:00");
-        const endDate = new Date(endDateText + "T00:00:00");
-        const checkingDate = new Date(startDate);
-
-        while (checkingDate <= endDate) {
-            const dateText = formatLocalDate(checkingDate);
-            if (busyDateSet.has(dateText)) {
-                return true;
-            }
-            checkingDate.setDate(checkingDate.getDate() + 1);
-        }
-
-        return false;
+        bookingButton.disabled = !(isCarAvailable && hasFullSelection);
+        bookingButton.classList.toggle("disabled", !(isCarAvailable && hasFullSelection));
     }
 
     function applySelection() {
         hideCalendarError();
 
-        if (!tempStartDate || !tempEndDate) {
-            showCalendarError("Vui lòng chọn đầy đủ ngày nhận xe và ngày trả xe.");
+        if (!tempStartDate || !tempStartHour || !tempEndDate || !tempEndHour) {
+            showCalendarError("Vui lòng chọn đầy đủ ngày và giờ nhận/trả xe.");
             return;
         }
 
-        if (hasBusyDateInRange(tempStartDate, tempEndDate)) {
-            showCalendarError("Khoảng thời gian bạn chọn có ngày xe bận. Vui lòng chọn lại.");
+        const startDateTime = tempStartDate + "T" + tempStartHour;
+        const endDateTime = tempEndDate + "T" + tempEndHour;
+
+        const startDate = new Date(startDateTime);
+        const endDate = new Date(endDateTime);
+        const now = new Date();
+
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+            showCalendarError("Thời gian thuê không hợp lệ.");
+            return;
+        }
+
+        if (startDate < now) {
+            showCalendarError("Thời gian nhận xe không được ở quá khứ.");
+            return;
+        }
+
+        if (endDate <= startDate) {
+            showCalendarError("Thời gian trả xe phải sau thời gian nhận xe.");
+            return;
+        }
+
+        if (endDate - startDate < 60 * 60 * 1000) {
+            showCalendarError("Thời gian thuê tối thiểu là 1 giờ.");
+            return;
+        }
+
+        if (hasTimeConflict(startDateTime, endDateTime)) {
+            showCalendarError("Khoảng thời gian bạn chọn trùng với lịch đã được đặt. Vui lòng chọn lại.");
             return;
         }
 
         startInput.value = tempStartDate;
+        startHourInput.value = tempStartHour;
         endInput.value = tempEndDate;
+        endHourInput.value = tempEndHour;
 
         updateSelectedDisplay();
         closeModal();
     }
 
-        
+    modalStartHour.addEventListener("change", function () {
+        tempStartHour = modalStartHour.value || "";
+        hideCalendarError();
+        updateSelectedDisplay();
+    });
+
+    modalEndHour.addEventListener("change", function () {
+        tempEndHour = modalEndHour.value || "";
+        hideCalendarError();
+        updateSelectedDisplay();
+    });
 
     if (openButton) {
         openButton.addEventListener("click", function (event) {
@@ -289,6 +300,32 @@ function initRentalCalendar() {
 
     if (confirmButton) {
         confirmButton.addEventListener("click", applySelection);
+    }
+
+    if (bookingButton) {
+        bookingButton.addEventListener("click", function () {
+            const isCarAvailable = bookingButton.dataset.carAvailable === "true";
+
+            if (!isCarAvailable) {
+                return;
+            }
+
+            const hasFullSelection = !!(
+                    startInput.value &&
+                    startHourInput.value &&
+                    endInput.value &&
+                    endHourInput.value
+                    );
+
+            if (!hasFullSelection) {
+                openModal();
+                return;
+            }
+
+            if (bookingForm) {
+                bookingForm.submit();
+            }
+        });
     }
 
     modal.addEventListener("click", function (event) {
@@ -371,9 +408,87 @@ function parseBusyDates(rawValue) {
     return [];
 }
 
+function parseBusyTimeRanges() {
+    const dataEl = document.getElementById("busyTimeRangesData");
+    if (!dataEl) {
+        return [];
+    }
+
+    try {
+        const parsed = JSON.parse(dataEl.textContent || "[]");
+        if (Array.isArray(parsed)) {
+            return parsed.filter(function (item) {
+                return item && item.start && item.end;
+            });
+        }
+    } catch (error) {
+        console.log("Busy time ranges parse error:", error);
+    }
+
+    return [];
+}
+
+function renderBusyTimeRanges() {
+    const listEl = document.getElementById("busyTimeList");
+    if (!listEl) {
+        return;
+    }
+
+    const ranges = parseBusyTimeRanges();
+    listEl.innerHTML = "";
+
+    if (!Array.isArray(ranges) || ranges.length === 0) {
+        listEl.innerHTML = "<li>Hiện chưa có lịch bận.</li>";
+        return;
+    }
+
+    ranges.forEach(function (item) {
+        const li = document.createElement("li");
+        li.textContent = formatDateTimeVN(item.start) + " → " + formatDateTimeVN(item.end);
+        listEl.appendChild(li);
+    });
+}
+
+function hasTimeConflict(startValue, endValue) {
+    const ranges = parseBusyTimeRanges();
+
+    const start = new Date(startValue);
+    const end = new Date(endValue);
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        return false;
+    }
+
+    return ranges.some(function (item) {
+        const busyStart = new Date(item.start);
+        const busyEnd = new Date(item.end);
+
+        return busyStart < end && busyEnd > start;
+    });
+}
+
 function formatLocalDate(date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
     return year + "-" + month + "-" + day;
+}
+
+function formatDateTimeVN(dateStr) {
+    if (!dateStr) {
+        return "--/--/---- --:--";
+    }
+
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) {
+        return "--/--/---- --:--";
+    }
+
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    const hour = String(date.getHours()).padStart(2, "0");
+    const minute = String(date.getMinutes()).padStart(2, "0");
+
+    return `${day}/${month}/${year} ${hour}:${minute}`;
 }

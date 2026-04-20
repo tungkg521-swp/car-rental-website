@@ -1,30 +1,22 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <!DOCTYPE html>
 <html>
-
     <head>
         <title>${car.modelName}</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style-base.css?v=6">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/car-detail.css?v=6">
-
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/wishlist.css?v=6">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=22">
-
     </head>
-
-
-
-    <body>
 
     <body data-context-path="${pageContext.request.contextPath}">
 
-
         <jsp:include page="/views/includes/header.jsp"/>
-
 
         <section class="car-detail-page">
             <div class="container">
@@ -61,9 +53,7 @@
                             <div class="alert alert-danger">${BOOKING_ERROR}</div>
                         </c:if>
 
-                        <h1>
-                            ${car.modelName}
-                        </h1>
+                        <h1>${car.modelName}</h1>
 
                         <div class="price">
                             <fmt:formatNumber value="${car.pricePerDay}" pattern="#,###"/> VND / day
@@ -90,22 +80,24 @@
                                   method="get">
                                 <input type="hidden" name="action" value="create">
                                 <input type="hidden" name="carId" value="${car.carId}">
-                                <input type="hidden" id="startDate" name="startDate" value="${startDate}">
-                                <input type="hidden" id="endDate" name="endDate" value="${endDate}">
+
+                                <input type="hidden" id="startDate" name="startDate"
+                                       value="${not empty startDate ? startDate : param.startDate}">
+                                <input type="hidden" id="startHour" name="startHour" value="${not empty startHour ? startHour : (not empty param.startHour ? param.startHour : '00:00')}">
+                                <input type="hidden" id="endDate" name="endDate"
+                                       value="${not empty endDate ? endDate : param.endDate}">
+                                <input type="hidden" id="endHour" name="endHour" value="${not empty endHour ? endHour : (not empty param.endHour ? param.endHour : '23:59')}">
 
                                 <div class="rental-summary-trigger" id="openRentalModal" role="button" tabindex="0">
-
                                     <div class="rental-summary-grid">
                                         <div class="rental-summary-col">
                                             <div class="rental-summary-label">Nhận xe</div>
                                             <div class="rental-summary-value" id="displayStartDate">
                                                 <c:choose>
-                                                    <c:when test="${not empty startDate}">
-                                                        ${startDate}
+                                                    <c:when test="${(not empty startDate or not empty param.startDate) and (not empty startHour or not empty param.startHour)}">
+                                                        ${not empty startDate ? startDate : param.startDate} ${not empty startHour ? startHour : param.startHour}
                                                     </c:when>
-                                                    <c:otherwise>
-                                                        Chọn ngày nhận xe
-                                                    </c:otherwise>
+                                                    <c:otherwise>Chọn ngày giờ nhận xe</c:otherwise>
                                                 </c:choose>
                                             </div>
                                         </div>
@@ -114,20 +106,17 @@
                                             <div class="rental-summary-label">Trả xe</div>
                                             <div class="rental-summary-value" id="displayEndDate">
                                                 <c:choose>
-                                                    <c:when test="${not empty endDate}">
-                                                        ${endDate}
+                                                    <c:when test="${(not empty endDate or not empty param.endDate) and (not empty endHour or not empty param.endHour)}">
+                                                        ${not empty endDate ? endDate : param.endDate} ${not empty endHour ? endHour : param.endHour}
                                                     </c:when>
-                                                    <c:otherwise>
-                                                        Chọn ngày trả xe
-                                                    </c:otherwise>
+                                                    <c:otherwise>Chọn ngày giờ trả xe</c:otherwise>
                                                 </c:choose>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-
-                                <button type="submit"
+                                <button type="button"
                                         id="bookNowBtn"
                                         data-car-available="${car.status eq 'AVAILABLE'}"
                                         class="btn ${car.status ne 'AVAILABLE' ? 'disabled' : ''}"
@@ -160,11 +149,14 @@
 
                             <a href="#" class="consult">Nhận thông tin tư vấn</a>
 
-
                         </div>
 
                     </div>
                 </div>
+
+                <script id="busyTimeRangesData" type="application/json">
+                    ${empty busyTimeRangesJson ? "[]" : busyTimeRangesJson}
+                </script>
 
                 <!-- DESCRIPTION -->
                 <div class="section">
@@ -257,6 +249,7 @@
             </div>
         </div>
 
+        <!-- RENTAL TIME MODAL -->
         <div id="rentalTimeModal" class="rental-time-modal">
             <div class="rental-time-modal-content">
                 <button type="button" class="rental-time-close" id="closeRentalModal">×</button>
@@ -264,7 +257,39 @@
                 <h3 class="rental-time-title">Thời gian</h3>
 
                 <div id="rentalCalendar"
-                     data-busy-dates='${empty busyDatesJson ? "[]" : busyDatesJson}'></div>
+                     data-busy-dates='${empty busyDatesJson ? "[]" : busyDatesJson}'>
+                </div>
+
+                <div class="rental-hour-grid">
+                    <div class="rental-hour-item">
+                        <label for="modalStartHour">Giờ nhận xe</label>
+                        <select id="modalStartHour" class="rental-time-select">
+                            <option value="00:00" selected>00:00</option>
+                            <c:forEach var="i" begin="1" end="23">
+                                <option value="${i lt 10 ? '0' : ''}${i}:00">
+                                    ${i lt 10 ? '0' : ''}${i}:00
+                                </option>
+                            </c:forEach>
+                        </select>
+                    </div>
+
+                    <div class="rental-hour-item">
+                        <label for="modalEndHour">Giờ trả xe</label>
+                        <select id="modalEndHour" class="rental-time-select">
+                            <c:forEach var="i" begin="0" end="22">
+                                <option value="${i lt 10 ? '0' : ''}${i}:00">
+                                    ${i lt 10 ? '0' : ''}${i}:00
+                                </option>
+                            </c:forEach>
+                            <option value="23:59" selected>23:59</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="rental-busy-box">
+                    <h4>Khung giờ xe đã được đặt</h4>
+                    <ul id="busyTimeList" class="busy-time-list"></ul>
+                </div>
 
                 <div class="rental-modal-actions">
                     <button type="button" class="rental-confirm-btn" id="confirmRentalSelection">
@@ -273,12 +298,12 @@
                 </div>
             </div>
         </div>
+
         <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
         <script src="${pageContext.request.contextPath}/assets/js/car-detail.js?v=9"></script>
         <script src="${pageContext.request.contextPath}/assets/js/verify-license.js"></script>
         <script src="${pageContext.request.contextPath}/assets/js/wishlist.js"></script>
         <script src="${pageContext.request.contextPath}/assets/js/edit-review.js"></script>
-
 
         <c:if test="${LICENSE_REQUIRED}">
             <div id="verifyModal" class="verify-modal" style="display:flex;">

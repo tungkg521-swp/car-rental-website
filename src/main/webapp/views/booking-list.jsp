@@ -6,7 +6,7 @@
 <html>
     <head>
         <title>My Bookings</title>
-        
+
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=99">
 
         <link rel="stylesheet"
@@ -14,7 +14,7 @@
     </head>
 
     <body>
-        
+
         <jsp:include page="/views/includes/header.jsp"/>
 
         <div class="booking-container">
@@ -56,9 +56,9 @@
                                     <div class="car-name">${b.carName}</div>
 
                                     <div class="booking-dates">
-                                        <fmt:formatDate value="${b.startDate}" pattern="dd/MM/yyyy"/>
+                                        <fmt:formatDate value="${b.startTime}" pattern="dd/MM/yyyy HH:mm"/>
                                         →
-                                        <fmt:formatDate value="${b.endDate}" pattern="dd/MM/yyyy"/>
+                                        <fmt:formatDate value="${b.endTime}" pattern="dd/MM/yyyy HH:mm"/>
                                     </div>
 
                                     <div class="price">
