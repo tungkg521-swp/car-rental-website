@@ -3,10 +3,8 @@ package Controllers;
 import models.AccountModel;
 import models.VoucherModel;
 import Utils.RoleConstants;
-
 import DALs.VoucherDAO;
-
-
+import java.time.LocalDate;
 import java.io.IOException;
 import java.sql.Date;
 import java.util.List;
@@ -21,14 +19,13 @@ import jakarta.servlet.http.HttpSession;
 @WebServlet(name = "VoucherController", urlPatterns = {"/staff/vouchers"})
 public class VoucherController extends HttpServlet {
 
-    
     private final VoucherDAO voucherDAO = new VoucherDAO();
 
-
-    
     private boolean isAdmin(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
-        if (session == null) return false;
+        if (session == null) {
+            return false;
+        }
         AccountModel account = (AccountModel) session.getAttribute("ACCOUNT");
         return account != null && account.getRoleId() == RoleConstants.ADMIN;
     }
@@ -85,10 +82,10 @@ public class VoucherController extends HttpServlet {
         }
     }
 
-    
     private void listVouchers(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        voucherDAO.refreshVoucherStatus();
         List<VoucherModel> vouchers = voucherDAO.getAllVouchers();
 
         request.setAttribute("vouchers", vouchers);
@@ -107,11 +104,7 @@ public class VoucherController extends HttpServlet {
 
         try {
             int voucherId = Integer.parseInt(voucherIdRaw);
-
-
-            Object voucher = voucherDAO.findById(voucherId);
-
-
+            VoucherModel voucher = voucherDAO.findById(voucherId);
 
             if (voucher != null) {
                 request.setAttribute("voucher", voucher);
@@ -124,7 +117,7 @@ public class VoucherController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/staff/vouchers?action=list");
         }
     }
-    
+
     private void createVoucher(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
@@ -133,32 +126,28 @@ public class VoucherController extends HttpServlet {
             String discountStr = request.getParameter("discount");
             String type = request.getParameter("type");
             String expireDateStr = request.getParameter("expireDate");
-            String statusStr = request.getParameter("status");
             String maxUsesStr = request.getParameter("maxUses");
             String minBookingAmountStr = request.getParameter("minBookingAmount");
 
-           
-            if (code == null || code.trim().isEmpty() || discountStr == null || discountStr.trim().isEmpty()
-                    || type == null || type.isEmpty() || expireDateStr == null || expireDateStr.isEmpty()
-                    || maxUsesStr == null || maxUsesStr.isEmpty() || minBookingAmountStr == null || minBookingAmountStr.isEmpty()) {
+            if (code == null || code.trim().isEmpty()
+                    || discountStr == null || discountStr.trim().isEmpty()
+                    || type == null || type.isEmpty()
+                    || expireDateStr == null || expireDateStr.isEmpty()
+                    || maxUsesStr == null || maxUsesStr.isEmpty()
+                    || minBookingAmountStr == null || minBookingAmountStr.isEmpty()) {
+
                 request.setAttribute("error", "All fields are required");
                 request.getRequestDispatcher("/views/voucher.jsp?action=create").forward(request, response);
                 return;
             }
 
-            
-
-
-            Object existingVoucher = voucherDAO.findByCode(code);
-
-
+            Object existingVoucher = voucherDAO.findByCode(code.trim());
             if (existingVoucher != null) {
                 request.setAttribute("error", "Voucher code already exists. Please use a different code.");
                 request.getRequestDispatcher("/views/voucher.jsp?action=create").forward(request, response);
                 return;
             }
 
-            
             java.math.BigDecimal discount;
             try {
                 discount = new java.math.BigDecimal(discountStr);
@@ -167,8 +156,9 @@ public class VoucherController extends HttpServlet {
                     request.getRequestDispatcher("/views/voucher.jsp?action=create").forward(request, response);
                     return;
                 }
-                
-                if ("PERCENT".equals(type) && discount.compareTo(new java.math.BigDecimal("100")) > 0) {
+
+                if ("PERCENT".equalsIgnoreCase(type)
+                        && discount.compareTo(new java.math.BigDecimal("100")) > 0) {
                     request.setAttribute("error", "Percent discount cannot exceed 100%");
                     request.getRequestDispatcher("/views/voucher.jsp?action=create").forward(request, response);
                     return;
@@ -179,7 +169,6 @@ public class VoucherController extends HttpServlet {
                 return;
             }
 
-            
             int maxUses;
             try {
                 maxUses = Integer.parseInt(maxUsesStr);
@@ -194,7 +183,6 @@ public class VoucherController extends HttpServlet {
                 return;
             }
 
-            
             java.math.BigDecimal minBookingAmount;
             try {
                 minBookingAmount = new java.math.BigDecimal(minBookingAmountStr);
@@ -209,13 +197,13 @@ public class VoucherController extends HttpServlet {
                 return;
             }
 
-            
             Date expireDate;
             try {
                 expireDate = Date.valueOf(expireDateStr);
-                Date today = new Date(System.currentTimeMillis());
-                if (expireDate.before(today)) {
-                    request.setAttribute("error", "Expire date must be in the future");
+                LocalDate today = LocalDate.now();
+
+                if (expireDate.toLocalDate().isBefore(today)) {
+                    request.setAttribute("error", "Expire date must be today or in the future");
                     request.getRequestDispatcher("/views/voucher.jsp?action=create").forward(request, response);
                     return;
                 }
@@ -225,19 +213,20 @@ public class VoucherController extends HttpServlet {
                 return;
             }
 
-            
-            boolean status;
-            if (statusStr == null || statusStr.isEmpty()) {
-                status = true;
-            } else {
-                status = "ACTIVE".equalsIgnoreCase(statusStr) || "1".equals(statusStr);
-            }
+            // Mới tạo luôn active, DAO sẽ tự tính lại status chuẩn trước khi insert
+            boolean status = true;
 
-            
-            VoucherModel newVoucher = new VoucherModel(maxUses, code, discount, type, expireDate, status, minBookingAmount);
+            VoucherModel newVoucher = new VoucherModel(
+                    maxUses,
+                    code.trim(),
+                    discount,
+                    type,
+                    expireDate,
+                    status,
+                    minBookingAmount
+            );
 
             boolean success = voucherDAO.insert(newVoucher);
-
 
             if (success) {
                 request.getSession().setAttribute("message", "Voucher created successfully");
@@ -254,7 +243,6 @@ public class VoucherController extends HttpServlet {
         }
     }
 
-    
     private void updateVoucher(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
@@ -264,39 +252,121 @@ public class VoucherController extends HttpServlet {
             String discountStr = request.getParameter("discount");
             String type = request.getParameter("type");
             String expireDateStr = request.getParameter("expireDate");
-            String statusStr = request.getParameter("status");
             String maxUsesStr = request.getParameter("maxUses");
             String minBookingAmountStr = request.getParameter("minBookingAmount");
 
-            
-            if (voucherIdStr == null || voucherIdStr.isEmpty() || code == null || code.isEmpty()
-                    || discountStr == null || discountStr.isEmpty() || type == null || type.isEmpty()
-                    || expireDateStr == null || expireDateStr.isEmpty()) {
+            if (voucherIdStr == null || voucherIdStr.isEmpty()
+                    || code == null || code.trim().isEmpty()
+                    || discountStr == null || discountStr.trim().isEmpty()
+                    || type == null || type.isEmpty()
+                    || expireDateStr == null || expireDateStr.isEmpty()
+                    || maxUsesStr == null || maxUsesStr.isEmpty()
+                    || minBookingAmountStr == null || minBookingAmountStr.isEmpty()) {
+
                 request.setAttribute("error", "All fields are required");
                 request.getRequestDispatcher("/views/voucher.jsp?action=detail&voucherId=" + voucherIdStr).forward(request, response);
                 return;
             }
 
             int voucherId = Integer.parseInt(voucherIdStr);
-            java.math.BigDecimal discount = new java.math.BigDecimal(discountStr);
-            Date expireDate = Date.valueOf(expireDateStr);
-            boolean status = "ACTIVE".equalsIgnoreCase(statusStr) || "1".equals(statusStr);
-            
-            
-            int maxUses = 0;
-            if (maxUsesStr != null && !maxUsesStr.isEmpty()) {
-                maxUses = Integer.parseInt(maxUsesStr);
-            }
-            
-            java.math.BigDecimal minBookingAmount = java.math.BigDecimal.ZERO;
-            if (minBookingAmountStr != null && !minBookingAmountStr.isEmpty()) {
-                minBookingAmount = new java.math.BigDecimal(minBookingAmountStr);
+
+            VoucherModel currentVoucher = (VoucherModel) voucherDAO.findById(voucherId);
+            if (currentVoucher == null) {
+                request.getSession().setAttribute("error", "Voucher not found");
+                response.sendRedirect(request.getContextPath() + "/staff/vouchers?action=list");
+                return;
             }
 
-            VoucherModel updatedVoucher = new VoucherModel(voucherId, code, discount, type, expireDate, status, maxUses, minBookingAmount, null);
+            Object voucherByCode = voucherDAO.findByCode(code.trim());
+            if (voucherByCode instanceof VoucherModel) {
+                VoucherModel duplicateVoucher = (VoucherModel) voucherByCode;
+                if (duplicateVoucher.getVoucherId() != voucherId) {
+                    request.setAttribute("error", "Voucher code already exists. Please use a different code.");
+                    request.getRequestDispatcher("/views/voucher.jsp?action=detail&voucherId=" + voucherId).forward(request, response);
+                    return;
+                }
+            }
+
+            java.math.BigDecimal discount;
+            try {
+                discount = new java.math.BigDecimal(discountStr);
+                if (discount.compareTo(java.math.BigDecimal.ZERO) <= 0) {
+                    request.setAttribute("error", "Discount value must be greater than 0");
+                    request.getRequestDispatcher("/views/voucher.jsp?action=detail&voucherId=" + voucherId).forward(request, response);
+                    return;
+                }
+
+                if ("PERCENT".equalsIgnoreCase(type)
+                        && discount.compareTo(new java.math.BigDecimal("100")) > 0) {
+                    request.setAttribute("error", "Percent discount cannot exceed 100%");
+                    request.getRequestDispatcher("/views/voucher.jsp?action=detail&voucherId=" + voucherId).forward(request, response);
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                request.setAttribute("error", "Invalid discount value");
+                request.getRequestDispatcher("/views/voucher.jsp?action=detail&voucherId=" + voucherId).forward(request, response);
+                return;
+            }
+
+            int maxUses;
+            try {
+                maxUses = Integer.parseInt(maxUsesStr);
+                if (maxUses <= 0) {
+                    request.setAttribute("error", "Max uses must be greater than 0");
+                    request.getRequestDispatcher("/views/voucher.jsp?action=detail&voucherId=" + voucherId).forward(request, response);
+                    return;
+                }
+
+                if (maxUses < currentVoucher.getUsedCount()) {
+                    request.setAttribute("error", "Max uses cannot be less than used count (" + currentVoucher.getUsedCount() + ")");
+                    request.getRequestDispatcher("/views/voucher.jsp?action=detail&voucherId=" + voucherId).forward(request, response);
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                request.setAttribute("error", "Invalid max uses value");
+                request.getRequestDispatcher("/views/voucher.jsp?action=detail&voucherId=" + voucherId).forward(request, response);
+                return;
+            }
+
+            java.math.BigDecimal minBookingAmount;
+            try {
+                minBookingAmount = new java.math.BigDecimal(minBookingAmountStr);
+                if (minBookingAmount.compareTo(java.math.BigDecimal.ZERO) < 0) {
+                    request.setAttribute("error", "Min booking amount cannot be negative");
+                    request.getRequestDispatcher("/views/voucher.jsp?action=detail&voucherId=" + voucherId).forward(request, response);
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                request.setAttribute("error", "Invalid min booking amount");
+                request.getRequestDispatcher("/views/voucher.jsp?action=detail&voucherId=" + voucherId).forward(request, response);
+                return;
+            }
+
+            Date expireDate;
+            try {
+                expireDate = Date.valueOf(expireDateStr);
+            } catch (IllegalArgumentException e) {
+                request.setAttribute("error", "Invalid date format. Please use YYYY-MM-DD");
+                request.getRequestDispatcher("/views/voucher.jsp?action=detail&voucherId=" + voucherId).forward(request, response);
+                return;
+            }
+
+            // DAO sẽ tự tính lại status theo: còn lượt => active, hết lượt => inactive
+            boolean status = true;
+
+            VoucherModel updatedVoucher = new VoucherModel(
+                    voucherId,
+                    code.trim(),
+                    discount,
+                    type,
+                    expireDate,
+                    status,
+                    maxUses,
+                    minBookingAmount,
+                    currentVoucher.getCreatedDate()
+            );
 
             boolean success = voucherDAO.update(updatedVoucher);
-
 
             if (success) {
                 request.getSession().setAttribute("message", "Voucher updated successfully");
@@ -328,11 +398,10 @@ public class VoucherController extends HttpServlet {
 
             boolean success = voucherDAO.delete(voucherId);
 
-
             if (success) {
-                request.getSession().setAttribute("message", "Voucher deleted successfully");
+                request.getSession().setAttribute("message", "Xóa voucher thành công.");
             } else {
-                request.getSession().setAttribute("error", "Failed to delete voucher");
+                request.getSession().setAttribute("error", "Không thể xóa voucher.");
             }
 
             response.sendRedirect(request.getContextPath() + "/staff/vouchers?action=list");

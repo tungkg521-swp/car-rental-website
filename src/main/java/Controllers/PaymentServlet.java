@@ -256,64 +256,64 @@ public class PaymentServlet extends HttpServlet {
         return booking.getPaymentDeadline().before(new Timestamp(System.currentTimeMillis()));
     }
 
-    private boolean processSandboxPayment(int bookingId, String paymentMethod, boolean success) {
-        BookingModel booking = bookingDAO.getById(bookingId);
+   private boolean processSandboxPayment(int bookingId, String paymentMethod, boolean success) {
+    BookingModel booking = bookingDAO.getById(bookingId);
 
-        if (booking == null) {
-            return false;
-        }
-
-        if (booking.getPaymentDeadline() != null
-                && booking.getPaymentDeadline().before(new Timestamp(System.currentTimeMillis()))) {
-            bookingDAO.updateStatus(bookingId, "CANCELLED");
-            return false;
-        }
-
-        if (!"AWAITING_PAYMENT".equalsIgnoreCase(booking.getStatus())) {
-            return false;
-        }
-
-        if (paymentDAO.hasSuccessfulDepositPayment(bookingId)) {
-            return false;
-        }
-
-        BigDecimal totalAmount = booking.getTotalEstimatedPrice();
-        BigDecimal depositAmount = calculateDeposit(totalAmount);
-        Timestamp now = new Timestamp(System.currentTimeMillis());
-
-        PaymentModel payment = new PaymentModel();
-        payment.setBookingId(bookingId);
-        payment.setAmount(depositAmount);
-        payment.setPaymentType("DEPOSIT");
-        payment.setPaymentMethod(paymentMethod);
-        payment.setPaymentStatus(success ? "SUCCESS" : "FAILED");
-        payment.setGatewayOrderRef("SBX-BOOKING-" + bookingId + "-" + System.currentTimeMillis());
-        payment.setGatewayTransactionId(success ? "TXN-" + System.currentTimeMillis() : null);
-        payment.setProviderResponseCode(success ? "00" : "99");
-        payment.setCallbackReceivedAt(now);
-        payment.setChecksumVerified(true);
-        payment.setPaidAt(success ? now : null);
-        payment.setRawResponse(success
-                ? "{status:'SUCCESS',message:'Sandbox payment success'}"
-                : "{status:'FAILED',message:'Sandbox payment failed'}");
-
-        boolean inserted = paymentDAO.insert(payment);
-        if (!inserted) {
-            return false;
-        }
-
-        if (success) {
-            boolean updated = bookingDAO.updateStatus(bookingId, "PENDING_APPROVAL");
-
-            if (updated && booking.getVoucherId() != null) {
-                voucherDAO.updateVoucherQuantity(booking.getVoucherId());
-            }
-
-            return updated;
-        }
-
-        return true;
+    if (booking == null) {
+        return false;
     }
+
+    if (booking.getPaymentDeadline() != null
+            && booking.getPaymentDeadline().before(new Timestamp(System.currentTimeMillis()))) {
+        bookingDAO.updateStatus(bookingId, "CANCELLED");
+        return false;
+    }
+
+    if (!"AWAITING_PAYMENT".equalsIgnoreCase(booking.getStatus())) {
+        return false;
+    }
+
+    if (paymentDAO.hasSuccessfulDepositPayment(bookingId)) {
+        return false;
+    }
+
+    BigDecimal totalAmount = booking.getTotalEstimatedPrice();
+    BigDecimal depositAmount = calculateDeposit(totalAmount);
+    Timestamp now = new Timestamp(System.currentTimeMillis());
+
+    PaymentModel payment = new PaymentModel();
+    payment.setBookingId(bookingId);
+    payment.setAmount(depositAmount);
+    payment.setPaymentType("DEPOSIT");
+    payment.setPaymentMethod(paymentMethod);
+    payment.setPaymentStatus(success ? "SUCCESS" : "FAILED");
+    payment.setGatewayOrderRef("SBX-BOOKING-" + bookingId + "-" + System.currentTimeMillis());
+    payment.setGatewayTransactionId(success ? "TXN-" + System.currentTimeMillis() : null);
+    payment.setProviderResponseCode(success ? "00" : "99");
+    payment.setCallbackReceivedAt(now);
+    payment.setChecksumVerified(true);
+    payment.setPaidAt(success ? now : null);
+    payment.setRawResponse(success
+            ? "{status:'SUCCESS',message:'Sandbox payment success'}"
+            : "{status:'FAILED',message:'Sandbox payment failed'}");
+
+    boolean inserted = paymentDAO.insert(payment);
+    if (!inserted) {
+        return false;
+    }
+
+    if (success) {
+        boolean updated = bookingDAO.updateStatus(bookingId, "PENDING_APPROVAL");
+
+        if (updated && booking.getVoucherId() != null) {
+            voucherDAO.markVoucherAsUsed(booking.getVoucherId());
+        }
+
+        return updated;
+    }
+
+    return true;
+}
 
     private boolean confirmBookingAfterSuccessfulPayment(int bookingId) {
         BookingModel booking = bookingDAO.getById(bookingId);
