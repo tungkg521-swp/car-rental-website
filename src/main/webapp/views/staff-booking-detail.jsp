@@ -61,9 +61,13 @@
                                             <span class="meta-label">Phone</span>
                                             <p>${booking.customerPhone}</p>
                                         </div>
+                                         <div class="meta-item">
+                                            <span class="meta-label">Số căn cước</span>
+                                            <p>${booking.customercitizen_id}</p>
+                                        </div>
                                     </div>
 
-                                    <div class="doc-section-title">Customer Documents</div>
+                                    <div class="doc-section-title">Customer License</div>
 
                                     <div class="document-grid">
                                         <!-- Driver License Front -->

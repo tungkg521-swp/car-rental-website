@@ -1,6 +1,3 @@
-
-
-
 package models;
 
 import DALs.*;
@@ -13,6 +10,7 @@ public class CustomerModel {
     private String fullName;
     private String email;
     private String phone;
+    private String citizen_id;
     private String status;
     private LocalDateTime createdAt;
     private int accountId;
@@ -20,18 +18,12 @@ public class CustomerModel {
     private String address;
     private LocalDate dob;
 
-
     private String statusAccount;
-   
-    
 
     private boolean licenseVerified;
 
-
     public CustomerModel() {
     }
-
-
 
     public int getCustomerId() {
         return customerId;
@@ -45,7 +37,6 @@ public class CustomerModel {
         return fullName;
     }
 
-
     public String getStatusAccount() {
         return statusAccount;
     }
@@ -53,7 +44,6 @@ public class CustomerModel {
     public void setStatusAccount(String statusAccount) {
         this.statusAccount = statusAccount;
     }
-
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
@@ -73,6 +63,14 @@ public class CustomerModel {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public String getCitizen_id() {
+        return citizen_id;
+    }
+
+    public void setCitizen_id(String citizen_id) {
+        this.citizen_id = citizen_id;
     }
 
     public String getStatus() {

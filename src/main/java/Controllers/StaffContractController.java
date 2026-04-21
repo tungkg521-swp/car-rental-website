@@ -134,6 +134,7 @@ public class StaffContractController extends HttpServlet {
 
                 long remainingRentalAmount = Math.round(contract.getTotalAmount() - contract.getDepositAmount());
                 long finalAmountDue = remainingRentalAmount + extraChargeTotal;
+               
 
                 request.setAttribute("contract", contract);
                 request.setAttribute("customer", customer);
