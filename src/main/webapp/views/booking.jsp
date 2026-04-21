@@ -66,6 +66,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <p><strong>Số điện thoại:</strong> ${customer.phone}</p>
+                                        <p><strong>Số căn cước công dân:</strong> ${customer.citizen_id}</p>
                                     </div>
                                 </div>
                             </div>
@@ -307,7 +308,7 @@
                             <div class="price-highlight-main" id="confirmTotal">0 VND</div>
 
                             <div class="price-highlight-note">
-                                Thanh toán trước 30% để giữ xe
+                                Thanh toán trước tiền cọc để giữ xe
                             </div>
 
                             <div class="price-highlight-sub">
@@ -387,14 +388,11 @@
                                 </div>
 
                                 <div class="summary-modern-row">
-                                    <span>Tiền cọc cần thanh toán (30%)</span>
-                                    <strong id="confirmDeposit">0 VND</strong>
+                                    <span>Tiền cọc cần thanh toán </span>
+                                    <strong id="">10.000.000 VND</strong>
                                 </div>
 
-                                <div class="summary-modern-row">
-                                    <span>Còn lại thanh toán sau</span>
-                                    <strong id="confirmRemaining">0 VND</strong>
-                                </div>
+
 
                                 <div class="summary-modern-row total">
                                     <span>Tổng cộng</span>

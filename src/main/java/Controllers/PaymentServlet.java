@@ -126,14 +126,10 @@ public class PaymentServlet extends HttpServlet {
             return;
         }
 
-        BigDecimal total = booking.getTotalEstimatedPrice();
-
-        BigDecimal deposit = calculateDeposit(total);
-        BigDecimal remaining = calculateRemaining(total);
+        BigDecimal deposit = BigDecimal.valueOf(10_000_000L);
 
         request.setAttribute("booking", booking);
         request.setAttribute("depositAmount", deposit);
-        request.setAttribute("remainingAmount", remaining);
 
         request.getRequestDispatcher("/views/payment.jsp").forward(request, response);
     }
@@ -233,22 +229,6 @@ public class PaymentServlet extends HttpServlet {
         return customer;
     }
 
-    private BigDecimal calculateDeposit(BigDecimal totalAmount) {
-        if (totalAmount == null) {
-            return BigDecimal.ZERO;
-        }
-        return totalAmount.multiply(new BigDecimal("0.30"))
-                .setScale(2, RoundingMode.HALF_UP);
-    }
-
-    private BigDecimal calculateRemaining(BigDecimal totalAmount) {
-        if (totalAmount == null) {
-            return BigDecimal.ZERO;
-        }
-        return totalAmount.subtract(calculateDeposit(totalAmount))
-                .setScale(2, RoundingMode.HALF_UP);
-    }
-
     private boolean isPaymentExpired(BookingModel booking) {
         if (booking == null || booking.getPaymentDeadline() == null) {
             return false;
@@ -261,6 +241,7 @@ public class PaymentServlet extends HttpServlet {
 
         if (booking == null) {
             return false;
+
         }
 
         if (booking.getPaymentDeadline() != null
@@ -277,10 +258,8 @@ public class PaymentServlet extends HttpServlet {
             return false;
         }
 
-        BigDecimal totalAmount = booking.getTotalEstimatedPrice();
-        BigDecimal depositAmount = calculateDeposit(totalAmount);
+        BigDecimal depositAmount = BigDecimal.valueOf(10_000_000L);
         Timestamp now = new Timestamp(System.currentTimeMillis());
-
         PaymentModel payment = new PaymentModel();
         payment.setBookingId(bookingId);
         payment.setAmount(depositAmount);
@@ -306,7 +285,7 @@ public class PaymentServlet extends HttpServlet {
             boolean updated = bookingDAO.updateStatus(bookingId, "PENDING_APPROVAL");
 
             if (updated && booking.getVoucherId() != null) {
-                voucherDAO.updateVoucherQuantity(booking.getVoucherId());
+                voucherDAO.markVoucherAsUsed(booking.getVoucherId());
             }
 
             return updated;

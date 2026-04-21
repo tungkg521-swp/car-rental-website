@@ -22,7 +22,6 @@
                 <div class="container">
                     <h1>Management Vouchers</h1>
 
-                    <!-- Messages -->
                     <c:if test="${not empty error}">
                         <div class="error-message">${error}</div>
                     </c:if>
@@ -31,9 +30,7 @@
                         <c:remove var="message" scope="session"/>
                     </c:if>
 
-                    <!-- ================= LIST VIEW ================= -->
                     <c:if test="${param.action == null || param.action == 'list'}">
-                        <!-- Nút Create chỉ hiện cho admin -->
                         <c:if test="${isAdmin}">
                             <div style="margin-bottom: 20px;">
                                 <a href="${pageContext.request.contextPath}/staff/vouchers?action=create"
@@ -105,7 +102,6 @@
                         </c:if>
                     </c:if>
 
-                    <!-- ================= CREATE VIEW ================= -->
                     <c:if test="${param.action == 'create'}">
                         <h2 style="margin-bottom: 20px;">Create New Voucher</h2>
 
@@ -121,7 +117,7 @@
                                     <label>Discount Type *</label>
                                     <select name="type" required>
                                         <option value="PERCENT">Percentage (%)</option>
-                                        <option value="AMOUNT">Fixed Amount ($)</option>
+                                        <option value="AMOUNT">Fixed Amount (VND)</option>
                                     </select>
                                 </div>
 
@@ -146,18 +142,10 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label>Min Booking Amount ($)</label>
+                                    <label>Min Booking Amount (VND)</label>
                                     <input type="number" name="minBookingAmount" step="0.01" min="0"
                                            placeholder="Enter minimum booking amount" value="0">
                                 </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Status</label>
-                                <select name="status">
-                                    <option value="ACTIVE">Active</option>
-                                    <option value="INACTIVE">Inactive</option>
-                                </select>
                             </div>
 
                             <div class="form-actions">
@@ -168,11 +156,9 @@
                         </form>
                     </c:if>
 
-                    <!-- ================= DETAIL/UPDATE VIEW ================= -->
                     <c:if test="${param.action == 'detail' && not empty voucher}">
                         <h2 style="margin-bottom: 20px;">Voucher Details</h2>
 
-                        <!-- Hiển thị thông tin voucher (cả staff và admin đều thấy) -->
                         <div class="voucher-detail-info">
                             <p><strong>Voucher ID:</strong> ${voucher.voucherId}</p>
                             <p><strong>Code:</strong> ${voucher.code}</p>
@@ -193,7 +179,6 @@
                             </p>
                         </div>
 
-                        <!-- Chỉ admin mới thấy form update -->
                         <c:if test="${isAdmin}">
                             <hr/>
                             <h3>Edit Voucher</h3>
@@ -208,7 +193,7 @@
                                         <label>Discount Type *</label>
                                         <select name="type" required>
                                             <option value="PERCENT" ${voucher.type == 'PERCENT' ? 'selected' : ''}>Percentage (%)</option>
-                                            <option value="AMOUNT" ${voucher.type == 'AMOUNT' ? 'selected' : ''}>Fixed Amount ($)</option>
+                                            <option value="AMOUNT" ${voucher.type == 'AMOUNT' ? 'selected' : ''}>Fixed Amount (VND)</option>
                                         </select>
                                     </div>
                                     <div class="form-group">
@@ -221,12 +206,14 @@
                                     <input type="date" name="expireDate" value="${voucher.expireDate}" required>
                                 </div>
                                 <div class="form-group">
-                                    <label>Status</label>
-                                    <select name="status">
-                                        <option value="ACTIVE" ${voucher.status ? 'selected' : ''}>Active</option>
-                                        <option value="INACTIVE" ${not voucher.status ? 'selected' : ''}>Inactive</option>
-                                    </select>
+                                    <label>Max Uses *</label>
+                                    <input type="number" name="maxUses" value="${voucher.maxUses}" min="1" required>
                                 </div>
+                                <div class="form-group">
+                                    <label>Min Booking Amount (VND)</label>
+                                    <input type="number" name="minBookingAmount" value="${voucher.minBookingAmount}" step="0.01" min="0">
+                                </div>
+
                                 <div class="form-actions">
                                     <button type="submit" class="btn btn-success">Update Voucher</button>
                                     <a href="${pageContext.request.contextPath}/staff/vouchers?action=list"
