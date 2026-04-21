@@ -3,109 +3,122 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>${isEdit ? 'Edit' : 'Add New'} Maintenance</title>
+    <title>${maintenance != null ? 'Edit Maintenance' : 'Add New Maintenance'}</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/staff.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/maintenance.css">
-    <style>
-        .form-group { margin-bottom: 1.5rem; }
-        .form-group label { 
-            display: block; 
-            margin-bottom: 6px; 
-            font-weight: 600; 
-            color: #1e293b; 
-        }
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            font-size: 1rem;
-        }
-        .form-group textarea { min-height: 120px; resize: vertical; }
-    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
 <body>
     <div class="staff-layout">
         <%@ include file="sidebar.jsp" %>
 
         <div class="staff-content">
-            <h1 class="maintenance-title">${isEdit ? 'Edit Maintenance' : 'Add New Maintenance'}</h1>
+            <div class="maintenance-form-shell">
+                <div class="maintenance-form-topbar">
+                    <h1 class="maintenance-page-title">
+                        ${maintenance != null ? 'Edit Maintenance' : 'Add New Maintenance'}
+                    </h1>
 
-            <form action="${pageContext.request.contextPath}/staff/maintenance" method="post" style="max-width: 700px;">
-                <input type="hidden" name="action" value="${isEdit ? 'update' : 'add'}">
-                <c:if test="${isEdit}">
-                    <input type="hidden" name="maintenanceId" value="${maintenance.maintenanceId}">
-                </c:if>
-
-                <div class="form-group">
-                    <label>Chọn Xe</label>
-                    <select name="carId" required>
-                        <c:forEach var="car" items="${cars}">
-                            <option value="${car.carId}" 
-                                ${maintenance != null && maintenance.carId == car.carId ? 'selected' : ''}>
-                                ${car.modelName} - ${car.plateNumber != null ? car.plateNumber : 'No plate'}
-                            </option>
-                        </c:forEach>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Loại Bảo Dưỡng</label>
-                    <select name="maintenanceType" required>
-                        <option value="Bảo dưỡng định kỳ" ${maintenance != null && maintenance.maintenanceType == 'Periodic' ? 'selected' : ''}>Bảo dưỡng định kỳ</option>
-                        <option value="Sữa chữa" ${maintenance != null && maintenance.maintenanceType == 'Repair' ? 'selected' : ''}>Sửa chữa</option>
-                        <option value="Khẩn cấp" ${maintenance != null && maintenance.maintenanceType == 'Emergency' ? 'selected' : ''}>Khẩn cấp</option>
-                        <option value="Thay dầu" ${maintenance != null && maintenance.maintenanceType == 'Oil Change' ? 'selected' : ''}>Thay dầu</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Ngày Lên Lịch</label>
-                    <input type="date" name="scheduledDate" 
-                           value="${maintenance != null ? maintenance.scheduledDate : ''}" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Số Km Lên Lịch (km)</label>
-                    <input type="number" name="mileageScheduled" 
-                           value="${maintenance != null ? maintenance.mileageScheduled : '0'}" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Chi phí ước tính (VND)</label>
-                    <input type="number" name="estimatedCost" step="1000" 
-                           value="${maintenance != null ? maintenance.estimatedCost : '0'}" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Mô tả / Lý do</label>
-                    <textarea name="description" placeholder="Nhập lý do bảo dưỡng...">${maintenance != null ? maintenance.description : ''}</textarea>
-                </div>
-
-                <c:if test="${isEdit}">
-                    <div class="form-group">
-                        <label>Trạng thái</label>
-                        <select name="status">
-                            <option value="SCHEDULED" ${maintenance.status == 'SCHEDULED' ? 'selected' : ''}>Scheduled</option>
-                            <option value="IN_PROGRESS" ${maintenance.status == 'IN_PROGRESS' ? 'selected' : ''}>In Progress</option>
-                            <option value="COMPLETED" ${maintenance.status == 'COMPLETED' ? 'selected' : ''}>Completed</option>
-                            <option value="CANCELLED" ${maintenance.status == 'CANCELLED' ? 'selected' : ''}>Cancelled</option>
-                            <option value="OVERDUE" ${maintenance.status == 'OVERDUE' ? 'selected' : ''}>Overdue</option>
-                        </select>
-                    </div>
-                </c:if>
-
-                <div style="margin-top: 30px;">
-                    <button type="submit" class="btn-add-maintenance" style="padding: 12px 32px; font-size: 1.1rem;">
-                        ${isEdit ? 'Cập nhật lịch bảo dưỡng' : 'Tạo lịch bảo dưỡng mới'}
-                    </button>
-                    <a href="${pageContext.request.contextPath}/staff/maintenance" 
-                       style="margin-left: 20px; color: #64748b; text-decoration: none; font-weight: 500;">
-                        Hủy
+                    <a href="${pageContext.request.contextPath}/staff/maintenance" class="maintenance-back-btn">
+                        ← Back to List
                     </a>
                 </div>
-            </form>
+
+                <div class="maintenance-form-panel">
+                    <form action="${pageContext.request.contextPath}/staff/maintenance" method="post" class="maintenance-form">
+                        <input type="hidden" name="action" value="${maintenance != null ? 'update' : 'add'}">
+                        <c:if test="${maintenance != null}">
+                            <input type="hidden" name="maintenanceId" value="${maintenance.maintenanceId}">
+                        </c:if>
+
+                        <div class="maintenance-form-grid">
+                            <div class="maintenance-field full-width">
+                                <label for="carId">Chọn Xe</label>
+                                <select name="carId" id="carId" required>
+                                    <option value="">-- Chọn xe --</option>
+                                    <c:forEach var="car" items="${carList}">
+                                        <option value="${car.carId}"
+                                            <c:if test="${maintenance != null && maintenance.carId == car.carId}">selected</c:if>>
+                                            ${car.modelName} - ${car.plateNumber}
+                                        </option>
+                                    </c:forEach>
+                                </select>
+                            </div>
+
+                            <div class="maintenance-field full-width">
+                                <label for="maintenanceType">Loại Bảo Dưỡng</label>
+                                <select name="maintenanceType" id="maintenanceType" required>
+                                    <option value="">-- Chọn loại bảo dưỡng --</option>
+                                    <option value="Bảo dưỡng định kỳ" <c:if test="${maintenance != null && maintenance.maintenanceType == 'Bảo dưỡng định kỳ'}">selected</c:if>>Bảo dưỡng định kỳ</option>
+                                    <option value="Sửa chữa" <c:if test="${maintenance != null && maintenance.maintenanceType == 'Sửa chữa'}">selected</c:if>>Sửa chữa</option>
+                                    <option value="Khẩn cấp" <c:if test="${maintenance != null && maintenance.maintenanceType == 'Khẩn cấp'}">selected</c:if>>Khẩn cấp</option>
+                                    <option value="Thay dầu" <c:if test="${maintenance != null && maintenance.maintenanceType == 'Thay dầu'}">selected</c:if>>Thay dầu</option>
+                                </select>
+                            </div>
+
+                            <div class="maintenance-field">
+                                <label for="startDate">Ngày bắt đầu</label>
+                                <input type="text" id="startDate" name="startDate"
+                                       value="${maintenance != null ? maintenance.startDate : ''}" required>
+                            </div>
+
+                            <div class="maintenance-field">
+                                <label for="endDate">Ngày kết thúc</label>
+                                <input type="text" id="endDate" name="endDate"
+                                       value="${maintenance != null ? maintenance.endDate : ''}" required>
+                            </div>
+
+                            <div class="maintenance-field">
+                                <label for="mileageScheduled">Số Km Lên Lịch (km)</label>
+                                <input type="number" id="mileageScheduled" name="mileageScheduled" min="0"
+                                       value="${maintenance != null ? maintenance.mileageScheduled : '0'}" required>
+                            </div>
+
+                            <div class="maintenance-field">
+                                <label for="estimatedCost">Chi phí ước tính (VND)</label>
+                                <input type="number" id="estimatedCost" name="estimatedCost" min="0" step="1000"
+                                       value="${maintenance != null ? maintenance.estimatedCost : '0'}" required>
+                            </div>
+
+                            <div class="maintenance-field full-width">
+                                <label for="description">Mô tả / Lý do</label>
+                                <textarea id="description" name="description" placeholder="Nhập lý do bảo dưỡng...">${maintenance != null ? maintenance.description : ''}</textarea>
+                            </div>
+
+                            <c:if test="${maintenance != null}">
+                                <div class="maintenance-field full-width">
+                                    <label for="status">Trạng thái</label>
+                                    <select name="status" id="status" required>
+                                        <option value="SCHEDULED" ${maintenance.status == 'SCHEDULED' ? 'selected' : ''}>SCHEDULED</option>
+                                        <option value="IN_PROGRESS" ${maintenance.status == 'IN_PROGRESS' ? 'selected' : ''}>IN_PROGRESS</option>
+                                        <option value="COMPLETED" ${maintenance.status == 'COMPLETED' ? 'selected' : ''}>COMPLETED</option>
+                                        <option value="CANCELLED" ${maintenance.status == 'CANCELLED' ? 'selected' : ''}>CANCELLED</option>
+                                    </select>
+                                </div>
+                            </c:if>
+                        </div>
+
+                        <div class="maintenance-form-actions">
+                            <button type="submit" class="maintenance-submit-btn">
+                                ${maintenance != null ? 'Update Maintenance' : 'Create Maintenance'}
+                            </button>
+
+                            <a href="${pageContext.request.contextPath}/staff/maintenance" class="maintenance-cancel-btn">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
+
+    <script>
+        window.maintenanceConfig = {
+            contextPath: '${pageContext.request.contextPath}'
+        };
+    </script>
+    <script src="${pageContext.request.contextPath}/assets/js/maintenance.js"></script>
 </body>
 </html>
