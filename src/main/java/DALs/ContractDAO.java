@@ -125,6 +125,15 @@ public class ContractDAO extends DBContext {
                     contract.setCustomerConfirmTime(rs.getTimestamp("customer_confirm_time"));
                     contract.setNoShowNote(rs.getString("no_show_note"));
 
+                    contract.setAllowedKm((Integer) rs.getObject("allowed_km"));
+                    contract.setActualKm((Integer) rs.getObject("actual_km"));
+                    contract.setExtraKm((Integer) rs.getObject("extra_km"));
+
+                    Object extraKmFeeObj = rs.getObject("extra_km_fee");
+                    if (extraKmFeeObj != null) {
+                        contract.setExtraKmFee(rs.getDouble("extra_km_fee"));
+                    }
+
                     return contract;
                 }
             }
@@ -231,6 +240,15 @@ public class ContractDAO extends DBContext {
                     contract.setCustomerConfirmTime(rs.getTimestamp("customer_confirm_time"));
                     contract.setNoShowNote(rs.getString("no_show_note"));
 
+                    contract.setAllowedKm((Integer) rs.getObject("allowed_km"));
+                    contract.setActualKm((Integer) rs.getObject("actual_km"));
+                    contract.setExtraKm((Integer) rs.getObject("extra_km"));
+
+                    Object extraKmFeeObj = rs.getObject("extra_km_fee");
+                    if (extraKmFeeObj != null) {
+                        contract.setExtraKmFee(rs.getDouble("extra_km_fee"));
+                    }
+
                     return contract;
                 }
             }
@@ -297,6 +315,26 @@ public class ContractDAO extends DBContext {
             ps.setString(3, "CANCELLED");
             ps.setInt(4, contractId);
             ps.setString(5, "WAITING_CUSTOMER_CONFIRM");
+
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public boolean updateMileageSummary(int contractId, int allowedKm, int actualKm, int extraKm, double extraKmFee) {
+        String sql = "UPDATE rental_contract "
+                + "SET allowed_km = ?, actual_km = ?, extra_km = ?, extra_km_fee = ? "
+                + "WHERE contract_id = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, allowedKm);
+            ps.setInt(2, actualKm);
+            ps.setInt(3, extraKm);
+            ps.setDouble(4, extraKmFee);
+            ps.setInt(5, contractId);
 
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
