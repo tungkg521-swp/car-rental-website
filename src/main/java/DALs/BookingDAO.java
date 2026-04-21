@@ -348,10 +348,13 @@ public class BookingDAO extends DBContext {
         b.deposit_amount,
         b.remaining_amount,
         b.payment_deadline,
+        
+                     
         c.full_name,
         c.email,
         c.phone,
-
+        c.citizen_id,
+                     
         car.model_name,
         car.price_per_day,
         car.image_folder,
@@ -383,6 +386,7 @@ public class BookingDAO extends DBContext {
                 booking.setCustomerName(rs.getString("full_name"));
                 booking.setCustomerEmail(rs.getString("email"));
                 booking.setCustomerPhone(rs.getString("phone"));
+                booking.setCustomercitizen_id(rs.getString("citizen_id"));
 
                 booking.setCarName(rs.getString("model_name"));
                 booking.setPricePerDay(rs.getBigDecimal("price_per_day"));

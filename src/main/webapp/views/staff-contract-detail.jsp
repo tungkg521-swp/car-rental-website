@@ -59,6 +59,16 @@
                                     <div class="info-label">Email</div>
                                     <div class="info-value">${customer.email}</div>
                                 </div>
+                                
+                                  <div class="info-row">
+                                    <div class="info-label">Số điện thoại</div>
+                                    <div class="info-value">${customer.phone}</div>
+                                </div>
+                                
+                                  <div class="info-row">
+                                    <div class="info-label">Số căn cước</div>
+                                    <div class="info-value">${customer.citizen_id}</div>
+                                </div>
                             </div>
                         </div>
 
@@ -205,7 +215,7 @@
                                 <div class="payment-row">
                                     <div class="payment-label">Minus Deposit</div>
                                     <div class="payment-value payment-negative">
-                                        - <fmt:formatNumber value="${contract.depositAmount}" type="number"/> VND
+                                        <fmt:formatNumber value="${contract.depositAmount}" type="number"/> VND
                                     </div>
                                 </div>
 
@@ -233,12 +243,43 @@
                                     <div class="payment-divider"></div>
                                 </c:if>
 
-                                <div class="payment-row payment-final">
-                                    <div class="payment-label">Final Amount Due</div>
-                                    <div class="payment-value payment-final-value">
-                                        <fmt:formatNumber value="${finalAmountDue}" type="number"/> VND
+                                <c:if test="${finalAmountDue < 0}">
+                                    <div class="payment-row payment-final">
+                                        <div class="payment-label">Số tiền cần thanh toán khi trả xe</div>
+
+                                        <div class="payment-value payment-final-value">
+                                            <fmt:formatNumber value="${0}" type="number"/> VND
+                                        </div>
                                     </div>
-                                </div>
+                                    <div class="payment-row payment-final">
+                                        <div class="payment-label">Số tiền hoàn trả khi trả xe</div>
+                                        <div class="payment-value payment-final-value">
+                                            <fmt:formatNumber value="${finalAmountDue*(-1)}" type="number"/> VND
+                                        </div>
+                                    </div>
+                                </c:if>
+
+
+
+
+                                <c:if test="${finalAmountDue > 0}">
+                                    <div class="payment-row payment-final">
+                                        <div class="payment-label">Số tiền cần thanh toán khi trả xe</div>
+                                        <div class="payment-value payment-final-value">
+                                            <fmt:formatNumber value="${finalAmountDue}" type="number"/> VND
+                                        </div>
+                                    </div>
+
+                                    <div class="payment-row payment-final">
+                                        <div class="payment-label">Số tiền hoàn trả khi trả xe</div>
+                                        <div class="payment-value payment-final-value">
+                                            <fmt:formatNumber value="${0}" type="number"/> VND
+                                        </div>
+                                    </div>
+                                </c:if>
+
+
+
                             </div>
                         </div>
 
