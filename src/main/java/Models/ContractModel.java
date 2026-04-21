@@ -45,6 +45,11 @@ public class ContractModel {
     private Timestamp customerConfirmTime;
     private String noShowNote;
 
+    private Integer allowedKm;
+    private Integer actualKm;
+    private Integer extraKm;
+    private Double extraKmFee;
+
     public ContractModel() {
     }
 
@@ -231,6 +236,36 @@ public class ContractModel {
     public void setNoShowNote(String noShowNote) {
         this.noShowNote = noShowNote;
     }
-    
-    
+
+    public Integer getAllowedKm() {
+        return allowedKm;
+    }
+
+    public void setAllowedKm(Integer allowedKm) {
+        this.allowedKm = allowedKm;
+    }
+
+    public Integer getActualKm() {
+        return actualKm;
+    }
+
+    public void setActualKm(Integer actualKm) {
+        this.actualKm = actualKm;
+    }
+
+    public Integer getExtraKm() {
+        return extraKm;
+    }
+
+    public void setExtraKm(Integer extraKm) {
+        this.extraKm = extraKm;
+    }
+
+    public Double getExtraKmFee() {
+        return extraKmFee;
+    }
+
+    public void setExtraKmFee(Double extraKmFee) {
+        this.extraKmFee = extraKmFee;
+    }
 }

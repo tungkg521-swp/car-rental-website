@@ -7,7 +7,6 @@ import DALs.CarDAO;
 import DALs.ContractDAO;
 import DALs.CustomerDAO;
 import DALs.VoucherDAO;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -440,11 +439,6 @@ public class BookingServlet extends HttpServlet {
         booking.setBookingDate(new Timestamp(System.currentTimeMillis()));
         booking.setStartTime(startTime);
         booking.setEndTime(endTime);
-
-        // Nếu project của bạn đang theo luồng approve trước rồi mới thanh toán
-        //booking.setStatus("PENDING_APPROVAL");
-        // Nếu project hiện tại của bạn vẫn đang dùng create xong sang payment ngay,
-        // đổi dòng trên thành:
         booking.setStatus("AWAITING_PAYMENT");
         booking.setNote(note);
         booking.setDepositAmount(depositAmount);
