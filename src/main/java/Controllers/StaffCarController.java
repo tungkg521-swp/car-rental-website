@@ -1,8 +1,6 @@
 package Controllers;
 
-
 import DALs.CarDAO;
-
 import Utils.RoleConstants;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -22,7 +20,6 @@ import java.util.List;
 import models.AccountModel;
 import models.CarModel;
 
-
 @WebServlet("/staff/cars")
 @MultipartConfig(
         fileSizeThreshold = 1024 * 1024,
@@ -31,9 +28,7 @@ import models.CarModel;
 )
 public class StaffCarController extends HttpServlet {
 
-
     private final CarDAO carDAO = new CarDAO();
-
 
     @Override
     protected void doGet(HttpServletRequest request,
@@ -47,7 +42,6 @@ public class StaffCarController extends HttpServlet {
                 int carId = Integer.parseInt(request.getParameter("id"));
 
                 List<String> images = carDAO.getCarImagesByCarId(carId);
-
 
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
@@ -70,9 +64,7 @@ public class StaffCarController extends HttpServlet {
         }
 
         if (action == null || action.equals("list")) {
-
             List<CarModel> carList = carDAO.findAllCars();
-
             request.setAttribute("carList", carList);
             request.getRequestDispatcher("/views/staff-cars-manager.jsp")
                     .forward(request, response);
@@ -86,11 +78,9 @@ public class StaffCarController extends HttpServlet {
             List<CarModel> carList;
 
             if (keyword != null && !keyword.trim().isEmpty()) {
-
                 carList = carDAO.searchCars(keyword);
             } else {
                 carList = carDAO.findAllCars();
-
             }
 
             if (status != null && !status.trim().isEmpty()) {
@@ -107,9 +97,7 @@ public class StaffCarController extends HttpServlet {
 
         if (action.equals("detail")) {
             int carId = Integer.parseInt(request.getParameter("id"));
-
             CarModel car = carDAO.findById(carId);
-
 
             request.setAttribute("car", car);
             request.getRequestDispatcher("/views/staff-cars-manager.jsp")
@@ -119,7 +107,7 @@ public class StaffCarController extends HttpServlet {
 
         if (action.equals("add")) {
             if (!isAdmin(request)) {
-                request.getSession().setAttribute("error", "Only admin can add cars.");
+                request.getSession().setAttribute("error", "Chỉ quản trị viên mới có thể thêm xe.");
                 response.sendRedirect(request.getContextPath() + "/staff/cars?action=list");
                 return;
             }
@@ -131,13 +119,12 @@ public class StaffCarController extends HttpServlet {
 
         if (action.equals("edit")) {
             if (!isAdmin(request)) {
-                request.getSession().setAttribute("error", "Only admin can edit cars.");
+                request.getSession().setAttribute("error", "Chỉ quản trị viên mới có thể cập nhật xe.");
                 response.sendRedirect(request.getContextPath() + "/staff/cars?action=list");
                 return;
             }
 
             int carId = Integer.parseInt(request.getParameter("id"));
-
             CarModel car = carDAO.findById(carId);
 
             request.setAttribute("car", car);
@@ -155,7 +142,7 @@ public class StaffCarController extends HttpServlet {
 
         if ("create".equals(action)) {
             if (!isAdmin(request)) {
-                request.getSession().setAttribute("error", "Only admin can add cars.");
+                request.getSession().setAttribute("error", "Chỉ quản trị viên mới có thể thêm xe.");
                 response.sendRedirect(request.getContextPath() + "/staff/cars?action=list");
                 return;
             }
@@ -165,7 +152,7 @@ public class StaffCarController extends HttpServlet {
 
         if ("update".equals(action)) {
             if (!isAdmin(request)) {
-                request.getSession().setAttribute("error", "Only admin can update cars.");
+                request.getSession().setAttribute("error", "Chỉ quản trị viên mới có thể cập nhật xe.");
                 response.sendRedirect(request.getContextPath() + "/staff/cars?action=list");
                 return;
             }
@@ -173,17 +160,15 @@ public class StaffCarController extends HttpServlet {
             return;
         }
 
-
         if ("delete".equals(action)) {
             if (!isAdmin(request)) {
-                request.getSession().setAttribute("error", "Only admin can delete cars.");
+                request.getSession().setAttribute("error", "Chỉ quản trị viên mới có thể xóa xe.");
                 response.sendRedirect(request.getContextPath() + "/staff/cars?action=list");
                 return;
             }
             deleteCar(request, response);
             return;
         }
-
     }
 
     private boolean isAdmin(HttpServletRequest request) {
@@ -212,6 +197,14 @@ public class StaffCarController extends HttpServlet {
             String description = request.getParameter("description");
             String status = request.getParameter("status");
             String plateNumber = request.getParameter("plateNumber");
+            plateNumber = plateNumber != null ? plateNumber.trim() : "";
+
+            if (carDAO.existsPlateNumber(plateNumber)) {
+                request.getSession().setAttribute("error",
+                        "Biển số xe đã tồn tại. Vui lòng nhập biển số khác.");
+                response.sendRedirect(request.getContextPath() + "/staff/cars?action=add");
+                return;
+            }
 
             String imageFolder = modelName.toLowerCase()
                     .replaceAll("\\s+", "_")
@@ -260,7 +253,7 @@ public class StaffCarController extends HttpServlet {
             }
 
             if (imageUrls.isEmpty()) {
-                throw new Exception("Please select at least one image!");
+                throw new Exception("Vui lòng chọn ít nhất một ảnh!");
             }
 
             CarModel car = new CarModel(
@@ -276,23 +269,23 @@ public class StaffCarController extends HttpServlet {
                     imageUrls.get(0),
                     imageFolder,
                     description,
-                    status,plateNumber
+                    status,
+                    plateNumber
             );
 
-
             if (car == null || imageUrls == null || imageUrls.isEmpty()) {
-                request.setAttribute("error", "Please select at least one image!");
+                request.setAttribute("error", "Vui lòng chọn ít nhất một ảnh!");
                 request.getRequestDispatcher("/views/staff-cars-manager.jsp").forward(request, response);
                 return;
             }
+
             boolean success = carDAO.addCarWithImages(car, imageUrls);
 
-
             if (success) {
-                request.getSession().setAttribute("message", "Car added successfully!");
+                request.getSession().setAttribute("message", "Thêm xe thành công!");
                 response.sendRedirect(request.getContextPath() + "/staff/cars?action=list");
             } else {
-                request.setAttribute("error", "Failed to add car!");
+                request.setAttribute("error", "Thêm xe thất bại!");
                 request.setAttribute("car", car);
                 request.getRequestDispatcher("/views/staff-cars-manager.jsp")
                         .forward(request, response);
@@ -300,7 +293,7 @@ public class StaffCarController extends HttpServlet {
 
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("error", "Error: " + e.getMessage());
+            request.setAttribute("error", "Lỗi: " + e.getMessage());
             request.getRequestDispatcher("/views/staff-cars-manager.jsp")
                     .forward(request, response);
         }
@@ -322,7 +315,15 @@ public class StaffCarController extends HttpServlet {
             String typeName = request.getParameter("typeName");
             String description = request.getParameter("description");
             String status = request.getParameter("status");
-            String plateNumber =request.getParameter("plateNumber");
+            String plateNumber = request.getParameter("plateNumber");
+            plateNumber = plateNumber != null ? plateNumber.trim() : "";
+
+            if (carDAO.existsPlateNumberExceptId(plateNumber, carId)) {
+                request.getSession().setAttribute("error",
+                        "Biển số xe đã tồn tại. Vui lòng nhập biển số khác.");
+                response.sendRedirect(request.getContextPath() + "/staff/cars?action=edit&id=" + carId);
+                return;
+            }
 
             CarModel existingCar = carDAO.findById(carId);
 
@@ -386,26 +387,27 @@ public class StaffCarController extends HttpServlet {
                     imageUrl,
                     imageFolder,
                     description,
-                    status,plateNumber
+                    status,
+                    plateNumber
             );
 
-
             if (car == null) {
-                request.setAttribute("error", "Invalid car data.");
+                request.setAttribute("error", "Dữ liệu xe không hợp lệ.");
                 request.getRequestDispatcher("/views/staff-cars-manager.jsp").forward(request, response);
                 return;
             }
+
             boolean success = carDAO.updateCarWithNewImages(car, newImageUrls);
 
             if (success) {
-                String msg = "Car updated successfully!";
+                String msg = "Cập nhật xe thành công!";
                 if (!newImageUrls.isEmpty()) {
-                    msg += " Added " + newImageUrls.size() + " new image(s).";
+                    msg += " Đã thêm " + newImageUrls.size() + " ảnh mới.";
                 }
                 request.getSession().setAttribute("message", msg);
                 response.sendRedirect(request.getContextPath() + "/staff/cars?action=list");
             } else {
-                request.setAttribute("error", "Failed to update car.");
+                request.setAttribute("error", "Cập nhật xe thất bại.");
                 request.setAttribute("car", car);
                 request.getRequestDispatcher("/views/staff-cars-manager.jsp")
                         .forward(request, response);
@@ -413,36 +415,50 @@ public class StaffCarController extends HttpServlet {
 
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("error", "Error: " + e.getMessage());
+            request.setAttribute("error", "Lỗi: " + e.getMessage());
             request.getRequestDispatcher("/views/staff-cars-manager.jsp")
                     .forward(request, response);
         }
     }
 
-    private void deleteCar(HttpServletRequest request,
-            HttpServletResponse response)
+    private void deleteCar(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        HttpSession session = request.getSession();
+        String carIdRaw = request.getParameter("carId");
+
         try {
-            int carId = Integer.parseInt(request.getParameter("carId"));
+            int carId = Integer.parseInt(carIdRaw);
 
-            boolean success = carDAO.deleteCar(carId);
-
-
-            if (success) {
-                request.getSession().setAttribute("message", "Car deleted successfully!");
-            } else {
-                request.getSession().setAttribute("error", "Failed to delete car.");
+            if (carDAO.isCarInMaintenanceStatus(carId) || carDAO.hasOpenMaintenanceRecord(carId) || carDAO.isCarUnderMaintenance(carId)) {
+                session.setAttribute("error",
+                        "Không thể xóa xe này vì xe đang trong quá trình bảo trì.");
+                response.sendRedirect(request.getContextPath() + "/staff/cars?action=list");
+                return;
             }
 
-            response.sendRedirect(request.getContextPath() + "/staff/cars?action=list");
+            if (carDAO.hasActiveBooking(carId)) {
+                session.setAttribute("error",
+                        "Không thể xóa xe này vì xe đang được thuê hoặc có đơn đặt xe đang hoạt động.");
+                response.sendRedirect(request.getContextPath() + "/staff/cars?action=list");
+                return;
+            }
 
+            boolean deleted = carDAO.deleteCar(carId);
+
+            if (deleted) {
+                session.setAttribute("message", "Xóa xe thành công.");
+            } else {
+                session.setAttribute("error", "Xóa xe thất bại.");
+            }
+
+        } catch (NumberFormatException e) {
+            session.setAttribute("error", "Mã xe không hợp lệ.");
         } catch (Exception e) {
             e.printStackTrace();
-            request.getSession().setAttribute("error", "Error: " + e.getMessage());
-            response.sendRedirect(request.getContextPath() + "/staff/cars?action=list");
+            session.setAttribute("error", "Đã xảy ra lỗi khi xóa xe.");
         }
+
+        response.sendRedirect(request.getContextPath() + "/staff/cars?action=list");
     }
-
 }
-

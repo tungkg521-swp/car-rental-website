@@ -20,15 +20,6 @@ public class DBContext {
 
     public DBContext() {
         try {
-  String URL = "jdbc:sqlserver://localhost:1433;"
-                    + "databaseName=CarRentalDB1;"
-                    + "user=sa;"
-
-                    + "password=123456;"
-
-                    + "encrypt=true;"
-                    + "trustServerCertificate=true;";
-
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
             connection = DriverManager.getConnection(URL);
             System.out.println("Database connected successfully.");

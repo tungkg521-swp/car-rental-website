@@ -186,6 +186,13 @@
                                                 <span class="info-value">${rentalDurationText}</span>
                                             </div>
 
+                                            <div class="info-row">
+                                                <span class="info-label">Tiền cọc và dằn xe</span>
+
+                                                <fmt:formatNumber value="${booking.depositAmount+10000000}" type="number" groupingUsed="true"/>
+                                                VND
+                                            </div>
+
                                             <div class="info-row total-row">
                                                 <span class="info-label">Total Price</span>
                                                 <span class="info-value total-price">
@@ -283,7 +290,17 @@
                                 </c:choose>
                             </div>
 
-                            <!-- CAR CHANGE REQUEST -->
+
+
+                            <!-- NOTE -->
+                            <c:if test="${not empty booking.note}">
+                                <div class="note-box">
+                                    <div class="note-title">Customer Note</div>
+                                    <p>${booking.note}</p>
+                                </div>
+                            </c:if>
+
+
                             <c:if test="${not empty pendingCarChangeRequest}">
                                 <div class="section-card car-change-section">
                                     <div class="section-heading">

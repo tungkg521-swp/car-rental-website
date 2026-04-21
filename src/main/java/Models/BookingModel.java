@@ -27,6 +27,7 @@ public class BookingModel {
     private String customerName;
     private String customerEmail;
     private String customerPhone;
+      private String customercitizen_id;
 
     private BigDecimal pricePerDay;
 
@@ -55,6 +56,14 @@ private Timestamp customerCheckedAt;
 
     public void setBookingId(int bookingId) {
         this.bookingId = bookingId;
+    }
+
+    public String getCustomercitizen_id() {
+        return customercitizen_id;
+    }
+
+    public void setCustomercitizen_id(String citizen_id) {
+        this.customercitizen_id = citizen_id;
     }
 
     public int getCustomerId() {
