@@ -10,7 +10,6 @@ import DALs.ContractDAO;
 import DALs.CustomerDAO;
 import DALs.PaymentDAO;
 import DALs.VoucherDAO;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -19,7 +18,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.math.BigDecimal;
-
 import java.math.RoundingMode;
 import java.sql.Timestamp;
 import models.AccountModel;

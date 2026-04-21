@@ -12,8 +12,8 @@ public class CarCheckDAO extends DBContext {
     public boolean addCheck(CarCheckModel check) {
         String sql = "INSERT INTO car_check "
                 + "(contract_id, car_id, checked_by, check_time, fuel_level, "
-                + "exterior_note, interior_note, check_result, note) "
-                + "VALUES (?, ?, ?, GETDATE(), ?, ?, ?, ?, ?)";
+                + "exterior_note, interior_note, check_result, note, odometer_km) "
+                + "VALUES (?, ?, ?, GETDATE(), ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, check.getContractId());
@@ -24,6 +24,11 @@ public class CarCheckDAO extends DBContext {
             ps.setString(6, check.getInteriorNote());
             ps.setString(7, check.getCheckResult());
             ps.setString(8, check.getNote());
+            if (check.getOdometerKm() != null) {
+                ps.setInt(9, check.getOdometerKm());
+            } else {
+                ps.setNull(9, java.sql.Types.INTEGER);
+            }
 
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
@@ -91,12 +96,13 @@ public class CarCheckDAO extends DBContext {
         check.setInteriorNote(rs.getString("interior_note"));
         check.setCheckResult(rs.getString("check_result"));
         check.setNote(rs.getString("note"));
+        check.setOdometerKm((Integer) rs.getObject("odometer_km"));
         return check;
     }
 
     public boolean insert(CarCheckModel check) {
-        String sql = "INSERT INTO car_check (contract_id, car_id, checked_by, check_time, fuel_level, exterior_note, interior_note, check_result, note) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO car_check (contract_id, car_id, checked_by, check_time, fuel_level, exterior_note, interior_note, check_result, note, odometer_km) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, check.getContractId());
@@ -108,6 +114,11 @@ public class CarCheckDAO extends DBContext {
             ps.setString(7, check.getInteriorNote());
             ps.setString(8, check.getCheckResult());
             ps.setString(9, check.getNote());
+            if (check.getOdometerKm() != null) {
+                ps.setInt(10, check.getOdometerKm());
+            } else {
+                ps.setNull(10, java.sql.Types.INTEGER);
+            }
 
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
@@ -136,6 +147,7 @@ public class CarCheckDAO extends DBContext {
                     check.setInteriorNote(rs.getString("interior_note"));
                     check.setCheckResult(rs.getString("check_result"));
                     check.setNote(rs.getString("note"));
+                    check.setOdometerKm((Integer) rs.getObject("odometer_km"));
 
                     return check;
                 }

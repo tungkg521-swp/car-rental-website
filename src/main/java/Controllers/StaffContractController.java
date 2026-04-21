@@ -25,6 +25,9 @@ import models.StaffModel;
 @WebServlet("/staff/contracts")
 public class StaffContractController extends HttpServlet {
 
+    private static final int DEFAULT_ALLOWED_KM_PER_DAY = 100;
+    private static final double DEFAULT_EXTRA_KM_FEE_PER_KM = 3000;
+
     private final CustomerDAO customerDAO = new CustomerDAO();
     private final CarDAO carDAO = new CarDAO();
     private final ContractDAO contractDAO = new ContractDAO();
@@ -133,7 +136,8 @@ public class StaffContractController extends HttpServlet {
                 }
 
                 long remainingRentalAmount = Math.round(contract.getTotalAmount() - contract.getDepositAmount());
-                long finalAmountDue = remainingRentalAmount + extraChargeTotal;
+                double extraKmFee = contract.getExtraKmFee() != null ? contract.getExtraKmFee() : 0;
+                double finalAmountDue = remainingRentalAmount + extraChargeTotal + extraKmFee;
 
                 request.setAttribute("contract", contract);
                 request.setAttribute("customer", customer);
@@ -152,6 +156,11 @@ public class StaffContractController extends HttpServlet {
                 request.setAttribute("savedIssueTypes", savedIssueTypes);
                 request.setAttribute("savedDescriptions", savedDescriptions);
                 request.setAttribute("savedAmounts", savedAmounts);
+                request.setAttribute("preCheckOdometer",
+                        preDeliveryCheck != null ? preDeliveryCheck.getOdometerKm() : null);
+                request.setAttribute("returnCheckOdometer",
+                        returnCheck != null ? returnCheck.getOdometerKm() : null);
+                request.setAttribute("contractExtraKmFee", extraKmFee);
 
                 request.getRequestDispatcher("/views/staff-contract-detail.jsp")
                         .forward(request, response);
@@ -359,7 +368,18 @@ public class StaffContractController extends HttpServlet {
             return false;
         }
 
-        if (!hasReturnCheck(contractId)) {
+        CarCheckModel returnCheck = carCheckDAO.getLatestReturnCheckByContractId(contractId);
+        if (returnCheck == null || returnCheck.getOdometerKm() == null) {
+            return false;
+        }
+
+        boolean mileageUpdated = updateContractMileageSummary(contractId);
+        if (!mileageUpdated) {
+            return false;
+        }
+
+        boolean carKmUpdated = carDAO.updateCurrentOdometerKm(contract.getCarId(), returnCheck.getOdometerKm());
+        if (!carKmUpdated) {
             return false;
         }
 
@@ -406,6 +426,8 @@ public class StaffContractController extends HttpServlet {
             if (car == null) {
                 return false;
             }
+
+            int startOdometerKm = car.getCurrentOdometerKm();
 
             String physicalStatus = request.getParameter("physicalStatus");
             if (physicalStatus == null
@@ -468,6 +490,7 @@ public class StaffContractController extends HttpServlet {
             check.setInteriorNote(interiorNote);
             check.setCheckResult(finalResult);
             check.setNote(finalNote.toString());
+            check.setOdometerKm(startOdometerKm);
 
             return carCheckDAO.addCheck(check);
 
@@ -509,43 +532,87 @@ public class StaffContractController extends HttpServlet {
             }
 
             String[] issueTypes = request.getParameterValues("issueTypes");
-            if (issueTypes == null || issueTypes.length == 0) {
-                request.getSession().setAttribute("error", "Please select at least one issue.");
+            String noIssuesFound = request.getParameter("noIssuesFound");
+
+            String odometerKmRaw = request.getParameter("odometerKm");
+            if (odometerKmRaw == null || odometerKmRaw.trim().isEmpty()) {
+                request.getSession().setAttribute("error", "Please enter return odometer.");
                 response.sendRedirect(request.getContextPath() + "/staff/contracts?action=detail&id=" + contractId);
                 return;
             }
 
+            int returnOdometerKm = Integer.parseInt(odometerKmRaw.trim());
+            if (returnOdometerKm < 0) {
+                request.getSession().setAttribute("error", "Return odometer must be greater than or equal to 0.");
+                response.sendRedirect(request.getContextPath() + "/staff/contracts?action=detail&id=" + contractId);
+                return;
+            }
+
+            CarCheckModel preDeliveryCheck = carCheckDAO.getLatestPreDeliveryCheckByContractId(contractId);
+            if (preDeliveryCheck == null || preDeliveryCheck.getOdometerKm() == null) {
+                request.getSession().setAttribute("error", "Pre-delivery odometer not found.");
+                response.sendRedirect(request.getContextPath() + "/staff/contracts?action=detail&id=" + contractId);
+                return;
+            }
+
+            int startOdometerKm = preDeliveryCheck.getOdometerKm();
+            if (returnOdometerKm < startOdometerKm) {
+                request.getSession().setAttribute("error", "Return odometer cannot be smaller than pre-check odometer.");
+                response.sendRedirect(request.getContextPath() + "/staff/contracts?action=detail&id=" + contractId);
+                return;
+            }
+
+            boolean isNormalReturn = "true".equalsIgnoreCase(noIssuesFound);
+
+            if (issueTypes == null) {
+                issueTypes = new String[0];
+            }
+
+            // Nếu tick No issues found thì luôn lưu theo nhánh normal return
+            if (isNormalReturn) {
+                issueTypes = new String[0];
+            }
+
+            // Nếu không có issue nào được chọn thì cũng hiểu là normal return
+            if (issueTypes.length == 0) {
+                isNormalReturn = true;
+            }
+
             StringBuilder exteriorNoteBuilder = new StringBuilder();
             StringBuilder noteBuilder = new StringBuilder();
-            double totalExtraFee = 0;
 
-            for (String issue : issueTypes) {
-                String safeSuffix = buildSafeFieldSuffix(issue);
+            if (isNormalReturn) {
+                noteBuilder.append("No issues found");
+            } else {
+                for (String issue : issueTypes) {
+                    String safeSuffix = buildSafeFieldSuffix(issue);
 
-                String description = request.getParameter("description_" + safeSuffix);
-                String amountRaw = request.getParameter("amount_" + safeSuffix);
+                    String description = request.getParameter("description_" + safeSuffix);
+                    String amountRaw = request.getParameter("amount_" + safeSuffix);
 
-                long amount = 0;
-                if (amountRaw != null && !amountRaw.trim().isEmpty()) {
-                    amount = Long.parseLong(amountRaw.trim());
-                    if (amount < 0) {
-                        request.getSession().setAttribute("error", "Amount must be greater than or equal to 0.");
+                    if (amountRaw == null || amountRaw.trim().isEmpty()) {
+                        request.getSession().setAttribute("error", "Please enter amount for issue: " + issue);
                         response.sendRedirect(request.getContextPath() + "/staff/contracts?action=detail&id=" + contractId);
                         return;
                     }
-                }
 
-                if (exteriorNoteBuilder.length() > 0) {
-                    exteriorNoteBuilder.append(" | ");
-                }
-                exteriorNoteBuilder.append(issue);
+                    long amount = Long.parseLong(amountRaw.trim());
+                    if (amount <= 0) {
+                        request.getSession().setAttribute("error", "Amount must be greater than 0 for issue: " + issue);
+                        response.sendRedirect(request.getContextPath() + "/staff/contracts?action=detail&id=" + contractId);
+                        return;
+                    }
 
-                if (noteBuilder.length() > 0) {
-                    noteBuilder.append(" | ");
-                }
-                noteBuilder.append(buildDisplayFeeLine(issue, description, amount));
+                    if (exteriorNoteBuilder.length() > 0) {
+                        exteriorNoteBuilder.append(" | ");
+                    }
+                    exteriorNoteBuilder.append(issue);
 
-                totalExtraFee += amount;
+                    if (noteBuilder.length() > 0) {
+                        noteBuilder.append(" | ");
+                    }
+                    noteBuilder.append(buildDisplayFeeLine(issue, description, amount));
+                }
             }
 
             CarCheckModel check = new CarCheckModel();
@@ -557,11 +624,18 @@ public class StaffContractController extends HttpServlet {
             check.setInteriorNote("");
             check.setCheckResult("RETURN_CHECK");
             check.setNote(noteBuilder.toString());
+            check.setOdometerKm(returnOdometerKm);
 
             boolean saved = carCheckDAO.addCheck(check);
 
             if (saved) {
-                request.getSession().setAttribute("message", "Return check saved successfully.");
+                boolean mileageUpdated = updateContractMileageSummary(contractId);
+
+                if (mileageUpdated) {
+                    request.getSession().setAttribute("message", "Return check saved successfully.");
+                } else {
+                    request.getSession().setAttribute("error", "Return check saved but failed to update mileage summary.");
+                }
             } else {
                 request.getSession().setAttribute("error", "Failed to save return check.");
             }
@@ -570,7 +644,7 @@ public class StaffContractController extends HttpServlet {
 
         } catch (NumberFormatException e) {
             e.printStackTrace();
-            request.getSession().setAttribute("error", "Invalid amount format.");
+            request.getSession().setAttribute("error", "Invalid number format.");
             response.sendRedirect(request.getContextPath() + "/staff/contracts");
         } catch (Exception e) {
             e.printStackTrace();
@@ -891,6 +965,58 @@ public class StaffContractController extends HttpServlet {
         }
 
         return builder.toString();
+    }
+
+    private int calculateAllowedKm(ContractModel contract) {
+        long minutes = Duration.between(
+                contract.getContractStartTime().toLocalDateTime(),
+                contract.getContractEndTime().toLocalDateTime()
+        ).toMinutes();
+
+        long rentalDays = (long) Math.ceil(minutes / 1440.0);
+        if (rentalDays <= 0) {
+            rentalDays = 1;
+        }
+
+        return (int) rentalDays * DEFAULT_ALLOWED_KM_PER_DAY;
+    }
+
+    private boolean updateContractMileageSummary(int contractId) {
+        ContractModel contract = contractDAO.getContractById(contractId);
+        if (contract == null) {
+            return false;
+        }
+
+        CarCheckModel preDeliveryCheck = carCheckDAO.getLatestPreDeliveryCheckByContractId(contractId);
+        CarCheckModel returnCheck = carCheckDAO.getLatestReturnCheckByContractId(contractId);
+
+        if (preDeliveryCheck == null || preDeliveryCheck.getOdometerKm() == null) {
+            return false;
+        }
+
+        if (returnCheck == null || returnCheck.getOdometerKm() == null) {
+            return false;
+        }
+
+        int startKm = preDeliveryCheck.getOdometerKm();
+        int endKm = returnCheck.getOdometerKm();
+
+        if (endKm < startKm) {
+            return false;
+        }
+
+        int actualKm = endKm - startKm;
+        int allowedKm = calculateAllowedKm(contract);
+        int extraKm = Math.max(actualKm - allowedKm, 0);
+        double extraKmFee = extraKm * DEFAULT_EXTRA_KM_FEE_PER_KM;
+
+        return contractDAO.updateMileageSummary(
+                contractId,
+                allowedKm,
+                actualKm,
+                extraKm,
+                extraKmFee
+        );
     }
 
 }

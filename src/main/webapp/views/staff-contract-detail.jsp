@@ -127,6 +127,12 @@
                                             <div class="info-value">${preDeliveryCheck.fuelLevel}</div>
                                         </div>
                                         <div class="info-row">
+                                            <div class="info-label">Odometer</div>
+                                            <div class="info-value">
+                                                <fmt:formatNumber value="${preDeliveryCheck.odometerKm}" type="number"/> km
+                                            </div>
+                                        </div>
+                                        <div class="info-row">
                                             <div class="info-label">Exterior Note</div>
                                             <div class="info-value">${preDeliveryCheck.exteriorNote}</div>
                                         </div>
@@ -158,13 +164,77 @@
 
                                 <c:choose>
                                     <c:when test="${not empty returnCheck}">
-                                        <ul class="check-list">
-                                            <c:if test="${not empty returnCheck.exteriorNote}">
-                                                <c:forTokens items="${returnCheck.exteriorNote}" delims="|" var="issue">
-                                                    <li>${issue}</li>
-                                                    </c:forTokens>
-                                                </c:if>
-                                        </ul>
+
+                                        <div class="info-table" style="margin-bottom: 16px;">
+                                            <div class="info-row">
+                                                <div class="info-label">Return Odometer</div>
+                                                <div class="info-value">
+                                                    <fmt:formatNumber value="${not empty returnCheck.odometerKm ? returnCheck.odometerKm : 0}" type="number"/> km
+                                                </div>
+                                            </div>
+
+                                            <div class="info-row">
+                                                <div class="info-label">Actual KM</div>
+                                                <div class="info-value">
+                                                    <fmt:formatNumber value="${not empty contract.actualKm ? contract.actualKm : 0}" type="number"/> km
+                                                </div>
+                                            </div>
+
+                                            <div class="info-row">
+                                                <div class="info-label">Allowed KM</div>
+                                                <div class="info-value">
+                                                    <fmt:formatNumber value="${not empty contract.allowedKm ? contract.allowedKm : 0}" type="number"/> km
+                                                </div>
+                                            </div>
+
+                                            <div class="info-row">
+                                                <div class="info-label">Extra KM</div>
+                                                <div class="info-value">
+                                                    <fmt:formatNumber value="${not empty contract.extraKm ? contract.extraKm : 0}" type="number"/> km
+                                                </div>
+                                            </div>
+
+                                            <div class="info-row">
+                                                <div class="info-label">Extra KM Fee</div>
+                                                <div class="info-value">
+                                                    <fmt:formatNumber value="${not empty contract.extraKmFee ? contract.extraKmFee : 0}" type="number"/> VND
+                                                </div>
+                                            </div>
+
+                                            <div class="info-row">
+                                                <div class="info-label">Return Status</div>
+                                                <div class="info-value">
+                                                    <c:choose>
+                                                        <c:when test="${empty returnCheck.exteriorNote}">
+                                                            Vehicle returned in normal condition
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            Issues detected
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <c:choose>
+                                            <c:when test="${not empty returnCheck.exteriorNote}">
+                                                <div style="margin-bottom: 10px; font-weight: 600;">Detected Issues</div>
+                                                <ul class="check-list">
+                                                    <c:forTokens items="${returnCheck.exteriorNote}" delims="|" var="issue">
+                                                        <li><c:out value="${issue}"/></li>
+                                                        </c:forTokens>
+                                                </ul>
+                                            </c:when>
+
+                                            <c:otherwise>
+                                                <div class="empty-check-state">
+                                                    <div class="empty-check-icon">✅</div>
+                                                    <div class="empty-check-title">Vehicle returned in normal condition</div>
+                                                    <div class="empty-check-subtitle">Không phát hiện vấn đề phát sinh khi trả xe</div>
+                                                </div>
+                                            </c:otherwise>
+                                        </c:choose>
+
                                     </c:when>
 
                                     <c:otherwise>
@@ -232,6 +302,20 @@
 
                                     <div class="payment-divider"></div>
                                 </c:if>
+
+                                <div class="payment-row">
+                                    <div class="payment-label">Extra KM Fee</div>
+                                    <div class="payment-value">
+                                        <fmt:formatNumber value="${not empty contract.extraKmFee ? contract.extraKmFee : 0}" type="number"/> VND
+                                    </div>
+                                </div>
+
+                                <div class="payment-row">
+                                    <div class="payment-label">Extra KM</div>
+                                    <div class="payment-value">
+                                        <fmt:formatNumber value="${not empty contract.extraKm ? contract.extraKm : 0}" type="number"/> km
+                                    </div>
+                                </div>
 
                                 <div class="payment-row payment-final">
                                     <div class="payment-label">Final Amount Due</div>
@@ -399,6 +483,14 @@
                         </div>
 
                         <div class="cf-section">
+                            <h4>Current Odometer</h4>
+                            <input type="number"
+                                   class="cf-input"
+                                   value="${car.currentOdometerKm}"
+                                   readonly>
+                        </div>
+
+                        <div class="cf-section">
                             <h4>System Check</h4>
                             <div class="info-table">
                                 <div class="info-row">
@@ -469,6 +561,28 @@
                     <input type="hidden" name="contractId" value="${contract.contractId}">
 
                     <div class="cf-modal-body">
+
+                        <div class="cf-section">
+                            <label class="cf-checkbox-item">
+                                <input type="checkbox" id="noIssuesFound" name="noIssuesFound" value="true">
+                                <span>No issues found / Vehicle returned in normal condition</span>
+                            </label>
+                        </div>
+
+                        <div class="cf-section">
+                            <h4>Return Odometer</h4>
+                            <input type="number"
+                                   name="odometerKm"
+                                   class="cf-input"
+                                   min="${preDeliveryCheck.odometerKm}"
+                                   value="${not empty returnCheck ? returnCheck.odometerKm : ''}"
+                                   placeholder="Enter current odometer"
+                                   required>
+                            <small style="color:#666;">
+                                Pre-check odometer:
+                                <fmt:formatNumber value="${preDeliveryCheck.odometerKm}" type="number"/> km
+                            </small>
+                        </div>
 
                         <div class="cf-section">
                             <h4>Check Information</h4>
@@ -573,6 +687,17 @@
             </c:forEach>
         </div>
 
+        <div id="returnCheckMetaData"
+             data-has-return-check="${not empty returnCheck}"
+             data-normal-return="${not empty returnCheck and empty returnCheck.exteriorNote and returnCheck.note eq 'No issues found'}"
+             style="display:none;">
+        </div>
+
+        <div id="returnCheckSavedOdometer"
+             data-odometer="${not empty returnCheck ? returnCheck.odometerKm : ''}"
+             style="display:none;">
+        </div>
+
         <div id="savedBeforeCheckData"
              data-exterior-note="${not empty preDeliveryCheck ? preDeliveryCheck.exteriorNote : ''}"
              data-interior-note="${not empty preDeliveryCheck ? preDeliveryCheck.interiorNote : ''}"
@@ -588,6 +713,8 @@
              style="display:none;">
         </div>
 
-        <script src="${pageContext.request.contextPath}/assets/js/contract-check-fees.js"></script>
+        <input type="hidden" id="preCheckOdometerValue" value="${not empty preDeliveryCheck ? preDeliveryCheck.odometerKm : 0}">
+
+        <script src="${pageContext.request.contextPath}/assets/js/contract-check-fees.js?v=9"></script>
     </body>
 </html>
