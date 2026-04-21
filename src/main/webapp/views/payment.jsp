@@ -56,9 +56,9 @@
                     <div class="price-box-main">
                         <div class="label">Tiền cọc và dằn xe cần thanh toán</div>
                         <div class="value">
-                            <fmt:formatNumber value="${depositAmount+10000000}" pattern="#,###"/> VND
+                            <fmt:formatNumber value="${depositAmount}" pattern="#,###"/> VND
                         </div>
-                        <div class="sub">Thanh toán trước 30% và tiền dằn xe để giữ xe</div>
+                        <div class="sub">Thanh toán trước tiền cọc để giữ xe</div>
                     </div>
 
                     <div class="mini-summary">
@@ -69,12 +69,7 @@
                             </strong>
                         </div>
 
-                        <div class="mini-item">
-                            <span>Số tiền còn lại</span>
-                            <strong>
-                                <fmt:formatNumber value="${remainingAmount}" pattern="#,###"/> VND
-                            </strong>
-                        </div>
+                      
 
                         <div class="mini-item">
                             <span>Trạng thái hiện tại</span>
@@ -98,24 +93,24 @@
 
                         <div class="info-grid">
                             <div class="info-item">
-                                <span>Mã booking</span>
+                                <span style="color: #16a34a">Mã booking</span>
                                 <strong>#${booking.bookingId}</strong>
                             </div>
 
                             <div class="info-item">
-                                <span>Tên xe</span>
+                                <span style="color: #16a34a">Tên xe</span>
                                 <strong>${booking.carName}</strong>
                             </div>
 
                             <div class="info-item">
-                                <span>Ngày bắt đầu</span>
+                                <span style="color: #16a34a">Ngày bắt đầu</span>
                                 <strong>
                                     <fmt:formatDate value="${booking.startTime}" pattern="dd/MM/yyyy HH:mm"/>
                                 </strong>
                             </div>
 
                             <div class="info-item">
-                                <span>Ngày kết thúc</span>
+                                <span style="color: #16a34a">Ngày kết thúc</span>
                                 <strong>
                                     <fmt:formatDate value="${booking.endTime}" pattern="dd/MM/yyyy HH:mm"/>
                                 </strong>
@@ -144,23 +139,13 @@
                             </div>
 
 
-                            <div class="summary-row">
-                                <span>Còn lại thanh toán sau</span>
-                                <strong>
-                                    <fmt:formatNumber value="${remainingAmount}" pattern="#,###"/> VND
-                                </strong>
-                            </div>
+                         
  
-                                <div class="summary-row deposit">
-                                <span>Tiền dằn xe cần thanh toán ngay</span>
-                                <strong>
-                                    <fmt:formatNumber value="10000000" pattern="#,###"/> VND
-                                </strong>
-                            </div>
+                               
                             <div class="summary-row total">
                                 <span>Xác nhận thanh toán</span>
                                 <strong>
-                                    <fmt:formatNumber value="${depositAmount+10000000}" pattern="#,###"/> VND
+                                    <fmt:formatNumber value="${depositAmount}" pattern="#,###"/> VND
                                 </strong>
                             </div>
 

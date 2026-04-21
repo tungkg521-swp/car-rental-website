@@ -1,6 +1,5 @@
 package DALs;
 
-
 import Utils.DBContext;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -10,13 +9,12 @@ import java.util.ArrayList;
 import java.util.List;
 import models.CustomerModel;
 
-
 public class CustomerDAO extends DBContext {
 
     public CustomerModel getByAccountId(int accountId) {
 
         String sql = """
-            SELECT customer_id, full_name, email, phone, status,
+            SELECT customer_id, full_name, email, phone,citizen_id, status,
        created_at, account_id, address, dob,
        is_license_verified
        FROM customer
@@ -33,6 +31,7 @@ public class CustomerDAO extends DBContext {
                 c.setFullName(rs.getString("full_name"));
                 c.setEmail(rs.getString("email"));
                 c.setPhone(rs.getString("phone"));
+                c.setCitizen_id(rs.getString("citizen_id"));
                 c.setStatus(rs.getString("status"));
                 c.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
                 c.setAccountId(rs.getInt("account_id"));
@@ -112,6 +111,7 @@ public class CustomerDAO extends DBContext {
                                c.full_name,
                                c.email,
                                c.phone,
+                               c.citizen_id,
                                c.status,
                                c.created_at,
                                c.account_id,
@@ -137,6 +137,7 @@ public class CustomerDAO extends DBContext {
                 c.setFullName(rs.getString("full_name"));
                 c.setEmail(rs.getString("email"));
                 c.setPhone(rs.getString("phone"));
+                c.setCitizen_id(rs.getString("citizen_id"));
                 c.setStatus(rs.getString("status"));
                 c.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
                 c.setAccountId(rs.getInt("account_id"));
@@ -255,12 +256,10 @@ public class CustomerDAO extends DBContext {
 
         List<Object> params = new ArrayList<>();
 
-
         if (fullname != null && !fullname.trim().isEmpty()) {
             sql.append(" AND LOWER(c.full_name) LIKE ? ");
             params.add("%" + fullname.trim().toLowerCase() + "%");
         }
-
 
         if (status != null && !status.equalsIgnoreCase("ALL")) {
             sql.append(" AND c.status = ? ");
@@ -268,7 +267,6 @@ public class CustomerDAO extends DBContext {
         }
 
         try (PreparedStatement ps = connection.prepareStatement(sql.toString());) {
-
 
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
@@ -308,9 +306,7 @@ public class CustomerDAO extends DBContext {
     public int updateStatusAccount(int accountId, String status) {
         String sql = "UPDATE account SET status = ? WHERE account_id = ?";
 
-
         try (PreparedStatement ps = connection.prepareStatement(sql.toString());) {
-
 
             ps.setString(1, status);
             ps.setInt(2, accountId);
@@ -323,7 +319,7 @@ public class CustomerDAO extends DBContext {
 
         return 0;
     }
-    
+
     public CustomerModel findByPhone(String phone) {
 
         String sql = "SELECT * FROM customer WHERE phone = ?";

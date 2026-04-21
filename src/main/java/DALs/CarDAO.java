@@ -235,7 +235,7 @@ public class CarDAO extends DBContext {
             i.image_url,  -- THÊM: Lấy image_url
             c.image_folder,
             c.description,  -- THÊM: Nếu cần description (optional, nhưng constructor có)
-            c.status
+            c.status,
             c.plate_number
         FROM cars c  -- SỬA: cars lowercase để nhất quán
         JOIN brand b ON c.brand_id = b.brand_id
@@ -691,11 +691,10 @@ public class CarDAO extends DBContext {
                     for (int i = 0; i < imageUrls.size(); i++) {
                         imagePs.setInt(1, carId);
 
-                        // QUAN TRỌNG: Đảm bảo đường dẫn ảnh đúng format
+                      
                         String imagePath = imageUrls.get(i);
 
-                        // Nếu imageUrls đã là đường dẫn đầy đủ từ controller thì giữ nguyên
-                        // Nếu chỉ là tên file, cần tạo đường dẫn đầy đủ
+                       
                         if (!imagePath.startsWith("assets/")) {
                             imagePath = "assets/images/cars/" + car.getImageFolder() + "/" + imagePath;
                         }
@@ -1093,6 +1092,7 @@ public class CarDAO extends DBContext {
         return list;
     }
 
+
     public boolean updateCurrentOdometerKm(int carId, int odometerKm) {
         String sql = "UPDATE cars SET current_odometer_km = ? WHERE car_id = ?";
 
@@ -1100,10 +1100,109 @@ public class CarDAO extends DBContext {
             ps.setInt(1, odometerKm);
             ps.setInt(2, carId);
             return ps.executeUpdate() > 0;
+
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         return false;
     }
+    
+     public boolean existsPlateNumber(String plateNumber) {
+        String sql = "SELECT 1 FROM cars WHERE plate_number = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, plateNumber);
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+             } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+
+    public boolean existsPlateNumberExceptId(String plateNumber, int carId) {
+        String sql = "SELECT 1 FROM cars WHERE plate_number = ? AND car_id <> ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, plateNumber);
+            ps.setInt(2, carId);
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public boolean hasActiveBooking(int carId) {
+        String sql = """
+        SELECT 1
+        FROM booking
+        WHERE car_id = ?
+          AND status IN ('PENDING_APPROVAL', 'AWAITING_PAYMENT', 'CONFIRMED', 'ACTIVE')
+    """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, carId);
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public boolean isCarUnderMaintenance(int carId) {
+        String sql = """
+        SELECT 1
+        FROM maintenance_record
+        WHERE car_id = ?
+          AND status IN ('OPEN', 'IN_PROGRESS')
+    """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, carId);
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public boolean isCarInMaintenanceStatus(int carId) {
+        String sql = "SELECT 1 FROM cars WHERE car_id = ? AND status = 'MAINTENANCE'";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, carId);
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean hasOpenMaintenanceRecord(int carId) {
+        String sql = """
+        SELECT 1
+        FROM maintenance_record
+        WHERE car_id = ?
+          AND status IN ('OPEN', 'IN_PROGRESS')
+    """;
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, carId);
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 }

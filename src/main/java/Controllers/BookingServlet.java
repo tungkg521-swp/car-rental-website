@@ -425,9 +425,8 @@ public class BookingServlet extends HttpServlet {
             }
         }
 
-        BigDecimal depositAmount = totalPrice
-                .multiply(new BigDecimal("0.30"))
-                .setScale(2, RoundingMode.HALF_UP);
+        BigDecimal depositAmount = BigDecimal.valueOf(10_000_000L);
+        
 
         BigDecimal remainingAmount = totalPrice
                 .subtract(depositAmount)

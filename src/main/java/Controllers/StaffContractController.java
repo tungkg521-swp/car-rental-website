@@ -2,10 +2,9 @@ package Controllers;
 
 import DALs.BookingDAO;
 import DALs.CarCheckDAO;
-import java.io.IOException;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
 import DALs.CarDAO;
+import java.io.IOException;
+import java.util.List;
 import DALs.ContractDAO;
 import DALs.CustomerDAO;
 import jakarta.servlet.ServletException;
@@ -136,6 +135,7 @@ public class StaffContractController extends HttpServlet {
                 }
 
                 long remainingRentalAmount = Math.round(contract.getTotalAmount() - contract.getDepositAmount());
+
                 double extraKmFee = contract.getExtraKmFee() != null ? contract.getExtraKmFee() : 0;
                 double finalAmountDue = remainingRentalAmount + extraChargeTotal + extraKmFee;
 

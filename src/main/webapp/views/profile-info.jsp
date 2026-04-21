@@ -38,6 +38,11 @@
                 <span>${CUSTOMER_PROFILE.phone}</span>
             </div>
 
+             <div class="info-row">
+                <span>Số căn cước công dân</span>
+                <span>${CUSTOMER_PROFILE.citizen_id}</span>
+            </div>
+            
             <div class="info-row">
                 <span>Email</span>
                 <span>${CUSTOMER_PROFILE.email}</span>
