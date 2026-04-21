@@ -30,13 +30,6 @@
                         <c:remove var="message" scope="session"/>
                     </c:if>
 
-                    <c:if test="${not empty sessionScope.error}">
-                        <div class="maintenance-alert error-alert">
-                            ${sessionScope.error}
-                        </div>
-                        <c:remove var="error" scope="session"/>
-                    </c:if>
-
                     <div class="maintenance-table-card">
                         <table class="maintenance-table">
                             <thead>

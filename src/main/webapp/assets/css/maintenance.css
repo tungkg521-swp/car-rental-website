@@ -711,4 +711,13 @@
         min-width: auto;
 
     }
+    .auto-dismiss-alert {
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .auto-dismiss-alert.hide {
+        opacity: 0;
+        transform: translateY(-6px);
+        pointer-events: none;
+    }
 }

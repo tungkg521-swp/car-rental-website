@@ -69,14 +69,33 @@ public class StaffMaintenanceServlet extends HttpServlet {
             return;
         }
 
-        if (action.equals("add")) {
+        if ("add".equals(action)) {
             List<CarModel> carList = carDAO.findAllCars();
             request.setAttribute("carList", carList);
+
+            request.setAttribute("error", request.getSession().getAttribute("error"));
+            request.setAttribute("formCarId", request.getSession().getAttribute("formCarId"));
+            request.setAttribute("formMaintenanceType", request.getSession().getAttribute("formMaintenanceType"));
+            request.setAttribute("formStartDate", request.getSession().getAttribute("formStartDate"));
+            request.setAttribute("formEndDate", request.getSession().getAttribute("formEndDate"));
+            request.setAttribute("formMileageScheduled", request.getSession().getAttribute("formMileageScheduled"));
+            request.setAttribute("formDescription", request.getSession().getAttribute("formDescription"));
+            request.setAttribute("formEstimatedCost", request.getSession().getAttribute("formEstimatedCost"));
+
+            request.getSession().removeAttribute("error");
+            request.getSession().removeAttribute("formCarId");
+            request.getSession().removeAttribute("formMaintenanceType");
+            request.getSession().removeAttribute("formStartDate");
+            request.getSession().removeAttribute("formEndDate");
+            request.getSession().removeAttribute("formMileageScheduled");
+            request.getSession().removeAttribute("formDescription");
+            request.getSession().removeAttribute("formEstimatedCost");
+
             request.getRequestDispatcher("/views/maintenance-form.jsp").forward(request, response);
             return;
         }
 
-        if (action.equals("edit")) {
+        if ("edit".equals(action)) {
             try {
                 int maintenanceId = Integer.parseInt(request.getParameter("id"));
                 MaintenanceModel maintenance = maintenanceDAO.findById(maintenanceId);
@@ -84,6 +103,10 @@ public class StaffMaintenanceServlet extends HttpServlet {
 
                 request.setAttribute("maintenance", maintenance);
                 request.setAttribute("carList", carList);
+
+                request.setAttribute("error", request.getSession().getAttribute("error"));
+                request.getSession().removeAttribute("error");
+
                 request.getRequestDispatcher("/views/maintenance-form.jsp").forward(request, response);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -93,7 +116,7 @@ public class StaffMaintenanceServlet extends HttpServlet {
             return;
         }
 
-        if (action.equals("detail")) {
+        if ("detail".equals(action)) {
             try {
                 int maintenanceId = Integer.parseInt(request.getParameter("id"));
                 MaintenanceModel maintenance = maintenanceDAO.findById(maintenanceId);
@@ -139,7 +162,7 @@ public class StaffMaintenanceServlet extends HttpServlet {
         try {
             MaintenanceModel maintenance = new MaintenanceModel();
 
-            int carId = Integer.parseInt(request.getParameter("carId"));
+            String carIdRaw = request.getParameter("carId");
             String maintenanceType = request.getParameter("maintenanceType");
             String startDateRaw = request.getParameter("startDate");
             String endDateRaw = request.getParameter("endDate");
@@ -147,8 +170,31 @@ public class StaffMaintenanceServlet extends HttpServlet {
             String description = request.getParameter("description");
             String estimatedCostRaw = request.getParameter("estimatedCost");
 
+            request.getSession().setAttribute("formCarId", carIdRaw);
+            request.getSession().setAttribute("formMaintenanceType", maintenanceType);
+            request.getSession().setAttribute("formStartDate", startDateRaw);
+            request.getSession().setAttribute("formEndDate", endDateRaw);
+            request.getSession().setAttribute("formMileageScheduled", mileageRaw);
+            request.getSession().setAttribute("formDescription", description);
+            request.getSession().setAttribute("formEstimatedCost", estimatedCostRaw);
+
+            if (carIdRaw == null || carIdRaw.trim().isEmpty()
+                    || maintenanceType == null || maintenanceType.trim().isEmpty()
+                    || startDateRaw == null || startDateRaw.trim().isEmpty()
+                    || endDateRaw == null || endDateRaw.trim().isEmpty()
+                    || mileageRaw == null || mileageRaw.trim().isEmpty()
+                    || estimatedCostRaw == null || estimatedCostRaw.trim().isEmpty()) {
+
+                request.getSession().setAttribute("error", "Vui lòng nhập đầy đủ thông tin.");
+                response.sendRedirect(request.getContextPath() + "/staff/maintenance?action=add");
+                return;
+            }
+
+            int carId = Integer.parseInt(carIdRaw);
             Date startDate = Date.valueOf(startDateRaw);
             Date endDate = Date.valueOf(endDateRaw);
+            int mileageScheduled = Integer.parseInt(mileageRaw);
+            BigDecimal estimatedCost = new BigDecimal(estimatedCostRaw.trim());
 
             if (endDate.before(startDate)) {
                 request.getSession().setAttribute("error", "Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu.");
@@ -156,9 +202,22 @@ public class StaffMaintenanceServlet extends HttpServlet {
                 return;
             }
 
+            if (mileageScheduled < 0) {
+                request.getSession().setAttribute("error", "Số km lên lịch không hợp lệ.");
+                response.sendRedirect(request.getContextPath() + "/staff/maintenance?action=add");
+                return;
+            }
+
+            if (estimatedCost.compareTo(BigDecimal.ZERO) < 0) {
+                request.getSession().setAttribute("error", "Chi phí ước tính không hợp lệ.");
+                response.sendRedirect(request.getContextPath() + "/staff/maintenance?action=add");
+                return;
+            }
+
             boolean conflict = maintenanceDAO.hasScheduleConflict(carId, startDate, endDate, null);
             if (conflict) {
-                request.getSession().setAttribute("error", "Xe đã có lịch thuê, hợp đồng hoặc lịch bảo dưỡng trùng trong khoảng thời gian này.");
+                request.getSession().setAttribute("error",
+                        "Xe đã có lịch thuê, hợp đồng hoặc lịch bảo dưỡng trùng trong khoảng thời gian này.");
                 response.sendRedirect(request.getContextPath() + "/staff/maintenance?action=add");
                 return;
             }
@@ -167,15 +226,9 @@ public class StaffMaintenanceServlet extends HttpServlet {
             maintenance.setMaintenanceType(maintenanceType);
             maintenance.setStartDate(startDate);
             maintenance.setEndDate(endDate);
-            maintenance.setMileageScheduled(Integer.parseInt(mileageRaw));
+            maintenance.setMileageScheduled(mileageScheduled);
             maintenance.setDescription(description);
-
-            if (estimatedCostRaw != null && !estimatedCostRaw.trim().isEmpty()) {
-                maintenance.setEstimatedCost(new BigDecimal(estimatedCostRaw.trim()));
-            } else {
-                maintenance.setEstimatedCost(BigDecimal.ZERO);
-            }
-
+            maintenance.setEstimatedCost(estimatedCost);
             maintenance.setStatus("IN_PROGRESS");
 
             Integer createdBy = null;
@@ -194,19 +247,37 @@ public class StaffMaintenanceServlet extends HttpServlet {
             boolean success = maintenanceDAO.add(maintenance);
 
             if (success) {
+                request.getSession().removeAttribute("formCarId");
+                request.getSession().removeAttribute("formMaintenanceType");
+                request.getSession().removeAttribute("formStartDate");
+                request.getSession().removeAttribute("formEndDate");
+                request.getSession().removeAttribute("formMileageScheduled");
+                request.getSession().removeAttribute("formDescription");
+                request.getSession().removeAttribute("formEstimatedCost");
+                request.getSession().removeAttribute("error");
+
                 carDAO.updateCarStatus(carId, "MAINTENANCE");
                 request.getSession().setAttribute("message",
                         "Tạo lịch bảo dưỡng thành công. Trạng thái xe đã chuyển sang MAINTENANCE.");
+                response.sendRedirect(request.getContextPath() + "/staff/maintenance");
             } else {
                 request.getSession().setAttribute("error", "Tạo lịch bảo dưỡng thất bại.");
+                response.sendRedirect(request.getContextPath() + "/staff/maintenance?action=add");
             }
 
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            request.getSession().setAttribute("error", "Dữ liệu số không hợp lệ.");
+            response.sendRedirect(request.getContextPath() + "/staff/maintenance?action=add");
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            request.getSession().setAttribute("error", "Ngày nhập không hợp lệ.");
+            response.sendRedirect(request.getContextPath() + "/staff/maintenance?action=add");
         } catch (Exception e) {
             e.printStackTrace();
-            request.getSession().setAttribute("error", "Dữ liệu nhập không hợp lệ.");
+            request.getSession().setAttribute("error", "Đã xảy ra lỗi khi tạo lịch bảo dưỡng.");
+            response.sendRedirect(request.getContextPath() + "/staff/maintenance?action=add");
         }
-
-        response.sendRedirect(request.getContextPath() + "/staff/maintenance");
     }
 
     private void handleUpdate(HttpServletRequest request, HttpServletResponse response)
