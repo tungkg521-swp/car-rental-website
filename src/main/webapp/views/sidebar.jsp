@@ -105,6 +105,7 @@
                         <span>Manage Contracts</span>
                     </a>
                 </li>
+              
             </c:when>
 
             <c:otherwise>

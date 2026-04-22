@@ -484,6 +484,50 @@ public class CarDAO extends DBContext {
         }
     }
 
+    public List<String> getAllBrandNames() {
+        List<String> list = new ArrayList<>();
+
+        String sql = """
+        SELECT brand_name
+        FROM brand
+        ORDER BY brand_name
+    """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                list.add(rs.getString("brand_name"));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public List<String> getAllTypeNames() {
+        List<String> list = new ArrayList<>();
+
+        String sql = """
+        SELECT type_name
+        FROM cars_type
+        ORDER BY type_name
+    """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                list.add(rs.getString("type_name"));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
     private int getBrandId(Connection conn, String brandName) throws SQLException {
         System.out.println("   getBrandId - brandName: " + brandName);
 
@@ -691,10 +735,8 @@ public class CarDAO extends DBContext {
                     for (int i = 0; i < imageUrls.size(); i++) {
                         imagePs.setInt(1, carId);
 
-                      
                         String imagePath = imageUrls.get(i);
 
-                       
                         if (!imagePath.startsWith("assets/")) {
                             imagePath = "assets/images/cars/" + car.getImageFolder() + "/" + imagePath;
                         }
@@ -1092,7 +1134,6 @@ public class CarDAO extends DBContext {
         return list;
     }
 
-
     public boolean updateCurrentOdometerKm(int carId, int odometerKm) {
         String sql = "UPDATE cars SET current_odometer_km = ? WHERE car_id = ?";
 
@@ -1107,21 +1148,20 @@ public class CarDAO extends DBContext {
 
         return false;
     }
-    
-     public boolean existsPlateNumber(String plateNumber) {
+
+    public boolean existsPlateNumber(String plateNumber) {
         String sql = "SELECT 1 FROM cars WHERE plate_number = ?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, plateNumber);
             ResultSet rs = ps.executeQuery();
             return rs.next();
-             } catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
         return false;
     }
-
 
     public boolean existsPlateNumberExceptId(String plateNumber, int carId) {
         String sql = "SELECT 1 FROM cars WHERE plate_number = ? AND car_id <> ?";
@@ -1204,5 +1244,4 @@ public class CarDAO extends DBContext {
         }
         return false;
     }
-
 }

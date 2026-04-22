@@ -166,7 +166,12 @@ public class CarListServlet extends HttpServlet {
 
         request.setAttribute("car", car);
         request.setAttribute("reviews", reviews);
-
+        request.setAttribute("dailyKmLimit", 400);
+        request.setAttribute("lateFeePerHour", 100000);
+        request.setAttribute("lateFeeFlatDayThreshold", 4);
+        request.setAttribute("extraKmFee", getExtraKmFee(car.getPricePerDay()));
+        request.setAttribute("cleaningFee", getCleaningFee(car.getPricePerDay()));
+        request.setAttribute("deodorizingFee", getDeodorizingFee(car.getPricePerDay()));
         String startHour = request.getParameter("startHour");
         String endHour = request.getParameter("endHour");
 
@@ -265,6 +270,45 @@ public class CarListServlet extends HttpServlet {
         request.setAttribute("endHour", endHourRaw);
 
         request.getRequestDispatcher("/views/car-list.jsp").forward(request, response);
+    }
+
+    private int getExtraKmFee(BigDecimal pricePerDay) {
+        if (pricePerDay == null) {
+            return 3000;
+        }
+        if (pricePerDay.compareTo(new BigDecimal("700000")) < 0) {
+            return 3000;
+        }
+        if (pricePerDay.compareTo(new BigDecimal("1200000")) < 0) {
+            return 5000;
+        }
+        return 7000;
+    }
+
+    private int getCleaningFee(BigDecimal pricePerDay) {
+        if (pricePerDay == null) {
+            return 70000;
+        }
+        if (pricePerDay.compareTo(new BigDecimal("700000")) < 0) {
+            return 70000;
+        }
+        if (pricePerDay.compareTo(new BigDecimal("1200000")) < 0) {
+            return 90000;
+        }
+        return 100000;
+    }
+
+    private int getDeodorizingFee(BigDecimal pricePerDay) {
+        if (pricePerDay == null) {
+            return 300000;
+        }
+        if (pricePerDay.compareTo(new BigDecimal("700000")) < 0) {
+            return 300000;
+        }
+        if (pricePerDay.compareTo(new BigDecimal("1200000")) < 0) {
+            return 400000;
+        }
+        return 500000;
     }
 
     private boolean isValidDateRange(HttpServletRequest request) {

@@ -1400,4 +1400,67 @@ body.modal-open {
     .rental-hour-grid {
         grid-template-columns: 1fr;
     }
+    /* =========================
+   SURCHARGE SECTION
+========================= */
+    .surcharge-section {
+        margin-top: 28px;
+    }
+
+    .surcharge-list {
+        display: grid;
+        gap: 14px;
+    }
+
+    .surcharge-item {
+        background: #fff;
+        border: 1px solid #e7e7e7;
+        border-radius: 14px;
+        padding: 16px 18px;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+    }
+
+    .surcharge-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 8px;
+    }
+
+    .surcharge-title {
+        font-size: 17px;
+        font-weight: 700;
+        color: #222;
+    }
+
+    .surcharge-value {
+        font-size: 16px;
+        font-weight: 700;
+        color: #6b7280;
+        white-space: nowrap;
+    }
+
+    .surcharge-item p {
+        margin: 0;
+        color: #5f6368;
+        line-height: 1.65;
+        font-size: 15px;
+    }
+
+    .surcharge-item strong {
+        color: #111827;
+    }
+
+    @media (max-width: 768px) {
+        .surcharge-head {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+        }
+
+        .surcharge-value {
+            white-space: normal;
+        }
+    }
 }
