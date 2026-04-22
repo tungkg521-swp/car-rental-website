@@ -9,7 +9,7 @@
 
 <div class="staff-sidebar">
 
-   
+
     <ul class="sidebar-menu">
 
         <c:choose>
@@ -41,7 +41,7 @@
                     </a>
                 </li>
 
-               
+
 
                 <li>
                     <a class="${fn:contains(currentUri, '/staff/users') ? 'active' : ''}"
@@ -56,6 +56,13 @@
                        href="${pageContext.request.contextPath}/staff/cars">
                         <i class="icon">🚗</i>
                         <span>Manage Cars</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="${fn:contains(currentUri, '/admin/brand-type-cars') ? 'active' : ''}"
+                       href="${pageContext.request.contextPath}/admin/brand-type-cars?action=list">
+                        <i class="icon">🏷️</i>
+                        <span>Brand & Type Car</span>
                     </a>
                 </li>
 

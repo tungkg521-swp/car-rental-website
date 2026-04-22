@@ -37,8 +37,8 @@ public class AuthFilter implements Filter {
 
     private static final Set<String> ADMIN_ALLOWED_PATHS = Set.of(
             "/dashboard/admin",
-            "/admin/review"
-    // không cần thêm /admin/... vào đây vì ta xử lý bằng startsWith("/admin/")
+            "/admin/review",
+            "/admin/brand-type-cars"
     );
 
     @Override
@@ -57,7 +57,7 @@ public class AuthFilter implements Filter {
                 ? null
                 : (AccountModel) session.getAttribute("ACCOUNT");
 
-        // === PUBLIC PATHS (không cần login) ===
+        // === PUBLIC PATHS ===
         if (path.equals("/")
                 || path.equals("/home")
                 || path.equals("/login")
@@ -77,7 +77,7 @@ public class AuthFilter implements Filter {
             return;
         }
 
-        // === STAFF AREA (giữ nguyên như cũ của bạn) ===
+        // === STAFF AREA  ===
         if (path.equals("/dashboard/staff") || path.startsWith("/staff/")) {
             if (!STAFF_ALLOWED_PATHS.contains(path)) {
                 if (account != null
@@ -141,13 +141,11 @@ public class AuthFilter implements Filter {
             return;
         }
 
-        // === ADMIN AREA (đã sửa để fix lỗi AJAX report bị redirect login) ===
+        // === ADMIN AREA) ===
         if (path.equals("/dashboard/admin")
                 || path.startsWith("/admin/")
                 || path.startsWith("/dashboard/admin/")) {
 
-            // Cho phép tất cả các endpoint nội bộ/fragment (AJAX) đi qua mà KHÔNG check session/role
-            // Vì chúng được gọi từ trang admin đã được bảo vệ rồi
             if (path.endsWith("-content")
                     || path.contains("report-content")
                     || path.equals("/admin/rental-report-content")
@@ -157,7 +155,6 @@ public class AuthFilter implements Filter {
                 return;
             }
 
-            // Từ đây mới check quyền ADMIN nghiêm ngặt (cho các trang chính)
             if (account == null) {
                 response.sendRedirect(ctx + "/login");
                 return;

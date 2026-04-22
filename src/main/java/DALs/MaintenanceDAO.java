@@ -36,17 +36,32 @@ public class MaintenanceDAO extends DBContext {
             ORDER BY m.start_date DESC, m.maintenance_id DESC
         """;
 
-        try (PreparedStatement ps = connection.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                list.add(mapRowToModel(rs));
+                MaintenanceModel m = new MaintenanceModel();
+                m.setMaintenanceId(rs.getInt(1));
+                m.setCarId(rs.getInt(2));
+                m.setModelName(rs.getString(3));
+                m.setLicensePlate(rs.getString(4));
+                m.setCarImageUrl(rs.getString(5));
+                m.setMaintenanceType(rs.getString(6));
+                m.setStartDate(rs.getDate(7));
+                m.setEndDate(rs.getDate(8));
+                m.setMileageScheduled(rs.getInt(9));
+                m.setDescription(rs.getString(10));
+                m.setEstimatedCost(rs.getBigDecimal(11));
+                m.setStatus(rs.getString(12));
+                m.setCreatedBy((Integer) rs.getObject(13));
+                if (rs.getTimestamp(14) != null) {
+                    m.setUpdatedAt(rs.getTimestamp(14).toLocalDateTime());
+                }
+                list.add(m);
             }
-
+            return list;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         return list;
     }
 
@@ -76,42 +91,59 @@ public class MaintenanceDAO extends DBContext {
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, maintenanceId);
 
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return mapRowToModel(rs);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                MaintenanceModel m = new MaintenanceModel();
+                m.setMaintenanceId(rs.getInt(1));
+                m.setCarId(rs.getInt(2));
+                m.setModelName(rs.getString(3));
+                m.setLicensePlate(rs.getString(4));
+                m.setCarImageUrl(rs.getString(5));
+                m.setMaintenanceType(rs.getString(6));
+                m.setStartDate(rs.getDate(7));
+                m.setEndDate(rs.getDate(8));
+                m.setMileageScheduled(rs.getInt(9));
+                m.setDescription(rs.getString(10));
+                m.setEstimatedCost(rs.getBigDecimal(11));
+                m.setStatus(rs.getString(12));
+                m.setCreatedBy((Integer) rs.getObject(13));
+                if (rs.getTimestamp(14) != null) {
+                    m.setUpdatedAt(rs.getTimestamp(14).toLocalDateTime());
                 }
+                return m;
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
         return null;
+
     }
+//
+//    private MaintenanceModel mapRowToModel(ResultSet rs) throws SQLException {
+//        MaintenanceModel m = new MaintenanceModel();
+//
+//        m.setMaintenanceId(rs.getInt("maintenance_id"));
+//        m.setCarId(rs.getInt("car_id"));
+//        m.setModelName(rs.getString("model_name"));
+//        m.setLicensePlate(rs.getString("license_plate"));
+//        m.setCarImageUrl(rs.getString("car_image_url"));
+//        m.setMaintenanceType(rs.getString("maintenance_type"));
+//        m.setStartDate(rs.getDate("start_date"));
+//        m.setEndDate(rs.getDate("end_date"));
+//        m.setMileageScheduled(rs.getInt("mileage_scheduled"));
+//        m.setDescription(rs.getString("description"));
+//        m.setEstimatedCost(rs.getBigDecimal("estimated_cost"));
 
-    private MaintenanceModel mapRowToModel(ResultSet rs) throws SQLException {
-        MaintenanceModel m = new MaintenanceModel();
-
-        m.setMaintenanceId(rs.getInt("maintenance_id"));
-        m.setCarId(rs.getInt("car_id"));
-        m.setModelName(rs.getString("model_name"));
-        m.setLicensePlate(rs.getString("license_plate"));
-        m.setCarImageUrl(rs.getString("car_image_url"));
-        m.setMaintenanceType(rs.getString("maintenance_type"));
-        m.setStartDate(rs.getDate("start_date"));
-        m.setEndDate(rs.getDate("end_date"));
-        m.setMileageScheduled(rs.getInt("mileage_scheduled"));
-        m.setDescription(rs.getString("description"));
-        m.setEstimatedCost(rs.getBigDecimal("estimated_cost"));
-        m.setStatus(rs.getString("status"));
-        m.setCreatedBy((Integer) rs.getObject("created_by"));
-
-        if (rs.getTimestamp("updated_at") != null) {
-            m.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
-        }
-
-        return m;
-    }
+    ////        m.setStatus(rs.getString("status"));
+////        m.setCreatedBy((Integer) rs.getObject("created_by"));
+//
+//        if (rs.getTimestamp("updated_at") != null) {
+//            m.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
+//        }
+//
+//        return m;
+//    }
 
     public boolean add(MaintenanceModel m) {
         String sql = """
