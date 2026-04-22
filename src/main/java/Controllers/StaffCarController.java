@@ -187,6 +187,11 @@ public class StaffCarController extends HttpServlet {
         return account != null && account.getRoleId() == RoleConstants.ADMIN;
     }
 
+    private void loadFormData(HttpServletRequest request) {
+        request.setAttribute("brandList", carDAO.getAllBrandNames());
+        request.setAttribute("typeList", carDAO.getAllTypeNames());
+    }
+
     private void createCar(HttpServletRequest request,
             HttpServletResponse response)
             throws ServletException, IOException {
@@ -281,8 +286,7 @@ public class StaffCarController extends HttpServlet {
 
             if (car == null || imageUrls == null || imageUrls.isEmpty()) {
                 request.setAttribute("error", "Vui lòng chọn ít nhất một ảnh!");
-                request.setAttribute("brandList", carDAO.getAllBrandNames());
-                request.setAttribute("typeList", carDAO.getAllTypeNames());
+                loadFormData(request);
                 request.getRequestDispatcher("/views/staff-cars-manager.jsp").forward(request, response);
                 return;
             }
@@ -295,6 +299,7 @@ public class StaffCarController extends HttpServlet {
             } else {
                 request.setAttribute("error", "Thêm xe thất bại!");
                 request.setAttribute("car", car);
+                loadFormData(request);
                 request.getRequestDispatcher("/views/staff-cars-manager.jsp")
                         .forward(request, response);
             }
@@ -302,6 +307,7 @@ public class StaffCarController extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("error", "Lỗi: " + e.getMessage());
+            loadFormData(request);
             request.getRequestDispatcher("/views/staff-cars-manager.jsp")
                     .forward(request, response);
         }
@@ -401,6 +407,7 @@ public class StaffCarController extends HttpServlet {
 
             if (car == null) {
                 request.setAttribute("error", "Dữ liệu xe không hợp lệ.");
+                loadFormData(request);
                 request.getRequestDispatcher("/views/staff-cars-manager.jsp").forward(request, response);
                 return;
             }
@@ -417,6 +424,7 @@ public class StaffCarController extends HttpServlet {
             } else {
                 request.setAttribute("error", "Cập nhật xe thất bại.");
                 request.setAttribute("car", car);
+                loadFormData(request);
                 request.getRequestDispatcher("/views/staff-cars-manager.jsp")
                         .forward(request, response);
             }
@@ -424,6 +432,7 @@ public class StaffCarController extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("error", "Lỗi: " + e.getMessage());
+            loadFormData(request);
             request.getRequestDispatcher("/views/staff-cars-manager.jsp")
                     .forward(request, response);
         }
