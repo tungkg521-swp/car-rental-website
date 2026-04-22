@@ -112,6 +112,9 @@ public class StaffCarController extends HttpServlet {
                 return;
             }
 
+            request.setAttribute("brandList", carDAO.getAllBrandNames());
+            request.setAttribute("typeList", carDAO.getAllTypeNames());
+
             request.getRequestDispatcher("/views/staff-cars-manager.jsp")
                     .forward(request, response);
             return;
@@ -128,6 +131,9 @@ public class StaffCarController extends HttpServlet {
             CarModel car = carDAO.findById(carId);
 
             request.setAttribute("car", car);
+            request.setAttribute("brandList", carDAO.getAllBrandNames());
+            request.setAttribute("typeList", carDAO.getAllTypeNames());
+
             request.getRequestDispatcher("/views/staff-cars-manager.jsp")
                     .forward(request, response);
         }
@@ -275,6 +281,8 @@ public class StaffCarController extends HttpServlet {
 
             if (car == null || imageUrls == null || imageUrls.isEmpty()) {
                 request.setAttribute("error", "Vui lòng chọn ít nhất một ảnh!");
+                request.setAttribute("brandList", carDAO.getAllBrandNames());
+                request.setAttribute("typeList", carDAO.getAllTypeNames());
                 request.getRequestDispatcher("/views/staff-cars-manager.jsp").forward(request, response);
                 return;
             }
