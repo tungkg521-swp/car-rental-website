@@ -216,7 +216,7 @@
 
                                         <c:if test="${booking.status == 'AWAITING_PAYMENT'}">
                                             <div class="status-note status-note-info">
-                                                This booking has been approved and is waiting for customer payment.
+                                                The customer has created this booking and it is currently waiting for payment.
                                             </div>
                                         </c:if>
 

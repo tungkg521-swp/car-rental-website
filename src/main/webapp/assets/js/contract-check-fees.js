@@ -1,25 +1,48 @@
 function openCheckFeesModal() {
     const modal = document.getElementById("checkFeesModal");
     const form = document.getElementById("checkFeesForm");
+    const noIssuesCheckbox = document.getElementById("noIssuesFound");
+    const odometerInput = document.querySelector('input[name="odometerKm"]');
 
     if (form) {
         form.reset();
     }
 
-    const savedData = getSavedReturnCheckData();
-    const hasSavedReturnCheck = savedData.issues && savedData.issues.length > 0;
+    resetReturnCheckCheckboxStates();
 
-    if (hasSavedReturnCheck) {
-        restoreSavedReturnCheckData();
+    if (noIssuesCheckbox) {
+        noIssuesCheckbox.checked = false;
+    }
+
+    const savedData = getSavedReturnCheckData();
+    const returnMeta = getReturnCheckMeta();
+
+    // Luôn seed lại issue từ pre-check trước
+    applyPreDeliverySeedToReturnCheck();
+
+    if (returnMeta.hasReturnCheck) {
+        restoreSavedReturnOdometer();
+
+        if (returnMeta.normalReturn) {
+            if (noIssuesCheckbox) {
+                noIssuesCheckbox.checked = true;
+            }
+            toggleNoIssuesMode();
+        } else {
+            restoreSavedReturnCheckData();
+            markSavedReturnIssuesAsNotSeeded();
+        }
     } else {
-        applyPreDeliverySeedToReturnCheck();
+        if (odometerInput) {
+            odometerInput.value = "";
+        }
     }
 
     if (modal) {
         modal.classList.add("show");
         renderSelectedIssues();
 
-        if (hasSavedReturnCheck) {
+        if (returnMeta.hasReturnCheck && !returnMeta.normalReturn && savedData.issues.length > 0) {
             applySavedFeeValues();
         }
     }
@@ -28,9 +51,16 @@ function openCheckFeesModal() {
 function closeCheckFeesModal() {
     const modal = document.getElementById("checkFeesModal");
     const form = document.getElementById("checkFeesForm");
+    const noIssuesCheckbox = document.getElementById("noIssuesFound");
 
     if (form) {
         form.reset();
+    }
+
+    resetReturnCheckCheckboxStates();
+
+    if (noIssuesCheckbox) {
+        noIssuesCheckbox.checked = false;
     }
 
     if (modal) {
@@ -46,11 +76,11 @@ function escapeHtml(text) {
     }
 
     return text
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
 }
 
 function buildSafeFieldSuffix(issue) {
@@ -61,6 +91,7 @@ function renderSelectedIssues() {
     const checkedBoxes = document.querySelectorAll('input[name="issueTypes"]:checked');
     const preview = document.getElementById("selectedIssuesPreview");
     const feeRowsContainer = document.getElementById("feeRowsContainer");
+    const noIssuesCheckbox = document.getElementById("noIssuesFound");
 
     if (!preview || !feeRowsContainer) {
         return;
@@ -71,57 +102,130 @@ function renderSelectedIssues() {
     preview.innerHTML = "";
     feeRowsContainer.innerHTML = "";
 
+    let hasVisibleTag = false;
+
     checkedBoxes.forEach((checkbox) => {
         const issue = checkbox.value;
-        const safeIssueText = escapeHtml(issue);
         const safeSuffix = buildSafeFieldSuffix(issue);
+        const isSeeded = checkbox.dataset.seeded === "true";
+
+        const tag = document.createElement("span");
+        tag.className = "cf-tag";
+        tag.textContent = isSeeded ? issue + " (from pre-check)" : issue;
+        preview.appendChild(tag);
+        hasVisibleTag = true;
+
+        // Issue từ pre-check chỉ hiện ở Selected Issues, không hiện xuống Fees
+        if (isSeeded) {
+            return;
+        }
+
+        // Nếu đang tick No issues found thì không render phí cho issue return-check
+        if (noIssuesCheckbox && noIssuesCheckbox.checked) {
+            return;
+        }
 
         const savedDescription = currentValues[issue] ? currentValues[issue].description : "";
         const savedAmount = currentValues[issue] ? currentValues[issue].amount : "";
 
-        const tag = document.createElement("span");
-        tag.className = "cf-tag";
-        tag.textContent = issue;
-        preview.appendChild(tag);
+        const safeIssueText = escapeHtml(issue);
 
         const row = document.createElement("div");
         row.className = "cf-fee-row";
         row.innerHTML =
-            '<div class="cf-fee-type">' + safeIssueText + '</div>' +
-            '<div>' +
+                '<div class="cf-fee-type">' + safeIssueText + '</div>' +
+                '<div>' +
                 '<input type="text" name="description_' + safeSuffix + '" placeholder="Enter description" class="cf-input" value="' + escapeHtml(savedDescription) + '">' +
-            '</div>' +
-            '<div>' +
+                '</div>' +
+                '<div>' +
                 '<input type="number" min="0" step="1000" name="amount_' + safeSuffix + '" placeholder="0" class="cf-input" value="' + escapeHtml(savedAmount) + '">' +
-            '</div>';
+                '</div>';
 
         feeRowsContainer.appendChild(row);
     });
+
+    // Nếu tick No issues found thì vẫn giữ pre-check tags và thêm 1 tag normal return
+    if (noIssuesCheckbox && noIssuesCheckbox.checked) {
+        const normalTag = document.createElement("span");
+        normalTag.className = "cf-tag";
+        normalTag.textContent = "No issues found";
+        preview.appendChild(normalTag);
+        hasVisibleTag = true;
+    }
+
+    if (!hasVisibleTag) {
+        preview.innerHTML = '<span class="cf-tag">No issues selected</span>';
+    }
 }
 
 function validateCheckFeesForm(event) {
-    const checkedBoxes = document.querySelectorAll('input[name="issueTypes"]:checked');
+    const odometerInput = document.querySelector('input[name="odometerKm"]');
+    const preCheckOdometerInput = document.getElementById("preCheckOdometerValue");
+    const noIssuesCheckbox = document.getElementById("noIssuesFound");
 
-    if (checkedBoxes.length === 0) {
-        alert("Please select at least one issue.");
+    if (!odometerInput || odometerInput.value.trim() === "") {
+        alert("Please enter return odometer.");
         event.preventDefault();
         return;
     }
 
+    const endKm = Number(odometerInput.value);
+
+    if (isNaN(endKm) || endKm < 0) {
+        alert("Return odometer must be greater than or equal to 0.");
+        event.preventDefault();
+        return;
+    }
+
+    if (preCheckOdometerInput) {
+        const startKm = Number(preCheckOdometerInput.value || 0);
+        if (endKm < startKm) {
+            alert("Return odometer cannot be smaller than pre-check odometer.");
+            event.preventDefault();
+            return;
+        }
+    }
+
+    // Nếu tick No issues found thì chỉ cần km, không kiểm tra phí
+    if (noIssuesCheckbox && noIssuesCheckbox.checked) {
+        return;
+    }
+
+    const checkedBoxes = document.querySelectorAll('input[name="issueTypes"]:checked');
     let invalidAmount = false;
+    let missingAmount = false;
 
     checkedBoxes.forEach((checkbox) => {
+        const isSeeded = checkbox.dataset.seeded === "true";
+
+        // Issue từ pre-check không tính phí
+        if (isSeeded) {
+            return;
+        }
+
         const issue = checkbox.value;
         const safeSuffix = buildSafeFieldSuffix(issue);
         const amountInput = document.querySelector('input[name="amount_' + safeSuffix + '"]');
 
-        if (amountInput && amountInput.value !== "" && Number(amountInput.value) < 0) {
+        if (!amountInput || amountInput.value.trim() === "") {
+            missingAmount = true;
+            return;
+        }
+
+        const amountValue = Number(amountInput.value);
+        if (isNaN(amountValue) || amountValue <= 0) {
             invalidAmount = true;
         }
     });
 
+    if (missingAmount) {
+        alert("Please enter an amount for each selected return issue.");
+        event.preventDefault();
+        return;
+    }
+
     if (invalidAmount) {
-        alert("Amount must be greater than or equal to 0.");
+        alert("Amount must be greater than 0 for each selected return issue.");
         event.preventDefault();
     }
 }
@@ -129,8 +233,16 @@ function validateCheckFeesForm(event) {
 function bindCheckFeesEvents() {
     const checkboxes = document.querySelectorAll('input[name="issueTypes"]');
     checkboxes.forEach((checkbox) => {
-        checkbox.addEventListener("change", renderSelectedIssues);
+        checkbox.addEventListener("change", function () {
+            checkbox.dataset.seeded = "false";
+            renderSelectedIssues();
+        });
     });
+
+    const noIssuesCheckbox = document.getElementById("noIssuesFound");
+    if (noIssuesCheckbox) {
+        noIssuesCheckbox.addEventListener("change", toggleNoIssuesMode);
+    }
 
     const form = document.getElementById("checkFeesForm");
     if (form) {
@@ -177,6 +289,7 @@ function handleCompleteReturn(hasReturnCheck) {
 
 function restoreSavedReturnCheckData() {
     const savedData = getSavedReturnCheckData();
+    const seedIssues = getPreDeliverySeedIssues();
 
     if (!savedData.issues || savedData.issues.length === 0) {
         return;
@@ -184,7 +297,12 @@ function restoreSavedReturnCheckData() {
 
     const checkboxes = document.querySelectorAll('input[name="issueTypes"]');
     checkboxes.forEach((checkbox) => {
-        checkbox.checked = savedData.issues.includes(checkbox.value);
+        // Không đụng vào issue cố định từ pre-check
+        if (!seedIssues.includes(checkbox.value) && savedData.issues.includes(checkbox.value)) {
+            checkbox.checked = true;
+            checkbox.dataset.seeded = "false";
+            checkbox.disabled = false;
+        }
     });
 }
 
@@ -209,6 +327,15 @@ function applySavedFeeValues() {
             amountInput.value = savedData.amounts[index];
         }
     });
+}
+
+function getReturnCheckMeta() {
+    const meta = document.getElementById("returnCheckMetaData");
+
+    return {
+        hasReturnCheck: meta ? meta.dataset.hasReturnCheck === "true" : false,
+        normalReturn: meta ? meta.dataset.normalReturn === "true" : false
+    };
 }
 
 function getSavedReturnCheckData() {
@@ -255,13 +382,13 @@ function parseIssueText(issueText) {
     }
 
     return issueText
-        .split("|")
-        .map(function (item) {
-            return item.trim();
-        })
-        .filter(function (item) {
-            return item.length > 0;
-        });
+            .split("|")
+            .map(function (item) {
+                return item.trim();
+            })
+            .filter(function (item) {
+                return item.length > 0;
+            });
 }
 
 function resetBeforeCheckForm() {
@@ -403,8 +530,8 @@ function getPreDeliverySeedIssues() {
     const interiorIssues = parseIssueText(seed.dataset.interiorNote || "");
 
     const allIssues = exteriorIssues
-        .concat(interiorIssues)
-        .map(normalizeIssueName);
+            .concat(interiorIssues)
+            .map(normalizeIssueName);
 
     return allIssues.filter(function (issue, index) {
         return allIssues.indexOf(issue) === index;
@@ -425,6 +552,94 @@ function applyPreDeliverySeedToReturnCheck() {
     checkboxes.forEach(function (checkbox) {
         if (seedIssues.includes(checkbox.value)) {
             checkbox.checked = true;
+            checkbox.dataset.seeded = "true";
+            checkbox.disabled = true;
         }
     });
 }
+
+function clearReturnSeedFlags() {
+    const checkboxes = document.querySelectorAll('input[name="issueTypes"]');
+    checkboxes.forEach(function (checkbox) {
+        checkbox.dataset.seeded = "false";
+    });
+}
+
+function markSavedReturnIssuesAsNotSeeded() {
+    const seedIssues = getPreDeliverySeedIssues();
+    const checkboxes = document.querySelectorAll('input[name="issueTypes"]');
+
+    checkboxes.forEach(function (checkbox) {
+        // Chỉ bỏ seeded cho các issue của return-check đã lưu,
+        // không đụng vào issue cố định từ pre-check
+        if (checkbox.checked && !seedIssues.includes(checkbox.value)) {
+            checkbox.dataset.seeded = "false";
+            checkbox.disabled = false;
+        }
+    });
+}
+
+function resetReturnCheckCheckboxStates() {
+    const checkboxes = document.querySelectorAll('input[name="issueTypes"]');
+    checkboxes.forEach(function (checkbox) {
+        checkbox.disabled = false;
+        checkbox.dataset.seeded = "false";
+    });
+}
+
+function toggleNoIssuesMode() {
+    const noIssuesCheckbox = document.getElementById("noIssuesFound");
+    const issueCheckboxes = document.querySelectorAll('input[name="issueTypes"]');
+    const feeRowsContainer = document.getElementById("feeRowsContainer");
+
+    if (!noIssuesCheckbox) {
+        return;
+    }
+
+    if (noIssuesCheckbox.checked) {
+        issueCheckboxes.forEach(function (checkbox) {
+            const isSeeded = checkbox.dataset.seeded === "true";
+
+            // Pre-check issue là cố định -> giữ nguyên
+            if (isSeeded) {
+                checkbox.checked = true;
+                checkbox.disabled = true;
+            } else {
+                // Chỉ clear issue phát sinh ở return-check
+                checkbox.checked = false;
+                checkbox.disabled = true;
+            }
+        });
+
+        if (feeRowsContainer) {
+            feeRowsContainer.innerHTML = "";
+        }
+
+        renderSelectedIssues();
+    } else {
+        issueCheckboxes.forEach(function (checkbox) {
+            const isSeeded = checkbox.dataset.seeded === "true";
+
+            if (isSeeded) {
+                checkbox.checked = true;
+                checkbox.disabled = true;
+            } else {
+                checkbox.disabled = false;
+            }
+        });
+
+        renderSelectedIssues();
+    }
+}
+
+function restoreSavedReturnOdometer() {
+    const odometerInput = document.querySelector('input[name="odometerKm"]');
+    const holder = document.getElementById("returnCheckSavedOdometer");
+
+    if (!odometerInput || !holder) {
+        return;
+    }
+
+    odometerInput.value = holder.dataset.odometer || "";
+}
+

@@ -91,16 +91,13 @@ public class CarDAO extends DBContext {
             c.transmission,
             b.brand_name,
             t.type_name,
-
             i.image_url,
-
             c.image_folder,
             c.description,
             c.status,
-            c.plate_number
-               
+            c.plate_number,
+            c.current_odometer_km
         FROM cars c
-
         LEFT JOIN brand b 
             ON c.brand_id = b.brand_id
         LEFT JOIN cars_type t 
@@ -117,7 +114,7 @@ public class CarDAO extends DBContext {
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                return new CarModel(
+                CarModel car = new CarModel(
                         rs.getInt("car_id"),
                         rs.getString("model_name"),
                         rs.getInt("model_year"),
@@ -133,6 +130,9 @@ public class CarDAO extends DBContext {
                         rs.getString("status"),
                         rs.getString("plate_number")
                 );
+
+                car.setCurrentOdometerKm(rs.getInt("current_odometer_km"));
+                return car;
             }
 
         } catch (Exception e) {
@@ -943,7 +943,7 @@ public class CarDAO extends DBContext {
           AND c.car_id NOT IN (
               SELECT bk.car_id
               FROM booking bk
-              WHERE bk.status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'ACTIVE')
+              WHERE bk.status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'WAITING_CUSTOMER_CONFIRM', 'ACTIVE')
                 AND bk.start_time < ?
                 AND bk.end_time > ?
           )
@@ -987,7 +987,7 @@ public class CarDAO extends DBContext {
         SELECT 1
         FROM booking
         WHERE car_id = ?
-          AND status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'ACTIVE')
+          AND status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'WAITING_CUSTOMER_CONFIRM', 'ACTIVE')
           AND start_time < ?
           AND end_time > ?
     """;
@@ -1042,7 +1042,7 @@ public class CarDAO extends DBContext {
               SELECT 1
               FROM booking bk
               WHERE bk.car_id = c.car_id
-                AND bk.status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'ACTIVE')
+                AND bk.status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'WAITING_CUSTOMER_CONFIRM', 'ACTIVE')
                 AND bk.start_time < ?
                 AND bk.end_time > ?
           )
@@ -1092,19 +1092,36 @@ public class CarDAO extends DBContext {
         return list;
     }
 
-    public boolean existsPlateNumber(String plateNumber) {
-        String sql = "SELECT 1 FROM cars WHERE plate_number = ?";
+
+    public boolean updateCurrentOdometerKm(int carId, int odometerKm) {
+        String sql = "UPDATE cars SET current_odometer_km = ? WHERE car_id = ?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, plateNumber);
-            ResultSet rs = ps.executeQuery();
-            return rs.next();
+            ps.setInt(1, odometerKm);
+            ps.setInt(2, carId);
+            return ps.executeUpdate() > 0;
+
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         return false;
     }
+    
+     public boolean existsPlateNumber(String plateNumber) {
+        String sql = "SELECT 1 FROM cars WHERE plate_number = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, plateNumber);
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+             } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
 
     public boolean existsPlateNumberExceptId(String plateNumber, int carId) {
         String sql = "SELECT 1 FROM cars WHERE plate_number = ? AND car_id <> ?";
@@ -1187,4 +1204,5 @@ public class CarDAO extends DBContext {
         }
         return false;
     }
+
 }
