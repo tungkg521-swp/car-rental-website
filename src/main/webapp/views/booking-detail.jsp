@@ -250,6 +250,18 @@
                                                     </div>
 
                                                     <div class="info-row">
+                                                        <div class="info-label">Odometer</div>
+                                                        <div class="info-value">
+                                                            <c:choose>
+                                                                <c:when test="${not empty handoverCheck and handoverCheck.odometerKm != null}">
+                                                                    <fmt:formatNumber value="${handoverCheck.odometerKm}" type="number"/> km
+                                                                </c:when>
+                                                                <c:otherwise>Not available</c:otherwise>
+                                                            </c:choose>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="info-row">
                                                         <span class="info-label">Exterior Note</span>
                                                         <span class="info-value">${handoverCheck.exteriorNote}</span>
                                                     </div>

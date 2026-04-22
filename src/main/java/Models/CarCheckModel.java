@@ -14,6 +14,8 @@ public class CarCheckModel {
     private String interiorNote;
     private String checkResult;
     private String note;
+    
+    private Integer odometerKm;
 
     public CarCheckModel() {
     }
@@ -96,5 +98,13 @@ public class CarCheckModel {
 
     public void setNote(String note) {
         this.note = note;
+    }
+
+    public Integer getOdometerKm() {
+        return odometerKm;
+    }
+
+    public void setOdometerKm(Integer odometerKm) {
+        this.odometerKm = odometerKm;
     }
 }
