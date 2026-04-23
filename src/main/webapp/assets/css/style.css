@@ -389,14 +389,6 @@ img {
   color: #444;
 }
 
-.promo-modal-image img {
-  width: 100%;
-  border-radius: 14px;
-  display: block;
-  margin-bottom: 24px;
-  object-fit: cover;
-}
-
 .promo-modal-body {
   text-align: center;
 }
