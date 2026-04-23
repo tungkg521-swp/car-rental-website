@@ -10,9 +10,7 @@ public class DBContext {
             = "jdbc:sqlserver://localhost:1433;"
             + "databaseName=CarRentalDB1;"
             + "user=sa;"
-
-            + "password=0886443006;"
-
+            + "password=123456;"
             + "encrypt=true;"
             + "trustServerCertificate=true;";
 

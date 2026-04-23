@@ -221,15 +221,31 @@
 
                                 <div class="form-group">
                                     <label>Brand *</label>
-                                    <input type="text" name="brandName" required 
-                                           placeholder="e.g., VinFast, Toyota" value="${car.brandName}">
+                                    <select name="brandName" required>
+                                        <option value="">Select brand</option>
+                                        <c:forEach var="brand" items="${brandList}">
+                                            <option value="${brand}"
+                                                    ${car.brandName == brand ? 'selected' : ''}>
+                                                ${brand}
+                                            </option>
+                                        </c:forEach>
+                                    </select>
                                 </div>
 
                                 <div class="form-group">
                                     <label>Type *</label>
-                                    <input type="text" name="typeName" required 
-                                           placeholder="e.g., SUV, Sedan" value="${car.typeName}">
+                                    <select name="typeName" required>
+                                        <option value="">Select type</option>
+                                        <c:forEach var="type" items="${typeList}">
+                                            <option value="${type}"
+                                                    ${car.typeName == type ? 'selected' : ''}>
+                                                ${type}
+                                            </option>
+                                        </c:forEach>
+                                    </select>
                                 </div>
+
+
 
                                 <div class="form-group">
                                     <label>Plate number *</label>

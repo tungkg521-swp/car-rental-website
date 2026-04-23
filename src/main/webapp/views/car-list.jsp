@@ -10,7 +10,7 @@
         <meta charset="UTF-8">
         <title>Danh sách xe</title>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style-base.css?v=2">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/car-list.css?v=3">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/car-list.css?v=4">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=22">
     </head>
     <body>
@@ -258,9 +258,24 @@
                                     <div class="car-img">
                                         <img src="${car.imageUrl}" alt="${car.modelName}">
                                     </div>
+
                                     <div class="car-info">
-                                        <h4>${car.modelName}</h4>
-                                        <p>${car.brandName} • ${car.typeName}</p>
+                                        <h4 class="car-name-row">
+                                            <span class="car-model-name">${car.modelName}</span>
+                                            <span class="car-name-dot">•</span>
+                                            <span class="car-plate-inline">${car.plateNumber}</span>
+                                        </h4>
+
+                                        <p class="car-sub-meta">${car.brandName} • ${car.typeName}</p>
+
+                                        <div class="car-spec-line">
+                                            <span class="car-spec-item">🚗 ${car.seatCount} chỗ</span>
+                                            <span class="car-spec-separator">||</span>
+                                            <span class="car-spec-item">⚙ ${car.transmission}</span>
+                                            <span class="car-spec-separator">||</span>
+                                            <span class="car-spec-item fuel-item">⛽ ${car.fuelType}</span>
+                                        </div>
+
                                         <div class="price">
                                             <fmt:formatNumber value="${car.pricePerDay}" pattern="#,##0" /> VND / ngày
                                         </div>
