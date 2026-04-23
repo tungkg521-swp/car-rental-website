@@ -129,12 +129,13 @@ public class StaffContractController extends HttpServlet {
 
                 boolean hasReturnCheck = returnCheck != null;
 
+                Timestamp actualReturnTime = contract.getActualReturnTime();
                 String returnTimingStatus = "NOT_RETURNED";
                 double extraTimeFee = 0;
 
                 if (returnCheck != null) {
-                    returnTimingStatus = determineReturnTimingStatus(contract, returnCheck);
-                    extraTimeFee = calculateExtraTimeFee(contract, returnCheck);
+                    returnTimingStatus = determineReturnTimingStatus(contract.getContractEndTime(), actualReturnTime);
+                    extraTimeFee = calculateExtraTimeFee(contract, actualReturnTime);
                 }
 
                 List<String> savedIssueTypes = parseSavedIssueTypes(returnCheck);
@@ -1039,17 +1040,14 @@ public class StaffContractController extends HttpServlet {
         );
     }
 
-    private String determineReturnTimingStatus(ContractModel contract, CarCheckModel returnCheck) {
-        if (contract == null || returnCheck == null || returnCheck.getCheckTime() == null) {
+    private String determineReturnTimingStatus(Timestamp expectedReturnTime, Timestamp actualReturnTime) {
+        if (expectedReturnTime == null || actualReturnTime == null) {
             return "UNKNOWN";
         }
 
-        Timestamp expectedReturn = contract.getContractEndTime();
-        Timestamp actualReturn = returnCheck.getCheckTime();
-
-        if (actualReturn.before(expectedReturn)) {
+        if (actualReturnTime.before(expectedReturnTime)) {
             return "EARLY";
-        } else if (actualReturn.after(expectedReturn)) {
+        } else if (actualReturnTime.after(expectedReturnTime)) {
             return "LATE";
         } else {
             return "ON_TIME";
@@ -1076,7 +1074,10 @@ public class StaffContractController extends HttpServlet {
             return 0;
         }
 
-        double dailyPrice = contract.getDailyPrice() != null ? contract.getDailyPrice() : 0;
+        double dailyPrice = contract.getDailyPrice();
+        if (dailyPrice < 0) {
+            dailyPrice = 0;
+        }
         double hourlyPrice = dailyPrice / 24.0;
         double halfDayPrice = dailyPrice / 2.0;
 

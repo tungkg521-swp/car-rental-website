@@ -49,6 +49,7 @@ public class ContractModel {
     private Integer actualKm;
     private Integer extraKm;
     private Double extraKmFee;
+    private Timestamp actualReturnTime;
 
     public ContractModel() {
     }
@@ -268,4 +269,14 @@ public class ContractModel {
     public void setExtraKmFee(Double extraKmFee) {
         this.extraKmFee = extraKmFee;
     }
+
+    public Timestamp getActualReturnTime() {
+        return actualReturnTime;
+    }
+
+    public void setActualReturnTime(Timestamp actualReturnTime) {
+        this.actualReturnTime = actualReturnTime;
+    }
+    
+    
 }
