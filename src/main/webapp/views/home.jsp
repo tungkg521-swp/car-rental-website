@@ -7,11 +7,31 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=22">
-
     </head>
+
     <body>
 
         <jsp:include page="includes/header.jsp"/>
+
+        <!-- ABOUT MODAL -->
+        <div id="aboutModal" class="promo-modal">
+            <div class="promo-modal-overlay"></div>
+
+            <div class="promo-modal-box">
+                <button type="button" class="promo-modal-close" id="closeAboutModal">&times;</button>
+
+                <div class="promo-modal-body">
+                    <h3>GIỚI THIỆU</h3>
+                    <h4>Về Car Rental Website</h4>
+                    <div class="promo-line"></div>
+                    <p>
+                        Car Rental Website (CRW)là nền tảng chia sẻ ô tô, sứ mệnh của chúng tôi không chỉ dừng lại ở việc kết nối
+                        chủ xe và khách hàng một cách Nhanh chóng - An toàn - Tiện lợi, mà còn hướng đến việc
+                        truyền cảm hứng KHÁM PHÁ những điều mới lạ đến cộng đồng qua những chuyến đi trên nền tảng của chúng tôi.
+                    </p>
+                </div>
+            </div>
+        </div>
 
         <section class="hero">
             <div class="container">
@@ -38,8 +58,6 @@
                         </div>
                     </div>
                 </div>
-
-
 
                 <div class="hero-booking-wrap">
                     <div class="hero-booking-panel">
@@ -140,49 +158,42 @@
             </div>
         </section>
 
-        <section class="promo-section">
+        <section class="promo-section" id="promo-section">
             <div class="promo-header">
                 <h2>Chương Trình Khuyến Mãi</h2>
                 <p>Nhận nhiều ưu đãi hấp dẫn dành cho khách hàng đặt xe online</p>
             </div>
 
             <div class="promo-grid">
-
-                <!-- PROMO 1 -->
                 <div class="promo-card promo-dark"
                      data-title="Giảm 10% cho khách hàng mới"
                      data-subtitle="Ưu đãi dành riêng cho người dùng mới"
-
                      data-content="Chương trình ưu đãi dành cho khách hàng lần đầu đăng ký tài khoản và thực hiện đặt xe trên hệ thống. Bạn sẽ được giảm ngay 10% giá trị đơn thuê xe đầu tiên. Ưu đãi này giúp người dùng mới dễ dàng trải nghiệm dịch vụ thuê xe với chi phí tiết kiệm hơn. Chương trình chỉ áp dụng một lần duy nhất trên mỗi tài khoản hợp lệ.">
                     <span class="promo-badge">NEW USER</span>
                     <h3>Giảm 10% cho khách hàng mới</h3>
                     <p>Áp dụng cho lần đặt xe đầu tiên khi đăng ký tài khoản mới.</p>
                 </div>
 
-                <!-- PROMO 2 -->
                 <div class="promo-card promo-blue"
                      data-title="Ưu đãi cuối tuần"
                      data-subtitle="Tiết kiệm hơn cho những chuyến đi ngắn ngày"
-
                      data-content="Chương trình ưu đãi cuối tuần được áp dụng cho các đơn đặt xe vào thứ Bảy và Chủ nhật. Đây là lựa chọn phù hợp cho những chuyến đi ngắn ngày cùng gia đình hoặc bạn bè. Khách hàng sẽ nhận được mức giá tốt hơn trong thời gian cuối tuần, giúp việc lên kế hoạch cho các chuyến đi trở nên linh hoạt và tiết kiệm hơn.">
                     <span class="promo-badge">WEEKEND</span>
                     <h3>Ưu đãi cuối tuần</h3>
                     <p>Tiết kiệm hơn cho những chuyến đi ngắn ngày cùng gia đình.</p>
                 </div>
 
-                <!-- PROMO 3 -->
                 <div class="promo-card promo-orange"
                      data-title="Thuê dài ngày giá tốt"
                      data-subtitle="Ưu đãi hấp dẫn cho hành trình dài ngày"
-
                      data-content="Đối với những khách hàng có nhu cầu thuê xe từ 3 ngày trở lên, hệ thống áp dụng mức giá ưu đãi tốt hơn so với thuê ngắn ngày. Chương trình này phù hợp cho các chuyến du lịch dài ngày, công tác hoặc về quê. Việc thuê xe trong thời gian dài không chỉ giúp bạn chủ động di chuyển mà còn tối ưu chi phí đáng kể.">
                     <span class="promo-badge">LONG TRIP</span>
                     <h3>Thuê dài ngày giá tốt</h3>
                     <p>Đặt từ 3 ngày trở lên để nhận mức giá ưu đãi hơn.</p>
                 </div>
-
             </div>
         </section>
+
         <div id="promoModal" class="promo-modal">
             <div class="promo-modal-overlay"></div>
 
@@ -203,9 +214,7 @@
                 <h2 class="recommend-title">Xe Dành Cho Bạn</h2>
 
                 <div class="grid-12 recommend-grid">
-                    <a class="col-3 car-info-card"
-                       href="${pageContext.request.contextPath}/cars">
-
+                    <a class="col-3 car-info-card" href="${pageContext.request.contextPath}/cars">
                         <img src="${pageContext.request.contextPath}/assets/images/cars/vf3/vf3_1.jpg" alt="VF3">
                         <div class="car-card-body">
                             <h4>VinFast VF3</h4>
@@ -213,9 +222,7 @@
                         </div>
                     </a>
 
-                    <a class="col-3 car-info-card"
-                       href="${pageContext.request.contextPath}/cars">
-
+                    <a class="col-3 car-info-card" href="${pageContext.request.contextPath}/cars">
                         <img src="${pageContext.request.contextPath}/assets/images/cars/vf6_eco/vf6_eco_1.jpg" alt="VF6 Eco">
                         <div class="car-card-body">
                             <h4>VinFast VF6 Eco</h4>
@@ -223,10 +230,7 @@
                         </div>
                     </a>
 
-                    <a class="col-3 car-info-card"
-
-                       href="${pageContext.request.contextPath}/cars">
-
+                    <a class="col-3 car-info-card" href="${pageContext.request.contextPath}/cars">
                         <img src="${pageContext.request.contextPath}/assets/images/cars/vf6_plus/vf6_plus_1.jpg" alt="VF6 Plus">
                         <div class="car-card-body">
                             <h4>VinFast VF6 Plus</h4>
@@ -234,10 +238,7 @@
                         </div>
                     </a>
 
-                    <a class="col-3 car-info-card"
-
-                       href="${pageContext.request.contextPath}/cars">
-
+                    <a class="col-3 car-info-card" href="${pageContext.request.contextPath}/cars">
                         <img src="${pageContext.request.contextPath}/assets/images/cars/vf7_plus/vf7_plus_1.jpg" alt="VF7 Plus">
                         <div class="car-card-body">
                             <h4>VinFast VF7 Plus</h4>
@@ -304,9 +305,9 @@
             </div>
         </footer>
 
-
         <script src="${pageContext.request.contextPath}/assets/js/main.js"></script>
         <script src="${pageContext.request.contextPath}/assets/js/home.js"></script>
+        <script src="${pageContext.request.contextPath}/assets/js/about-modal.js"></script>
 
     </body>
 </html>
