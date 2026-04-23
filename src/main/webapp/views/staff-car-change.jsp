@@ -109,14 +109,18 @@
                                 </div>
                             </c:if>
 
-                            <div class="check-fail-box">
-                                <h3>Latest Check Result</h3>
-                                <p>
-                                    <strong>Result:</strong>
-                                    <span class="status-badge status-bad">${latestCarCheck.checkResult}</span>
-                                </p>
-                                <p><strong>Note:</strong> ${latestCarCheck.note}</p>
-                            </div>
+                            <c:if test="${not empty latestCarCheck}">
+                                <div class="check-fail-box">
+                                    <h3>Latest Check Result</h3>
+                                    <p>
+                                        <strong>Result:</strong>
+                                        <span class="status-badge ${latestCarCheck.checkResult eq 'NOT_OK' ? 'status-bad' : 'status-warn'}">
+                                            ${latestCarCheck.checkResult}
+                                        </span>
+                                    </p>
+                                    <p><strong>Note:</strong> ${not empty latestCarCheck.note ? latestCarCheck.note : 'No note'}</p>
+                                </div>
+                            </c:if>
                         </div>
 
                         <!-- RIGHT -->

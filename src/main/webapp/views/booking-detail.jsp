@@ -129,6 +129,14 @@
                                                     <span class="status-badge cancelled">Cancelled</span>
                                                 </c:when>
 
+                                                <c:when test="${booking.status == 'REFUND_PENDING'}">
+                                                    <span class="status-badge awaiting">Waiting for Refund</span>
+                                                </c:when>
+
+                                                <c:when test="${booking.status == 'REFUNDED'}">
+                                                    <span class="status-badge completed">Refunded</span>
+                                                </c:when>
+
                                                 <c:otherwise>
                                                     <span class="status-badge default">${booking.status}</span>
                                                 </c:otherwise>
@@ -312,38 +320,12 @@
                                 </div>
                             </c:if>
 
-                            <c:if test="${param.changeRequest == 'requested'}">
-                                <div class="alert alert-success">
-                                    Your request for another car has been sent. Staff will prepare a new replacement vehicle.
-                                </div>
-                            </c:if>
-
-                            <c:if test="${param.changeRequest == 'exists'}">
-                                <div class="alert alert-warning">
-                                    A replacement request is already being processed for this booking.
-                                </div>
-                            </c:if>
-
-                            <c:if test="${param.changeRequest == 'fail'}">
-                                <div class="alert alert-danger">
-                                    Failed to submit your replacement request.
-                                </div>
-                            </c:if>
-
-
                             <c:if test="${not empty carChangeRequest}">
                                 <div class="section-card car-change-section">
                                     <div class="section-heading">
                                         <div>
                                             <h3>Replacement Car Request</h3>
-                                            <c:choose>
-                                                <c:when test="${carChangeRequest.requestedBy == 'CUSTOMER'}">
-                                                    <span>Customer requested another car after rejecting the current vehicle</span>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <span>Replacement vehicle proposed by staff</span>
-                                                </c:otherwise>
-                                            </c:choose>
+                                            <span>Replacement vehicle proposed by staff</span>
                                         </div>
                                     </div>
 
@@ -351,20 +333,10 @@
                                         <div class="car-change-header">
                                             <div>
                                                 <h3>Replacement Car Request</h3>
-                                                <c:choose>
-                                                    <c:when test="${carChangeRequest.requestedBy == 'CUSTOMER'}">
-                                                        <p>
-                                                            You requested another car after rejecting the current vehicle.
-                                                            Staff is now processing a suitable replacement option for the same rental period.
-                                                        </p>
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <p>
-                                                            Your original car cannot be delivered. Our staff has prepared a replacement
-                                                            car for the same rental period.
-                                                        </p>
-                                                    </c:otherwise>
-                                                </c:choose>
+                                                <p>
+                                                    Your original car cannot be delivered. Our staff has prepared a replacement
+                                                    car for the same rental period.
+                                                </p>
                                             </div>
 
                                             <span class="change-status-badge ${carChangeRequest.status == 'PENDING' ? 'status-pending' : 'status-done'}">
@@ -423,7 +395,7 @@
                                                 </div>
                                             </div>
 
-                                            <c:if test="${carChangeRequest.requestedBy == 'STAFF' && not empty newCarChangeCar}">
+                                            <c:if test="${not empty newCarChangeCar}">
                                                 <div class="change-car-box recommended">
                                                     <div class="change-car-title">Replacement Car</div>
 
@@ -481,11 +453,6 @@
                                             </div>
                                         </c:if>
 
-                                        <c:if test="${carChangeRequest.status == 'PENDING' && carChangeRequest.requestedBy == 'CUSTOMER'}">
-                                            <div class="alert alert-warning" style="margin-top:16px;">
-                                                Your request for another car is being processed by staff. A replacement option will be sent to you soon.
-                                            </div>
-                                        </c:if>
 
                                         <c:if test="${carChangeRequest.status == 'APPROVED'}">
                                             <div class="alert alert-success" style="margin-top:16px;">
@@ -549,14 +516,6 @@
                                                         class="btn btn-primary"
                                                         onclick="return validateCustomerConfirm();">
                                                     Confirm Vehicle Handover
-                                                </button>
-
-                                                <button type="submit"
-                                                        name="action"
-                                                        value="requestAnotherCar"
-                                                        class="btn btn-warning"
-                                                        onclick="return confirm('Do you want to request another replacement car?');">
-                                                    Request Another Car
                                                 </button>
 
                                                 <button type="submit"

@@ -110,10 +110,7 @@ public class BookingDAO extends DBContext {
                 booking.setDepositAmount(rs.getBigDecimal("deposit_amount"));
                 booking.setRemainingAmount(rs.getBigDecimal("remaining_amount"));
                 booking.setPaymentDeadline(rs.getTimestamp("payment_deadline"));
-                booking.setCustomerCheckStatus(rs.getString("customer_check_status"));
-                booking.setCustomerCheckReason(rs.getString("customer_check_reason"));
-                booking.setCustomerCheckNote(rs.getString("customer_check_note"));
-                booking.setCustomerCheckedAt(rs.getTimestamp("customer_checked_at"));
+                
                 return booking;
             }
         } catch (SQLException e) {
@@ -185,10 +182,6 @@ public class BookingDAO extends DBContext {
             b.deposit_amount,
             b.remaining_amount,
             b.payment_deadline,
-            b.customer_check_status,
-            b.customer_check_reason,
-            b.customer_check_note,
-            b.customer_checked_at,
             c.model_name,
             c.image_folder,
 
@@ -241,10 +234,7 @@ public class BookingDAO extends DBContext {
                 booking.setRemainingAmount(rs.getBigDecimal("remaining_amount"));
                 booking.setPaymentDeadline(rs.getTimestamp("payment_deadline"));
 
-                booking.setCustomerCheckStatus(rs.getString("customer_check_status"));
-                booking.setCustomerCheckReason(rs.getString("customer_check_reason"));
-                booking.setCustomerCheckNote(rs.getString("customer_check_note"));
-                booking.setCustomerCheckedAt(rs.getTimestamp("customer_checked_at"));
+                
 
                 return booking;
             }
@@ -709,38 +699,6 @@ public class BookingDAO extends DBContext {
             ResultSet rs = ps.executeQuery();
             return rs.next();
         } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-
-    public boolean updateCustomerCheck(
-            int bookingId,
-            int customerId,
-            String status,
-            String reason,
-            String note) {
-
-        String sql = """
-        UPDATE booking
-        SET customer_check_status = ?,
-            customer_check_reason = ?,
-            customer_check_note = ?,
-            customer_checked_at = SYSDATETIME()
-        WHERE booking_id = ?
-          AND customer_id = ?
-    """;
-
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, status);
-            ps.setString(2, reason);
-            ps.setString(3, note);
-            ps.setInt(4, bookingId);
-            ps.setInt(5, customerId);
-
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
             e.printStackTrace();
         }
 

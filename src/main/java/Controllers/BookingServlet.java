@@ -103,18 +103,12 @@ public class BookingServlet extends HttpServlet {
             case "delete":
                 deleteBooking(request, response);
                 break;
-            case "customerCheck":
-                submitCustomerCheck(request, response);
-                break;
             case "confirmHandover":
                 confirmHandover(request, response);
                 break;
             case "rejectHandover":
                 rejectHandover(request, response);
-                break;
-            case "requestAnotherCar":
-                requestAnotherCar(request, response);
-                break;
+                break; 
             default:
                 response.sendRedirect(request.getContextPath() + "/cars");
                 break;
@@ -712,110 +706,6 @@ public class BookingServlet extends HttpServlet {
         }
     }
 
-    private void submitCustomerCheck(HttpServletRequest request,
-            HttpServletResponse response)
-            throws ServletException, IOException {
-
-        HttpSession session = request.getSession(false);
-        if (session == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-
-        AccountModel account = (AccountModel) session.getAttribute("ACCOUNT");
-        if (account == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-
-        CustomerModel customer = new CustomerDAO().getByAccountId(account.getAccountId());
-        if (customer == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-
-        String bookingIdRaw = request.getParameter("bookingId");
-        String decision = request.getParameter("decision");
-        String[] reasons = request.getParameterValues("reason");
-        String note = request.getParameter("note");
-
-        int bookingId;
-        try {
-            bookingId = Integer.parseInt(bookingIdRaw);
-        } catch (Exception e) {
-            response.sendRedirect(request.getContextPath() + "/booking?action=list");
-            return;
-        }
-
-        BookingModel booking = bookingDAO.findById(bookingId, customer.getCustomerId());
-        if (booking == null) {
-            session.setAttribute("error", "Booking not found.");
-            response.sendRedirect(request.getContextPath() + "/booking?action=list");
-            return;
-        }
-
-        if (!"CONFIRMED".equalsIgnoreCase(booking.getStatus())) {
-            session.setAttribute("error", "This booking is not ready for customer check.");
-            response.sendRedirect(request.getContextPath() + "/booking?action=detail&bookingId=" + bookingId);
-            return;
-        }
-
-        if (booking.getCustomerCheckStatus() != null && !booking.getCustomerCheckStatus().trim().isEmpty()) {
-            session.setAttribute("error", "You have already submitted your vehicle check.");
-            response.sendRedirect(request.getContextPath() + "/booking?action=detail&bookingId=" + bookingId);
-            return;
-        }
-
-        ContractModel contract = contractDAO.getContractByBookingId(bookingId);
-        if (contract == null) {
-            session.setAttribute("error", "Contract not found.");
-            response.sendRedirect(request.getContextPath() + "/booking?action=detail&bookingId=" + bookingId);
-            return;
-        }
-
-        CarCheckModel latestCarCheck = carCheckDAO.getLatestCheckByContractId(contract.getContractId());
-        if (latestCarCheck == null || !"OK".equalsIgnoreCase(latestCarCheck.getCheckResult())) {
-            session.setAttribute("error", "Staff has not completed a valid pre-check yet.");
-            response.sendRedirect(request.getContextPath() + "/booking?action=detail&bookingId=" + bookingId);
-            return;
-        }
-
-        if (decision == null || decision.trim().isEmpty()) {
-            session.setAttribute("error", "Please choose your vehicle check decision.");
-            response.sendRedirect(request.getContextPath() + "/booking?action=detail&bookingId=" + bookingId);
-            return;
-        }
-
-        if (!"ACCEPTED".equalsIgnoreCase(decision)
-                && !"REJECTED".equalsIgnoreCase(decision)
-                && !"NEED_SUPPORT".equalsIgnoreCase(decision)) {
-            session.setAttribute("error", "Invalid vehicle check decision.");
-            response.sendRedirect(request.getContextPath() + "/booking?action=detail&bookingId=" + bookingId);
-            return;
-        }
-
-        String reasonText = null;
-        if (reasons != null && reasons.length > 0) {
-            reasonText = String.join(",", reasons);
-        }
-
-        boolean success = bookingDAO.updateCustomerCheck(
-                bookingId,
-                customer.getCustomerId(),
-                decision,
-                reasonText,
-                note
-        );
-
-        if (success) {
-            session.setAttribute("message", "Your vehicle check has been submitted successfully.");
-        } else {
-            session.setAttribute("error", "Failed to submit your vehicle check.");
-        }
-
-        response.sendRedirect(request.getContextPath() + "/booking?action=detail&bookingId=" + bookingId);
-    }
-
     private void confirmHandover(HttpServletRequest request,
             HttpServletResponse response)
             throws ServletException, IOException {
@@ -977,36 +867,42 @@ public class BookingServlet extends HttpServlet {
     }
 
     private BigDecimal calculateTotalPrice(Timestamp startTime, Timestamp endTime, BigDecimal pricePerDay) {
-        long minutes = ChronoUnit.MINUTES.between(
+        long totalMinutes = ChronoUnit.MINUTES.between(
                 startTime.toLocalDateTime(),
                 endTime.toLocalDateTime()
         );
 
-        if (minutes <= 0) {
+        if (totalMinutes <= 0) {
             return BigDecimal.ZERO;
         }
 
-        BigDecimal pricePerHour = pricePerDay.divide(BigDecimal.valueOf(24), 2, RoundingMode.HALF_UP);
+        long minutesPerDay = 24 * 60;
+        long fullDays = totalMinutes / minutesPerDay;
+        long remainingMinutes = totalMinutes % minutesPerDay;
+
+        BigDecimal totalPrice = pricePerDay.multiply(BigDecimal.valueOf(fullDays));
         BigDecimal halfDayPrice = pricePerDay.divide(BigDecimal.valueOf(2), 2, RoundingMode.HALF_UP);
 
-        long fullDays = minutes / 1440;
-        long remainMinutes = minutes % 1440;
+        if (remainingMinutes > 0) {
+            long remainingHours = remainingMinutes / 60;
+            long remainingExtraMinutes = remainingMinutes % 60;
 
-        BigDecimal total = pricePerDay.multiply(BigDecimal.valueOf(fullDays));
+            boolean isLessThan8Hours = remainingHours < 8;
 
-        if (remainMinutes > 0) {
-            if (remainMinutes <= 360) {
-                BigDecimal remainHours = BigDecimal.valueOf(remainMinutes)
-                        .divide(BigDecimal.valueOf(60), 2, RoundingMode.HALF_UP);
-                total = total.add(pricePerHour.multiply(remainHours));
-            } else if (remainMinutes <= 720) {
-                total = total.add(halfDayPrice);
+            if (remainingHours == 8 && remainingExtraMinutes == 0) {
+                isLessThan8Hours = false;
+            } else if (remainingHours >= 8) {
+                isLessThan8Hours = false;
+            }
+
+            if (isLessThan8Hours) {
+                totalPrice = totalPrice.add(halfDayPrice);
             } else {
-                total = total.add(pricePerDay);
+                totalPrice = totalPrice.add(pricePerDay);
             }
         }
 
-        return total.setScale(2, RoundingMode.HALF_UP);
+        return totalPrice.setScale(2, RoundingMode.HALF_UP);
     }
 
     private boolean cancelBookingByCustomer(int bookingId, int customerId) {
@@ -1126,98 +1022,4 @@ public class BookingServlet extends HttpServlet {
         return rentalDurationText;
     }
 
-    private void requestAnotherCar(HttpServletRequest request,
-            HttpServletResponse response)
-            throws ServletException, IOException {
-
-        HttpSession session = request.getSession(false);
-        if (session == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-
-        AccountModel account = (AccountModel) session.getAttribute("ACCOUNT");
-        if (account == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-
-        CustomerModel customer = new CustomerDAO().getByAccountId(account.getAccountId());
-        if (customer == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-
-        String bookingIdRaw = request.getParameter("bookingId");
-        String contractIdRaw = request.getParameter("contractId");
-        String customerNote = request.getParameter("customerNote");
-
-        int bookingId;
-        int contractId;
-
-        try {
-            bookingId = Integer.parseInt(bookingIdRaw);
-            contractId = Integer.parseInt(contractIdRaw);
-        } catch (Exception e) {
-            response.sendRedirect(request.getContextPath() + "/booking?action=list");
-            return;
-        }
-
-        BookingModel booking = bookingDAO.findById(bookingId, customer.getCustomerId());
-        if (booking == null) {
-            session.setAttribute("error", "Booking not found.");
-            response.sendRedirect(request.getContextPath() + "/booking?action=list");
-            return;
-        }
-
-        if (!"CONFIRMED".equalsIgnoreCase(booking.getStatus())) {
-            session.setAttribute("error", "This booking is not eligible for replacement handling.");
-            response.sendRedirect(request.getContextPath() + "/booking?action=detail&bookingId=" + bookingId);
-            return;
-        }
-
-        ContractModel contract = contractDAO.getContractById(contractId);
-        if (contract == null || contract.getCustomerId() != customer.getCustomerId()) {
-            session.setAttribute("error", "Contract not found.");
-            response.sendRedirect(request.getContextPath() + "/booking?action=detail&bookingId=" + bookingId);
-            return;
-        }
-
-        if (!"WAITING_CUSTOMER_CONFIRM".equalsIgnoreCase(contract.getContractStatus())) {
-            session.setAttribute("error", "This contract is not waiting for customer confirmation.");
-            response.sendRedirect(request.getContextPath() + "/booking?action=detail&bookingId=" + bookingId);
-            return;
-        }
-
-        if (carChangeRequestDAO.existsPendingRequest(bookingId)) {
-            response.sendRedirect(request.getContextPath()
-                    + "/booking?action=detail&bookingId=" + bookingId + "&changeRequest=exists");
-            return;
-        }
-
-        boolean contractReset = contractDAO.updateContractStatus(contractId, "CREATED");
-        if (!contractReset) {
-            response.sendRedirect(request.getContextPath()
-                    + "/booking?action=detail&bookingId=" + bookingId + "&changeRequest=fail");
-            return;
-        }
-
-        CarChangeRequestModel changeRequest = new CarChangeRequestModel();
-        changeRequest.setBookingId(bookingId);
-        changeRequest.setOldCarId(contract.getCarId());
-        changeRequest.setNewCarId(0);
-        changeRequest.setRequestedBy("CUSTOMER");
-        changeRequest.setStatus("PENDING");
-
-        if (customerNote == null || customerNote.trim().isEmpty()) {
-            customerNote = "Customer rejected current handover vehicle and requested another car.";
-        }
-        changeRequest.setReason(customerNote.trim());
-
-        boolean created = carChangeRequestDAO.createCustomerRequest(changeRequest) > 0;
-
-        response.sendRedirect(request.getContextPath()
-                + "/booking?action=detail&bookingId=" + bookingId
-                + "&changeRequest=" + (created ? "requested" : "fail"));
-    }
 }

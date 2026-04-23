@@ -134,6 +134,7 @@ public class ContractDAO extends DBContext {
                     if (extraKmFeeObj != null) {
                         contract.setExtraKmFee(rs.getDouble("extra_km_fee"));
                     }
+                    contract.setActualReturnTime(rs.getTimestamp("actual_return_time"));
 
                     return contract;
                 }
@@ -249,6 +250,7 @@ public class ContractDAO extends DBContext {
                     if (extraKmFeeObj != null) {
                         contract.setExtraKmFee(rs.getDouble("extra_km_fee"));
                     }
+                    contract.setActualReturnTime(rs.getTimestamp("actual_return_time"));
 
                     return contract;
                 }

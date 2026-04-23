@@ -532,3 +532,21 @@
         grid-template-columns: 1fr;
     }
 }
+
+.datetime-split-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.datetime-col {
+    flex: 1;
+    min-width: 220px;
+}
+
+.cf-sub-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+}

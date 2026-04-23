@@ -58,7 +58,7 @@ public class CarChangeServlet extends HttpServlet {
             markRefundCompleted(request, response);
         } else if ("staffRejectRefund".equals(action)) {
             rejectAndRefundByStaff(request, response);
-        } 
+        }
     }
 
     private void showChangeForm(HttpServletRequest request, HttpServletResponse response)
@@ -109,7 +109,14 @@ public class CarChangeServlet extends HttpServlet {
                 contract.getContractId(),
                 contract.getCarId()
         );
+
         if (latestCheck == null || !"NOT_OK".equalsIgnoreCase(latestCheck.getCheckResult())) {
+            response.sendRedirect(request.getContextPath()
+                    + "/staff/contracts?action=detail&id=" + contract.getContractId());
+            return;
+        }
+
+        if (requestDAO.existsPendingRequest(bookingId)) {
             response.sendRedirect(request.getContextPath()
                     + "/staff/contracts?action=detail&id=" + contract.getContractId());
             return;
@@ -244,7 +251,7 @@ public class CarChangeServlet extends HttpServlet {
         }
 
         boolean result = markRefundCompletedInternal(bookingId);
-        
+
         ContractModel contract = contractDAO.getContractByBookingId(bookingId);
 
         if (contract != null) {
@@ -391,6 +398,10 @@ public class CarChangeServlet extends HttpServlet {
             return false;
         }
 
+        if (!"STAFF".equalsIgnoreCase(request.getRequestedBy())) {
+            return false;
+        }
+
         if (!"PENDING".equalsIgnoreCase(request.getStatus())) {
             return false;
         }
@@ -409,15 +420,8 @@ public class CarChangeServlet extends HttpServlet {
             return false;
         }
 
-        if (!isValidCarChangeFlow(booking, contract)) {
-            return false;
-        }
-
-        CarCheckModel latestCheck = carCheckDAO.getLatestPreDeliveryCheckByContractAndCarId(
-                contract.getContractId(),
-                contract.getCarId()
-        );
-        if (latestCheck == null || !"NOT_OK".equalsIgnoreCase(latestCheck.getCheckResult())) {
+        if (!("CREATED".equalsIgnoreCase(contract.getContractStatus())
+                || "WAITING_CUSTOMER_CONFIRM".equalsIgnoreCase(contract.getContractStatus()))) {
             return false;
         }
 
@@ -549,14 +553,7 @@ public class CarChangeServlet extends HttpServlet {
     }
 
     private boolean isValidCarChangeFlow(BookingModel booking, ContractModel contract) {
-        boolean staffInitiatedFlow
-                = "CONFIRMED".equalsIgnoreCase(booking.getStatus())
+        return "CONFIRMED".equalsIgnoreCase(booking.getStatus())
                 && "CREATED".equalsIgnoreCase(contract.getContractStatus());
-
-        boolean customerRejectedFlow
-                = "CONFIRMED".equalsIgnoreCase(booking.getStatus())
-                && "WAITING_CUSTOMER_CONFIRM".equalsIgnoreCase(contract.getContractStatus());
-
-        return staffInitiatedFlow || customerRejectedFlow;
     }
 }
