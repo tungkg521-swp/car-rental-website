@@ -191,28 +191,6 @@
                                 Quá ${lateFeeFlatDayThreshold} giờ tính bằng giá thuê 1 ngày
                             </p>
                         </div>
-
-                        <div class="surcharge-item">
-                            <div class="surcharge-head">
-                                <span class="surcharge-title">Vệ sinh xe</span>
-                            </div>
-                            <p>
-                                Phí:
-                                <strong><fmt:formatNumber value="${cleaningFee}" pattern="#,###"/> đ</strong>
-                                (nếu trả xe nhiều vết bẩn, bùn cát, sinh tố... cần phải vệ sinh lại trước khi giao cho khách sau)
-                            </p>
-                        </div>
-
-                        <div class="surcharge-item">
-                            <div class="surcharge-head">
-                                <span class="surcharge-title">Khử mùi xe</span>
-                            </div>
-                            <p>
-                                Phí:
-                                <strong><fmt:formatNumber value="${deodorizingFee}" pattern="#,###"/> đ</strong>
-                                (nếu có mùi thuốc lá, đồ ăn nặng mùi... cần phải khử mùi trước khi giao cho khách sau)
-                            </p>
-                        </div>
                     </div>
                 </div>
 
