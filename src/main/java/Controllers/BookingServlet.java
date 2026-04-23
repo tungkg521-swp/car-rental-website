@@ -104,6 +104,9 @@ public class BookingServlet extends HttpServlet {
             case "rejectHandover":
                 rejectHandover(request, response);
                 break;
+            case "requestAnotherCar":
+                requestAnotherCar(request, response);
+                break;
             default:
                 response.sendRedirect(request.getContextPath() + "/cars");
                 break;
@@ -426,7 +429,6 @@ public class BookingServlet extends HttpServlet {
         }
 
         BigDecimal depositAmount = BigDecimal.valueOf(10_000_000L);
-        
 
         BigDecimal remainingAmount = totalPrice
                 .subtract(depositAmount)
@@ -516,7 +518,7 @@ public class BookingServlet extends HttpServlet {
 
         String bookingIdRaw = request.getParameter("bookingId");
         if (bookingIdRaw == null) {
-            response.sendRedirect(request.getContextPath() + "/customer/bookings?action=list");
+            response.sendRedirect(request.getContextPath() + "/booking?action=list");
             return;
         }
 
@@ -524,7 +526,7 @@ public class BookingServlet extends HttpServlet {
         try {
             bookingId = Integer.parseInt(bookingIdRaw);
         } catch (NumberFormatException e) {
-            response.sendRedirect(request.getContextPath() + "/customer/bookings?action=list");
+            response.sendRedirect(request.getContextPath() + "/booking?action=list");
             return;
         }
 
@@ -564,22 +566,24 @@ public class BookingServlet extends HttpServlet {
         request.setAttribute("canCustomerConfirm", canCustomerConfirm);
         request.setAttribute("rentalDurationText", rentalDurationText);
 
-        CarChangeRequestModel pendingRequest = carChangeRequestDAO.getPendingByBookingId(bookingId);
+        CarChangeRequestModel carChangeRequest = carChangeRequestDAO.getLatestByBookingId(bookingId);
 
-        request.setAttribute("pendingCarChangeRequest", pendingRequest);
+        request.setAttribute("carChangeRequest", carChangeRequest);
 
-        if (pendingRequest != null) {
-            CarModel oldCar = carDAO.findById(pendingRequest.getOldCarId());
-            CarModel newCar = carDAO.findById(pendingRequest.getNewCarId());
-
+        if (carChangeRequest != null) {
+            CarModel oldCar = carDAO.findById(carChangeRequest.getOldCarId());
             request.setAttribute("oldCarChangeCar", oldCar);
-            request.setAttribute("newCarChangeCar", newCar);
+
+            if (carChangeRequest.getNewCarId() > 0) {
+                CarModel newCar = carDAO.findById(carChangeRequest.getNewCarId());
+                request.setAttribute("newCarChangeCar", newCar);
+            }
         }
 
         String cancelStatus = request.getParameter("cancelStatus");
         request.setAttribute("cancelStatus", cancelStatus);
         request.setAttribute("booking", booking);
-        
+
         session.removeAttribute("handoverStatus");
 
         request.getRequestDispatcher("/views/booking-detail.jsp").forward(request, response);
@@ -938,7 +942,7 @@ public class BookingServlet extends HttpServlet {
         boolean success = contractDAO.rejectCustomerHandover(contractId, customerNote);
 
         if (success) {
-            bookingDAO.updateStatus(bookingId, "CANCELLED");
+            bookingDAO.updateStatus(bookingId, "REFUND_PENDING");
             carDAO.updateStatus(contract.getCarId(), "AVAILABLE");
             session.setAttribute("handoverStatus", "reject_success");
         } else {
@@ -1114,4 +1118,98 @@ public class BookingServlet extends HttpServlet {
         return rentalDurationText;
     }
 
+    private void requestAnotherCar(HttpServletRequest request,
+            HttpServletResponse response)
+            throws ServletException, IOException {
+
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        AccountModel account = (AccountModel) session.getAttribute("ACCOUNT");
+        if (account == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        CustomerModel customer = new CustomerDAO().getByAccountId(account.getAccountId());
+        if (customer == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        String bookingIdRaw = request.getParameter("bookingId");
+        String contractIdRaw = request.getParameter("contractId");
+        String customerNote = request.getParameter("customerNote");
+
+        int bookingId;
+        int contractId;
+
+        try {
+            bookingId = Integer.parseInt(bookingIdRaw);
+            contractId = Integer.parseInt(contractIdRaw);
+        } catch (Exception e) {
+            response.sendRedirect(request.getContextPath() + "/booking?action=list");
+            return;
+        }
+
+        BookingModel booking = bookingDAO.findById(bookingId, customer.getCustomerId());
+        if (booking == null) {
+            session.setAttribute("error", "Booking not found.");
+            response.sendRedirect(request.getContextPath() + "/booking?action=list");
+            return;
+        }
+
+        if (!"CONFIRMED".equalsIgnoreCase(booking.getStatus())) {
+            session.setAttribute("error", "This booking is not eligible for replacement handling.");
+            response.sendRedirect(request.getContextPath() + "/booking?action=detail&bookingId=" + bookingId);
+            return;
+        }
+
+        ContractModel contract = contractDAO.getContractById(contractId);
+        if (contract == null || contract.getCustomerId() != customer.getCustomerId()) {
+            session.setAttribute("error", "Contract not found.");
+            response.sendRedirect(request.getContextPath() + "/booking?action=detail&bookingId=" + bookingId);
+            return;
+        }
+
+        if (!"WAITING_CUSTOMER_CONFIRM".equalsIgnoreCase(contract.getContractStatus())) {
+            session.setAttribute("error", "This contract is not waiting for customer confirmation.");
+            response.sendRedirect(request.getContextPath() + "/booking?action=detail&bookingId=" + bookingId);
+            return;
+        }
+
+        if (carChangeRequestDAO.existsPendingRequest(bookingId)) {
+            response.sendRedirect(request.getContextPath()
+                    + "/booking?action=detail&bookingId=" + bookingId + "&changeRequest=exists");
+            return;
+        }
+
+        boolean contractReset = contractDAO.updateContractStatus(contractId, "CREATED");
+        if (!contractReset) {
+            response.sendRedirect(request.getContextPath()
+                    + "/booking?action=detail&bookingId=" + bookingId + "&changeRequest=fail");
+            return;
+        }
+
+        CarChangeRequestModel changeRequest = new CarChangeRequestModel();
+        changeRequest.setBookingId(bookingId);
+        changeRequest.setOldCarId(contract.getCarId());
+        changeRequest.setNewCarId(0);
+        changeRequest.setRequestedBy("CUSTOMER");
+        changeRequest.setStatus("PENDING");
+
+        if (customerNote == null || customerNote.trim().isEmpty()) {
+            customerNote = "Customer rejected current handover vehicle and requested another car.";
+        }
+        changeRequest.setReason(customerNote.trim());
+
+        boolean created = carChangeRequestDAO.createCustomerRequest(changeRequest) > 0;
+
+        response.sendRedirect(request.getContextPath()
+                + "/booking?action=detail&bookingId=" + bookingId
+                + "&changeRequest=" + (created ? "requested" : "fail"));
+    }
 }

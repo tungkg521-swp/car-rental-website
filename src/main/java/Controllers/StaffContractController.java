@@ -1,6 +1,7 @@
 package Controllers;
 
 import DALs.BookingDAO;
+import DALs.CarChangeRequestDAO;
 import DALs.CarCheckDAO;
 import DALs.CarDAO;
 import java.io.IOException;
@@ -13,8 +14,11 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.sql.Timestamp;
 import java.time.Duration;
 import java.util.ArrayList;
+import models.BookingModel;
+import models.CarChangeRequestModel;
 import models.CarCheckModel;
 import models.CarModel;
 import models.ContractModel;
@@ -32,6 +36,7 @@ public class StaffContractController extends HttpServlet {
     private final ContractDAO contractDAO = new ContractDAO();
     private final BookingDAO bookingDAO = new BookingDAO();
     private final CarCheckDAO carCheckDAO = new CarCheckDAO();
+    private final CarChangeRequestDAO carChangeRequestDAO = new CarChangeRequestDAO();
 
     @Override
     protected void doGet(HttpServletRequest request,
@@ -114,13 +119,23 @@ public class StaffContractController extends HttpServlet {
                     rentalDurationText = "0 minute";
                 }
 
-                CarCheckModel preDeliveryCheck
-                        = carCheckDAO.getLatestPreDeliveryCheckByContractId(contract.getContractId());
+                CarCheckModel preDeliveryCheck = carCheckDAO.getLatestPreDeliveryCheckByContractAndCarId(
+                        contract.getContractId(),
+                        contract.getCarId()
+                );
 
                 CarCheckModel returnCheck
                         = carCheckDAO.getLatestReturnCheckByContractId(contract.getContractId());
 
                 boolean hasReturnCheck = returnCheck != null;
+
+                String returnTimingStatus = "NOT_RETURNED";
+                double extraTimeFee = 0;
+
+                if (returnCheck != null) {
+                    returnTimingStatus = determineReturnTimingStatus(contract, returnCheck);
+                    extraTimeFee = calculateExtraTimeFee(contract, returnCheck);
+                }
 
                 List<String> savedIssueTypes = parseSavedIssueTypes(returnCheck);
                 List<String> savedDescriptions = parseSavedDescriptions(returnCheck);
@@ -137,7 +152,41 @@ public class StaffContractController extends HttpServlet {
                 long remainingRentalAmount = Math.round(contract.getTotalAmount() - contract.getDepositAmount());
 
                 double extraKmFee = contract.getExtraKmFee() != null ? contract.getExtraKmFee() : 0;
-                double finalAmountDue = remainingRentalAmount + extraChargeTotal + extraKmFee;
+                double finalAmountDue = remainingRentalAmount + extraChargeTotal + extraKmFee + extraTimeFee;
+
+                BookingModel booking = bookingDAO.findById(contract.getBookingId());
+
+                CarChangeRequestModel carChangeRequest = carChangeRequestDAO.getLatestByBookingId(contract.getBookingId());
+
+                CarModel oldCarChangeCar = null;
+                CarModel newCarChangeCar = null;
+
+                if (carChangeRequest != null) {
+                    oldCarChangeCar = carDAO.findById(carChangeRequest.getOldCarId());
+                    newCarChangeCar = carDAO.findById(carChangeRequest.getNewCarId());
+                }
+
+                boolean canRequestCarChange = false;
+
+                boolean normalStaffFlow
+                        = booking != null
+                        && "CONFIRMED".equalsIgnoreCase(booking.getStatus())
+                        && "CREATED".equalsIgnoreCase(contract.getContractStatus())
+                        && preDeliveryCheck != null
+                        && "NOT_OK".equalsIgnoreCase(preDeliveryCheck.getCheckResult())
+                        && (carChangeRequest == null || !"PENDING".equalsIgnoreCase(carChangeRequest.getStatus()));
+
+                boolean customerRequestedFlow
+                        = booking != null
+                        && "CONFIRMED".equalsIgnoreCase(booking.getStatus())
+                        && "CREATED".equalsIgnoreCase(contract.getContractStatus())
+                        && carChangeRequest != null
+                        && "PENDING".equalsIgnoreCase(carChangeRequest.getStatus())
+                        && "CUSTOMER".equalsIgnoreCase(carChangeRequest.getRequestedBy());
+
+                if (normalStaffFlow || customerRequestedFlow) {
+                    canRequestCarChange = true;
+                }
 
                 request.setAttribute("contract", contract);
                 request.setAttribute("customer", customer);
@@ -161,6 +210,13 @@ public class StaffContractController extends HttpServlet {
                 request.setAttribute("returnCheckOdometer",
                         returnCheck != null ? returnCheck.getOdometerKm() : null);
                 request.setAttribute("contractExtraKmFee", extraKmFee);
+                request.setAttribute("booking", booking);
+                request.setAttribute("carChangeRequest", carChangeRequest);
+                request.setAttribute("oldCarChangeCar", oldCarChangeCar);
+                request.setAttribute("newCarChangeCar", newCarChangeCar);
+                request.setAttribute("canRequestCarChange", canRequestCarChange);
+                request.setAttribute("returnTimingStatus", returnTimingStatus);
+                request.setAttribute("extraTimeFee", extraTimeFee);
 
                 request.getRequestDispatcher("/views/staff-contract-detail.jsp")
                         .forward(request, response);
@@ -173,67 +229,14 @@ public class StaffContractController extends HttpServlet {
                         request.getContextPath() + "/staff/contracts");
             }
         } else if ("checkForm".equals(action)) {
-
             try {
                 int id = Integer.parseInt(request.getParameter("id"));
-
-                ContractModel contract = contractDAO.getContractById(id);
-
-                if (contract == null) {
-                    response.sendRedirect(request.getContextPath() + "/staff/contracts");
-                    return;
-                }
-
-                if (!"CREATED".equalsIgnoreCase(contract.getContractStatus())) {
-                    request.getSession().setAttribute("error", "Only contracts with CREATED status can be checked.");
-                    response.sendRedirect(request.getContextPath() + "/staff/contracts?action=detail&id=" + id);
-                    return;
-                }
-
-                CustomerModel customer = customerDAO.findById(contract.getCustomerId());
-                CarModel car = carDAO.findById(contract.getCarId());
-
-                if (car == null) {
-                    request.getSession().setAttribute("error", "Car not found.");
-                    response.sendRedirect(request.getContextPath() + "/staff/contracts?action=detail&id=" + id);
-                    return;
-                }
-
-                boolean maintenanceBlocked = "MAINTENANCE".equalsIgnoreCase(car.getStatus());
-
-                boolean scheduleConflict = bookingDAO.hasBookingConflictExcludeBooking(
-                        contract.getCarId(),
-                        contract.getContractStartTime(),
-                        contract.getContractEndTime(),
-                        contract.getBookingId()
-                );
-
-                request.setAttribute("maintenanceBlocked", maintenanceBlocked);
-                request.setAttribute("scheduleConflict", scheduleConflict);
-
-                CarCheckModel latestCarCheck
-                        = carCheckDAO.getLatestCheckByContractId(contract.getContractId());
-
-                List<CarCheckModel> carCheckList
-                        = carCheckDAO.getChecksByContractId(contract.getContractId());
-
-                request.setAttribute("contract", contract);
-                request.setAttribute("customer", customer);
-                request.setAttribute("car", car);
-                request.setAttribute("latestCarCheck", latestCarCheck);
-                request.setAttribute("carCheckList", carCheckList);
-
-                request.getRequestDispatcher("/views/staff-car-check.jsp")
-                        .forward(request, response);
-
+                response.sendRedirect(request.getContextPath() + "/staff/contracts?action=detail&id=" + id);
+                return;
             } catch (Exception e) {
-                e.printStackTrace();
                 response.sendRedirect(request.getContextPath() + "/staff/contracts");
+                return;
             }
-        } else {
-
-            response.sendRedirect(
-                    request.getContextPath() + "/staff/contracts");
         }
     }
 
@@ -339,7 +342,6 @@ public class StaffContractController extends HttpServlet {
         }
 
         if ("WAITING_CUSTOMER_CONFIRM".equalsIgnoreCase(status)) {
-            bookingDAO.updateStatus(contract.getBookingId(), "WAITING_CUSTOMER_CONFIRM");
 
         } else if ("ACTIVE".equalsIgnoreCase(status)) {
             carDAO.updateStatus(contract.getCarId(), "RENTING");
@@ -548,6 +550,20 @@ public class StaffContractController extends HttpServlet {
                 return;
             }
 
+            String actualReturnTimeRaw = request.getParameter("actualReturnTime");
+            if (actualReturnTimeRaw == null || actualReturnTimeRaw.trim().isEmpty()) {
+                request.getSession().setAttribute("error", "Please enter actual return time.");
+                response.sendRedirect(request.getContextPath() + "/staff/contracts?action=detail&id=" + contractId);
+                return;
+            }
+
+            Timestamp actualReturnTime = parseDateTimeLocal(actualReturnTimeRaw);
+            if (actualReturnTime == null) {
+                request.getSession().setAttribute("error", "Invalid actual return time.");
+                response.sendRedirect(request.getContextPath() + "/staff/contracts?action=detail&id=" + contractId);
+                return;
+            }
+
             CarCheckModel preDeliveryCheck = carCheckDAO.getLatestPreDeliveryCheckByContractId(contractId);
             if (preDeliveryCheck == null || preDeliveryCheck.getOdometerKm() == null) {
                 request.getSession().setAttribute("error", "Pre-delivery odometer not found.");
@@ -568,12 +584,10 @@ public class StaffContractController extends HttpServlet {
                 issueTypes = new String[0];
             }
 
-            // Nếu tick No issues found thì luôn lưu theo nhánh normal return
             if (isNormalReturn) {
                 issueTypes = new String[0];
             }
 
-            // Nếu không có issue nào được chọn thì cũng hiểu là normal return
             if (issueTypes.length == 0) {
                 isNormalReturn = true;
             }
@@ -907,7 +921,10 @@ public class StaffContractController extends HttpServlet {
             return false;
         }
 
-        CarCheckModel latestCarCheck = carCheckDAO.getLatestPreDeliveryCheckByContractId(contractId);
+        CarCheckModel latestCarCheck = carCheckDAO.getLatestPreDeliveryCheckByContractAndCarId(
+                contractId,
+                contract.getCarId()
+        );
         if (latestCarCheck == null) {
             return false;
         }
@@ -987,7 +1004,10 @@ public class StaffContractController extends HttpServlet {
             return false;
         }
 
-        CarCheckModel preDeliveryCheck = carCheckDAO.getLatestPreDeliveryCheckByContractId(contractId);
+        CarCheckModel preDeliveryCheck = carCheckDAO.getLatestPreDeliveryCheckByContractAndCarId(
+                contractId,
+                contract.getCarId()
+        );
         CarCheckModel returnCheck = carCheckDAO.getLatestReturnCheckByContractId(contractId);
 
         if (preDeliveryCheck == null || preDeliveryCheck.getOdometerKm() == null) {
@@ -1019,4 +1039,70 @@ public class StaffContractController extends HttpServlet {
         );
     }
 
+    private String determineReturnTimingStatus(ContractModel contract, CarCheckModel returnCheck) {
+        if (contract == null || returnCheck == null || returnCheck.getCheckTime() == null) {
+            return "UNKNOWN";
+        }
+
+        Timestamp expectedReturn = contract.getContractEndTime();
+        Timestamp actualReturn = returnCheck.getCheckTime();
+
+        if (actualReturn.before(expectedReturn)) {
+            return "EARLY";
+        } else if (actualReturn.after(expectedReturn)) {
+            return "LATE";
+        } else {
+            return "ON_TIME";
+        }
+    }
+
+    private double calculateExtraTimeFee(ContractModel contract, Timestamp actualReturnTime) {
+        if (contract == null || actualReturnTime == null || contract.getContractEndTime() == null) {
+            return 0;
+        }
+
+        Timestamp expectedReturnTime = contract.getContractEndTime();
+
+        if (!actualReturnTime.after(expectedReturnTime)) {
+            return 0;
+        }
+
+        long overdueMinutes = Duration.between(
+                expectedReturnTime.toLocalDateTime(),
+                actualReturnTime.toLocalDateTime()
+        ).toMinutes();
+
+        if (overdueMinutes <= 0) {
+            return 0;
+        }
+
+        double dailyPrice = contract.getDailyPrice() != null ? contract.getDailyPrice() : 0;
+        double hourlyPrice = dailyPrice / 24.0;
+        double halfDayPrice = dailyPrice / 2.0;
+
+        if (overdueMinutes <= 360) {
+            double overdueHours = overdueMinutes / 60.0;
+            return hourlyPrice * overdueHours;
+        } else if (overdueMinutes <= 720) {
+            return halfDayPrice;
+        } else {
+            return dailyPrice;
+        }
+    }
+
+    private java.sql.Timestamp parseDateTimeLocal(String raw) {
+        if (raw == null || raw.trim().isEmpty()) {
+            return null;
+        }
+
+        try {
+            String normalized = raw.trim().replace("T", " ");
+            if (normalized.length() == 16) {
+                normalized += ":00";
+            }
+            return java.sql.Timestamp.valueOf(normalized);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
 }

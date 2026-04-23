@@ -20,7 +20,6 @@
 
             <div class="staff-content">
                 <div class="car-change-page">
-
                     <div class="car-change-header">
                         <div>
                             <h1>Request Car Change</h1>
@@ -31,7 +30,7 @@
                         </div>
 
                         <a class="btn-back"
-                           href="${pageContext.request.contextPath}/staff/contracts?action=checkForm&id=${contract.contractId}">
+                           href="${pageContext.request.contextPath}/staff/contracts?action=detail&id=${contract.contractId}">
                             Back to Car Check
                         </a>
                     </div>
@@ -76,9 +75,9 @@
                                 <div class="summary-item">
                                     <span>Rental Period</span>
                                     <p>
-                                    <fmt:formatDate value="${booking.startTime}" pattern="dd/MM/yyyy HH:mm"/>
-                                    →
-                                    <fmt:formatDate value="${booking.endTime}" pattern="dd/MM/yyyy HH:mm"/>
+                                        <fmt:formatDate value="${booking.startTime}" pattern="dd/MM/yyyy HH:mm"/>
+                                        →
+                                        <fmt:formatDate value="${booking.endTime}" pattern="dd/MM/yyyy HH:mm"/>
                                     </p>
                                 </div>
 
@@ -88,13 +87,18 @@
                                 </div>
 
                                 <div class="summary-item">
+                                    <span>Current Plate Number</span>
+                                    <p>${currentCar.plateNumber}</p>
+                                </div>
+
+                                <div class="summary-item">
                                     <span>Car Type</span>
                                     <p>${currentCar.typeName}</p>
                                 </div>
 
                                 <div class="summary-item">
                                     <span>Daily Price</span>
-                                    <p>${currentCar.pricePerDay}</p>
+                                    <p><fmt:formatNumber value="${currentCar.pricePerDay}" type="number"/> VND</p>
                                 </div>
                             </div>
 
@@ -135,13 +139,14 @@
                                                 <c:forEach var="car" items="${replacementCars}">
                                                     <option value="${car.carId}"
                                                             data-name="${car.modelName}"
+                                                            data-plate="${car.plateNumber}"
                                                             data-type="${car.typeName}"
                                                             data-price="${car.pricePerDay}"
                                                             data-seat="${car.seatCount}"
                                                             data-fuel="${car.fuelType}"
                                                             data-trans="${car.transmission}"
                                                             data-image="${car.imageUrl}">
-                                                        ${car.modelName} - ${car.typeName} - ${car.pricePerDay}
+                                                        ${car.modelName} - ${car.plateNumber} - ${car.typeName}
                                                     </option>
                                                 </c:forEach>
                                             </select>
@@ -156,6 +161,7 @@
 
                                             <div class="preview-info">
                                                 <p><strong>Model:</strong> <span id="previewCarName"></span></p>
+                                                <p><strong>Plate Number:</strong> <span id="previewCarPlate"></span></p>
                                                 <p><strong>Type:</strong> <span id="previewCarType"></span></p>
                                                 <p><strong>Price/Day:</strong> <span id="previewCarPrice"></span></p>
                                                 <p><strong>Seats:</strong> <span id="previewCarSeat"></span></p>
@@ -179,7 +185,7 @@
                                             </button>
 
                                             <a class="btn-cancel"
-                                               href="${pageContext.request.contextPath}/staff/contracts?action=checkForm&id=${contract.contractId}">
+                                               href="${pageContext.request.contextPath}/staff/contracts?action=detail&id=${contract.contractId}">
                                                 Cancel
                                             </a>
                                         </div>
@@ -214,6 +220,7 @@
                 }
 
                 document.getElementById("previewCarName").textContent = selected.dataset.name || "";
+                document.getElementById("previewCarPlate").textContent = selected.dataset.plate || "";
                 document.getElementById("previewCarType").textContent = selected.dataset.type || "";
                 document.getElementById("previewCarPrice").textContent = selected.dataset.price || "";
                 document.getElementById("previewCarSeat").textContent = selected.dataset.seat || "";

@@ -115,7 +115,9 @@ public class AuthFilter implements Filter {
             int roleId = account.getRoleId();
 
             // Staff/Admin: tạo request đổi xe + hoàn tiền + xử lý tại quầy
-            if ("create".equals(action)
+// Staff/Admin: mở form đổi xe + tạo request + hoàn tiền + xử lý tại quầy
+            if ("form".equals(action)
+                    || "create".equals(action)
                     || "refund".equals(action)
                     || "staffRejectRefund".equals(action)) {
                 if (roleId != RoleConstants.STAFF && roleId != RoleConstants.ADMIN) {

@@ -58,7 +58,7 @@ public class CarChangeServlet extends HttpServlet {
             markRefundCompleted(request, response);
         } else if ("staffRejectRefund".equals(action)) {
             rejectAndRefundByStaff(request, response);
-        }
+        } 
     }
 
     private void showChangeForm(HttpServletRequest request, HttpServletResponse response)
@@ -74,19 +74,25 @@ public class CarChangeServlet extends HttpServlet {
         try {
             bookingId = Integer.parseInt(request.getParameter("bookingId"));
         } catch (Exception e) {
-            response.sendRedirect(request.getContextPath() + "/staff/bookings");
+            response.sendRedirect(request.getContextPath() + "/staff/contracts");
             return;
         }
 
         BookingModel booking = bookingDAO.getById(bookingId);
-        if (booking == null || !"CONFIRMED".equalsIgnoreCase(booking.getStatus())) {
-            response.sendRedirect(request.getContextPath() + "/staff/bookings?action=detail&id=" + bookingId);
+        if (booking == null) {
+            response.sendRedirect(request.getContextPath() + "/staff/contracts");
             return;
         }
 
         ContractModel contract = contractDAO.getContractByBookingId(bookingId);
-        if (contract == null || !"CREATED".equalsIgnoreCase(contract.getContractStatus())) {
-            response.sendRedirect(request.getContextPath() + "/staff/bookings?action=detail&id=" + bookingId);
+        if (contract == null) {
+            response.sendRedirect(request.getContextPath() + "/staff/contracts");
+            return;
+        }
+
+        if (!isValidCarChangeFlow(booking, contract)) {
+            response.sendRedirect(request.getContextPath()
+                    + "/staff/contracts?action=detail&id=" + contract.getContractId());
             return;
         }
 
@@ -95,13 +101,17 @@ public class CarChangeServlet extends HttpServlet {
 
         if (currentCar == null) {
             response.sendRedirect(request.getContextPath()
-                    + "/staff/contracts?action=checkForm&id=" + contract.getContractId());
+                    + "/staff/contracts?action=detail&id=" + contract.getContractId());
             return;
         }
 
-        CarCheckModel latestCheck = carCheckDAO.getLatestCheckByContractId(contract.getContractId());
+        CarCheckModel latestCheck = carCheckDAO.getLatestPreDeliveryCheckByContractAndCarId(
+                contract.getContractId(),
+                contract.getCarId()
+        );
         if (latestCheck == null || !"NOT_OK".equalsIgnoreCase(latestCheck.getCheckResult())) {
-            response.sendRedirect(request.getContextPath() + "/staff/contracts?action=checkForm&id=" + contract.getContractId());
+            response.sendRedirect(request.getContextPath()
+                    + "/staff/contracts?action=detail&id=" + contract.getContractId());
             return;
         }
 
@@ -156,9 +166,8 @@ public class CarChangeServlet extends HttpServlet {
         ContractModel contract = contractDAO.getContractByBookingId(bookingId);
 
         if (contract != null) {
-            response.sendRedirect(
-                    request.getContextPath()
-                    + "/staff/contracts?action=checkForm&id=" + contract.getContractId()
+            response.sendRedirect(request.getContextPath()
+                    + "/staff/contracts?action=detail&id=" + contract.getContractId()
                     + "&changeRequest=" + (result ? "success" : "fail")
             );
         } else {
@@ -199,7 +208,7 @@ public class CarChangeServlet extends HttpServlet {
         try {
             requestId = Integer.parseInt(requestIdRaw);
         } catch (NumberFormatException e) {
-            response.sendRedirect(request.getContextPath() + "/customer/bookings?action=list");
+            response.sendRedirect(request.getContextPath() + "/booking?action=list");
             return;
         }
         String decision = request.getParameter("decision");
@@ -212,7 +221,7 @@ public class CarChangeServlet extends HttpServlet {
 
         response.sendRedirect(
                 request.getContextPath()
-                + "/customer/bookings?action=detail&bookingId=" + bookingId
+                + "/booking?action=detail&bookingId=" + bookingId
                 + "&changeResponse=" + (result ? "success" : "fail")
         );
     }
@@ -235,12 +244,22 @@ public class CarChangeServlet extends HttpServlet {
         }
 
         boolean result = markRefundCompletedInternal(bookingId);
+        
+        ContractModel contract = contractDAO.getContractByBookingId(bookingId);
 
-        response.sendRedirect(
-                request.getContextPath()
-                + "/staff/bookings?action=detail&id=" + bookingId
-                + "&refundStatus=" + (result ? "success" : "fail")
-        );
+        if (contract != null) {
+            response.sendRedirect(
+                    request.getContextPath()
+                    + "/staff/contracts?action=detail&id=" + contract.getContractId()
+                    + "&refundStatus=" + (result ? "success" : "fail")
+            );
+        } else {
+            response.sendRedirect(
+                    request.getContextPath()
+                    + "/staff/bookings?action=detail&id=" + bookingId
+                    + "&refundStatus=" + (result ? "success" : "fail")
+            );
+        }
     }
 
     private void rejectAndRefundByStaff(HttpServletRequest request, HttpServletResponse response)
@@ -262,11 +281,21 @@ public class CarChangeServlet extends HttpServlet {
 
         boolean result = rejectAndRefundByStaffInternal(bookingId);
 
-        response.sendRedirect(
-                request.getContextPath()
-                + "/staff/bookings?action=detail&id=" + bookingId
-                + "&refundStatus=" + (result ? "success" : "fail")
-        );
+        ContractModel contract = contractDAO.getContractByBookingId(bookingId);
+
+        if (contract != null) {
+            response.sendRedirect(
+                    request.getContextPath()
+                    + "/staff/contracts?action=detail&id=" + contract.getContractId()
+                    + "&refundStatus=" + (result ? "success" : "fail")
+            );
+        } else {
+            response.sendRedirect(
+                    request.getContextPath()
+                    + "/staff/bookings?action=detail&id=" + bookingId
+                    + "&refundStatus=" + (result ? "success" : "fail")
+            );
+        }
     }
 
     private List<CarModel> getAvailableReplacementCars(int bookingId) {
@@ -295,20 +324,19 @@ public class CarChangeServlet extends HttpServlet {
             return false;
         }
 
-        if (!"CONFIRMED".equalsIgnoreCase(booking.getStatus())) {
-            return false;
-        }
-
         ContractModel contract = contractDAO.getContractByBookingId(bookingId);
         if (contract == null) {
             return false;
         }
 
-        if (!"CREATED".equalsIgnoreCase(contract.getContractStatus())) {
+        if (!isValidCarChangeFlow(booking, contract)) {
             return false;
         }
 
-        CarCheckModel latestCheck = carCheckDAO.getLatestCheckByContractId(contract.getContractId());
+        CarCheckModel latestCheck = carCheckDAO.getLatestPreDeliveryCheckByContractAndCarId(
+                contract.getContractId(),
+                contract.getCarId()
+        );
         if (latestCheck == null || !"NOT_OK".equalsIgnoreCase(latestCheck.getCheckResult())) {
             return false;
         }
@@ -319,6 +347,10 @@ public class CarChangeServlet extends HttpServlet {
 
         CarModel oldCar = carDAO.findById(booking.getCarId());
         if (oldCar == null) {
+            return false;
+        }
+
+        if (newCarId == oldCar.getCarId()) {
             return false;
         }
 
@@ -377,11 +409,14 @@ public class CarChangeServlet extends HttpServlet {
             return false;
         }
 
-        if (!"CREATED".equalsIgnoreCase(contract.getContractStatus())) {
+        if (!isValidCarChangeFlow(booking, contract)) {
             return false;
         }
 
-        CarCheckModel latestCheck = carCheckDAO.getLatestCheckByContractId(contract.getContractId());
+        CarCheckModel latestCheck = carCheckDAO.getLatestPreDeliveryCheckByContractAndCarId(
+                contract.getContractId(),
+                contract.getCarId()
+        );
         if (latestCheck == null || !"NOT_OK".equalsIgnoreCase(latestCheck.getCheckResult())) {
             return false;
         }
@@ -449,7 +484,9 @@ public class CarChangeServlet extends HttpServlet {
         }
 
         ContractModel contract = contractDAO.getContractByBookingId(booking.getBookingId());
-        if (contract != null && "CREATED".equalsIgnoreCase(contract.getContractStatus())) {
+        if (contract != null
+                && ("CREATED".equalsIgnoreCase(contract.getContractStatus())
+                || "WAITING_CUSTOMER_CONFIRM".equalsIgnoreCase(contract.getContractStatus()))) {
             boolean contractUpdated = contractDAO.updateCarId(contract.getContractId(), newCarId);
             if (!contractUpdated) {
                 return false;
@@ -484,7 +521,9 @@ public class CarChangeServlet extends HttpServlet {
         }
 
         ContractModel contract = contractDAO.getContractByBookingId(bookingId);
-        if (contract != null && "CREATED".equalsIgnoreCase(contract.getContractStatus())) {
+        if (contract != null
+                && ("CREATED".equalsIgnoreCase(contract.getContractStatus())
+                || "WAITING_CUSTOMER_CONFIRM".equalsIgnoreCase(contract.getContractStatus()))) {
             boolean contractCancelled = contractDAO.updateContractStatus(contract.getContractId(), "CANCELLED");
             if (!contractCancelled) {
                 return false;
@@ -509,4 +548,15 @@ public class CarChangeServlet extends HttpServlet {
         return true;
     }
 
+    private boolean isValidCarChangeFlow(BookingModel booking, ContractModel contract) {
+        boolean staffInitiatedFlow
+                = "CONFIRMED".equalsIgnoreCase(booking.getStatus())
+                && "CREATED".equalsIgnoreCase(contract.getContractStatus());
+
+        boolean customerRejectedFlow
+                = "CONFIRMED".equalsIgnoreCase(booking.getStatus())
+                && "WAITING_CUSTOMER_CONFIRM".equalsIgnoreCase(contract.getContractStatus());
+
+        return staffInitiatedFlow || customerRejectedFlow;
+    }
 }

@@ -1006,16 +1006,15 @@ public class CarDAO extends DBContext {
         return false;
     }
 
-    public List<CarModel> getAvailableReplacementCars(
-            int oldCarId,
-            String typeName,
-            BigDecimal pricePerDay,
-            Timestamp startTime,
-            Timestamp endTime
-    ) {
-        List<CarModel> list = new ArrayList<>();
+public List<CarModel> getAvailableReplacementCars(int currentCarId,
+        String requiredTypeName,
+        java.math.BigDecimal currentPricePerDay,
+        java.sql.Timestamp startTime,
+        java.sql.Timestamp endTime) {
 
-        String sql = """
+    List<CarModel> list = new java.util.ArrayList<>();
+
+    String sql = """
         SELECT
             c.car_id,
             c.model_name,
@@ -1024,20 +1023,20 @@ public class CarDAO extends DBContext {
             c.seat_count,
             c.fuel_type,
             c.transmission,
-            b.brand_name,
-            t.type_name,
             c.plate_number,
             c.image_folder,
             c.description,
             c.status,
-            c.plate_number
+            b.brand_name,
+            t.type_name,
+            i.image_url
         FROM cars c
         JOIN brand b ON c.brand_id = b.brand_id
         JOIN cars_type t ON c.type_id = t.type_id
+        LEFT JOIN cars_image i ON c.car_id = i.car_id AND i.is_primary = 1
         WHERE c.car_id <> ?
-          AND t.type_name = ?
-          AND c.price_per_day = ?
           AND c.status = 'AVAILABLE'
+          AND t.type_name = ?
           AND NOT EXISTS (
               SELECT 1
               FROM booking bk
@@ -1054,43 +1053,42 @@ public class CarDAO extends DBContext {
                 AND ISNULL(m.end_time, '9999-12-31') >= ?
                 AND m.status IN ('OPEN', 'IN_PROGRESS')
           )
+        ORDER BY c.price_per_day ASC, c.car_id DESC
     """;
 
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setInt(1, oldCarId);
-            ps.setString(2, typeName);
-            ps.setBigDecimal(3, pricePerDay);
-            ps.setTimestamp(4, endTime);
-            ps.setTimestamp(5, startTime);
-            ps.setTimestamp(6, endTime);
-            ps.setTimestamp(7, startTime);
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setInt(1, currentCarId);
+        ps.setString(2, requiredTypeName);
+        ps.setTimestamp(3, endTime);
+        ps.setTimestamp(4, startTime);
+        ps.setTimestamp(5, endTime);
+        ps.setTimestamp(6, startTime);
 
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    list.add(new CarModel(
-                            rs.getInt("car_id"),
-                            rs.getString("model_name"),
-                            rs.getInt("model_year"),
-                            rs.getBigDecimal("price_per_day"),
-                            rs.getInt("seat_count"),
-                            rs.getString("fuel_type"),
-                            rs.getString("transmission"),
-                            rs.getString("brand_name"),
-                            rs.getString("type_name"),
-                            null,
-                            rs.getString("image_folder"),
-                            rs.getString("description"),
-                            rs.getString("status"),
-                            rs.getString("plate_number")
-                    ));
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            CarModel car = new CarModel();
+            car.setCarId(rs.getInt("car_id"));
+            car.setModelName(rs.getString("model_name"));
+            car.setModelYear(rs.getInt("model_year"));
+            car.setPricePerDay(rs.getBigDecimal("price_per_day"));
+            car.setSeatCount(rs.getInt("seat_count"));
+            car.setFuelType(rs.getString("fuel_type"));
+            car.setTransmission(rs.getString("transmission"));
+            car.setPlateNumber(rs.getString("plate_number"));
+            car.setImageFolder(rs.getString("image_folder"));
+            car.setDescription(rs.getString("description"));
+            car.setStatus(rs.getString("status"));
+            car.setBrandName(rs.getString("brand_name"));
+            car.setTypeName(rs.getString("type_name"));
+            car.setImageUrl(rs.getString("image_url"));
+            list.add(car);
         }
-
-        return list;
+    } catch (Exception e) {
+        e.printStackTrace();
     }
+
+    return list;
+}
 
 
     public boolean updateCurrentOdometerKm(int carId, int odometerKm) {
