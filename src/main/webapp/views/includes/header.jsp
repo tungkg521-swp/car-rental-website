@@ -19,9 +19,8 @@
         <!-- CENTER: MENU -->
         <nav class="nav-main nav-center">
             <a href="${pageContext.request.contextPath}/cars">Thuê xe</a>
-            <a href="#">Khuyến mãi</a>
-            <a href="#">Giới thiệu</a>
-
+            <a href="#promo-section">Khuyến mãi</a>
+            <a href="javascript:void(0);" id="openAboutModal">Giới thiệu</a>
         </nav>
 
         <!-- RIGHT: AUTH -->
@@ -32,7 +31,6 @@
             </c:if>
 
             <c:if test="${not empty sessionScope.ACCOUNT}">
-
                 <div class="customer-header-actions">
                     <a href="${pageContext.request.contextPath}/customer/bookings?action=list"
                        class="customer-action-btn booking-btn"
@@ -61,9 +59,7 @@
 
                     <a href="${pageContext.request.contextPath}/logout" class="logout">Logout</a>
                 </div>
-
             </c:if>
         </div>
     </div>
 </header>
-
