@@ -101,7 +101,7 @@ function calculateBookingPrice(startValue, endValue, pricePerDay) {
         return {
             total: 0,
             subtotal: 0,
-            billableText: "0"
+            billableText: "0 ngày"
         };
     }
 
@@ -113,7 +113,7 @@ function calculateBookingPrice(startValue, endValue, pricePerDay) {
         return {
             total: 0,
             subtotal: 0,
-            billableText: "0"
+            billableText: "0 ngày"
         };
     }
 
@@ -121,7 +121,7 @@ function calculateBookingPrice(startValue, endValue, pricePerDay) {
         return {
             total: 0,
             subtotal: 0,
-            billableText: "0"
+            billableText: "0 ngày"
         };
     }
 
@@ -130,48 +130,42 @@ function calculateBookingPrice(startValue, endValue, pricePerDay) {
         return {
             total: 0,
             subtotal: 0,
-            billableText: "0"
+            billableText: "0 ngày"
         };
     }
 
-    const pricePerHour = pricePerDay / 24;
+    const minutesPerDay = 24 * 60;
+    const fullDays = Math.floor(diffMinutes / minutesPerDay);
+    const remainMinutes = diffMinutes % minutesPerDay;
+
     const halfDayPrice = pricePerDay / 2;
 
-    const fullDays = Math.floor(diffMinutes / 1440);
-    const remainMinutes = diffMinutes % 1440;
-
     let total = fullDays * pricePerDay;
-    let billableText = fullDays > 0 ? `${fullDays} ngày` : "";
+    let displayDays = fullDays;
 
     if (remainMinutes > 0) {
-        if (remainMinutes <= 360) {
-            const remainHours = remainMinutes / 60;
-            total += remainHours * pricePerHour;
-
-            const hourText = Number.isInteger(remainHours)
-                ? `${remainHours} giờ`
-                : `${remainHours.toFixed(2)} giờ`;
-
-            billableText = billableText
-                ? `${billableText} + ${hourText}`
-                : hourText;
-        } else if (remainMinutes <= 720) {
+        if (remainMinutes < 8 * 60) {
             total += halfDayPrice;
-            billableText = billableText
-                ? `${billableText} + nửa ngày`
-                : "nửa ngày";
+            displayDays += 0.5;
         } else {
             total += pricePerDay;
-            billableText = billableText
-                ? `${billableText} + 1 ngày`
-                : "1 ngày";
+            displayDays += 1;
         }
+    }
+
+    let billableText = "0 ngày";
+    if (displayDays === 0.5) {
+        billableText = "0.5 ngày";
+    } else if (Number.isInteger(displayDays)) {
+        billableText = displayDays + " ngày";
+    } else {
+        billableText = displayDays + " ngày";
     }
 
     return {
         total: total,
         subtotal: total,
-        billableText: billableText || "0"
+        billableText: billableText
     };
 }
 
@@ -380,7 +374,7 @@ function calculateBookingSummary() {
             if (canApply) {
                 if (discountType === "PERCENT") {
                     discount = subtotal * discountValue / 100;
-                } else if (discountType === "FIXED") {
+                } else if (discountType === "AMOUNT") {
                     discount = discountValue;
                 }
 

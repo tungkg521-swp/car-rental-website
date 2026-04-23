@@ -129,6 +129,14 @@
                                                     <span class="status-badge cancelled">Cancelled</span>
                                                 </c:when>
 
+                                                <c:when test="${booking.status == 'REFUND_PENDING'}">
+                                                    <span class="status-badge awaiting">Waiting for Refund</span>
+                                                </c:when>
+
+                                                <c:when test="${booking.status == 'REFUNDED'}">
+                                                    <span class="status-badge completed">Refunded</span>
+                                                </c:when>
+
                                                 <c:otherwise>
                                                     <span class="status-badge default">${booking.status}</span>
                                                 </c:otherwise>
@@ -312,8 +320,7 @@
                                 </div>
                             </c:if>
 
-
-                            <c:if test="${not empty pendingCarChangeRequest}">
+                            <c:if test="${not empty carChangeRequest}">
                                 <div class="section-card car-change-section">
                                     <div class="section-heading">
                                         <div>
@@ -332,8 +339,8 @@
                                                 </p>
                                             </div>
 
-                                            <span class="change-status-badge ${pendingCarChangeRequest.status == 'PENDING' ? 'status-pending' : 'status-done'}">
-                                                ${pendingCarChangeRequest.status}
+                                            <span class="change-status-badge ${carChangeRequest.status == 'PENDING' ? 'status-pending' : 'status-done'}">
+                                                ${carChangeRequest.status}
                                             </span>
                                         </div>
 
@@ -352,7 +359,7 @@
                                         <div class="change-meta-grid">
                                             <div class="change-meta-item">
                                                 <span>Request ID</span>
-                                                <p>#${pendingCarChangeRequest.requestId}</p>
+                                                <p>#${carChangeRequest.requestId}</p>
                                             </div>
 
                                             <div class="change-meta-item">
@@ -362,7 +369,7 @@
 
                                             <div class="change-meta-item full-width">
                                                 <span>Reason</span>
-                                                <p>${pendingCarChangeRequest.reason}</p>
+                                                <p>${carChangeRequest.reason}</p>
                                             </div>
                                         </div>
 
@@ -379,6 +386,7 @@
 
                                                 <div class="change-car-info">
                                                     <p><strong>Model:</strong> ${oldCarChangeCar.modelName}</p>
+                                                    <p><strong>Plate Number:</strong> ${oldCarChangeCar.plateNumber}</p>
                                                     <p><strong>Type:</strong> ${oldCarChangeCar.typeName}</p>
                                                     <p><strong>Seats:</strong> ${oldCarChangeCar.seatCount}</p>
                                                     <p><strong>Fuel:</strong> ${oldCarChangeCar.fuelType}</p>
@@ -387,34 +395,37 @@
                                                 </div>
                                             </div>
 
-                                            <div class="change-car-box recommended">
-                                                <div class="change-car-title">Replacement Car</div>
+                                            <c:if test="${not empty newCarChangeCar}">
+                                                <div class="change-car-box recommended">
+                                                    <div class="change-car-title">Replacement Car</div>
 
-                                                <c:if test="${not empty newCarChangeCar and not empty newCarChangeCar.imageUrl}">
-                                                    <div class="change-car-image-wrap">
-                                                        <img src="${pageContext.request.contextPath}/${newCarChangeCar.imageUrl}"
-                                                             alt="${newCarChangeCar.modelName}">
+                                                    <c:if test="${not empty newCarChangeCar and not empty newCarChangeCar.imageUrl}">
+                                                        <div class="change-car-image-wrap">
+                                                            <img src="${pageContext.request.contextPath}/${newCarChangeCar.imageUrl}"
+                                                                 alt="${newCarChangeCar.modelName}">
+                                                        </div>
+                                                    </c:if>
+
+                                                    <div class="change-car-info">
+                                                        <p><strong>Model:</strong> ${newCarChangeCar.modelName}</p>
+                                                        <p><strong>Plate Number:</strong> ${newCarChangeCar.plateNumber}</p>
+                                                        <p><strong>Type:</strong> ${newCarChangeCar.typeName}</p>
+                                                        <p><strong>Seats:</strong> ${newCarChangeCar.seatCount}</p>
+                                                        <p><strong>Fuel:</strong> ${newCarChangeCar.fuelType}</p>
+                                                        <p><strong>Transmission:</strong> ${newCarChangeCar.transmission}</p>
+                                                        <p><strong>Price/Day:</strong> ${newCarChangeCar.pricePerDay}</p>
                                                     </div>
-                                                </c:if>
-
-                                                <div class="change-car-info">
-                                                    <p><strong>Model:</strong> ${newCarChangeCar.modelName}</p>
-                                                    <p><strong>Type:</strong> ${newCarChangeCar.typeName}</p>
-                                                    <p><strong>Seats:</strong> ${newCarChangeCar.seatCount}</p>
-                                                    <p><strong>Fuel:</strong> ${newCarChangeCar.fuelType}</p>
-                                                    <p><strong>Transmission:</strong> ${newCarChangeCar.transmission}</p>
-                                                    <p><strong>Price/Day:</strong> ${newCarChangeCar.pricePerDay}</p>
                                                 </div>
-                                            </div>
+                                            </c:if>
                                         </div>
 
-                                        <c:if test="${pendingCarChangeRequest.status == 'PENDING'}">
+                                        <c:if test="${carChangeRequest.status == 'PENDING' && carChangeRequest.requestedBy == 'STAFF'}">
                                             <div class="change-action-row">
                                                 <form method="post"
                                                       action="${pageContext.request.contextPath}/car-change"
                                                       class="inline-form">
                                                     <input type="hidden" name="action" value="respond"/>
-                                                    <input type="hidden" name="requestId" value="${pendingCarChangeRequest.requestId}"/>
+                                                    <input type="hidden" name="requestId" value="${carChangeRequest.requestId}"/>
                                                     <input type="hidden" name="bookingId" value="${booking.bookingId}"/>
                                                     <input type="hidden" name="decision" value="accept"/>
 
@@ -429,7 +440,7 @@
                                                       action="${pageContext.request.contextPath}/car-change"
                                                       class="inline-form">
                                                     <input type="hidden" name="action" value="respond"/>
-                                                    <input type="hidden" name="requestId" value="${pendingCarChangeRequest.requestId}"/>
+                                                    <input type="hidden" name="requestId" value="${carChangeRequest.requestId}"/>
                                                     <input type="hidden" name="bookingId" value="${booking.bookingId}"/>
                                                     <input type="hidden" name="decision" value="reject"/>
 
@@ -439,6 +450,25 @@
                                                         Reject Replacement
                                                     </button>
                                                 </form>
+                                            </div>
+                                        </c:if>
+
+
+                                        <c:if test="${carChangeRequest.status == 'APPROVED'}">
+                                            <div class="alert alert-success" style="margin-top:16px;">
+                                                You accepted the replacement car. Your booking has been updated to the new vehicle.
+                                            </div>
+                                        </c:if>
+
+                                        <c:if test="${carChangeRequest.status == 'REJECTED'}">
+                                            <div class="alert alert-danger" style="margin-top:16px;">
+                                                You rejected the replacement car. Refund processing is being handled by staff.
+                                            </div>
+                                        </c:if>
+
+                                        <c:if test="${carChangeRequest.status == 'CANCELLED'}">
+                                            <div class="alert alert-warning" style="margin-top:16px;">
+                                                This replacement request is no longer available. Staff may prepare another replacement option.
                                             </div>
                                         </c:if>
                                     </div>
@@ -492,8 +522,8 @@
                                                         name="action"
                                                         value="rejectHandover"
                                                         class="btn btn-danger"
-                                                        onclick="return confirm('Are you sure you want to reject this vehicle?');">
-                                                    Reject Vehicle
+                                                        onclick="return confirm('Are you sure you want to cancel this booking and request refund?');">
+                                                    Cancel Booking & Refund
                                                 </button>
                                             </div>
                                         </form>
@@ -525,7 +555,7 @@
                                         </form>
                                     </c:if>
 
-                                    <c:if test="${booking.status == 'AWAITING_PAYMENT' && empty pendingCarChangeRequest}">
+                                    <c:if test="${booking.status == 'AWAITING_PAYMENT' && empty carChangeRequest}">
                                         <a href="${pageContext.request.contextPath}/payment?action=create&bookingId=${booking.bookingId}"
                                            class="btn btn-primary">
                                             Thanh toán ngay

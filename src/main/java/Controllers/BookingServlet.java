@@ -103,15 +103,12 @@ public class BookingServlet extends HttpServlet {
             case "delete":
                 deleteBooking(request, response);
                 break;
-            case "customerCheck":
-                submitCustomerCheck(request, response);
-                break;
             case "confirmHandover":
                 confirmHandover(request, response);
                 break;
             case "rejectHandover":
                 rejectHandover(request, response);
-                break;
+                break; 
             default:
                 response.sendRedirect(request.getContextPath() + "/cars");
                 break;
@@ -523,7 +520,7 @@ public class BookingServlet extends HttpServlet {
 
         String bookingIdRaw = request.getParameter("bookingId");
         if (bookingIdRaw == null) {
-            response.sendRedirect(request.getContextPath() + "/customer/bookings?action=list");
+            response.sendRedirect(request.getContextPath() + "/booking?action=list");
             return;
         }
 
@@ -531,7 +528,7 @@ public class BookingServlet extends HttpServlet {
         try {
             bookingId = Integer.parseInt(bookingIdRaw);
         } catch (NumberFormatException e) {
-            response.sendRedirect(request.getContextPath() + "/customer/bookings?action=list");
+            response.sendRedirect(request.getContextPath() + "/booking?action=list");
             return;
         }
 
@@ -571,16 +568,18 @@ public class BookingServlet extends HttpServlet {
         request.setAttribute("canCustomerConfirm", canCustomerConfirm);
         request.setAttribute("rentalDurationText", rentalDurationText);
 
-        CarChangeRequestModel pendingRequest = carChangeRequestDAO.getPendingByBookingId(bookingId);
+        CarChangeRequestModel carChangeRequest = carChangeRequestDAO.getLatestByBookingId(bookingId);
 
-        request.setAttribute("pendingCarChangeRequest", pendingRequest);
+        request.setAttribute("carChangeRequest", carChangeRequest);
 
-        if (pendingRequest != null) {
-            CarModel oldCar = carDAO.findById(pendingRequest.getOldCarId());
-            CarModel newCar = carDAO.findById(pendingRequest.getNewCarId());
-
+        if (carChangeRequest != null) {
+            CarModel oldCar = carDAO.findById(carChangeRequest.getOldCarId());
             request.setAttribute("oldCarChangeCar", oldCar);
-            request.setAttribute("newCarChangeCar", newCar);
+
+            if (carChangeRequest.getNewCarId() > 0) {
+                CarModel newCar = carDAO.findById(carChangeRequest.getNewCarId());
+                request.setAttribute("newCarChangeCar", newCar);
+            }
         }
 
         String cancelStatus = request.getParameter("cancelStatus");
@@ -705,110 +704,6 @@ public class BookingServlet extends HttpServlet {
                     + "/booking?action=detail&bookingId=" + bookingId
             );
         }
-    }
-
-    private void submitCustomerCheck(HttpServletRequest request,
-            HttpServletResponse response)
-            throws ServletException, IOException {
-
-        HttpSession session = request.getSession(false);
-        if (session == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-
-        AccountModel account = (AccountModel) session.getAttribute("ACCOUNT");
-        if (account == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-
-        CustomerModel customer = new CustomerDAO().getByAccountId(account.getAccountId());
-        if (customer == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-
-        String bookingIdRaw = request.getParameter("bookingId");
-        String decision = request.getParameter("decision");
-        String[] reasons = request.getParameterValues("reason");
-        String note = request.getParameter("note");
-
-        int bookingId;
-        try {
-            bookingId = Integer.parseInt(bookingIdRaw);
-        } catch (Exception e) {
-            response.sendRedirect(request.getContextPath() + "/booking?action=list");
-            return;
-        }
-
-        BookingModel booking = bookingDAO.findById(bookingId, customer.getCustomerId());
-        if (booking == null) {
-            session.setAttribute("error", "Booking not found.");
-            response.sendRedirect(request.getContextPath() + "/booking?action=list");
-            return;
-        }
-
-        if (!"CONFIRMED".equalsIgnoreCase(booking.getStatus())) {
-            session.setAttribute("error", "This booking is not ready for customer check.");
-            response.sendRedirect(request.getContextPath() + "/booking?action=detail&bookingId=" + bookingId);
-            return;
-        }
-
-        if (booking.getCustomerCheckStatus() != null && !booking.getCustomerCheckStatus().trim().isEmpty()) {
-            session.setAttribute("error", "You have already submitted your vehicle check.");
-            response.sendRedirect(request.getContextPath() + "/booking?action=detail&bookingId=" + bookingId);
-            return;
-        }
-
-        ContractModel contract = contractDAO.getContractByBookingId(bookingId);
-        if (contract == null) {
-            session.setAttribute("error", "Contract not found.");
-            response.sendRedirect(request.getContextPath() + "/booking?action=detail&bookingId=" + bookingId);
-            return;
-        }
-
-        CarCheckModel latestCarCheck = carCheckDAO.getLatestCheckByContractId(contract.getContractId());
-        if (latestCarCheck == null || !"OK".equalsIgnoreCase(latestCarCheck.getCheckResult())) {
-            session.setAttribute("error", "Staff has not completed a valid pre-check yet.");
-            response.sendRedirect(request.getContextPath() + "/booking?action=detail&bookingId=" + bookingId);
-            return;
-        }
-
-        if (decision == null || decision.trim().isEmpty()) {
-            session.setAttribute("error", "Please choose your vehicle check decision.");
-            response.sendRedirect(request.getContextPath() + "/booking?action=detail&bookingId=" + bookingId);
-            return;
-        }
-
-        if (!"ACCEPTED".equalsIgnoreCase(decision)
-                && !"REJECTED".equalsIgnoreCase(decision)
-                && !"NEED_SUPPORT".equalsIgnoreCase(decision)) {
-            session.setAttribute("error", "Invalid vehicle check decision.");
-            response.sendRedirect(request.getContextPath() + "/booking?action=detail&bookingId=" + bookingId);
-            return;
-        }
-
-        String reasonText = null;
-        if (reasons != null && reasons.length > 0) {
-            reasonText = String.join(",", reasons);
-        }
-
-        boolean success = bookingDAO.updateCustomerCheck(
-                bookingId,
-                customer.getCustomerId(),
-                decision,
-                reasonText,
-                note
-        );
-
-        if (success) {
-            session.setAttribute("message", "Your vehicle check has been submitted successfully.");
-        } else {
-            session.setAttribute("error", "Failed to submit your vehicle check.");
-        }
-
-        response.sendRedirect(request.getContextPath() + "/booking?action=detail&bookingId=" + bookingId);
     }
 
     private void confirmHandover(HttpServletRequest request,
@@ -945,7 +840,7 @@ public class BookingServlet extends HttpServlet {
         boolean success = contractDAO.rejectCustomerHandover(contractId, customerNote);
 
         if (success) {
-            bookingDAO.updateStatus(bookingId, "CANCELLED");
+            bookingDAO.updateStatus(bookingId, "REFUND_PENDING");
             carDAO.updateStatus(contract.getCarId(), "AVAILABLE");
             session.setAttribute("handoverStatus", "reject_success");
         } else {
@@ -972,36 +867,42 @@ public class BookingServlet extends HttpServlet {
     }
 
     private BigDecimal calculateTotalPrice(Timestamp startTime, Timestamp endTime, BigDecimal pricePerDay) {
-        long minutes = ChronoUnit.MINUTES.between(
+        long totalMinutes = ChronoUnit.MINUTES.between(
                 startTime.toLocalDateTime(),
                 endTime.toLocalDateTime()
         );
 
-        if (minutes <= 0) {
+        if (totalMinutes <= 0) {
             return BigDecimal.ZERO;
         }
 
-        BigDecimal pricePerHour = pricePerDay.divide(BigDecimal.valueOf(24), 2, RoundingMode.HALF_UP);
+        long minutesPerDay = 24 * 60;
+        long fullDays = totalMinutes / minutesPerDay;
+        long remainingMinutes = totalMinutes % minutesPerDay;
+
+        BigDecimal totalPrice = pricePerDay.multiply(BigDecimal.valueOf(fullDays));
         BigDecimal halfDayPrice = pricePerDay.divide(BigDecimal.valueOf(2), 2, RoundingMode.HALF_UP);
 
-        long fullDays = minutes / 1440;
-        long remainMinutes = minutes % 1440;
+        if (remainingMinutes > 0) {
+            long remainingHours = remainingMinutes / 60;
+            long remainingExtraMinutes = remainingMinutes % 60;
 
-        BigDecimal total = pricePerDay.multiply(BigDecimal.valueOf(fullDays));
+            boolean isLessThan8Hours = remainingHours < 8;
 
-        if (remainMinutes > 0) {
-            if (remainMinutes <= 360) {
-                BigDecimal remainHours = BigDecimal.valueOf(remainMinutes)
-                        .divide(BigDecimal.valueOf(60), 2, RoundingMode.HALF_UP);
-                total = total.add(pricePerHour.multiply(remainHours));
-            } else if (remainMinutes <= 720) {
-                total = total.add(halfDayPrice);
+            if (remainingHours == 8 && remainingExtraMinutes == 0) {
+                isLessThan8Hours = false;
+            } else if (remainingHours >= 8) {
+                isLessThan8Hours = false;
+            }
+
+            if (isLessThan8Hours) {
+                totalPrice = totalPrice.add(halfDayPrice);
             } else {
-                total = total.add(pricePerDay);
+                totalPrice = totalPrice.add(pricePerDay);
             }
         }
 
-        return total.setScale(2, RoundingMode.HALF_UP);
+        return totalPrice.setScale(2, RoundingMode.HALF_UP);
     }
 
     private boolean cancelBookingByCustomer(int bookingId, int customerId) {

@@ -22,6 +22,7 @@ function openCheckFeesModal() {
 
     if (returnMeta.hasReturnCheck) {
         restoreSavedReturnOdometer();
+        restoreSavedActualReturnTime();
 
         if (returnMeta.normalReturn) {
             if (noIssuesCheckbox) {
@@ -148,7 +149,7 @@ function renderSelectedIssues() {
     if (noIssuesCheckbox && noIssuesCheckbox.checked) {
         const normalTag = document.createElement("span");
         normalTag.className = "cf-tag";
-        normalTag.textContent = "No issues found";
+        normalTag.textContent = "No additional return issues found";
         preview.appendChild(normalTag);
         hasVisibleTag = true;
     }
@@ -162,6 +163,20 @@ function validateCheckFeesForm(event) {
     const odometerInput = document.querySelector('input[name="odometerKm"]');
     const preCheckOdometerInput = document.getElementById("preCheckOdometerValue");
     const noIssuesCheckbox = document.getElementById("noIssuesFound");
+    const actualReturnDateInput = document.querySelector('input[name="actualReturnDate"]');
+    const actualReturnHourSelect = document.querySelector('select[name="actualReturnHour"]');
+
+    if (!actualReturnDateInput || actualReturnDateInput.value.trim() === "") {
+        alert("Please select actual return date.");
+        event.preventDefault();
+        return;
+    }
+
+    if (!actualReturnHourSelect || actualReturnHourSelect.value.trim() === "") {
+        alert("Please select actual return hour.");
+        event.preventDefault();
+        return;
+    }
 
     if (!odometerInput || odometerInput.value.trim() === "") {
         alert("Please enter return odometer.");
@@ -643,3 +658,27 @@ function restoreSavedReturnOdometer() {
     odometerInput.value = holder.dataset.odometer || "";
 }
 
+function restoreSavedActualReturnTime() {
+    const dateInput = document.querySelector('input[name="actualReturnDate"]');
+    const hourSelect = document.querySelector('select[name="actualReturnHour"]');
+    const holder = document.getElementById("returnCheckSavedActualReturnTime");
+
+    if (!dateInput || !hourSelect || !holder) {
+        return;
+    }
+
+    const raw = holder.dataset.returnTime || "";
+    if (!raw) {
+        dateInput.value = "";
+        hourSelect.value = "";
+        return;
+    }
+
+    const parts = raw.split("T");
+    if (parts.length === 2) {
+        dateInput.value = parts[0];
+
+        const hourPart = parts[1].substring(0, 2);
+        hourSelect.value = hourPart + ":00";
+    }
+}

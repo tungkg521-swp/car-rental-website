@@ -59,13 +59,13 @@
                                     <div class="info-label">Email</div>
                                     <div class="info-value">${customer.email}</div>
                                 </div>
-                                
-                                  <div class="info-row">
+
+                                <div class="info-row">
                                     <div class="info-label">Số điện thoại</div>
                                     <div class="info-value">${customer.phone}</div>
                                 </div>
-                                
-                                  <div class="info-row">
+
+                                <div class="info-row">
                                     <div class="info-label">Số căn cước</div>
                                     <div class="info-value">${customer.citizen_id}</div>
                                 </div>
@@ -167,6 +167,151 @@
                             </c:choose>
                         </div>
 
+                        <div class="contract-section">
+                            <h2>Car Change Request</h2>
+
+                            <c:choose>
+                                <c:when test="${not empty carChangeRequest}">
+                                    <div class="info-table">
+                                        <div class="info-row">
+                                            <div class="info-label">Request ID</div>
+                                            <div class="info-value">#${carChangeRequest.requestId}</div>
+                                        </div>
+
+                                        <div class="info-row">
+                                            <div class="info-label">Status</div>
+                                            <div class="info-value">${carChangeRequest.status}</div>
+                                        </div>
+
+                                        <div class="info-row">
+                                            <div class="info-label">Requested By</div>
+                                            <div class="info-value">${carChangeRequest.requestedBy}</div>
+                                        </div>
+
+                                        <div class="info-row">
+                                            <div class="info-label">Reason</div>
+                                            <div class="info-value">${carChangeRequest.reason}</div>
+                                        </div>
+
+                                        <div class="info-row">
+                                            <div class="info-label">Requested At</div>
+                                            <div class="info-value">
+                                                <fmt:formatDate value="${carChangeRequest.createdAt}" pattern="yyyy-MM-dd HH:mm:ss"/>
+                                            </div>
+                                        </div>
+
+                                        <c:if test="${not empty carChangeRequest.resolvedAt}">
+                                            <div class="info-row">
+                                                <div class="info-label">Resolved At</div>
+                                                <div class="info-value">
+                                                    <fmt:formatDate value="${carChangeRequest.resolvedAt}" pattern="yyyy-MM-dd HH:mm:ss"/>
+                                                </div>
+                                            </div>
+                                        </c:if>
+                                    </div>
+
+                                    <div class="booking-bottom-grid" style="margin-top:16px;">
+                                        <c:if test="${not empty oldCarChangeCar}">
+                                            <div class="booking-card">
+                                                <h3 class="card-title">Current Car</h3>
+                                                <div class="car-info-grid">
+                                                    <div class="meta-item">
+                                                        <span class="meta-label">Model</span>
+                                                        <p>${oldCarChangeCar.modelName}</p>
+                                                    </div>
+                                                    <div class="meta-item">
+                                                        <span class="meta-label">Type</span>
+                                                        <p>${oldCarChangeCar.typeName}</p>
+                                                    </div>
+                                                    <div class="meta-item">
+                                                        <span class="meta-label">Plate Number</span>
+                                                        <p>${oldCarChangeCar.plateNumber}</p>
+                                                    </div>
+                                                    <div class="meta-item">
+                                                        <span class="meta-label">Seats</span>
+                                                        <p>${oldCarChangeCar.seatCount}</p>
+                                                    </div>
+                                                    <div class="meta-item">
+                                                        <span class="meta-label">Transmission</span>
+                                                        <p>${oldCarChangeCar.transmission}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </c:if>
+
+                                        <c:if test="${not empty newCarChangeCar}">
+                                            <div class="booking-card">
+                                                <h3 class="card-title">Replacement Car</h3>
+                                                <div class="car-info-grid">
+                                                    <div class="meta-item">
+                                                        <span class="meta-label">Model</span>
+                                                        <p>${newCarChangeCar.modelName}</p>
+                                                    </div>
+                                                    <div class="meta-item">
+                                                        <span class="meta-label">Type</span>
+                                                        <p>${newCarChangeCar.typeName}</p>
+                                                    </div>
+                                                    <div class="meta-item">
+                                                        <span class="meta-label">Plate Number</span>
+                                                        <p>${newCarChangeCar.plateNumber}</p>
+                                                    </div>
+                                                    <div class="meta-item">
+                                                        <span class="meta-label">Seats</span>
+                                                        <p>${newCarChangeCar.seatCount}</p>
+                                                    </div>
+                                                    <div class="meta-item">
+                                                        <span class="meta-label">Transmission</span>
+                                                        <p>${newCarChangeCar.transmission}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </c:if>
+                                    </div>
+
+                                    <c:if test="${carChangeRequest.status == 'PENDING' && carChangeRequest.requestedBy == 'STAFF'}">
+                                        <div class="status-note status-note-info" style="margin-top:16px;">
+                                            Waiting for customer response to the replacement car request.
+                                        </div>
+                                    </c:if>
+
+                                    <c:if test="${carChangeRequest.status == 'APPROVED'}">
+                                        <div class="status-note status-note-success" style="margin-top:16px;">
+                                            Customer accepted the replacement car.
+                                        </div>
+                                    </c:if>
+
+                                    <c:if test="${carChangeRequest.status == 'REJECTED'}">
+                                        <div class="status-note status-note-danger" style="margin-top:16px;">
+                                            Customer rejected the replacement car. Refund processing may be required.
+                                        </div>
+                                    </c:if>
+
+                                    <c:if test="${carChangeRequest.status == 'CANCELLED'}">
+                                        <div class="status-note status-note-warning" style="margin-top:16px;">
+                                            This replacement request is no longer valid.
+                                        </div>
+                                    </c:if>
+                                </c:when>
+
+                                <c:otherwise>
+                                    <div class="empty-check-state">
+                                        <div class="empty-check-icon">🚗</div>
+                                        <div class="empty-check-title">No car change request yet</div>
+                                        <div class="empty-check-subtitle">Chưa có yêu cầu đổi xe cho hợp đồng này</div>
+                                    </div>
+                                </c:otherwise>
+                            </c:choose>
+
+                            <c:if test="${canRequestCarChange}">
+                                <div class="car-change-action-wrap">
+                                    <a href="${pageContext.request.contextPath}/car-change?action=form&bookingId=${booking.bookingId}"
+                                       class="btn-action btn-check request-change-btn">
+                                        Request Replacement Car
+                                    </a>
+                                </div>
+                            </c:if>
+                        </div>
+
                         <!-- Return Check Information -->
                         <c:if test="${contract.contractStatus eq 'ACTIVE' or contract.contractStatus eq 'COMPLETED'}">
                             <div class="contract-section">
@@ -212,6 +357,20 @@
                                             </div>
 
                                             <div class="info-row">
+                                                <div class="info-label">Extra KM Fee Rule</div>
+                                                <div class="info-value">
+                                                    <fmt:formatNumber value="${extraKmFeePerKm}" type="number"/> VND / km
+                                                </div>
+                                            </div>
+
+                                            <div class="info-row">
+                                                <div class="info-label">Late Return Hourly Fee</div>
+                                                <div class="info-value">
+                                                    <fmt:formatNumber value="${lateHourlyFee}" type="number"/> VND / hour
+                                                </div>
+                                            </div>
+
+                                            <div class="info-row">
                                                 <div class="info-label">Return Status</div>
                                                 <div class="info-value">
                                                     <c:choose>
@@ -223,6 +382,23 @@
                                                         </c:otherwise>
                                                     </c:choose>
                                                 </div>
+                                            </div>
+
+                                            <div class="info-row">
+                                                <div class="info-label">Actual Return Time</div>
+                                                <div class="info-value">
+                                                    <c:choose>
+                                                        <c:when test="${not empty actualReturnTime}">
+                                                            <fmt:formatDate value="${actualReturnTime}" pattern="yyyy-MM-dd HH:mm"/>
+                                                        </c:when>
+                                                        <c:otherwise>Not available</c:otherwise>
+                                                    </c:choose>
+                                                </div>
+                                            </div>
+
+                                            <div class="info-row">
+                                                <div class="info-label">Return Timing Status</div>
+                                                <div class="info-value">${returnTimingStatus}</div>
                                             </div>
                                         </div>
 
@@ -328,7 +504,14 @@
                                     </div>
                                 </div>
 
-            
+                                <div class="payment-row">
+                                    <div class="payment-label">Extra Time Fee</div>
+                                    <div class="payment-value">
+                                        <fmt:formatNumber value="${not empty extraTimeFee ? extraTimeFee : 0}" type="number"/> VND
+                                    </div>
+                                </div>
+
+
 
                                 <c:if test="${finalAmountDue < 0}">
                                     <div class="payment-row payment-final">
@@ -371,6 +554,12 @@
                             </div>
                         </div>
 
+                        <c:if test="${canProcessRefund}">
+                            <div class="status-note status-note-warning" style="margin-top:16px;">
+                                Customer rejected the vehicle handover. This booking is waiting for staff to complete the refund.
+                            </div>
+                        </c:if>
+
                         <!-- Actions -->
                         <div class="contract-actions">
                             <a href="${pageContext.request.contextPath}/staff/contracts" class="btn-action btn-back">
@@ -378,7 +567,7 @@
                             </a>
 
                             <c:choose>
-                                <c:when test="${contract.contractStatus eq 'CREATED'}">
+                                <c:when test="${contract.contractStatus eq 'CREATED' and empty carChangeRequest}">
                                     <button type="button"
                                             class="btn-action btn-check"
                                             onclick="openBeforeCheckModal()">
@@ -412,6 +601,27 @@
                                             Cancel Contract
                                         </button>
                                     </form>
+                                </c:when>
+
+                                <c:when test="${canProcessRefund}">
+                                    <form method="post"
+                                          action="${pageContext.request.contextPath}/car-change"
+                                          style="display:inline-block;">
+                                        <input type="hidden" name="action" value="refund">
+                                        <input type="hidden" name="bookingId" value="${booking.bookingId}">
+
+                                        <button type="submit"
+                                                class="btn-action btn-complete"
+                                                onclick="return confirm('Confirm that refund has been completed for this booking?');">
+                                            Complete Refund
+                                        </button>
+                                    </form>
+                                </c:when>
+
+                                <c:when test="${contract.contractStatus eq 'CREATED' and not empty carChangeRequest and carChangeRequest.status eq 'PENDING'}">
+                                    <div class="status-note status-note-info" style="margin-bottom:12px;">
+                                        Replacement request is in progress. Normal pre-delivery actions are temporarily locked until the customer responds.
+                                    </div>
                                 </c:when>
 
                                 <c:when test="${contract.contractStatus eq 'WAITING_CUSTOMER_CONFIRM'}">
@@ -630,6 +840,40 @@
                         </div>
 
                         <div class="cf-section">
+                            <h4>Actual Return Time</h4>
+
+                            <div class="datetime-split-row">
+                                <div class="datetime-col">
+                                    <label class="cf-sub-label">Return Date</label>
+                                    <input type="date"
+                                           name="actualReturnDate"
+                                           class="cf-input"
+                                           value="${not empty actualReturnDateValue ? actualReturnDateValue : ''}"
+                                           required>
+                                </div>
+
+                                <div class="datetime-col">
+                                    <label class="cf-sub-label">Return Hour</label>
+                                    <select name="actualReturnHour" class="cf-input" required>
+                                        <option value="">Select hour</option>
+                                        <c:forEach begin="0" end="23" var="hour">
+                                            <fmt:formatNumber value="${hour}" pattern="00" var="hourText"/>
+                                            <option value="${hourText}:00"
+                                                    ${actualReturnHourValue == (hourText.concat(':00')) ? 'selected' : ''}>
+                                                ${hourText}:00
+                                            </option>
+                                        </c:forEach>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <small style="color:#666;">
+                                Contract end time:
+                                <fmt:formatDate value="${contract.contractEndTime}" pattern="yyyy-MM-dd HH:mm"/>
+                            </small>
+                        </div>
+
+                        <div class="cf-section">
                             <h4>Check Information</h4>
 
                             <div class="cf-issues-grid">
@@ -661,11 +905,6 @@
                                 <label class="cf-checkbox-item">
                                     <input type="checkbox" name="issueTypes" value="Interior damage">
                                     <span>Interior damage</span>
-                                </label>
-
-                                <label class="cf-checkbox-item">
-                                    <input type="checkbox" name="issueTypes" value="Returned late">
-                                    <span>Returned late</span>
                                 </label>
 
                                 <label class="cf-checkbox-item">
@@ -740,6 +979,11 @@
 
         <div id="returnCheckSavedOdometer"
              data-odometer="${not empty returnCheck ? returnCheck.odometerKm : ''}"
+             style="display:none;">
+        </div>
+
+        <div id="returnCheckSavedActualReturnTime"
+             data-return-time="${not empty actualReturnTimeValue ? actualReturnTimeValue : ''}"
              style="display:none;">
         </div>
 

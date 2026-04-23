@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Utils.DBContext;
+import java.sql.Timestamp;
 import models.ContractModel;
 
 /**
@@ -133,6 +134,7 @@ public class ContractDAO extends DBContext {
                     if (extraKmFeeObj != null) {
                         contract.setExtraKmFee(rs.getDouble("extra_km_fee"));
                     }
+                    contract.setActualReturnTime(rs.getTimestamp("actual_return_time"));
 
                     return contract;
                 }
@@ -248,6 +250,7 @@ public class ContractDAO extends DBContext {
                     if (extraKmFeeObj != null) {
                         contract.setExtraKmFee(rs.getDouble("extra_km_fee"));
                     }
+                    contract.setActualReturnTime(rs.getTimestamp("actual_return_time"));
 
                     return contract;
                 }
@@ -341,6 +344,23 @@ public class ContractDAO extends DBContext {
             e.printStackTrace();
         }
 
+        return false;
+    }
+
+    public boolean updateActualReturnTime(int contractId, Timestamp actualReturnTime) {
+        String sql = """
+        UPDATE rental_contract
+        SET actual_return_time = ?
+        WHERE contract_id = ?
+    """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setTimestamp(1, actualReturnTime);
+            ps.setInt(2, contractId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return false;
     }
 }

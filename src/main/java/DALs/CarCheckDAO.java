@@ -200,4 +200,30 @@ public class CarCheckDAO extends DBContext {
 
         return null;
     }
+
+    public CarCheckModel getLatestPreDeliveryCheckByContractAndCarId(int contractId, int carId) {
+        String sql = """
+        SELECT TOP 1 *
+        FROM car_check
+        WHERE contract_id = ?
+          AND car_id = ?
+          AND check_result IN ('OK', 'NOT_OK')
+        ORDER BY check_time DESC, check_id DESC
+    """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, contractId);
+            ps.setInt(2, carId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapResultSet(rs);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
 }
