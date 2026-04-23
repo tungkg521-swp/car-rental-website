@@ -2,7 +2,6 @@ package DALs;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -484,6 +483,50 @@ public class CarDAO extends DBContext {
         }
     }
 
+    public List<String> getAllBrandNames() {
+        List<String> list = new ArrayList<>();
+
+        String sql = """
+        SELECT brand_name
+        FROM brand
+        ORDER BY brand_name
+    """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                list.add(rs.getString("brand_name"));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public List<String> getAllTypeNames() {
+        List<String> list = new ArrayList<>();
+
+        String sql = """
+        SELECT type_name
+        FROM cars_type
+        ORDER BY type_name
+    """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                list.add(rs.getString("type_name"));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
     private int getBrandId(Connection conn, String brandName) throws SQLException {
         System.out.println("   getBrandId - brandName: " + brandName);
 
@@ -691,10 +734,8 @@ public class CarDAO extends DBContext {
                     for (int i = 0; i < imageUrls.size(); i++) {
                         imagePs.setInt(1, carId);
 
-                      
                         String imagePath = imageUrls.get(i);
 
-                       
                         if (!imagePath.startsWith("assets/")) {
                             imagePath = "assets/images/cars/" + car.getImageFolder() + "/" + imagePath;
                         }
@@ -921,34 +962,34 @@ public class CarDAO extends DBContext {
         List<CarModel> list = new ArrayList<>();
 
         String sql = """
-        SELECT
-            c.car_id,
-            c.model_name,
-            c.model_year,
-            c.price_per_day,
-            c.seat_count,
-            c.fuel_type,
-            c.transmission,
-            b.brand_name,
-            t.type_name,
-            i.image_url,
-            c.image_folder,
-            c.status,
-            c.plate_number
-        FROM cars c
-        LEFT JOIN brand b ON c.brand_id = b.brand_id
-        LEFT JOIN cars_type t ON c.type_id = t.type_id
-        LEFT JOIN cars_image i ON c.car_id = i.car_id AND i.is_primary = 1
-        WHERE c.status <> 'MAINTENANCE'
-          AND c.car_id NOT IN (
-              SELECT bk.car_id
-              FROM booking bk
-              WHERE bk.status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'WAITING_CUSTOMER_CONFIRM', 'ACTIVE')
-                AND bk.start_time < ?
-                AND bk.end_time > ?
-          )
-        ORDER BY c.car_id DESC
-    """;
+    SELECT
+        c.car_id,
+        c.model_name,
+        c.model_year,
+        c.price_per_day,
+        c.seat_count,
+        c.fuel_type,
+        c.transmission,
+        b.brand_name,
+        t.type_name,
+        i.image_url,
+        c.image_folder,
+        c.status,
+        c.plate_number
+    FROM cars c
+    LEFT JOIN brand b ON c.brand_id = b.brand_id
+    LEFT JOIN cars_type t ON c.type_id = t.type_id
+    LEFT JOIN cars_image i ON c.car_id = i.car_id AND i.is_primary = 1
+    WHERE c.status <> 'MAINTENANCE'
+      AND c.car_id NOT IN (
+          SELECT bk.car_id
+          FROM booking bk
+          WHERE bk.status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'ACTIVE')
+            AND bk.start_time < DATEADD(HOUR, 4, ?)
+            AND bk.end_time > DATEADD(HOUR, -4, ?)
+      )
+    ORDER BY c.car_id DESC
+""";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setTimestamp(1, endTime);
@@ -984,13 +1025,13 @@ public class CarDAO extends DBContext {
 
     public boolean isCarBookedInRange(int carId, Timestamp startTime, Timestamp endTime) {
         String sql = """
-        SELECT 1
-        FROM booking
-        WHERE car_id = ?
-          AND status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'WAITING_CUSTOMER_CONFIRM', 'ACTIVE')
-          AND start_time < ?
-          AND end_time > ?
-    """;
+    SELECT 1
+    FROM booking
+    WHERE car_id = ?
+      AND status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'WAITING_CUSTOMER_CONFIRM', 'ACTIVE')
+      AND start_time < DATEADD(HOUR, 4, ?)
+      AND end_time > DATEADD(HOUR, -4, ?)
+""";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, carId);
@@ -1006,90 +1047,92 @@ public class CarDAO extends DBContext {
         return false;
     }
 
-public List<CarModel> getAvailableReplacementCars(int currentCarId,
-        String requiredTypeName,
-        java.math.BigDecimal currentPricePerDay,
-        java.sql.Timestamp startTime,
-        java.sql.Timestamp endTime) {
+    public List<CarModel> getAvailableReplacementCars(
+            int oldCarId,
+            String typeName,
+            BigDecimal pricePerDay,
+            Timestamp startTime,
+            Timestamp endTime
+    ) {
+        List<CarModel> list = new ArrayList<>();
 
-    List<CarModel> list = new java.util.ArrayList<>();
+        String sql = """
+    SELECT
+        c.car_id,
+        c.model_name,
+        c.model_year,
+        c.price_per_day,
+        c.seat_count,
+        c.fuel_type,
+        c.transmission,
+        b.brand_name,
+        t.type_name,
+        c.plate_number,
+        c.image_folder,
+        c.description,
+        c.status,
+        c.plate_number
+    FROM cars c
+    JOIN brand b ON c.brand_id = b.brand_id
+    JOIN cars_type t ON c.type_id = t.type_id
+    WHERE c.car_id <> ?
+      AND t.type_name = ?
+      AND c.price_per_day = ?
+      AND c.status = 'AVAILABLE'
+      AND NOT EXISTS (
+          SELECT 1
+          FROM booking bk
+          WHERE bk.car_id = c.car_id
+            AND bk.status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'WAITING_CUSTOMER_CONFIRM', 'ACTIVE')
+            AND bk.start_time < DATEADD(HOUR, 4, ?)
+            AND bk.end_time > DATEADD(HOUR, -4, ?)
+      )
+      AND NOT EXISTS (
+          SELECT 1
+          FROM maintenance_record m
+          WHERE m.car_id = c.car_id
+            AND m.start_time < ?
+            AND ISNULL(m.end_time, '9999-12-31') >= ?
+            AND m.status IN ('OPEN', 'IN_PROGRESS')
+      )
+""";
 
-    String sql = """
-        SELECT
-            c.car_id,
-            c.model_name,
-            c.model_year,
-            c.price_per_day,
-            c.seat_count,
-            c.fuel_type,
-            c.transmission,
-            c.plate_number,
-            c.image_folder,
-            c.description,
-            c.status,
-            b.brand_name,
-            t.type_name,
-            i.image_url
-        FROM cars c
-        JOIN brand b ON c.brand_id = b.brand_id
-        JOIN cars_type t ON c.type_id = t.type_id
-        LEFT JOIN cars_image i ON c.car_id = i.car_id AND i.is_primary = 1
-        WHERE c.car_id <> ?
-          AND c.status = 'AVAILABLE'
-          AND t.type_name = ?
-          AND NOT EXISTS (
-              SELECT 1
-              FROM booking bk
-              WHERE bk.car_id = c.car_id
-                AND bk.status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'WAITING_CUSTOMER_CONFIRM', 'ACTIVE')
-                AND bk.start_time < ?
-                AND bk.end_time > ?
-          )
-          AND NOT EXISTS (
-              SELECT 1
-              FROM maintenance_record m
-              WHERE m.car_id = c.car_id
-                AND m.start_time < ?
-                AND ISNULL(m.end_time, '9999-12-31') >= ?
-                AND m.status IN ('OPEN', 'IN_PROGRESS')
-          )
-        ORDER BY c.price_per_day ASC, c.car_id DESC
-    """;
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, oldCarId);
+            ps.setString(2, typeName);
+            ps.setBigDecimal(3, pricePerDay);
+            ps.setTimestamp(4, endTime);
+            ps.setTimestamp(5, startTime);
+            ps.setTimestamp(6, endTime);
+            ps.setTimestamp(7, startTime);
 
-    try (PreparedStatement ps = connection.prepareStatement(sql)) {
-        ps.setInt(1, currentCarId);
-        ps.setString(2, requiredTypeName);
-        ps.setTimestamp(3, endTime);
-        ps.setTimestamp(4, startTime);
-        ps.setTimestamp(5, endTime);
-        ps.setTimestamp(6, startTime);
-
-        ResultSet rs = ps.executeQuery();
-        while (rs.next()) {
-            CarModel car = new CarModel();
-            car.setCarId(rs.getInt("car_id"));
-            car.setModelName(rs.getString("model_name"));
-            car.setModelYear(rs.getInt("model_year"));
-            car.setPricePerDay(rs.getBigDecimal("price_per_day"));
-            car.setSeatCount(rs.getInt("seat_count"));
-            car.setFuelType(rs.getString("fuel_type"));
-            car.setTransmission(rs.getString("transmission"));
-            car.setPlateNumber(rs.getString("plate_number"));
-            car.setImageFolder(rs.getString("image_folder"));
-            car.setDescription(rs.getString("description"));
-            car.setStatus(rs.getString("status"));
-            car.setBrandName(rs.getString("brand_name"));
-            car.setTypeName(rs.getString("type_name"));
-            car.setImageUrl(rs.getString("image_url"));
-            list.add(car);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(new CarModel(
+                            rs.getInt("car_id"),
+                            rs.getString("model_name"),
+                            rs.getInt("model_year"),
+                            rs.getBigDecimal("price_per_day"),
+                            rs.getInt("seat_count"),
+                            rs.getString("fuel_type"),
+                            rs.getString("transmission"),
+                            rs.getString("brand_name"),
+                            rs.getString("type_name"),
+                            null,
+                            rs.getString("image_folder"),
+                            rs.getString("description"),
+                            rs.getString("status"),
+                            rs.getString("plate_number")
+                    ));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-    } catch (Exception e) {
-        e.printStackTrace();
+        return list;
     }
-
-    return list;
-}
-
 
     public boolean updateCurrentOdometerKm(int carId, int odometerKm) {
         String sql = "UPDATE cars SET current_odometer_km = ? WHERE car_id = ?";
@@ -1105,21 +1148,20 @@ public List<CarModel> getAvailableReplacementCars(int currentCarId,
 
         return false;
     }
-    
-     public boolean existsPlateNumber(String plateNumber) {
+
+    public boolean existsPlateNumber(String plateNumber) {
         String sql = "SELECT 1 FROM cars WHERE plate_number = ?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, plateNumber);
             ResultSet rs = ps.executeQuery();
             return rs.next();
-             } catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
         return false;
     }
-
 
     public boolean existsPlateNumberExceptId(String plateNumber, int carId) {
         String sql = "SELECT 1 FROM cars WHERE plate_number = ? AND car_id <> ?";
@@ -1202,5 +1244,4 @@ public List<CarModel> getAvailableReplacementCars(int currentCarId,
         }
         return false;
     }
-
 }

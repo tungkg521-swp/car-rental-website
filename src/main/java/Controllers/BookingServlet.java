@@ -18,6 +18,7 @@ import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,13 @@ public class BookingServlet extends HttpServlet {
     private final CarChangeRequestDAO carChangeRequestDAO = new CarChangeRequestDAO();
     private final ContractDAO contractDAO = new ContractDAO();
     private final CarCheckDAO carCheckDAO = new CarCheckDAO();
+    private static final DateTimeFormatter DATETIME_FORMATTER
+            = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+
+    private Timestamp parseTimestamp(String raw) {
+        LocalDateTime ldt = LocalDateTime.parse(raw, DATETIME_FORMATTER);
+        return Timestamp.valueOf(ldt);
+    }
 
     @Override
     protected void doGet(HttpServletRequest request,

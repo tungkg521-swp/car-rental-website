@@ -258,7 +258,7 @@ public class StaffMaintenanceServlet extends HttpServlet {
 
                 carDAO.updateCarStatus(carId, "MAINTENANCE");
                 request.getSession().setAttribute("message",
-                        "Tạo lịch bảo dưỡng thành công. Trạng thái xe đã chuyển sang MAINTENANCE.");
+                        "Tạo lịch bảo dưỡng thành công.");
                 response.sendRedirect(request.getContextPath() + "/staff/maintenance");
             } else {
                 request.getSession().setAttribute("error", "Tạo lịch bảo dưỡng thất bại.");

@@ -68,7 +68,7 @@
                             <div class="price">
                                 <fmt:formatNumber value="${car.pricePerDay}" pattern="#,###"/> VND / day
                             </div>
-                            
+
                             <h3>Chọn thời gian thuê</h3>
 
                             <c:if test="${not empty BOOKING_ERROR}">
@@ -159,11 +159,39 @@
                 <script id="busyTimeRangesData" type="application/json">
                     ${empty busyTimeRangesJson ? "[]" : busyTimeRangesJson}
                 </script>
-
                 <!-- DESCRIPTION -->
                 <div class="section">
                     <h2>Mô tả xe</h2>
                     <p>${car.description}</p>
+                </div>
+
+                <div class="section surcharge-section">
+                    <h2>Phụ phí</h2>
+
+                    <div class="surcharge-list">
+                        <div class="surcharge-item">
+                            <div class="surcharge-head">
+                                <span class="surcharge-title">Giới hạn quãng đường</span>
+                                <span class="surcharge-value">${dailyKmLimit} km/ngày</span>
+                            </div>
+                            <p>
+                                Phí:
+                                <strong><fmt:formatNumber value="${extraKmFee}" pattern="#,###"/> đ/km</strong>
+                                vượt giới hạn
+                            </p>
+                        </div>
+
+                        <div class="surcharge-item">
+                            <div class="surcharge-head">
+                                <span class="surcharge-title">Quá giờ</span>
+                            </div>
+                            <p>
+                                Phí:
+                                <strong><fmt:formatNumber value="${lateFeePerHour}" pattern="#,###"/> đ/giờ</strong>.
+                                Quá ${lateFeeFlatDayThreshold} giờ tính bằng giá thuê 1 ngày
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- REVIEWS -->
