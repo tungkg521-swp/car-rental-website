@@ -88,7 +88,7 @@
                                 <input type="hidden" id="startHour" name="startHour" value="${not empty startHour ? startHour : (not empty param.startHour ? param.startHour : '00:00')}">
                                 <input type="hidden" id="endDate" name="endDate"
                                        value="${not empty endDate ? endDate : param.endDate}">
-                                <input type="hidden" id="endHour" name="endHour" value="${not empty endHour ? endHour : (not empty param.endHour ? param.endHour : '23:59')}">
+                                <input type="hidden" id="endHour" name="endHour" value="${not empty endHour ? endHour : (not empty param.endHour ? param.endHour : '23:00')}">
 
                                 <div class="rental-summary-trigger" id="openRentalModal" role="button" tabindex="0">
                                     <div class="rental-summary-grid">
@@ -189,28 +189,6 @@
                                 Phí:
                                 <strong><fmt:formatNumber value="${lateFeePerHour}" pattern="#,###"/> đ/giờ</strong>.
                                 Quá ${lateFeeFlatDayThreshold} giờ tính bằng giá thuê 1 ngày
-                            </p>
-                        </div>
-
-                        <div class="surcharge-item">
-                            <div class="surcharge-head">
-                                <span class="surcharge-title">Vệ sinh xe</span>
-                            </div>
-                            <p>
-                                Phí:
-                                <strong><fmt:formatNumber value="${cleaningFee}" pattern="#,###"/> đ</strong>
-                                (nếu trả xe nhiều vết bẩn, bùn cát, sinh tố... cần phải vệ sinh lại trước khi giao cho khách sau)
-                            </p>
-                        </div>
-
-                        <div class="surcharge-item">
-                            <div class="surcharge-head">
-                                <span class="surcharge-title">Khử mùi xe</span>
-                            </div>
-                            <p>
-                                Phí:
-                                <strong><fmt:formatNumber value="${deodorizingFee}" pattern="#,###"/> đ</strong>
-                                (nếu có mùi thuốc lá, đồ ăn nặng mùi... cần phải khử mùi trước khi giao cho khách sau)
                             </p>
                         </div>
                     </div>
@@ -333,7 +311,7 @@
                                     ${i lt 10 ? '0' : ''}${i}:00
                                 </option>
                             </c:forEach>
-                            <option value="23:59" selected>23:59</option>
+                            <option value="23:00" selected>23:00</option>
                         </select>
                     </div>
                 </div>

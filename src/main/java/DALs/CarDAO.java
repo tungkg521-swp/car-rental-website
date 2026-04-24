@@ -2,7 +2,6 @@ package DALs;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -959,34 +958,34 @@ public class CarDAO extends DBContext {
         List<CarModel> list = new ArrayList<>();
 
         String sql = """
-        SELECT
-            c.car_id,
-            c.model_name,
-            c.model_year,
-            c.price_per_day,
-            c.seat_count,
-            c.fuel_type,
-            c.transmission,
-            b.brand_name,
-            t.type_name,
-            i.image_url,
-            c.image_folder,
-            c.status,
-            c.plate_number
-        FROM cars c
-        LEFT JOIN brand b ON c.brand_id = b.brand_id
-        LEFT JOIN cars_type t ON c.type_id = t.type_id
-        LEFT JOIN cars_image i ON c.car_id = i.car_id AND i.is_primary = 1
-        WHERE c.status <> 'MAINTENANCE'
-          AND c.car_id NOT IN (
-              SELECT bk.car_id
-              FROM booking bk
-              WHERE bk.status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'WAITING_CUSTOMER_CONFIRM', 'ACTIVE')
-                AND bk.start_time < ?
-                AND bk.end_time > ?
-          )
-        ORDER BY c.car_id DESC
-    """;
+    SELECT
+        c.car_id,
+        c.model_name,
+        c.model_year,
+        c.price_per_day,
+        c.seat_count,
+        c.fuel_type,
+        c.transmission,
+        b.brand_name,
+        t.type_name,
+        i.image_url,
+        c.image_folder,
+        c.status,
+        c.plate_number
+    FROM cars c
+    LEFT JOIN brand b ON c.brand_id = b.brand_id
+    LEFT JOIN cars_type t ON c.type_id = t.type_id
+    LEFT JOIN cars_image i ON c.car_id = i.car_id AND i.is_primary = 1
+    WHERE c.status <> 'MAINTENANCE'
+      AND c.car_id NOT IN (
+          SELECT bk.car_id
+          FROM booking bk
+          WHERE bk.status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'ACTIVE')
+            AND bk.start_time < DATEADD(HOUR, 4, ?)
+            AND bk.end_time > DATEADD(HOUR, -4, ?)
+      )
+    ORDER BY c.car_id DESC
+""";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setTimestamp(1, endTime);
@@ -1022,13 +1021,13 @@ public class CarDAO extends DBContext {
 
     public boolean isCarBookedInRange(int carId, Timestamp startTime, Timestamp endTime) {
         String sql = """
-        SELECT 1
-        FROM booking
-        WHERE car_id = ?
-          AND status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'WAITING_CUSTOMER_CONFIRM', 'ACTIVE')
-          AND start_time < ?
-          AND end_time > ?
-    """;
+    SELECT 1
+    FROM booking
+    WHERE car_id = ?
+      AND status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'WAITING_CUSTOMER_CONFIRM', 'ACTIVE')
+      AND start_time < DATEADD(HOUR, 4, ?)
+      AND end_time > DATEADD(HOUR, -4, ?)
+""";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, carId);
@@ -1054,45 +1053,45 @@ public class CarDAO extends DBContext {
         List<CarModel> list = new ArrayList<>();
 
         String sql = """
-        SELECT
-            c.car_id,
-            c.model_name,
-            c.model_year,
-            c.price_per_day,
-            c.seat_count,
-            c.fuel_type,
-            c.transmission,
-            b.brand_name,
-            t.type_name,
-            c.plate_number,
-            c.image_folder,
-            c.description,
-            c.status,
-            c.plate_number
-        FROM cars c
-        JOIN brand b ON c.brand_id = b.brand_id
-        JOIN cars_type t ON c.type_id = t.type_id
-        WHERE c.car_id <> ?
-          AND t.type_name = ?
-          AND c.price_per_day = ?
-          AND c.status = 'AVAILABLE'
-          AND NOT EXISTS (
-              SELECT 1
-              FROM booking bk
-              WHERE bk.car_id = c.car_id
-                AND bk.status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'WAITING_CUSTOMER_CONFIRM', 'ACTIVE')
-                AND bk.start_time < ?
-                AND bk.end_time > ?
-          )
-          AND NOT EXISTS (
-              SELECT 1
-              FROM maintenance_record m
-              WHERE m.car_id = c.car_id
-                AND m.start_time < ?
-                AND ISNULL(m.end_time, '9999-12-31') >= ?
-                AND m.status IN ('OPEN', 'IN_PROGRESS')
-          )
-    """;
+    SELECT
+        c.car_id,
+        c.model_name,
+        c.model_year,
+        c.price_per_day,
+        c.seat_count,
+        c.fuel_type,
+        c.transmission,
+        b.brand_name,
+        t.type_name,
+        c.plate_number,
+        c.image_folder,
+        c.description,
+        c.status,
+        c.plate_number
+    FROM cars c
+    JOIN brand b ON c.brand_id = b.brand_id
+    JOIN cars_type t ON c.type_id = t.type_id
+    WHERE c.car_id <> ?
+      AND t.type_name = ?
+      AND c.price_per_day = ?
+      AND c.status = 'AVAILABLE'
+      AND NOT EXISTS (
+          SELECT 1
+          FROM booking bk
+          WHERE bk.car_id = c.car_id
+            AND bk.status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'WAITING_CUSTOMER_CONFIRM', 'ACTIVE')
+            AND bk.start_time < DATEADD(HOUR, 4, ?)
+            AND bk.end_time > DATEADD(HOUR, -4, ?)
+      )
+      AND NOT EXISTS (
+          SELECT 1
+          FROM maintenance_record m
+          WHERE m.car_id = c.car_id
+            AND m.start_time < ?
+            AND ISNULL(m.end_time, '9999-12-31') >= ?
+            AND m.status IN ('OPEN', 'IN_PROGRESS')
+      )
+""";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, oldCarId);
@@ -1122,11 +1121,12 @@ public class CarDAO extends DBContext {
                             rs.getString("plate_number")
                     ));
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return list;
     }
 

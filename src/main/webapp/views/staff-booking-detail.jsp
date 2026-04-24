@@ -263,21 +263,6 @@
                                                 </button>
                                             </form>
                                         </c:if>
-
-                                        <c:if test="${booking.status == 'CONFIRMED' && not empty pendingCarChangeRequest}">
-                                            <form method="post"
-                                                  action="${pageContext.request.contextPath}/car-change"
-                                                  class="inline-form">
-                                                <input type="hidden" name="action" value="staffRejectRefund"/>
-                                                <input type="hidden" name="bookingId" value="${booking.bookingId}"/>
-
-                                                <button type="submit"
-                                                        class="btn-status btn-warning"
-                                                        onclick="return confirm('Reject on behalf of customer and mark refunded at counter?');">
-                                                    Reject & Refund at Counter
-                                                </button>
-                                            </form>
-                                        </c:if>
                                     </div>
 
                                     <div class="footer-right">

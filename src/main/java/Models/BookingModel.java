@@ -1,7 +1,6 @@
 package models;
 
 import java.math.BigDecimal;
-import java.sql.Date;
 import java.sql.Timestamp;
 
 public class BookingModel {
@@ -37,10 +36,6 @@ public class BookingModel {
     private Timestamp paymentDeadline;
     
     
-    private String customerCheckStatus;
-private String customerCheckReason;
-private String customerCheckNote;
-private Timestamp customerCheckedAt;
 
 
 // getter + setter
@@ -232,39 +227,5 @@ private Timestamp customerCheckedAt;
 
     public void setPaymentDeadline(Timestamp paymentDeadline) {
         this.paymentDeadline = paymentDeadline;
-    }
-
-    public String getCustomerCheckStatus() {
-        return customerCheckStatus;
-    }
-
-    public void setCustomerCheckStatus(String customerCheckStatus) {
-        this.customerCheckStatus = customerCheckStatus;
-    }
-
-    public String getCustomerCheckReason() {
-        return customerCheckReason;
-    }
-
-    public void setCustomerCheckReason(String customerCheckReason) {
-        this.customerCheckReason = customerCheckReason;
-    }
-
-    public String getCustomerCheckNote() {
-        return customerCheckNote;
-    }
-
-    public void setCustomerCheckNote(String customerCheckNote) {
-        this.customerCheckNote = customerCheckNote;
-    }
-
-    public Timestamp getCustomerCheckedAt() {
-        return customerCheckedAt;
-    }
-
-    public void setCustomerCheckedAt(Timestamp customerCheckedAt) {
-        this.customerCheckedAt = customerCheckedAt;
-    }
-
-    
+    }   
 }

@@ -417,3 +417,136 @@
     color: #16a34a;
     font-weight: 600;
 }
+
+/* =========================
+   CAR CHANGE REQUEST
+   ========================= */
+.contract-section .status-note {
+    margin-top: 16px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+    font-weight: 500;
+}
+
+.contract-section .status-note-info {
+    background: #eef6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+}
+
+.contract-section .status-note-success {
+    background: #ecfdf3;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+
+.contract-section .status-note-danger {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.contract-section .status-note-warning {
+    background: #fff7ed;
+    color: #d97706;
+    border: 1px solid #fed7aa;
+}
+
+/* grid 2 cột cho current car / replacement car */
+.booking-bottom-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    margin-top: 16px;
+}
+
+.booking-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 18px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.card-title {
+    margin: 0 0 14px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+}
+
+/* grid info trong card xe */
+.car-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 20px;
+    align-items: start;
+}
+
+.meta-item {
+    background: #f9fafb;
+    border: 1px solid #edf0f3;
+    border-radius: 12px;
+    padding: 12px 14px;
+}
+
+.meta-item p {
+    margin: 6px 0 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #111827;
+    line-height: 1.5;
+    word-break: break-word;
+}
+
+.meta-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* nút request replacement car */
+.contract-section .btn-action.btn-check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 0 16px;
+    border-radius: 10px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* responsive */
+@media (max-width: 991px) {
+    .booking-bottom-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .car-info-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.datetime-split-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.datetime-col {
+    flex: 1;
+    min-width: 220px;
+}
+
+.cf-sub-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+}

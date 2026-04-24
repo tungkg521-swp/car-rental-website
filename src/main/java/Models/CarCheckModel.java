@@ -16,6 +16,7 @@ public class CarCheckModel {
     private String note;
     
     private Integer odometerKm;
+    private Timestamp checkedAt;
 
     public CarCheckModel() {
     }
@@ -107,4 +108,14 @@ public class CarCheckModel {
     public void setOdometerKm(Integer odometerKm) {
         this.odometerKm = odometerKm;
     }
+
+    public Timestamp getCheckedAt() {
+        return checkedAt;
+    }
+
+    public void setCheckedAt(Timestamp checkedAt) {
+        this.checkedAt = checkedAt;
+    }
+    
+    
 }

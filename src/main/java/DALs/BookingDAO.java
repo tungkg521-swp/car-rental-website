@@ -1,6 +1,5 @@
 package DALs;
 
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -97,20 +96,21 @@ public class BookingDAO extends DBContext {
                     booking.setVoucherId(voucherId);
                 }
 
+                int staffId = rs.getInt("staff_id");
+                if (!rs.wasNull()) {
+                    booking.setStaffId(staffId);
+                }
+
                 booking.setBookingDate(rs.getTimestamp("booking_date"));
                 booking.setStartTime(rs.getTimestamp("start_time"));
                 booking.setEndTime(rs.getTimestamp("end_time"));
                 booking.setStatus(rs.getString("status"));
                 booking.setNote(rs.getString("note"));
-                booking.setStaffId(rs.getInt("staff_id"));
                 booking.setTotalEstimatedPrice(rs.getBigDecimal("total_estimated_price"));
                 booking.setDepositAmount(rs.getBigDecimal("deposit_amount"));
                 booking.setRemainingAmount(rs.getBigDecimal("remaining_amount"));
                 booking.setPaymentDeadline(rs.getTimestamp("payment_deadline"));
-                booking.setCustomerCheckStatus(rs.getString("customer_check_status"));
-                booking.setCustomerCheckReason(rs.getString("customer_check_reason"));
-                booking.setCustomerCheckNote(rs.getString("customer_check_note"));
-                booking.setCustomerCheckedAt(rs.getTimestamp("customer_checked_at"));
+                
                 return booking;
             }
         } catch (SQLException e) {
@@ -220,8 +220,7 @@ public class BookingDAO extends DBContext {
                 booking.setStatus(rs.getString("status"));
                 booking.setNote(rs.getString("note"));
 
-                booking.setTotalEstimatedPrice(
-                        rs.getBigDecimal("total_estimated_price"));
+                booking.setTotalEstimatedPrice(rs.getBigDecimal("total_estimated_price"));
 
                 booking.setCarName(rs.getString("model_name"));
                 booking.setImageFolder(rs.getString("image_folder"));
@@ -230,11 +229,13 @@ public class BookingDAO extends DBContext {
                 booking.setCustomerEmail(rs.getString("email"));
                 booking.setCustomerPhone(rs.getString("phone"));
 
-                booking.setContractStatus(
-                        rs.getString("contract_status"));
+                booking.setContractStatus(rs.getString("contract_status"));
                 booking.setDepositAmount(rs.getBigDecimal("deposit_amount"));
                 booking.setRemainingAmount(rs.getBigDecimal("remaining_amount"));
                 booking.setPaymentDeadline(rs.getTimestamp("payment_deadline"));
+
+                
+
                 return booking;
             }
 
@@ -348,17 +349,16 @@ public class BookingDAO extends DBContext {
         b.deposit_amount,
         b.remaining_amount,
         b.payment_deadline,
-        
-                     
+
         c.full_name,
         c.email,
         c.phone,
         c.citizen_id,
-                     
+
         car.model_name,
         car.price_per_day,
         car.image_folder,
-         car.plate_number
+        car.plate_number
 
     FROM booking b
     JOIN customer c ON b.customer_id = c.customer_id
@@ -478,25 +478,22 @@ public class BookingDAO extends DBContext {
     }
 
     public boolean hasOverlapConfirmed(int carId, Timestamp startTime, Timestamp endTime) {
-
         String sql = """
         SELECT 1
         FROM booking
         WHERE car_id = ?
           AND status = 'CONFIRMED'
-          AND start_time < ?
-          AND end_time > ?
+          AND start_time < DATEADD(HOUR, 4, ?)
+          AND end_time > DATEADD(HOUR, -4, ?)
     """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-
             ps.setInt(1, carId);
             ps.setTimestamp(2, endTime);
             ps.setTimestamp(3, startTime);
 
             ResultSet rs = ps.executeQuery();
             return rs.next();
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -515,19 +512,16 @@ public class BookingDAO extends DBContext {
         SET status = 'REJECTED'
         WHERE car_id = ?
           AND booking_id <> ?
-          AND start_time < ?
-          AND end_time > ?
+          AND start_time < DATEADD(HOUR, 4, ?)
+          AND end_time > DATEADD(HOUR, -4, ?)
     """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-
             ps.setInt(1, carId);
             ps.setInt(2, confirmedBookingId);
             ps.setTimestamp(3, endTime);
             ps.setTimestamp(4, startTime);
-
             ps.executeUpdate();
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -552,25 +546,22 @@ public class BookingDAO extends DBContext {
     }
 
     public boolean hasBookingConflict(int carId, Timestamp startTime, Timestamp endTime) {
-
         String sql = """
-            SELECT 1
-            FROM booking
-            WHERE car_id = ?
-            AND status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'WAITING_CUSTOMER_CONFIRM', 'ACTIVE')
-            AND start_time < ?
-            AND end_time > ?
-             """;
+        SELECT 1
+        FROM booking
+        WHERE car_id = ?
+          AND status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'ACTIVE')
+          AND start_time < DATEADD(HOUR, 4, ?)
+          AND end_time > DATEADD(HOUR, -4, ?)
+    """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-
             ps.setInt(1, carId);
             ps.setTimestamp(2, endTime);
             ps.setTimestamp(3, startTime);
 
             ResultSet rs = ps.executeQuery();
             return rs.next();
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -689,15 +680,14 @@ public class BookingDAO extends DBContext {
     }
 
     public boolean hasBookingConflictExcludeBooking(int carId, Timestamp startTime, Timestamp endTime, int excludeBookingId) {
-
         String sql = """
         SELECT 1
         FROM booking
         WHERE car_id = ?
           AND booking_id <> ?
-          AND status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'WAITING_CUSTOMER_CONFIRM', 'ACTIVE')
-          AND start_time < ?
-          AND end_time > ?
+          AND status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'ACTIVE')
+          AND start_time < DATEADD(HOUR, 4, ?)
+          AND end_time > DATEADD(HOUR, -4, ?)
     """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -708,40 +698,7 @@ public class BookingDAO extends DBContext {
 
             ResultSet rs = ps.executeQuery();
             return rs.next();
-
         } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-
-    public boolean updateCustomerCheck(
-            int bookingId,
-            int customerId,
-            String status,
-            String reason,
-            String note) {
-
-        String sql = """
-        UPDATE booking
-        SET customer_check_status = ?,
-            customer_check_reason = ?,
-            customer_check_note = ?,
-            customer_checked_at = SYSDATETIME()
-        WHERE booking_id = ?
-          AND customer_id = ?
-    """;
-
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, status);
-            ps.setString(2, reason);
-            ps.setString(3, note);
-            ps.setInt(4, bookingId);
-            ps.setInt(5, customerId);
-
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
             e.printStackTrace();
         }
 

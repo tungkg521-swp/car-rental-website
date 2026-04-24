@@ -24,7 +24,6 @@ import models.StaffModel;
 public class StaffBookingController extends HttpServlet {
 
     private final BookingDAO bookingDAO = new BookingDAO();
-    private final CarChangeRequestDAO carChangeRequestDAO = new CarChangeRequestDAO();
     private final CarDAO carDAO = new CarDAO();
     private final ContractDAO contractDAO = new ContractDAO();
 
@@ -58,14 +57,6 @@ public class StaffBookingController extends HttpServlet {
 
                     return;
                 }
-
-                CarChangeRequestModel pendingRequest
-                        = carChangeRequestDAO.getPendingByBookingId(id);
-
-                List<CarModel> replacementCars = getAvailableReplacementCars(id);
-
-                request.setAttribute("pendingCarChangeRequest", pendingRequest);
-                request.setAttribute("replacementCars", replacementCars);
 
                 request.setAttribute("booking", booking);
 
@@ -213,25 +204,4 @@ public class StaffBookingController extends HttpServlet {
 
         return bookingDAO.updateStatus(bookingId, "REJECTED");
     }
-
-    private List<CarModel> getAvailableReplacementCars(int bookingId) {
-        BookingModel booking = bookingDAO.getById(bookingId);
-        if (booking == null) {
-            return java.util.Collections.emptyList();
-        }
-
-        CarModel oldCar = carDAO.findById(booking.getCarId());
-        if (oldCar == null) {
-            return java.util.Collections.emptyList();
-        }
-
-        return carDAO.getAvailableReplacementCars(
-                oldCar.getCarId(),
-                oldCar.getTypeName(),
-                oldCar.getPricePerDay(),
-                booking.getStartTime(),
-                booking.getEndTime()
-        );
-    }
-
 }
