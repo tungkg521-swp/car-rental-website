@@ -277,8 +277,8 @@ public class CarDAO extends DBContext {
     public List<CarModel> filterCars(
             String keyword,
             boolean availableOnly,
-            String[] brands,
-            String[] types,
+            String brands,
+            String types,
             String[] fuels,
             Integer seats,
             String transmission,
@@ -312,22 +312,18 @@ public class CarDAO extends DBContext {
             sql.append(" AND c.status = 'AVAILABLE'");
         }
 
-        if (brands != null && brands.length > 0) {
-            sql.append(" AND b.brand_name IN (");
-            for (int i = 0; i < brands.length; i++) {
-                sql.append(i == 0 ? "?" : ", ?");
-                params.add(brands[i]);
-            }
-            sql.append(")");
+       
+        if (brands != null && !brands.isEmpty() ) {
+            sql.append(" AND b.brand_name = ?");
+                params.add(brands);
+
         }
 
-        if (types != null && types.length > 0) {
-            sql.append(" AND ct.type_name IN (");
-            for (int i = 0; i < types.length; i++) {
-                sql.append(i == 0 ? "?" : ", ?");
-                params.add(types[i]);
-            }
-            sql.append(")");
+        if (types != null && !types.isEmpty()) {
+            sql.append(" AND ct.type_name = ?");
+           
+                params.add(types);
+           
         }
 
         if (fuels != null && fuels.length > 0) {
