@@ -62,7 +62,7 @@
                     <a class="${fn:contains(currentUri, '/admin/brand-type-cars') ? 'active' : ''}"
                        href="${pageContext.request.contextPath}/admin/brand-type-cars?action=list">
                         <i class="icon">🏷️</i>
-                        <span>Brand & Type Car</span>
+                        <span>Manage Brand & Car Type </span>
                     </a>
                 </li>
 

@@ -90,7 +90,7 @@
                             </form>
 
                             <button type="button" class="btn btn-primary btn-add" onclick="openModal('addBrandModal')">
-                                + Add Brand
+                                + Add Brand Car
                             </button>
                         </div>
 
