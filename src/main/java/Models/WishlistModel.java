@@ -22,9 +22,9 @@ public class WishlistModel {
     private String brandName;
     private String typeName;
 
-    // IMAGE
-    private String imageUrl;      // list
-    private String imageFolder;   // detail
+
+    private String imageUrl;    
+    private String imageFolder;  
 
     public WishlistModel(int wishlistId, int carId, String modelName, int modelYear, BigDecimal pricePerDay, int seatCount, String fuelType, String transmission, String brandName, String typeName, String imageUrl, String imageFolder) {
         this.wishlistId = wishlistId;

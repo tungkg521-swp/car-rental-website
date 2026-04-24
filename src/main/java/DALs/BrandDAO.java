@@ -170,7 +170,7 @@ public class BrandDAO extends DBContext {
         return false;
     }
 
-    // soft delete
+
     public boolean delete(int brandId) {
         String sql = "DELETE brand WHERE brand_id = ?";
 

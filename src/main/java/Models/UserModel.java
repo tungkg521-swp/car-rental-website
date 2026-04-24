@@ -4,8 +4,8 @@ public class UserModel {
 
     private int accountId;
 
-    private Integer customerId; // có thể null (staff/admin)
-    private String role;         // CUSTOMER / STAFF / ADMIN
+    private Integer customerId;
+    private String role;      
 
     private String status;
     private String email;
@@ -56,7 +56,7 @@ public class UserModel {
     }
 
 
-    // ===== HELPER METHODS (RẤT TIỆN) =====
+  
 
 
     public boolean isCustomer() {

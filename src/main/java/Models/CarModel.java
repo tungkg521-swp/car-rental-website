@@ -15,11 +15,11 @@ public class CarModel {
     private String typeName;
     private String plateNumber;
 
-    // IMAGE
-    private String imageUrl;      // list
-    private String imageFolder;   // detail
 
-    // DETAIL EXTRA
+    private String imageUrl;    
+    private String imageFolder;  
+
+  
     private String description;
     private String status;
 
@@ -85,7 +85,8 @@ public class CarModel {
     
     
 
-    // ===== GETTERS =====
+  
+    
     public int getCarId() {
         return carId;
     }

@@ -119,31 +119,7 @@ public class MaintenanceDAO extends DBContext {
         return null;
 
     }
-//
-//    private MaintenanceModel mapRowToModel(ResultSet rs) throws SQLException {
-//        MaintenanceModel m = new MaintenanceModel();
-//
-//        m.setMaintenanceId(rs.getInt("maintenance_id"));
-//        m.setCarId(rs.getInt("car_id"));
-//        m.setModelName(rs.getString("model_name"));
-//        m.setLicensePlate(rs.getString("license_plate"));
-//        m.setCarImageUrl(rs.getString("car_image_url"));
-//        m.setMaintenanceType(rs.getString("maintenance_type"));
-//        m.setStartDate(rs.getDate("start_date"));
-//        m.setEndDate(rs.getDate("end_date"));
-//        m.setMileageScheduled(rs.getInt("mileage_scheduled"));
-//        m.setDescription(rs.getString("description"));
-//        m.setEstimatedCost(rs.getBigDecimal("estimated_cost"));
 
-    ////        m.setStatus(rs.getString("status"));
-////        m.setCreatedBy((Integer) rs.getObject("created_by"));
-//
-//        if (rs.getTimestamp("updated_at") != null) {
-//            m.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
-//        }
-//
-//        return m;
-//    }
 
     public boolean add(MaintenanceModel m) {
         String sql = """

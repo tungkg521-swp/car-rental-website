@@ -40,7 +40,7 @@ public class ReportController extends HttpServlet {
         String endDate = request.getParameter("endDate");
 
         try {
-            // ==================== JSON ENDPOINTS ====================
+          
             if ("/admin/report-summary".equals(path)) {
                 Map<String, Object> summary = reportDAO.getReportSummary(startDate, endDate);
                 sendJsonResponse(response, summary);
@@ -56,7 +56,7 @@ public class ReportController extends HttpServlet {
             } else if ("/admin/vehicle-utilization".equals(path)) {
                 Map<String, Object> utilizationData = reportDAO.getVehicleUtilization(startDate, endDate);
                 sendJsonResponse(response, utilizationData);
-                // ==================== JSP FORWARD ENDPOINTS ====================
+            
             } else if ("/admin/rental-report-content".equals(path)) {
                 List<ReportModel> list = reportDAO.findAllRentalReports(startDate, endDate);
                 forwardToJSP(request, response, list, "RENTAL");
@@ -80,14 +80,14 @@ public class ReportController extends HttpServlet {
         }
     }
 
-    // Helper: Trả về JSON
+
     private void sendJsonResponse(HttpServletResponse response, Object data) throws IOException {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(gson.toJson(data));
     }
 
-    // Helper: Forward sang JSP
+ 
     private void forwardToJSP(HttpServletRequest request, HttpServletResponse response,
             List<ReportModel> list, String reportType) throws ServletException, IOException {
         request.setAttribute("reportList", list);

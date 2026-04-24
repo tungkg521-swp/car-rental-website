@@ -6,8 +6,8 @@ import java.sql.Date;
 
 public class ReportModel {
 
-    private Integer contractId;       // từ rental_contract
-    private Integer bookingId;        // fallback nếu chưa có contract
+    private Integer contractId;     
+    private Integer bookingId;       
     private Integer carId;
     private String plateNumber;
     private String modelName;
@@ -23,19 +23,19 @@ public class ReportModel {
     private BigDecimal totalPrice;
     private String staffName;
     private String note;
-    private Long rentalCount;       // số lần thuê
-    private Integer totalRentalDays; // tổng số ngày đã thuê
-    private BigDecimal totalRevenue; // tổng doanh thu từ xe đó (tùy chọn)
-    private Date lastRentalDate;    // lần thuê gần nhất
-    private Integer currentMileage; // mileage hiện tại
+    private Long rentalCount;       
+    private Integer totalRentalDays; 
+    private BigDecimal totalRevenue; 
+    private Date lastRentalDate;   
+    private Integer currentMileage; 
     private Date lastMaintenanceDate;
     private Date revenueDate;
 
-    // Constructor rỗng + full constructor + getters/setters
+    
     public ReportModel() {
     }
 
-    // getters & setters (tạo bằng NetBeans: Right-click → Insert Code → Getter and Setter)
+
     public Integer getContractId() {
         return contractId;
     }
