@@ -88,7 +88,7 @@
                                 <input type="hidden" id="startHour" name="startHour" value="${not empty startHour ? startHour : (not empty param.startHour ? param.startHour : '00:00')}">
                                 <input type="hidden" id="endDate" name="endDate"
                                        value="${not empty endDate ? endDate : param.endDate}">
-                                <input type="hidden" id="endHour" name="endHour" value="${not empty endHour ? endHour : (not empty param.endHour ? param.endHour : '23:59')}">
+                                <input type="hidden" id="endHour" name="endHour" value="${not empty endHour ? endHour : (not empty param.endHour ? param.endHour : '23:00')}">
 
                                 <div class="rental-summary-trigger" id="openRentalModal" role="button" tabindex="0">
                                     <div class="rental-summary-grid">
@@ -311,7 +311,7 @@
                                     ${i lt 10 ? '0' : ''}${i}:00
                                 </option>
                             </c:forEach>
-                            <option value="23:59" selected>23:59</option>
+                            <option value="23:00" selected>23:00</option>
                         </select>
                     </div>
                 </div>
