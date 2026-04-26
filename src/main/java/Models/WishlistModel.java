@@ -21,12 +21,13 @@ public class WishlistModel {
     private String transmission;
     private String brandName;
     private String typeName;
+    private String plateNumber;
 
 
     private String imageUrl;    
     private String imageFolder;  
 
-    public WishlistModel(int wishlistId, int carId, String modelName, int modelYear, BigDecimal pricePerDay, int seatCount, String fuelType, String transmission, String brandName, String typeName, String imageUrl, String imageFolder) {
+    public WishlistModel(int wishlistId, int carId, String modelName, int modelYear, BigDecimal pricePerDay, int seatCount, String fuelType, String transmission, String brandName, String typeName, String imageUrl, String imageFolder,String plateNumber) {
         this.wishlistId = wishlistId;
        
         this.carId = carId;
@@ -40,6 +41,7 @@ public class WishlistModel {
         this.typeName = typeName;
         this.imageUrl = imageUrl;
         this.imageFolder = imageFolder;
+        this.plateNumber = plateNumber;
     }
 
  
@@ -73,6 +75,14 @@ public class WishlistModel {
 
     public void setModelYear(int modelYear) {
         this.modelYear = modelYear;
+    }
+
+    public String getPlateNumber() {
+        return plateNumber;
+    }
+
+    public void setPlateNumber(String plateNumber) {
+        this.plateNumber = plateNumber;
     }
 
     public BigDecimal getPricePerDay() {

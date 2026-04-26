@@ -117,13 +117,13 @@ public class WishlistController extends HttpServlet {
             return;
 
         } else if (wishlistDAO.exists(customerId, carId)) {
-            message = "Already in wishlist!";
+            message = "Đã tồn tại trong danh sách yêu thích!";
         } else {
             boolean success = wishlistDAO.create(customerId, carId);
-            message = success ? "Added to wishlist successfully!" : "Something went wrong!";
+            message = success ? "Thêm thành công!" : "có lỗi khi thêm!";
         }
 
-        if (message.equals("Added to wishlist successfully!")) {
+        if (message.equals("Thêm thành công!")) {
             request.setAttribute("SUCCESS", message);
         } else {
             request.setAttribute("ERROR", message);
@@ -160,12 +160,12 @@ public class WishlistController extends HttpServlet {
 
         String message;
         if (!wishlistDAO.exists(customerId, carId)) {
-            message = "Item not found in wishlist!";
+            message = "Không thấy xe này trong danh sách yêu thích!";
         } else {
             boolean success = wishlistDAO.delete(customerId, carId);
-            message = success ? "Removed successfully!" : "Remove failed!";
+            message = success ? "Đã bỏ yêu thích!" : "Bỏ yêu thích thất bại!";
         }
-        if ("Removed successfully!".equals(message)) {
+        if ("Đã bỏ yêu thích!".equals(message)) {
             request.setAttribute("success", message);
         } else {
             request.setAttribute("error", message);

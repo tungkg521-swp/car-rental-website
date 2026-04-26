@@ -12,7 +12,7 @@
     <title> Wish list  </title>
 
     <link rel="stylesheet"
-          href="${pageContext.request.contextPath}/assets/css/wishlist.css">
+          href="${pageContext.request.contextPath}/assets/css/wishlist.css?v=13">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/car-detail.css">
 </head>
 <body>
@@ -47,25 +47,32 @@
                             <div class="wishlist-card">
 
                                 <!-- IMAGE -->
+
+
                                 <div class="wishlist-image">
                                     <img src="${w.imageUrl}" alt="${w.modelName}">
                                 </div>
 
-                                <!-- INFO -->
                                 <div class="wishlist-info">
-                                    <h4 class="car-title">
-                                        ${w.brandName}     ${w.modelName}     ${w.modelYear}
+                                    <h4 class="car-name-row">
+                                        <span class="car-model-name">${w.modelName}</span>
+                                        <span class="car-name-dot">•</span>
+                                        <span class="car-plate-inline">${w.plateNumber}</span>
                                     </h4>
 
-                                    <div class="car-specs">
-                                        <span>⚙ ${w.transmission}</span>
-                                        <span>⛽ ${w.fuelType}</span>
-                                        <span>👥 ${w.seatCount} chỗ</span>
-                                        <span>${w.typeName}</span>
+                                    <p class="car-sub-meta">
+                                        ${w.brandName} • ${w.typeName}
+                                    </p>
+
+                                    <div class="car-spec-line">
+                                        <span class="car-spec-item">🚗 ${w.seatCount} chỗ</span>
+                                        <span class="car-spec-separator">||</span>
+                                        <span class="car-spec-item">⚙ ${w.transmission}</span>
+                                        <span class="car-spec-separator">||</span>
+                                        <span class="car-spec-item fuel-item">⛽ ${w.fuelType}</span>
                                     </div>
                                 </div>
 
-                                <!-- ACTION -->
                                 <div class="wishlist-action">
                                     <div class="price">
                                         <fmt:formatNumber value="${w.pricePerDay}" pattern="#,###"/> VND / day
