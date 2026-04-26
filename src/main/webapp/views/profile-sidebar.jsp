@@ -34,7 +34,7 @@
             </a>
         </li>
 
-        <li class="sidebar-item logout">
+        <li class="sidebar-item ">
             <a href="${pageContext.request.contextPath}/logout">
                 ↩ Đăng xuất
             </a>

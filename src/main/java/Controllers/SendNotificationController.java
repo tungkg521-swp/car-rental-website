@@ -18,7 +18,7 @@ public class SendNotificationController extends HttpServlet {
     private final NotificationDAO notificationDAO = new NotificationDAO();
     private final AccountDAO accountDAO = new AccountDAO();
 
-    // Mở trang gửi notification
+
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)

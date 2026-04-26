@@ -33,7 +33,7 @@ public class ContractModel {
 
     private String note;
 
-    // Extra fields for display
+ 
     private String customerName;
     private String customerEmail;
     private String customerPhone;

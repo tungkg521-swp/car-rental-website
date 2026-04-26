@@ -4,14 +4,12 @@
  */
 package Controllers;
 
-
 import DALs.CarDAO;
 import DALs.WishlistDAO;
 
 import models.WishlistModel;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,20 +19,15 @@ import java.util.List;
 import models.CarModel;
 import models.CustomerModel;
 
-
-
 /**
  *
  * @author Admin
  */
 public class WishlistController extends HttpServlet {
 
-
     private final WishlistDAO wishlistDAO = new WishlistDAO();
     private final CarDAO carDAO = new CarDAO();
 
-
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
      *
@@ -95,9 +88,7 @@ public class WishlistController extends HttpServlet {
 
         int customerId = customer.getCustomerId();
 
-
         List<WishlistModel> list = wishlistDAO.findByCustomerId(customerId);
-
 
         request.setAttribute("wishlist", list);
 
@@ -124,16 +115,15 @@ public class WishlistController extends HttpServlet {
         if (car == null) {
             response.sendRedirect(request.getContextPath() + "/cars");
             return;
-            //message = "Car not found!";
+
         } else if (wishlistDAO.exists(customerId, carId)) {
-            message = "Already in wishlist!";
+            message = "Đã tồn tại trong danh sách yêu thích!";
         } else {
             boolean success = wishlistDAO.create(customerId, carId);
-            message = success ? "Added to wishlist successfully!" : "Something went wrong!";
+            message = success ? "Thêm thành công!" : "có lỗi khi thêm!";
         }
 
-
-        if (message.equals("Added to wishlist successfully!")) {
+        if (message.equals("Thêm thành công!")) {
             request.setAttribute("SUCCESS", message);
         } else {
             request.setAttribute("ERROR", message);
@@ -146,7 +136,6 @@ public class WishlistController extends HttpServlet {
                 .forward(request, response);
 
     }
-
 
     private void removeWishlist(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -171,12 +160,12 @@ public class WishlistController extends HttpServlet {
 
         String message;
         if (!wishlistDAO.exists(customerId, carId)) {
-            message = "Item not found in wishlist!";
+            message = "Không thấy xe này trong danh sách yêu thích!";
         } else {
             boolean success = wishlistDAO.delete(customerId, carId);
-            message = success ? "Removed successfully!" : "Remove failed!";
+            message = success ? "Đã bỏ yêu thích!" : "Bỏ yêu thích thất bại!";
         }
-        if ("Removed successfully!".equals(message)) {
+        if ("Đã bỏ yêu thích!".equals(message)) {
             request.setAttribute("success", message);
         } else {
             request.setAttribute("error", message);
@@ -188,6 +177,4 @@ public class WishlistController extends HttpServlet {
         request.getRequestDispatcher("/views/wishlist.jsp").forward(request, response);
     }
 
-    
-  
 }

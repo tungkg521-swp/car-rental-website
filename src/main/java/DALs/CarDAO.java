@@ -258,9 +258,9 @@ public class CarDAO extends DBContext {
                         rs.getString("transmission"),
                         rs.getString("brand_name"),
                         rs.getString("type_name"),
-                        rs.getString("image_url"), // SỬA: Lấy từ rs thay null
+                        rs.getString("image_url"), 
                         rs.getString("image_folder"),
-                        rs.getString("description"), // SỬA: Lấy từ rs thay null (nếu không cần, bỏ select và dùng constructor khác)
+                        rs.getString("description"),
 
                         rs.getString("status"),
                         rs.getString("plate_number")
@@ -300,7 +300,7 @@ public class CarDAO extends DBContext {
 
         List<Object> params = new ArrayList<>();
 
-        // Thêm điều kiện động
+      
         if (keyword != null && !keyword.trim().isEmpty()) {
 
             sql.append(" AND c.model_name LIKE ?");
@@ -837,7 +837,7 @@ public class CarDAO extends DBContext {
                         imagePs.setInt(1, car.getCarId());
                         imagePs.setString(2, newImageUrls.get(i));
 
-                        // Nếu xe chưa có ảnh primary nào thì ảnh đầu tiên upload mới sẽ là primary
+                      
                         boolean isPrimary = !hasPrimary && i == 0;
                         imagePs.setBoolean(3, isPrimary);
 

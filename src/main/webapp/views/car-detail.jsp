@@ -141,12 +141,29 @@
                                 </c:if>
                             </div>
 
+                            <c:if test="${not empty SUCCESS}">
+                                <div class="alert success">
+                                    ${SUCCESS}
+                                </div>
+                            </c:if>
+
+                            <c:if test="${not empty ERROR}">
+                                <div class="alert error">
+                                    ${ERROR}
+                                </div>
+                            </c:if>
+
                             <c:if test="${sessionScope.ACCOUNT != null and sessionScope.ACCOUNT.roleId == 1}">
-                                <button type="button"
-                                        class="wishlist-btn"
-                                        data-car-id="${car.carId}">
-                                    ❤ Thêm vào yêu thích
-                                </button>
+                                <form  action="${pageContext.request.contextPath}/wishlist"
+                                       method="POST">
+                                    <input type="hidden" name="action" value="add">
+                                    <input type="hidden" name="carId" value="${car.carId}">
+                                    <button type="submit"
+                                            class="wishlist-btn"
+                                            data-car-id="${car.carId}">
+                                        ❤ Thêm vào yêu thích
+                                    </button>
+                                </form>
                             </c:if>
 
                             <a href="#" class="consult">Nhận thông tin tư vấn</a>

@@ -38,7 +38,8 @@ public class WishlistDAO extends DBContext{
                b.brand_name,
                t.type_name,
                i.image_url,
-               c.image_folder        
+               c.image_folder,
+                c.plate_number  
         FROM cars c
         LEFT JOIN wish_list w ON c.car_id = w.car_id
         LEFT JOIN brand b ON c.brand_id = b.brand_id
@@ -67,7 +68,8 @@ public class WishlistDAO extends DBContext{
                     rs.getString("brand_name"),
                     rs.getString("type_name"),
                     rs.getString("image_url"),
-                    rs.getString("image_folder")
+                    rs.getString("image_folder"),
+                     rs.getString("plate_number")
             );
 
             list.add(w);
