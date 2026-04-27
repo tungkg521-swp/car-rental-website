@@ -43,9 +43,7 @@
                                      alt="${car.modelName} image ${i}">
                             </c:forEach>
                         </div>
-                        <c:if test="${not empty BOOKING_ERROR}">
-                            <div class="alert alert-danger">${BOOKING_ERROR}</div>
-                        </c:if>
+
 
                         <h1> ${car.modelName}</h1>
 
@@ -71,11 +69,7 @@
 
                             <h3>Chọn thời gian thuê</h3>
 
-                            <c:if test="${not empty BOOKING_ERROR}">
-                                <div class="date-error-box">${BOOKING_ERROR}</div>
-                            </c:if>
 
-                            <div id="calendarDateError" class="date-error-box" style="display:none;"></div>
 
                             <form id="bookingFromDetailForm"
                                   action="${pageContext.request.contextPath}/booking"
@@ -120,9 +114,7 @@
 
                                 <button type="button"
                                         id="bookNowBtn"
-                                        data-car-available="${car.status eq 'AVAILABLE'}"
-                                        class="btn ${car.status ne 'AVAILABLE' ? 'disabled' : ''}"
-                                        ${car.status ne 'AVAILABLE' ? 'disabled' : ''}>
+                                        class="btn">
                                     Đặt xe
                                 </button>
                             </form>
@@ -285,6 +277,7 @@
                 <button type="button" class="rental-time-close" id="closeRentalModal">×</button>
 
                 <h3 class="rental-time-title">Thời gian</h3>
+                <div id="calendarDateError" class="date-error-box rental-modal-error" style="display:none;"></div>
 
                 <div id="rentalCalendar"
                      data-busy-dates='${empty busyDatesJson ? "[]" : busyDatesJson}'>
@@ -306,7 +299,7 @@
                     <div class="rental-hour-item">
                         <label for="modalEndHour">Giờ trả xe</label>
                         <select id="modalEndHour" class="rental-time-select">
-                            <c:forEach var="i" begin="0" end="22">
+                            <c:forEach var="i" begin="0" end="23">
                                 <option value="${i lt 10 ? '0' : ''}${i}:00">
                                     ${i lt 10 ? '0' : ''}${i}:00
                                 </option>

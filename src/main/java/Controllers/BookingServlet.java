@@ -108,7 +108,7 @@ public class BookingServlet extends HttpServlet {
                 break;
             case "rejectHandover":
                 rejectHandover(request, response);
-                break; 
+                break;
             default:
                 response.sendRedirect(request.getContextPath() + "/cars");
                 break;
@@ -191,7 +191,7 @@ public class BookingServlet extends HttpServlet {
             return;
         }
 
-        if (bookingDAO.hasBookingConflict(carId, startTime, endTime)) {
+        if (bookingDAO.hasCarUnavailableConflict(carId, startTime, endTime)) {
 
             request.setAttribute("BOOKING_ERROR", "Xe đang bận trong khoảng thời gian bạn chọn. Vui lòng chọn lịch khác.");
             request.setAttribute("car", car);
@@ -217,7 +217,8 @@ public class BookingServlet extends HttpServlet {
 
                 busyTimeRangesJson.append("{")
                         .append("\"start\":\"").append(start.toString().replace(" ", "T")).append("\",")
-                        .append("\"end\":\"").append(end.toString().replace(" ", "T")).append("\"")
+                        .append("\"end\":\"").append(end.toString().replace(" ", "T")).append("\",")
+                        .append("\"type\":\"BOOKING\"")
                         .append("}");
 
                 if (i < busyRanges.size() - 1) {
@@ -238,11 +239,6 @@ public class BookingServlet extends HttpServlet {
             request.setAttribute("busyDatesJson", busyDatesJson.toString());
             request.setAttribute("busyTimeRangesJson", busyTimeRangesJson.toString());
             request.getRequestDispatcher("/views/car-detail.jsp").forward(request, response);
-            return;
-        }
-
-        if (!"AVAILABLE".equalsIgnoreCase(car.getStatus())) {
-            response.sendRedirect(request.getContextPath() + "/car-detail?carId=" + carId);
             return;
         }
 
@@ -372,12 +368,7 @@ public class BookingServlet extends HttpServlet {
             return;
         }
 
-        if ("MAINTENANCE".equalsIgnoreCase(car.getStatus())) {
-            response.sendRedirect(request.getContextPath() + "/cars");
-            return;
-        }
-
-        if (bookingDAO.hasBookingConflict(carId, startTime, endTime)) {
+        if (bookingDAO.hasCarUnavailableConflict(carId, startTime, endTime)) {
             request.setAttribute("errorMessage", "Xe không khả dụng trong khoảng thời gian đã chọn.");
             request.setAttribute("car", car);
             request.setAttribute("customer", customer);
@@ -535,7 +526,7 @@ public class BookingServlet extends HttpServlet {
         BookingModel booking = bookingDAO.findById(bookingId, customer.getCustomerId());
 
         if (booking == null) {
-            request.setAttribute("error", "Booking not found");
+            request.setAttribute("error", "Không tìm thấy đơn đặt xe.");
             request.getRequestDispatcher("/views/error.jsp").forward(request, response);
             return;
         }
@@ -584,9 +575,21 @@ public class BookingServlet extends HttpServlet {
 
         String cancelStatus = request.getParameter("cancelStatus");
         request.setAttribute("cancelStatus", cancelStatus);
+
         request.setAttribute("booking", booking);
 
-        session.removeAttribute("handoverStatus");
+        String handoverStatus = (String) session.getAttribute("handoverStatus");
+        if (handoverStatus != null) {
+            request.setAttribute("handoverStatus", handoverStatus);
+            request.setAttribute("handoverMessage", buildHandoverMessage(handoverStatus));
+            session.removeAttribute("handoverStatus");
+        }
+
+        String sessionError = (String) session.getAttribute("error");
+        if (sessionError != null) {
+            request.setAttribute("errorMessage", sessionError);
+            session.removeAttribute("error");
+        }
 
         request.getRequestDispatcher("/views/booking-detail.jsp").forward(request, response);
     }
@@ -697,11 +700,12 @@ public class BookingServlet extends HttpServlet {
         boolean success = deleteCancelledBookingByCustomer(bookingId, customer.getCustomerId());
 
         if (success) {
-            response.sendRedirect(request.getContextPath() + "/booking?action=list");
+            response.sendRedirect(request.getContextPath() + "/booking?action=list&deleteStatus=success");
         } else {
             response.sendRedirect(
                     request.getContextPath()
                     + "/booking?action=detail&bookingId=" + bookingId
+                    + "&deleteStatus=fail"
             );
         }
     }
@@ -745,26 +749,26 @@ public class BookingServlet extends HttpServlet {
 
         BookingModel booking = bookingDAO.findById(bookingId, customer.getCustomerId());
         if (booking == null) {
-            session.setAttribute("error", "Booking not found.");
+            session.setAttribute("error", "Không tìm thấy đơn đặt xe.");
             response.sendRedirect(request.getContextPath() + "/booking?action=list");
             return;
         }
 
         ContractModel contract = contractDAO.getContractById(contractId);
         if (contract == null || contract.getCustomerId() != customer.getCustomerId()) {
-            session.setAttribute("error", "Contract not found.");
+            session.setAttribute("error", "Không tìm thấy hợp đồng.");
             response.sendRedirect(request.getContextPath() + "/booking?action=detail&bookingId=" + bookingId);
             return;
         }
 
         if (!"WAITING_CUSTOMER_CONFIRM".equalsIgnoreCase(contract.getContractStatus())) {
-            session.setAttribute("error", "This contract is not waiting for customer confirmation.");
+            session.setAttribute("error", "Hợp đồng này chưa đến bước khách hàng xác nhận.");
             response.sendRedirect(request.getContextPath() + "/booking?action=detail&bookingId=" + bookingId);
             return;
         }
 
         if (contract.getHandoverCheckId() == null) {
-            session.setAttribute("error", "No handover check found for this contract.");
+            session.setAttribute("error", "Chưa có thông tin kiểm tra xe trước khi giao.");
             response.sendRedirect(request.getContextPath() + "/booking?action=detail&bookingId=" + bookingId);
             return;
         }
@@ -819,20 +823,26 @@ public class BookingServlet extends HttpServlet {
 
         BookingModel booking = bookingDAO.findById(bookingId, customer.getCustomerId());
         if (booking == null) {
-            session.setAttribute("error", "Booking not found.");
+            session.setAttribute("error", "Không tìm thấy đơn đặt xe.");
             response.sendRedirect(request.getContextPath() + "/booking?action=list");
             return;
         }
 
         ContractModel contract = contractDAO.getContractById(contractId);
         if (contract == null || contract.getCustomerId() != customer.getCustomerId()) {
-            session.setAttribute("error", "Contract not found.");
+            session.setAttribute("error", "Không tìm thấy hợp đồng.");
             response.sendRedirect(request.getContextPath() + "/booking?action=detail&bookingId=" + bookingId);
             return;
         }
 
         if (!"WAITING_CUSTOMER_CONFIRM".equalsIgnoreCase(contract.getContractStatus())) {
-            session.setAttribute("error", "This contract is not waiting for customer confirmation.");
+            session.setAttribute("error", "Hợp đồng này chưa đến bước khách hàng xác nhận.");
+            response.sendRedirect(request.getContextPath() + "/booking?action=detail&bookingId=" + bookingId);
+            return;
+        }
+
+        if (contract.getHandoverCheckId() == null) {
+            session.setAttribute("error", "Chưa có thông tin kiểm tra xe trước khi giao.");
             response.sendRedirect(request.getContextPath() + "/booking?action=detail&bookingId=" + bookingId);
             return;
         }
@@ -912,8 +922,7 @@ public class BookingServlet extends HttpServlet {
             return false;
         }
 
-        if (!"PENDING_APPROVAL".equalsIgnoreCase(booking.getStatus())
-                && !"AWAITING_PAYMENT".equalsIgnoreCase(booking.getStatus())) {
+        if (!"AWAITING_PAYMENT".equalsIgnoreCase(booking.getStatus())) {
             return false;
         }
 
@@ -927,11 +936,31 @@ public class BookingServlet extends HttpServlet {
             return false;
         }
 
-        if (!"CANCELLED".equalsIgnoreCase(booking.getStatus())) {
+        if (!"CANCELLED".equalsIgnoreCase(booking.getStatus())
+                && !"COMPLETED".equalsIgnoreCase(booking.getStatus())) {
             return false;
         }
 
         return bookingDAO.deleteBooking(bookingId, customerId);
+    }
+
+    private String buildHandoverMessage(String status) {
+        if (status == null) {
+            return "";
+        }
+
+        switch (status) {
+            case "confirm_success":
+                return "Xác nhận nhận xe thành công.";
+            case "confirm_fail":
+                return "Xác nhận nhận xe thất bại. Vui lòng thử lại.";
+            case "reject_success":
+                return "Từ chối nhận xe thành công. Đơn đặt xe đã chuyển sang trạng thái chờ hoàn tiền.";
+            case "reject_fail":
+                return "Từ chối nhận xe thất bại. Vui lòng thử lại.";
+            default:
+                return "";
+        }
     }
 
     private Timestamp parseDateTimeFromRequest(HttpServletRequest request, String dateParam, String timeParam) {

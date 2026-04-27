@@ -88,16 +88,118 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // ===== VALIDATE FORM SUBMIT =====
+    // ===== VALIDATE FORM SUBMIT =====
     const bookingForm = document.querySelector(".hero-booking-form");
+    const startDateInput = document.getElementById("startDate");
+    const endDateInput = document.getElementById("endDate");
     const startHourInput = document.getElementById("startHour");
     const endHourInput = document.getElementById("endHour");
+    const homeDateTimeError = document.getElementById("homeDateTimeError");
 
-    if (bookingForm && startHourInput && endHourInput) {
+    let homeErrorTimer = null;
+
+    function showHomeDateTimeError(message) {
+        if (!homeDateTimeError) {
+            return;
+        }
+
+        homeDateTimeError.textContent = message;
+        homeDateTimeError.style.display = "block";
+
+        if (homeErrorTimer) {
+            clearTimeout(homeErrorTimer);
+        }
+
+        homeErrorTimer = setTimeout(function () {
+            hideHomeDateTimeError();
+        }, 3500);
+    }
+
+    function hideHomeDateTimeError() {
+        if (!homeDateTimeError) {
+            return;
+        }
+
+        homeDateTimeError.textContent = "";
+        homeDateTimeError.style.display = "none";
+
+        if (homeErrorTimer) {
+            clearTimeout(homeErrorTimer);
+            homeErrorTimer = null;
+        }
+    }
+
+    function buildDateTime(dateValue, hourValue) {
+        if (!dateValue || !hourValue) {
+            return null;
+        }
+
+        const dateTime = new Date(dateValue + "T" + hourValue + ":00");
+
+        if (isNaN(dateTime.getTime())) {
+            return null;
+        }
+
+        return dateTime;
+    }
+
+    function validateHomeDateTime() {
+        hideHomeDateTimeError();
+
+        if (!startDateInput || !endDateInput || !startHourInput || !endHourInput) {
+            return true;
+        }
+
+        const startDateValue = startDateInput.value;
+        const endDateValue = endDateInput.value;
+        const startHourValue = startHourInput.value;
+        const endHourValue = endHourInput.value;
+
+        if (!startDateValue || !endDateValue) {
+            showHomeDateTimeError("Vui lòng chọn đầy đủ ngày nhận xe và ngày trả xe.");
+            return false;
+        }
+
+        if (!startHourValue || !endHourValue) {
+            showHomeDateTimeError("Vui lòng chọn đầy đủ giờ nhận xe và giờ trả xe.");
+            return false;
+        }
+
+        const startDateTime = buildDateTime(startDateValue, startHourValue);
+        const endDateTime = buildDateTime(endDateValue, endHourValue);
+
+        if (!startDateTime || !endDateTime) {
+            showHomeDateTimeError("Ngày giờ thuê không hợp lệ. Vui lòng kiểm tra lại.");
+            return false;
+        }
+
+        const now = new Date();
+
+        if (startDateTime < now) {
+            showHomeDateTimeError("Thời gian nhận xe không được nhỏ hơn thời điểm hiện tại.");
+            return false;
+        }
+
+        if (endDateTime <= startDateTime) {
+            showHomeDateTimeError("Thời gian trả xe phải sau thời gian nhận xe.");
+            return false;
+        }
+
+        return true;
+    }
+
+    if (bookingForm) {
         bookingForm.addEventListener("submit", function (e) {
-            if (!startHourInput.value || !endHourInput.value) {
+            if (!validateHomeDateTime()) {
                 e.preventDefault();
-                alert("Vui lòng chọn giờ nhận xe và giờ trả xe.");
             }
         });
     }
+
+    [startDateInput, endDateInput, startHourInput, endHourInput].forEach(function (input) {
+        if (input) {
+            input.addEventListener("change", hideHomeDateTimeError);
+            input.addEventListener("input", hideHomeDateTimeError);
+        }
+    });
 });

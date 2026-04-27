@@ -363,4 +363,28 @@ public class ContractDAO extends DBContext {
         }
         return false;
     }
+
+    public boolean updateFinalSettlement(int contractId,
+            double extraFeeTotal,
+            double finalAmount) {
+
+        String sql = """
+        UPDATE rental_contract
+        SET extra_fee_total = ?,
+            final_amount = ?
+        WHERE contract_id = ?
+    """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setDouble(1, extraFeeTotal);
+            ps.setDouble(2, finalAmount);
+            ps.setInt(3, contractId);
+
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
 }

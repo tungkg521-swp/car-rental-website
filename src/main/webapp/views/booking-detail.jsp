@@ -15,9 +15,7 @@
     <body>
         <jsp:include page="/views/includes/header.jsp"/>
 
-        <section class="booking-detail-page"
-                 data-cancel-status="${requestScope.cancelStatus}"
-                 data-handover-status="${sessionScope.handoverStatus}">
+        <section class="booking-detail-page">
             <div class="container">
                 <div class="booking-detail-shell">
 
@@ -38,7 +36,61 @@
 
                     <c:if test="${param.created == '1'}">
                         <div class="alert alert-success">
-                            Booking request created successfully. Please wait for staff approval.
+                            Tạo đơn đặt xe thành công.
+                        </div>
+                    </c:if>
+
+                    <c:if test="${not empty handoverMessage}">
+                        <div class="alert alert-success">
+                            ${handoverMessage}
+                        </div>
+                    </c:if>
+
+                    <c:if test="${not empty errorMessage}">
+                        <div class="alert alert-danger">
+                            ${errorMessage}
+                        </div>
+                    </c:if>
+
+                    <c:if test="${cancelStatus == 'success'}">
+                        <div class="alert alert-success">
+                            Hủy đơn đặt xe thành công.
+                        </div>
+                    </c:if>
+
+                    <c:if test="${cancelStatus == 'fail'}">
+                        <div class="alert alert-danger">
+                            Hủy đơn đặt xe thất bại. Vui lòng thử lại.
+                        </div>
+                    </c:if>
+
+                    <c:if test="${param.deleteStatus == 'fail'}">
+                        <div class="alert alert-danger">
+                            Xóa đơn đặt xe thất bại. Đơn này có thể không còn được phép xóa.
+                        </div>
+                    </c:if>
+
+                    <c:if test="${param.paymentStatus == 'success'}">
+                        <div class="alert alert-success">
+                            Thanh toán tiền cọc thành công.
+                        </div>
+                    </c:if>
+
+                    <c:if test="${param.paymentStatus == 'expired'}">
+                        <div class="alert alert-danger">
+                            Thanh toán đã hết hạn. Đơn đặt xe đã bị hủy.
+                        </div>
+                    </c:if>
+
+                    <c:if test="${param.paymentStatus == 'invalid'}">
+                        <div class="alert alert-danger">
+                            Không thể thanh toán đơn này. Trạng thái đơn đặt xe không hợp lệ.
+                        </div>
+                    </c:if>
+
+                    <c:if test="${param.paymentStatus == 'cancelled'}">
+                        <div class="alert alert-warning">
+                            Bạn đã hủy thanh toán.
                         </div>
                     </c:if>
 
@@ -346,13 +398,13 @@
 
                                         <c:if test="${param.changeResponse == 'success'}">
                                             <div class="alert alert-success">
-                                                Your response to the car change request was submitted successfully.
+                                                Phản hồi yêu cầu đổi xe thành công.
                                             </div>
                                         </c:if>
 
                                         <c:if test="${param.changeResponse == 'fail'}">
                                             <div class="alert alert-danger">
-                                                Failed to process your response. The replacement car may no longer be available.
+                                                Xử lý phản hồi thất bại. Xe thay thế có thể không còn khả dụng.
                                             </div>
                                         </c:if>
 
@@ -456,19 +508,19 @@
 
                                         <c:if test="${carChangeRequest.status == 'APPROVED'}">
                                             <div class="alert alert-success" style="margin-top:16px;">
-                                                You accepted the replacement car. Your booking has been updated to the new vehicle.
+                                                Bạn đã chấp nhận xe thay thế. Đơn đặt xe đã được cập nhật.
                                             </div>
                                         </c:if>
 
                                         <c:if test="${carChangeRequest.status == 'REJECTED'}">
                                             <div class="alert alert-danger" style="margin-top:16px;">
-                                                You rejected the replacement car. Refund processing is being handled by staff.
+                                                Bạn đã từ chối xe thay thế. Nhân viên sẽ xử lý hoàn tiền.
                                             </div>
                                         </c:if>
 
                                         <c:if test="${carChangeRequest.status == 'CANCELLED'}">
                                             <div class="alert alert-warning" style="margin-top:16px;">
-                                                This replacement request is no longer available. Staff may prepare another replacement option.
+                                                Yêu cầu đổi xe này không còn khả dụng.
                                             </div>
                                         </c:if>
                                     </div>

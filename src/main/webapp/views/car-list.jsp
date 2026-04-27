@@ -180,23 +180,38 @@
                             </div>
                         </div>
 
-                        <c:if test="${not empty dateError}">
-                            <div class="alert alert-danger modern-alert">${dateError}</div>
-                        </c:if>
+                        <div id="carListDateTimeError"
+                             class="car-list-date-error"
+                             style="${not empty dateError ? '' : 'display:none;'}">
+                            <div class="error-icon">!</div>
+                            <div class="error-content">
+                                <strong>Thời gian thuê không hợp lệ</strong>
+                                <span>
+                                    <c:choose>
+                                        <c:when test="${not empty dateError}">
+                                            ${dateError}
+                                        </c:when>
+                                        <c:otherwise>
+                                            Vui lòng kiểm tra lại ngày giờ nhận xe và trả xe.
+                                        </c:otherwise>
+                                    </c:choose>
+                                </span>
+                            </div>
+                        </div>
 
                         <div class="booking-bar">
-                            <form action="${pageContext.request.contextPath}/cars" method="get" class="booking-bar-form">
+                            <form action="${pageContext.request.contextPath}/cars" method="get" class="booking-bar-form" id="carListBookingForm">
                                 <input type="hidden" name="action" value="list">
 
                                 <div class="booking-bar-item">
                                     <label>Ngày nhận xe</label>
-                                    <input type="date" name="startDate"
+                                    <input type="date" id="listStartDate" name="startDate"
                                            value="${not empty startDate ? fn:substring(startDate,0,10) : param.startDate}" required>
                                 </div>
 
                                 <div class="booking-bar-item">
                                     <label>Giờ nhận xe</label>
-                                    <select name="startHour" required>
+                                    <select id="listStartHour" name="startHour" required>
                                         <option value="">Chọn giờ</option>
                                         <c:forEach var="h" begin="0" end="23">
                                             <fmt:formatNumber value="${h}" pattern="00" var="hourText" />
@@ -210,13 +225,13 @@
 
                                 <div class="booking-bar-item">
                                     <label>Ngày trả xe</label>
-                                    <input type="date" name="endDate"
+                                    <input type="date" id="listEndDate" name="endDate"
                                            value="${not empty endDate ? fn:substring(endDate,0,10) : param.endDate}" required>
                                 </div>
 
                                 <div class="booking-bar-item">
                                     <label>Giờ trả xe</label>
-                                    <select name="endHour" required>
+                                    <select id="listEndHour" name="endHour" required>
                                         <option value="">Chọn giờ</option>
                                         <c:forEach var="h" begin="0" end="23">
                                             <fmt:formatNumber value="${h}" pattern="00" var="hourText" />
@@ -287,6 +302,128 @@
                 </main>
             </div>
         </section>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const bookingForm = document.getElementById("carListBookingForm");
+                const startDateInput = document.getElementById("listStartDate");
+                const startHourInput = document.getElementById("listStartHour");
+                const endDateInput = document.getElementById("listEndDate");
+                const endHourInput = document.getElementById("listEndHour");
+                const errorBox = document.getElementById("carListDateTimeError");
+
+                let errorTimer = null;
+
+                function showError(message) {
+                    if (!errorBox) {
+                        return;
+                    }
+
+                    const messageText = errorBox.querySelector(".error-content span");
+                    if (messageText) {
+                        messageText.textContent = message;
+                    }
+
+                    errorBox.style.display = "flex";
+
+                    if (errorTimer) {
+                        clearTimeout(errorTimer);
+                    }
+
+                    errorTimer = setTimeout(function () {
+                        hideError();
+                    }, 3500);
+                }
+
+                function hideError() {
+                    if (!errorBox) {
+                        return;
+                    }
+
+                    errorBox.style.display = "none";
+
+                    if (errorTimer) {
+                        clearTimeout(errorTimer);
+                        errorTimer = null;
+                    }
+                }
+
+                function buildDateTime(dateValue, hourValue) {
+                    if (!dateValue || !hourValue) {
+                        return null;
+                    }
+
+                    const dateTime = new Date(dateValue + "T" + hourValue + ":00");
+
+                    if (isNaN(dateTime.getTime())) {
+                        return null;
+                    }
+
+                    return dateTime;
+                }
+
+                function validateDateTime() {
+                    const startDate = startDateInput ? startDateInput.value : "";
+                    const startHour = startHourInput ? startHourInput.value : "";
+                    const endDate = endDateInput ? endDateInput.value : "";
+                    const endHour = endHourInput ? endHourInput.value : "";
+
+                    if (!startDate || !endDate) {
+                        showError("Vui lòng chọn đầy đủ ngày nhận xe và ngày trả xe.");
+                        return false;
+                    }
+
+                    if (!startHour || !endHour) {
+                        showError("Vui lòng chọn đầy đủ giờ nhận xe và giờ trả xe.");
+                        return false;
+                    }
+
+                    const startDateTime = buildDateTime(startDate, startHour);
+                    const endDateTime = buildDateTime(endDate, endHour);
+
+                    if (!startDateTime || !endDateTime) {
+                        showError("Ngày giờ thuê không hợp lệ. Vui lòng kiểm tra lại.");
+                        return false;
+                    }
+
+                    const now = new Date();
+
+                    if (startDateTime < now) {
+                        showError("Thời gian nhận xe không được nhỏ hơn thời điểm hiện tại.");
+                        return false;
+                    }
+
+                    if (endDateTime <= startDateTime) {
+                        showError("Thời gian trả xe phải sau thời gian nhận xe.");
+                        return false;
+                    }
+
+                    return true;
+                }
+
+                if (bookingForm) {
+                    bookingForm.addEventListener("submit", function (event) {
+                        if (!validateDateTime()) {
+                            event.preventDefault();
+                        }
+                    });
+                }
+
+                [startDateInput, startHourInput, endDateInput, endHourInput].forEach(function (input) {
+                    if (input) {
+                        input.addEventListener("change", hideError);
+                        input.addEventListener("input", hideError);
+                    }
+                });
+
+                if (errorBox && errorBox.style.display !== "none") {
+                    errorTimer = setTimeout(function () {
+                        hideError();
+                    }, 3500);
+                }
+            });
+        </script>
+
     </body>
 
 </html>

@@ -7,9 +7,9 @@ public class BookingModel {
 
     private int bookingId;
     private int customerId;
-    private Integer staffId;          // nullable
+    private Integer staffId;         
     private int carId;
-    private Integer voucherId;        // nullable
+    private Integer voucherId;        
 
     private Timestamp bookingDate;
     private Timestamp startTime;
@@ -36,15 +36,9 @@ public class BookingModel {
     private Timestamp paymentDeadline;
     
     
-
-
-// getter + setter
-    // ===== CONSTRUCTOR =====
-
     public BookingModel() {
     }
 
-    // ===== GETTERS & SETTERS =====
     public int getBookingId() {
         return bookingId;
     }

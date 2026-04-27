@@ -461,6 +461,18 @@
             </div>
         </div>
 
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const errorAlert = document.getElementById("errorAlert");
+
+                if (errorAlert) {
+                    setTimeout(function () {
+                        errorAlert.style.display = "none";
+                    }, 3500);
+                }
+            });
+        </script>
+
         <!-- JS -->
         <script src="${pageContext.request.contextPath}/assets/js/booking.js?v=4"></script>
     </body>

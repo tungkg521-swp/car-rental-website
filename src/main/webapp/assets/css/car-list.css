@@ -1033,3 +1033,45 @@
         font-size: 12px;
     }
 }
+
+.car-list-date-error {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 18px 0 22px;
+    padding: 14px 18px;
+    border-radius: 16px;
+    background: #fff3f3;
+    border: 1px solid #ffc9c9;
+    color: #b42318;
+    box-shadow: 0 10px 24px rgba(180, 35, 24, 0.08);
+}
+
+.car-list-date-error .error-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #e03131;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+
+.car-list-date-error .error-content {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    line-height: 1.4;
+}
+
+.car-list-date-error .error-content strong {
+    font-size: 15px;
+}
+
+.car-list-date-error .error-content span {
+    font-size: 14px;
+    color: #7f1d1d;
+}

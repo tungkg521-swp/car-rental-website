@@ -23,6 +23,41 @@
             <div class="staff-content booking-detail-page">
                 <div class="booking-detail-shell">
 
+                    <c:if test="${param.operation == 'approve' and param.result == 'success'}">
+                        <div class="alert alert-success" style="margin-bottom:16px;">
+                            Duyệt đơn đặt xe thành công. Hợp đồng đã được tạo.
+                        </div>
+                    </c:if>
+
+                    <c:if test="${param.operation == 'approve' and param.result == 'fail'}">
+                        <div class="alert alert-danger" style="margin-bottom:16px;">
+                            Duyệt đơn đặt xe thất bại. Vui lòng kiểm tra trạng thái đơn, xe hoặc lịch thuê.
+                        </div>
+                    </c:if>
+
+                    <c:if test="${param.operation == 'reject' and param.result == 'success'}">
+                        <div class="alert alert-success" style="margin-bottom:16px;">
+                            Từ chối đơn đặt xe thành công.
+                        </div>
+                    </c:if>
+
+                    <c:if test="${param.operation == 'reject' and param.result == 'fail'}">
+                        <div class="alert alert-danger" style="margin-bottom:16px;">
+                            Từ chối đơn đặt xe thất bại. Đơn này có thể không còn ở trạng thái chờ duyệt.
+                        </div>
+                    </c:if>
+
+                    <c:if test="${param.refundStatus == 'success'}">
+                        <div class="alert alert-success" style="margin-bottom:16px;">
+                            Xác nhận hoàn tiền thành công.
+                        </div>
+                    </c:if>
+
+                    <c:if test="${param.refundStatus == 'fail'}">
+                        <div class="alert alert-danger" style="margin-bottom:16px;">
+                            Xác nhận hoàn tiền thất bại. Vui lòng thử lại.
+                        </div>
+                    </c:if>
 
 
                     <c:choose>
@@ -61,7 +96,7 @@
                                             <span class="meta-label">Phone</span>
                                             <p>${booking.customerPhone}</p>
                                         </div>
-                                         <div class="meta-item">
+                                        <div class="meta-item">
                                             <span class="meta-label">Số căn cước</span>
                                             <p>${booking.customercitizen_id}</p>
                                         </div>

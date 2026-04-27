@@ -140,7 +140,8 @@ public class CarListServlet extends HttpServlet {
 
             busyTimeRangesJson.append("{")
                     .append("\"start\":\"").append(start.toString().replace(" ", "T")).append("\",")
-                    .append("\"end\":\"").append(end.toString().replace(" ", "T")).append("\"")
+                    .append("\"end\":\"").append(end.toString().replace(" ", "T")).append("\",")
+                    .append("\"type\":\"BOOKING\"")
                     .append("}");
 
             if (i < busyRanges.size() - 1) {

@@ -41,7 +41,7 @@
                     </c:if>
 
                     <c:if test="${not empty sessionScope.error}">
-                        <div class="alert alert-error">${sessionScope.error}</div>
+                        <div class="alert alert-danger">${sessionScope.error}</div>
                         <c:remove var="error" scope="session"/>
                     </c:if>
 

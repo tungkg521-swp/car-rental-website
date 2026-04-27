@@ -112,6 +112,7 @@ public class StaffBookingController extends HttpServlet {
             response.sendRedirect(
                     request.getContextPath()
                     + "/staff/bookings?action=detail&id=" + bookingId
+                    + "&operation=" + action
                     + "&result=" + (success ? "success" : "fail")
             );
 
@@ -142,17 +143,7 @@ public class StaffBookingController extends HttpServlet {
         if (car == null) {
             return false;
         }
-        if ("MAINTENANCE".equalsIgnoreCase(car.getStatus())) {
-            return false;
-        }
-
-        if (bookingDAO.hasBookingConflictExcludeBooking(
-                booking.getCarId(),
-                booking.getStartTime(),
-                booking.getEndTime(),
-                bookingId)) {
-            return false;
-        }
+        
 
         boolean updatedStaff = bookingDAO.updateStaffId(bookingId, staffId);
         if (!updatedStaff) {

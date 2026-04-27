@@ -19,6 +19,43 @@
 
             <div class="staff-content">
                 <div class="contract-detail-wrapper">
+
+                    <c:if test="${not empty message}">
+                        <div class="alert alert-success" style="margin-bottom:16px;">
+                            ${message}
+                        </div>
+                    </c:if>
+
+                    <c:if test="${not empty error}">
+                        <div class="alert alert-danger" style="margin-bottom:16px;">
+                            ${error}
+                        </div>
+                    </c:if>
+
+                    <c:if test="${param.changeRequest == 'success'}">
+                        <div class="alert alert-success" style="margin-bottom:16px;">
+                            Tạo yêu cầu đổi xe thành công.
+                        </div>
+                    </c:if>
+
+                    <c:if test="${param.changeRequest == 'fail'}">
+                        <div class="alert alert-danger" style="margin-bottom:16px;">
+                            Tạo yêu cầu đổi xe thất bại. Vui lòng kiểm tra lại điều kiện đổi xe.
+                        </div>
+                    </c:if>
+
+                    <c:if test="${param.refundStatus == 'success'}">
+                        <div class="alert alert-success" style="margin-bottom:16px;">
+                            Xác nhận hoàn tiền thành công.
+                        </div>
+                    </c:if>
+
+                    <c:if test="${param.refundStatus == 'fail'}">
+                        <div class="alert alert-danger" style="margin-bottom:16px;">
+                            Xác nhận hoàn tiền thất bại. Vui lòng thử lại.
+                        </div>
+                    </c:if>
+
                     <div class="contract-detail-card">
 
                         <!-- Header -->
@@ -372,10 +409,7 @@
                                     </div>
                                 </div>
 
-                                
-
                                 <div class="payment-divider"></div>
-
                                 <div class="payment-row">
                                     <div class="payment-label">Số km trước khi giao</div>
                                     <div class="payment-value">

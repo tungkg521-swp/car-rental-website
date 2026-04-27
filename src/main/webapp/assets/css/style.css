@@ -1553,3 +1553,14 @@ textarea {
     background: #f0fdf4;
     color: #16a34a;
 }
+
+.home-date-error {
+    margin: 0 0 18px 0;
+    padding: 14px 18px;
+    border-radius: 14px;
+    background: #fff3f3;
+    border: 1px solid #ffc9c9;
+    color: #c0392b;
+    font-weight: 600;
+    font-size: 15px;
+}
