@@ -16,60 +16,10 @@ import models.ReportModel;
 
 public class ReportDAO extends DBContext {
 
-    private BigDecimal safe(BigDecimal value) {
-        return value == null ? BigDecimal.ZERO : value;
-    }
-
-    /*
-     * Doanh thu thực của đơn:
-     * - Không cộng tiền cọc deposit_amount.
-     * - Không ưu tiên final_amount vì trong flow của bạn final_amount có thể là số tiền cần thanh toán thêm.
-     * - Công thức đúng theo DB hiện tại:
-     *      total_amount + extra_km_fee + other_extra_fee
-     */
-    private BigDecimal calculateRevenue(BigDecimal totalAmount,
-                                        BigDecimal extraKmFee,
-                                        BigDecimal contractExtraFee,
-                                        BigDecimal checkExtraFee) {
-
-        BigDecimal rental = safe(totalAmount);
-        BigDecimal kmFee = safe(extraKmFee);
-
-        /*
-         * Nếu controller có cập nhật phí phát sinh khác vào rental_contract.extra_fee_total
-         * thì dùng cột đó.
-         * Nếu rental_contract.extra_fee_total = 0 nhưng phí nằm ở car_check.extra_fee_total
-         * thì fallback qua car_check.
-         *
-         * Làm vậy để tránh bị cộng trùng cùng một khoản phí.
-         */
-        BigDecimal otherFee = safe(contractExtraFee).compareTo(BigDecimal.ZERO) > 0
-                ? safe(contractExtraFee)
-                : safe(checkExtraFee);
-
-        return rental.add(kmFee).add(otherFee);
-    }
-
-    private String returnCheckFeeJoinSql() {
-        return """
-            LEFT JOIN (
-                SELECT 
-                    contract_id,
-                    SUM(ISNULL(extra_fee_total, 0)) AS return_check_extra_fee
-                FROM car_check
-                WHERE check_type = 'RETURN'
-                   OR check_result = 'RETURN_CHECK'
-                GROUP BY contract_id
-            ) return_fee
-                ON rc.contract_id = return_fee.contract_id
-            """;
-    }
-
     public List<ReportModel> findAllRentalReports(String startDate, String endDate) {
         List<ReportModel> list = new ArrayList<>();
 
-        StringBuilder sql = new StringBuilder();
-        sql.append("""
+        StringBuilder sql = new StringBuilder("""
             SELECT
                 rc.contract_id,
                 b.booking_id,
@@ -79,39 +29,21 @@ public class ReportDAO extends DBContext {
                 br.brand_name,
                 ct.type_name,
                 c.model_name,
-
                 CONVERT(date, rc.contract_start_time) AS start_date,
                 CONVERT(date, rc.contract_end_time) AS end_date,
                 CONVERT(date, ISNULL(rc.actual_return_time, rc.contract_end_time)) AS revenue_date,
-
                 DATEDIFF(DAY, rc.contract_start_time, rc.contract_end_time) + 1 AS rental_days,
-
                 rc.contract_status AS status,
                 s.full_name AS staff_name,
                 rc.note,
-
-                rc.total_amount,
-                rc.extra_km_fee,
-                rc.extra_fee_total,
-                ISNULL(return_fee.return_check_extra_fee, 0) AS return_check_extra_fee
+                ISNULL(rc.total_amount, 0) AS total_amount
             FROM rental_contract rc
-            INNER JOIN booking b 
-                ON rc.booking_id = b.booking_id
-            INNER JOIN customer cu 
-                ON b.customer_id = cu.customer_id
-            INNER JOIN cars c 
-                ON rc.car_id = c.car_id
-            INNER JOIN brand br 
-                ON c.brand_id = br.brand_id
-            INNER JOIN cars_type ct 
-                ON c.type_id = ct.type_id
-            LEFT JOIN staff s 
-                ON rc.staff_id = s.staff_id
-            """);
-
-        sql.append(returnCheckFeeJoinSql());
-
-        sql.append("""
+            JOIN booking b ON rc.booking_id = b.booking_id
+            JOIN customer cu ON b.customer_id = cu.customer_id
+            JOIN cars c ON rc.car_id = c.car_id
+            JOIN brand br ON c.brand_id = br.brand_id
+            JOIN cars_type ct ON c.type_id = ct.type_id
+            LEFT JOIN staff s ON rc.staff_id = s.staff_id
             WHERE rc.contract_status = 'COMPLETED'
             """);
 
@@ -136,13 +68,6 @@ public class ReportDAO extends DBContext {
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    BigDecimal revenue = calculateRevenue(
-                            rs.getBigDecimal("total_amount"),
-                            rs.getBigDecimal("extra_km_fee"),
-                            rs.getBigDecimal("extra_fee_total"),
-                            rs.getBigDecimal("return_check_extra_fee")
-                    );
-
                     ReportModel r = new ReportModel();
 
                     r.setContractId(rs.getInt("contract_id"));
@@ -157,7 +82,7 @@ public class ReportDAO extends DBContext {
                     r.setEndDate(rs.getDate("end_date"));
                     r.setRevenueDate(rs.getDate("revenue_date"));
                     r.setRentalDays(rs.getInt("rental_days"));
-                    r.setTotalPrice(revenue);
+                    r.setTotalPrice(rs.getBigDecimal("total_amount"));
                     r.setStatus(rs.getString("status"));
                     r.setStaffName(rs.getString("staff_name"));
                     r.setNote(rs.getString("note"));
@@ -176,8 +101,7 @@ public class ReportDAO extends DBContext {
     public List<ReportModel> findRevenueReports(String startDate, String endDate) {
         List<ReportModel> list = new ArrayList<>();
 
-        StringBuilder sql = new StringBuilder();
-        sql.append("""
+        StringBuilder sql = new StringBuilder("""
             SELECT
                 rc.contract_id,
                 b.booking_id,
@@ -187,39 +111,21 @@ public class ReportDAO extends DBContext {
                 br.brand_name,
                 ct.type_name,
                 c.model_name,
-
                 CONVERT(date, rc.contract_start_time) AS start_date,
                 CONVERT(date, rc.contract_end_time) AS end_date,
                 CONVERT(date, ISNULL(rc.actual_return_time, rc.contract_end_time)) AS revenue_date,
-
                 DATEDIFF(DAY, rc.contract_start_time, rc.contract_end_time) + 1 AS rental_days,
-
                 rc.contract_status AS status,
                 s.full_name AS staff_name,
                 rc.note,
-
-                rc.total_amount,
-                rc.extra_km_fee,
-                rc.extra_fee_total,
-                ISNULL(return_fee.return_check_extra_fee, 0) AS return_check_extra_fee
+                ISNULL(rc.total_amount, 0) AS total_amount
             FROM rental_contract rc
-            INNER JOIN booking b 
-                ON rc.booking_id = b.booking_id
-            INNER JOIN customer cu 
-                ON b.customer_id = cu.customer_id
-            INNER JOIN cars c 
-                ON rc.car_id = c.car_id
-            INNER JOIN brand br 
-                ON c.brand_id = br.brand_id
-            INNER JOIN cars_type ct 
-                ON c.type_id = ct.type_id
-            LEFT JOIN staff s 
-                ON rc.staff_id = s.staff_id
-            """);
-
-        sql.append(returnCheckFeeJoinSql());
-
-        sql.append("""
+            JOIN booking b ON rc.booking_id = b.booking_id
+            JOIN customer cu ON b.customer_id = cu.customer_id
+            JOIN cars c ON rc.car_id = c.car_id
+            JOIN brand br ON c.brand_id = br.brand_id
+            JOIN cars_type ct ON c.type_id = ct.type_id
+            LEFT JOIN staff s ON rc.staff_id = s.staff_id
             WHERE rc.contract_status = 'COMPLETED'
             """);
 
@@ -244,13 +150,6 @@ public class ReportDAO extends DBContext {
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    BigDecimal revenue = calculateRevenue(
-                            rs.getBigDecimal("total_amount"),
-                            rs.getBigDecimal("extra_km_fee"),
-                            rs.getBigDecimal("extra_fee_total"),
-                            rs.getBigDecimal("return_check_extra_fee")
-                    );
-
                     ReportModel r = new ReportModel();
 
                     r.setContractId(rs.getInt("contract_id"));
@@ -265,7 +164,7 @@ public class ReportDAO extends DBContext {
                     r.setEndDate(rs.getDate("end_date"));
                     r.setRevenueDate(rs.getDate("revenue_date"));
                     r.setRentalDays(rs.getInt("rental_days"));
-                    r.setTotalPrice(revenue);
+                    r.setTotalPrice(rs.getBigDecimal("total_amount"));
                     r.setStatus(rs.getString("status"));
                     r.setStaffName(rs.getString("staff_name"));
                     r.setNote(rs.getString("note"));
@@ -284,22 +183,12 @@ public class ReportDAO extends DBContext {
     public List<ReportModel> findRevenueByDate(String startDate, String endDate) {
         List<ReportModel> list = new ArrayList<>();
 
-        StringBuilder sql = new StringBuilder();
-        sql.append("""
+        StringBuilder sql = new StringBuilder("""
             SELECT
                 CONVERT(date, ISNULL(rc.actual_return_time, rc.contract_end_time)) AS revenue_date,
-                rc.total_amount,
-                rc.extra_km_fee,
-                rc.extra_fee_total,
-                ISNULL(return_fee.return_check_extra_fee, 0) AS return_check_extra_fee
+                SUM(ISNULL(rc.total_amount, 0)) AS total_revenue,
+                COUNT(rc.contract_id) AS rental_count
             FROM rental_contract rc
-            INNER JOIN booking b 
-                ON rc.booking_id = b.booking_id
-            """);
-
-        sql.append(returnCheckFeeJoinSql());
-
-        sql.append("""
             WHERE rc.contract_status = 'COMPLETED'
             """);
 
@@ -315,52 +204,27 @@ public class ReportDAO extends DBContext {
             params.add(Date.valueOf(endDate));
         }
 
+        sql.append("""
+            GROUP BY CONVERT(date, ISNULL(rc.actual_return_time, rc.contract_end_time))
+            ORDER BY revenue_date ASC
+            """);
+
         try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
             }
 
-            Map<Date, BigDecimal> dailyRevenueMap = new HashMap<>();
-            Map<Date, Long> dailyCountMap = new HashMap<>();
-
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    Date revenueDate = rs.getDate("revenue_date");
+                    ReportModel r = new ReportModel();
 
-                    if (revenueDate == null) {
-                        continue;
-                    }
+                    r.setRevenueDate(rs.getDate("revenue_date"));
+                    r.setTotalPrice(rs.getBigDecimal("total_revenue"));
+                    r.setRentalCount(rs.getLong("rental_count"));
 
-                    BigDecimal revenue = calculateRevenue(
-                            rs.getBigDecimal("total_amount"),
-                            rs.getBigDecimal("extra_km_fee"),
-                            rs.getBigDecimal("extra_fee_total"),
-                            rs.getBigDecimal("return_check_extra_fee")
-                    );
-
-                    dailyRevenueMap.put(
-                            revenueDate,
-                            dailyRevenueMap.getOrDefault(revenueDate, BigDecimal.ZERO).add(revenue)
-                    );
-
-                    dailyCountMap.put(
-                            revenueDate,
-                            dailyCountMap.getOrDefault(revenueDate, 0L) + 1
-                    );
+                    list.add(r);
                 }
             }
-
-            for (Map.Entry<Date, BigDecimal> entry : dailyRevenueMap.entrySet()) {
-                ReportModel r = new ReportModel();
-
-                r.setRevenueDate(entry.getKey());
-                r.setTotalPrice(entry.getValue());
-                r.setRentalCount(dailyCountMap.getOrDefault(entry.getKey(), 0L));
-
-                list.add(r);
-            }
-
-            list.sort((a, b) -> a.getRevenueDate().compareTo(b.getRevenueDate()));
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -372,27 +236,12 @@ public class ReportDAO extends DBContext {
     public Map<String, Object> getReportSummary(String startDate, String endDate) {
         Map<String, Object> summary = new HashMap<>();
 
-        StringBuilder sql = new StringBuilder();
-        sql.append("""
+        StringBuilder sql = new StringBuilder("""
             SELECT
-                rc.contract_id,
-                rc.car_id,
-                rc.contract_start_time,
-                rc.contract_end_time,
-                rc.actual_return_time,
-
-                rc.total_amount,
-                rc.extra_km_fee,
-                rc.extra_fee_total,
-                ISNULL(return_fee.return_check_extra_fee, 0) AS return_check_extra_fee
+                COUNT(rc.contract_id) AS total_trips,
+                SUM(ISNULL(rc.total_amount, 0)) AS total_revenue,
+                SUM(DATEDIFF(DAY, rc.contract_start_time, rc.contract_end_time) + 1) AS total_rental_days
             FROM rental_contract rc
-            INNER JOIN booking b 
-                ON rc.booking_id = b.booking_id
-            """);
-
-        sql.append(returnCheckFeeJoinSql());
-
-        sql.append("""
             WHERE rc.contract_status = 'COMPLETED'
             """);
 
@@ -408,63 +257,44 @@ public class ReportDAO extends DBContext {
             params.add(Date.valueOf(endDate));
         }
 
-        long totalTrips = 0;
-        BigDecimal totalRevenue = BigDecimal.ZERO;
-        int totalRentalDays = 0;
-
         try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
             }
 
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    totalTrips++;
+                if (rs.next()) {
+                    BigDecimal totalRevenue = rs.getBigDecimal("total_revenue");
+                    long totalTrips = rs.getLong("total_trips");
+                    int totalRentalDays = rs.getInt("total_rental_days");
 
-                    BigDecimal revenue = calculateRevenue(
-                            rs.getBigDecimal("total_amount"),
-                            rs.getBigDecimal("extra_km_fee"),
-                            rs.getBigDecimal("extra_fee_total"),
-                            rs.getBigDecimal("return_check_extra_fee")
-                    );
+                    int totalCars = countAllCars();
+                    int periodDays = 30;
 
-                    totalRevenue = totalRevenue.add(revenue);
+                    if (startDate != null && !startDate.isEmpty()
+                            && endDate != null && !endDate.isEmpty()) {
+                        try {
+                            LocalDate s = Date.valueOf(startDate).toLocalDate();
+                            LocalDate e = Date.valueOf(endDate).toLocalDate();
 
-                    java.sql.Timestamp startTs = rs.getTimestamp("contract_start_time");
-                    java.sql.Timestamp endTs = rs.getTimestamp("contract_end_time");
-
-                    if (startTs != null && endTs != null) {
-                        LocalDate s = startTs.toLocalDateTime().toLocalDate();
-                        LocalDate e = endTs.toLocalDateTime().toLocalDate();
-
-                        totalRentalDays += (int) ChronoUnit.DAYS.between(s, e) + 1;
+                            periodDays = (int) ChronoUnit.DAYS.between(s, e) + 1;
+                        } catch (Exception e) {
+                            periodDays = 30;
+                        }
                     }
+
+                    double utilization = 0;
+
+                    if (totalCars > 0 && periodDays > 0) {
+                        utilization = ((double) totalRentalDays / (double) (totalCars * periodDays)) * 100;
+                    }
+
+                    summary.put("totalRevenue", totalRevenue == null ? BigDecimal.ZERO : totalRevenue);
+                    summary.put("totalTrips", totalTrips);
+                    summary.put("utilization", Math.round(utilization * 10.0) / 10.0);
+                    summary.put("periodDays", periodDays);
                 }
             }
-
-            int totalCars = countAllCars();
-            int periodDays = 30;
-
-            if (startDate != null && !startDate.isEmpty()
-                    && endDate != null && !endDate.isEmpty()) {
-                try {
-                    LocalDate s = Date.valueOf(startDate).toLocalDate();
-                    LocalDate e = Date.valueOf(endDate).toLocalDate();
-
-                    periodDays = (int) ChronoUnit.DAYS.between(s, e) + 1;
-                } catch (Exception ignored) {
-                    periodDays = 30;
-                }
-            }
-
-            double utilization = (totalCars > 0 && periodDays > 0)
-                    ? ((double) totalRentalDays / (double) (totalCars * periodDays)) * 100.0
-                    : 0.0;
-
-            summary.put("totalRevenue", totalRevenue);
-            summary.put("totalTrips", totalTrips);
-            summary.put("utilization", Math.round(utilization * 10.0) / 10.0);
-            summary.put("periodDays", periodDays);
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -481,83 +311,37 @@ public class ReportDAO extends DBContext {
     public List<ReportModel> findVehicleUsageReports(String startDate, String endDate) {
         List<ReportModel> list = new ArrayList<>();
 
-        StringBuilder sql = new StringBuilder();
-        sql.append("""
+        StringBuilder sql = new StringBuilder("""
             SELECT
                 c.car_id,
                 c.plate_number,
                 c.model_name,
                 br.brand_name,
                 ct.type_name,
-
                 COUNT(rc.contract_id) AS rental_count,
-
-                ISNULL(SUM(
-                    CASE
-                        WHEN rc.contract_id IS NOT NULL
-                        THEN DATEDIFF(DAY, rc.contract_start_time, rc.contract_end_time) + 1
-                        ELSE 0
-                    END
-                ), 0) AS total_rental_days,
-
+                ISNULL(SUM(DATEDIFF(DAY, rc.contract_start_time, rc.contract_end_time) + 1), 0) AS total_rental_days,
+                ISNULL(SUM(rc.total_amount), 0) AS total_revenue,
                 MAX(CONVERT(date, ISNULL(rc.actual_return_time, rc.contract_end_time))) AS last_rental_date,
-
-                MAX(m.last_maintenance_date) AS last_maintenance_date,
-
-                ISNULL(SUM(
-                    CASE
-                        WHEN rc.contract_id IS NOT NULL THEN
-                            ISNULL(rc.total_amount, 0)
-                            + ISNULL(rc.extra_km_fee, 0)
-                            + CASE 
-                                WHEN ISNULL(rc.extra_fee_total, 0) > 0
-                                    THEN ISNULL(rc.extra_fee_total, 0)
-                                ELSE ISNULL(return_fee.return_check_extra_fee, 0)
-                              END
-                        ELSE 0
-                    END
-                ), 0) AS total_revenue
+                MAX(m.end_date) AS last_maintenance_date
             FROM cars c
-            INNER JOIN brand br 
-                ON c.brand_id = br.brand_id
-            INNER JOIN cars_type ct 
-                ON c.type_id = ct.type_id
-            LEFT JOIN rental_contract rc
-                ON c.car_id = rc.car_id
-               AND rc.contract_status = 'COMPLETED'
-            LEFT JOIN booking b
-                ON rc.booking_id = b.booking_id
-            LEFT JOIN (
-                SELECT 
-                    contract_id,
-                    SUM(ISNULL(extra_fee_total, 0)) AS return_check_extra_fee
-                FROM car_check
-                WHERE check_type = 'RETURN'
-                   OR check_result = 'RETURN_CHECK'
-                GROUP BY contract_id
-            ) return_fee
-                ON rc.contract_id = return_fee.contract_id
-            LEFT JOIN (
-                SELECT 
-                    car_id, 
-                    MAX(end_date) AS last_maintenance_date
-                FROM car_maintenance
-                WHERE status = 'COMPLETED'
-                GROUP BY car_id
-            ) m
-                ON c.car_id = m.car_id
+            JOIN brand br ON c.brand_id = br.brand_id
+            JOIN cars_type ct ON c.type_id = ct.type_id
+            LEFT JOIN rental_contract rc ON c.car_id = rc.car_id
+                AND rc.contract_status = 'COMPLETED'
+            LEFT JOIN car_maintenance m ON c.car_id = m.car_id
+                AND m.status = 'COMPLETED'
             WHERE 1 = 1
             """);
 
         List<Object> params = new ArrayList<>();
 
         if (startDate != null && !startDate.isEmpty()) {
-            sql.append(" AND (rc.contract_end_time IS NULL OR CONVERT(date, ISNULL(rc.actual_return_time, rc.contract_end_time)) >= ?)");
+            sql.append(" AND (rc.contract_id IS NULL OR CONVERT(date, ISNULL(rc.actual_return_time, rc.contract_end_time)) >= ?)");
             params.add(Date.valueOf(startDate));
         }
 
         if (endDate != null && !endDate.isEmpty()) {
-            sql.append(" AND (rc.contract_end_time IS NULL OR CONVERT(date, ISNULL(rc.actual_return_time, rc.contract_end_time)) <= ?)");
+            sql.append(" AND (rc.contract_id IS NULL OR CONVERT(date, ISNULL(rc.actual_return_time, rc.contract_end_time)) <= ?)");
             params.add(Date.valueOf(endDate));
         }
 
@@ -607,20 +391,17 @@ public class ReportDAO extends DBContext {
                       OR rc.contract_status IN ('CREATED', 'WAITING_CUSTOMER_CONFIRM', 'ACTIVE')
                     THEN 1 
                 END) AS rented,
-
                 COUNT(CASE 
                     WHEN c.status = 'AVAILABLE' 
                     THEN 1 
                 END) AS available,
-
                 COUNT(CASE 
                     WHEN c.status = 'MAINTENANCE' 
                     THEN 1 
                 END) AS maintenance
             FROM cars c
-            LEFT JOIN rental_contract rc
-                ON c.car_id = rc.car_id
-               AND rc.contract_status IN ('CREATED', 'WAITING_CUSTOMER_CONFIRM', 'ACTIVE')
+            LEFT JOIN rental_contract rc ON c.car_id = rc.car_id
+                AND rc.contract_status IN ('CREATED', 'WAITING_CUSTOMER_CONFIRM', 'ACTIVE')
             """;
 
         StringBuilder barSql = new StringBuilder("""
@@ -628,32 +409,23 @@ public class ReportDAO extends DBContext {
                 c.plate_number,
                 c.model_name,
                 br.brand_name,
-
-                ISNULL(SUM(
-                    CASE
-                        WHEN rc.contract_id IS NOT NULL
-                        THEN DATEDIFF(DAY, rc.contract_start_time, rc.contract_end_time) + 1
-                        ELSE 0
-                    END
-                ), 0) AS total_rental_days
+                ISNULL(SUM(DATEDIFF(DAY, rc.contract_start_time, rc.contract_end_time) + 1), 0) AS total_rental_days
             FROM cars c
-            INNER JOIN brand br 
-                ON c.brand_id = br.brand_id
-            LEFT JOIN rental_contract rc
-                ON c.car_id = rc.car_id
-               AND rc.contract_status = 'COMPLETED'
+            JOIN brand br ON c.brand_id = br.brand_id
+            LEFT JOIN rental_contract rc ON c.car_id = rc.car_id
+                AND rc.contract_status = 'COMPLETED'
             WHERE 1 = 1
             """);
 
         List<Object> params = new ArrayList<>();
 
         if (startDate != null && !startDate.isEmpty()) {
-            barSql.append(" AND (rc.contract_end_time IS NULL OR CONVERT(date, ISNULL(rc.actual_return_time, rc.contract_end_time)) >= ?)");
+            barSql.append(" AND (rc.contract_id IS NULL OR CONVERT(date, ISNULL(rc.actual_return_time, rc.contract_end_time)) >= ?)");
             params.add(Date.valueOf(startDate));
         }
 
         if (endDate != null && !endDate.isEmpty()) {
-            barSql.append(" AND (rc.contract_end_time IS NULL OR CONVERT(date, ISNULL(rc.actual_return_time, rc.contract_end_time)) <= ?)");
+            barSql.append(" AND (rc.contract_id IS NULL OR CONVERT(date, ISNULL(rc.actual_return_time, rc.contract_end_time)) <= ?)");
             params.add(Date.valueOf(endDate));
         }
 
