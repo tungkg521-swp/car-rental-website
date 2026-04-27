@@ -77,7 +77,6 @@ public class StaffContractController extends HttpServlet {
                 CarModel car
                         = carDAO.findById(contract.getCarId());
 
-
                 boolean bookingScheduleConflict = bookingDAO.hasBookingConflictExcludeBooking(
                         contract.getCarId(),
                         contract.getContractStartTime(),
@@ -92,7 +91,7 @@ public class StaffContractController extends HttpServlet {
                 );
 
                 boolean scheduleConflict = bookingScheduleConflict || maintenanceScheduleConflict;
-                
+
                 boolean maintenanceBlocked = maintenanceScheduleConflict;
 
                 Duration duration = Duration.between(
@@ -428,7 +427,7 @@ public class StaffContractController extends HttpServlet {
         if ("WAITING_CUSTOMER_CONFIRM".equalsIgnoreCase(status)) {
 
         } else if ("ACTIVE".equalsIgnoreCase(status)) {
-            carDAO.updateStatus(contract.getCarId(), "RENTING");
+            carDAO.updateStatus(contract.getCarId(), "BOOKED");
             bookingDAO.updateStatus(contract.getBookingId(), "ACTIVE");
 
         } else if ("COMPLETED".equalsIgnoreCase(status)) {
@@ -579,7 +578,7 @@ public class StaffContractController extends HttpServlet {
             String exteriorNote = joinIssueArray(exteriorIssues);
             String interiorNote = joinIssueArray(interiorIssues);
 
-            
+            boolean carCurrentlyBooked = "BOOKED".equalsIgnoreCase(car.getStatus());
 
             boolean bookingScheduleConflict = bookingDAO.hasBookingConflictExcludeBooking(
                     contract.getCarId(),
@@ -599,6 +598,7 @@ public class StaffContractController extends HttpServlet {
             String finalResult = "OK";
 
             if ("NOT_OK".equalsIgnoreCase(physicalStatus)
+                    || carCurrentlyBooked
                     || scheduleConflict) {
                 finalResult = "NOT_OK";
             }
@@ -614,6 +614,13 @@ public class StaffContractController extends HttpServlet {
                     finalNote.append(" | ");
                 }
                 finalNote.append("System detected: car has schedule conflict in this rental period.");
+            }
+
+            if (carCurrentlyBooked) {
+                if (finalNote.length() > 0) {
+                    finalNote.append(" | ");
+                }
+                finalNote.append("System detected: car is currently booked by another contract.");
             }
 
             CarCheckModel check = new CarCheckModel();
@@ -815,6 +822,15 @@ public class StaffContractController extends HttpServlet {
         }
 
         if (contract.getCustomerConfirmed() == null || !contract.getCustomerConfirmed()) {
+            return false;
+        }
+
+        CarModel car = carDAO.findById(contract.getCarId());
+        if (car == null) {
+            return false;
+        }
+
+        if ("BOOKED".equalsIgnoreCase(car.getStatus())) {
             return false;
         }
 

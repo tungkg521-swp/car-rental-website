@@ -775,14 +775,35 @@
                         <div class="cf-section">
                             <h4>Kết luận</h4>
                             <div class="cf-issues-grid">
-                                <label class="cf-checkbox-item">
-                                    <input type="radio" name="physicalStatus" value="OK" checked>
-                                    <span>Đạt</span>
-                                </label>
-                                <label class="cf-checkbox-item">
-                                    <input type="radio" name="physicalStatus" value="NOT_OK">
-                                    <span>Không đạt</span>
-                                </label>
+
+                                <c:choose>
+                                    <c:when test="${car.status == 'BOOKED'}">
+                                        <label class="cf-checkbox-item">
+                                            <input type="radio" name="physicalStatus" value="OK" disabled>
+                                            <span>Đạt</span>
+                                        </label>
+
+                                        <label class="cf-checkbox-item">
+                                            <input type="radio" name="physicalStatus" value="NOT_OK" checked readonly>
+                                            <span>Không đạt</span>
+                                        </label>
+
+                                        <input type="hidden" name="physicalStatus" value="NOT_OK">
+                                    </c:when>
+
+                                    <c:otherwise>
+                                        <label class="cf-checkbox-item">
+                                            <input type="radio" name="physicalStatus" value="OK" checked>
+                                            <span>Đạt</span>
+                                        </label>
+
+                                        <label class="cf-checkbox-item">
+                                            <input type="radio" name="physicalStatus" value="NOT_OK">
+                                            <span>Không đạt</span>
+                                        </label>
+                                    </c:otherwise>
+                                </c:choose>
+
                             </div>
                         </div>
 
