@@ -58,13 +58,12 @@
 
     <body>
 
-        <button onclick="goBackToDashboard()" class="back-btn" style="margin-bottom:15px;">
+        <button onclick="goBackToDashboard()" class="back-btn report-back-btn">
             ← Quay lại Report Dashboard
         </button>
 
         <c:choose>
 
-            <%-- ====================== RENTAL REPORT ====================== --%>
             <c:when test="${reportType == 'RENTAL'}">
                 <h2 class="report-title">🚗 Trip Report - Báo cáo Chuyến Thuê</h2>
 
@@ -134,7 +133,6 @@
                 </c:choose>
             </c:when>
 
-            <%-- ====================== REVENUE REPORT ====================== --%>
             <c:when test="${reportType == 'REVENUE'}">
                 <h2 class="report-title">💰 Revenue Report - Báo cáo Doanh Thu</h2>
 
@@ -203,7 +201,6 @@
                 </c:choose>
             </c:when>
 
-            <%-- ====================== USAGE REPORT ====================== --%>
             <c:when test="${reportType == 'USAGE'}">
                 <h2 class="report-title">⚙️ Vehicle Utilization Report</h2>
 
@@ -215,19 +212,19 @@
                     </c:when>
 
                     <c:otherwise>
-                        <div style="display:flex; gap:30px; flex-wrap:wrap;">
-                            <div style="flex:1; min-width:300px;">
+                        <div class="usage-chart-layout">
+                            <div class="usage-chart-card usage-pie-card">
                                 <h3>Tỷ lệ xe theo số ngày thuê</h3>
                                 <canvas id="usagePieChart" height="200"></canvas>
                             </div>
 
-                            <div style="flex:2; min-width:400px;">
+                            <div class="usage-chart-card usage-bar-card">
                                 <h3>Tổng ngày thuê theo xe</h3>
                                 <canvas id="usageBarChart" height="300"></canvas>
                             </div>
                         </div>
 
-                        <table class="report-table" style="margin-top:30px;">
+                        <table class="report-table usage-table">
                             <thead>
                                 <tr>
                                     <th>Biển số</th>
@@ -262,7 +259,6 @@
                 </c:choose>
             </c:when>
 
-            <%-- ====================== DEFAULT ====================== --%>
             <c:otherwise>
                 <h2 class="report-title">Không tìm thấy loại báo cáo</h2>
             </c:otherwise>

@@ -246,7 +246,8 @@ function renderDashboardRevenueLineChart(data) {
     }
 
     const labels = data.map(function (item) {
-        const d = new Date(item.revenueDate || item.revenue_date);
+        const d = new Date(item.revenueDate);
+
         return d.toLocaleDateString('vi-VN', {
             day: '2-digit',
             month: '2-digit'
@@ -254,7 +255,7 @@ function renderDashboardRevenueLineChart(data) {
     });
 
     const revenues = data.map(function (item) {
-        return Number(item.totalPrice || item.daily_revenue || 0);
+        return Number(item.totalPrice || 0);
     });
 
     revenueChartInstance = new Chart(ctx, {
@@ -292,7 +293,7 @@ function renderDashboardRevenueLineChart(data) {
                     beginAtZero: true,
                     ticks: {
                         callback: function (value) {
-                            return value / 1000000 + 'M';
+                            return Number(value).toLocaleString('vi-VN') + ' ₫';
                         }
                     }
                 }

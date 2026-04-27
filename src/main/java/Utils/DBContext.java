@@ -8,7 +8,7 @@ public class DBContext {
 
     private static final String URL
             = "jdbc:sqlserver://localhost:1433;"
-            + "databaseName=CarRentalDB1;"
+            + "databaseName=CarRentalDB2;"
             + "user=sa;"
             + "password=123456;"
             + "encrypt=true;"
