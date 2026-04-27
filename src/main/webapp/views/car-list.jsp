@@ -27,10 +27,11 @@
                     <div class="search-box">
                         <form action="${pageContext.request.contextPath}/cars" method="get">
                             <input type="hidden" name="action" value="search"/>
-                            <input type="hidden" name="startDate" value="${not empty startDate ? fn:substring(startDate,0,10) : param.startDate}"/>
-                            <input type="hidden" name="startHour" value="${not empty startDate ? fn:substring(startDate,11,16) : param.startHour}"/>
-                            <input type="hidden" name="endDate" value="${not empty endDate ? fn:substring(endDate,0,10) : param.endDate}"/>
-                            <input type="hidden" name="endHour" value="${not empty endDate ? fn:substring(endDate,11,16) : param.endHour}"/>
+                            <input type="hidden" name="startDate" value="${param.startDate}"/>
+                            <input type="hidden" name="startHour" value="${param.startHour}"/>
+                            <input type="hidden" name="endDate" value="${param.endDate}"/>
+                            <input type="hidden" name="endHour" value="${param.endHour}"/>
+
 
                             <input type="text" name="keyword" placeholder="Tìm kiếm xe..." value="${not empty keyword ? keyword : param.keyword}">
                             <button type="submit">Tìm</button>
@@ -41,55 +42,33 @@
                     <form action="${pageContext.request.contextPath}/cars" method="get">
                         <input type="hidden" name="action" value="filter"/>
                         <input type="hidden" name="keyword" value="${not empty keyword ? keyword : param.keyword}"/>
-                        <input type="hidden" name="startDate" value="${not empty startDate ? fn:substring(startDate,0,10) : param.startDate}"/>
-                        <input type="hidden" name="startHour" value="${not empty startDate ? fn:substring(startDate,11,16) : param.startHour}"/>
-                        <input type="hidden" name="endDate" value="${not empty endDate ? fn:substring(endDate,0,10) : param.endDate}"/>
-                        <input type="hidden" name="endHour" value="${not empty endDate ? fn:substring(endDate,11,16) : param.endHour}"/>
-
+                        <input type="hidden" name="startDate" value="${param.startDate}"/>
+                        <input type="hidden" name="startHour" value="${param.startHour}"/>
+                        <input type="hidden" name="endDate" value="${param.endDate}"/>
+                        <input type="hidden" name="endHour" value="${param.endHour}"/>
                         <div class="filter-header">
                             <h3>Lọc theo</h3>
-                            <a href="${pageContext.request.contextPath}/cars?action=list
-                               &startDate=${not empty startDate ? fn:substring(startDate,0,10) : param.startDate}
-                               &startHour=${not empty startDate ? fn:substring(startDate,11,16) : param.startHour}
-                               &endDate=${not empty endDate ? fn:substring(endDate,0,10) : param.endDate}
-                               &endHour=${not empty endDate ? fn:substring(endDate,11,16) : param.endHour}"
+                            <a href="${pageContext.request.contextPath}/cars?action=list&startDate=${param.startDate}&startHour=${param.startHour}&endDate=${param.endDate}&endHour=${param.endHour}"
                                class="reset">
                                 Xóa tất cả
                             </a>
                         </div>
 
-                        <!-- AVAILABLE -->
-                        <div class="filter-group inline">
-                            <label>Chỉ xe sẵn sàng ngay</label>
-                            <input type="checkbox" name="availableOnly" ${param.availableOnly != null ? 'checked' : ''} onchange="this.form.submit();">
-                        </div>
 
-                        <!-- PRICE RANGE / DAY (VND thực tế) -->
-                        <div class="filter-group">
-                            <label>Giá thuê/ngày (VND)</label>
-                            <div class="price-range">
-                                <span>100.000</span>
-                                <input type="range" name="maxPrice" min="100000" max="5000000" step="100000"
-                                       value="${param.maxPrice != null ? param.maxPrice : '5000000'}"
-                                       oninput="document.getElementById('maxPriceDisplay').innerText = new Intl.NumberFormat('vi-VN').format(this.value) + ' VND';">
-                                <span id="maxPriceDisplay">
-                                    <fmt:formatNumber value="${param.maxPrice != null ? param.maxPrice : 5000000}" pattern="#,##0" /> VND
-                                </span>
-                            </div>
-                        </div>
 
                         <!-- BRAND -->
                         <div class="filter-group">
                             <label>Hãng xe</label>
                             <div class="checkbox-list">
-                                <label><input type="checkbox" name="brand" value="Toyota" 
-                                              ${fn:contains(fn:join(paramValues.brand, ','), 'Toyota') ? 'checked' : ''} onchange="this.form.submit();"> Toyota</label>
-                                <label><input type="checkbox" name="brand" value="Mazda" 
-                                              ${fn:contains(fn:join(paramValues.brand, ','), 'Mazda') ? 'checked' : ''} onchange="this.form.submit();"> Mazda</label>
-                                <label><input type="checkbox" name="brand" value="BMW" 
-                                              ${fn:contains(fn:join(paramValues.brand, ','), 'BMW') ? 'checked' : ''} onchange="this.form.submit();"> BMW</label>
-                                <label><input type="checkbox" name="brand" value="VinFast" 
-                                              ${fn:contains(fn:join(paramValues.brand, ','), 'VinFast') ? 'checked' : ''} onchange="this.form.submit();"> VinFast</label>
+                                <select name="brand" onchange="this.form.submit();">
+                                    <option value="">All brands</option>
+                                    <c:forEach var="brandItem" items="${brandList}">
+                                        <option value="${brandItem}"
+                                                <c:if test="${param.brand eq brandItem}">selected="selected"</c:if>>
+                                            ${brandItem}
+                                        </option>
+                                    </c:forEach>
+                                </select>
                             </div>
                         </div>
 
@@ -97,14 +76,15 @@
                         <div class="filter-group">
                             <label>Loại xe</label>
                             <div class="checkbox-list">
-                                <label><input type="checkbox" name="type" value="Sedan" 
-                                              ${fn:contains(fn:join(paramValues.type, ','), 'Sedan') ? 'checked' : ''} onchange="this.form.submit();"> Sedan</label>
-                                <label><input type="checkbox" name="type" value="SUV" 
-                                              ${fn:contains(fn:join(paramValues.type, ','), 'SUV') ? 'checked' : ''} onchange="this.form.submit();"> SUV</label>
-                                <label><input type="checkbox" name="type" value="Hatchback" 
-                                              ${fn:contains(fn:join(paramValues.type, ','), 'Hatchback') ? 'checked' : ''} onchange="this.form.submit();"> Hatchback</label>
-                                <label><input type="checkbox" name="type" value="Coupe" 
-                                              ${fn:contains(fn:join(paramValues.type, ','), 'Coupe') ? 'checked' : ''} onchange="this.form.submit();"> Coupe</label>
+                                <select name="type" onchange="this.form.submit();">
+                                    <option value="">All types</option>
+                                    <c:forEach var="typeItem" items="${typeList}">
+                                        <option value="${typeItem}"
+                                                <c:if test="${param.type eq typeItem}">selected="selected"</c:if>>
+                                            ${typeItem}
+                                        </option>
+                                    </c:forEach>
+                                </select>
                             </div>
                         </div>
 

@@ -21,6 +21,7 @@ import models.CarModel;
 import DALs.ReviewDAO;
 import models.ReviewModel;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  *
@@ -85,10 +86,15 @@ public class CarListServlet extends HttpServlet {
 
         } else {
             cars = carDAO.findAllAvailableCars();
+
         }
 
+        List<String> listBrand = carDAO.getAllBrandNames();
+        List<String> listType = carDAO.getAllTypeNames();
         String keyword = request.getParameter("keyword");
         request.setAttribute("cars", cars);
+        request.setAttribute("typeList", listType);
+        request.setAttribute("brandList", listBrand);
         request.setAttribute("keyword", keyword);
         request.setAttribute("startDate", startDateRaw);
         request.setAttribute("startHour", startHourRaw);
@@ -202,7 +208,11 @@ public class CarListServlet extends HttpServlet {
 
         list = keepCarsAvailableInDateRange(request, list);
 
+         List<String> listBrand = carDAO.getAllBrandNames();
+        List<String> listType = carDAO.getAllTypeNames();
         request.setAttribute("cars", list);
+         request.setAttribute("typeList", listType);
+        request.setAttribute("brandList", listBrand);
         request.setAttribute("keyword", keyword);
         request.setAttribute("startDate", startDateRaw);
         request.setAttribute("startHour", startHourRaw);
@@ -222,8 +232,9 @@ public class CarListServlet extends HttpServlet {
         String endHourRaw = request.getParameter("endHour");
 
         boolean availableOnly = "on".equals(request.getParameter("availableOnly"));
-        String[] brands = request.getParameterValues("brand");
-        String[] types = request.getParameterValues("type");
+        String brands = request.getParameter("brand");
+
+        String types = request.getParameter("type");
         String[] fuels = request.getParameterValues("fuel");
 
         String seatsStr = request.getParameter("seats");
@@ -255,10 +266,13 @@ public class CarListServlet extends HttpServlet {
                 yearRange,
                 maxPrice
         );
-
+        List<String> brandList = carDAO.getAllBrandNames();
+        List<String> typeList = carDAO.getAllTypeNames();
         list = keepCarsAvailableInDateRange(request, list);
 
         request.setAttribute("cars", list);
+        request.setAttribute("brandList", brandList);
+        request.setAttribute("typeList", typeList);
         request.setAttribute("keyword", keyword);
         request.setAttribute("availableOnly", availableOnly);
         request.setAttribute("seats", seats);

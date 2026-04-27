@@ -7,9 +7,11 @@ public class BookingModel {
 
     private int bookingId;
     private int customerId;
+
     private Integer staffId;         
     private int carId;
     private Integer voucherId;        
+
 
     private Timestamp bookingDate;
     private Timestamp startTime;
@@ -38,6 +40,7 @@ public class BookingModel {
     
     public BookingModel() {
     }
+
 
     public int getBookingId() {
         return bookingId;

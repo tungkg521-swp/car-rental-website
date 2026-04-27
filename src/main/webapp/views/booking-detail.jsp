@@ -249,7 +249,7 @@
                                             <div class="info-row">
                                                 <span class="info-label">Tiền cọc và dằn xe</span>
 
-                                                <fmt:formatNumber value="${booking.depositAmount+10000000}" type="number" groupingUsed="true"/>
+                                                <fmt:formatNumber value="${booking.depositAmount}" type="number" groupingUsed="true"/>
                                                 VND
                                             </div>
 
