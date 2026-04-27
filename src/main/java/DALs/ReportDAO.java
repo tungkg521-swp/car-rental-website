@@ -239,7 +239,7 @@ public class ReportDAO extends DBContext {
         StringBuilder sql = new StringBuilder("""
             SELECT
                 COUNT(rc.contract_id) AS total_trips,
-                SUM(ISNULL(rc.total_amount, 0)) AS total_revenue,
+                SUM(ISNULL(rc.final_amount, 0)) AS total_revenue,
                 SUM(DATEDIFF(DAY, rc.contract_start_time, rc.contract_end_time) + 1) AS total_rental_days
             FROM rental_contract rc
             WHERE rc.contract_status = 'COMPLETED'
