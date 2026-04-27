@@ -45,23 +45,23 @@ function validateCustomerConfirm() {
 
     if (!reviewed.checked) {
         showPopup(
-            "warning",
-            "Confirmation Required",
-            "Please confirm that you have reviewed the vehicle condition."
-        );
+                "warning",
+                "Cần xác nhận",
+                "Vui lòng xác nhận bạn đã xem thông tin tình trạng xe."
+                );
         return false;
     }
 
     if (!agree.checked) {
         showPopup(
-            "warning",
-            "Confirmation Required",
-            "Please confirm that you agree to receive this vehicle."
-        );
+                "warning",
+                "Cần xác nhận",
+                "Vui lòng xác nhận bạn đồng ý nhận xe này."
+                );
         return false;
     }
 
-    return confirm("Confirm vehicle handover?");
+    return confirm("Bạn có chắc muốn xác nhận nhận xe?");
 }
 
 /* GALLERY */
@@ -120,55 +120,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (!bookingPage) {
         return;
-    }
-
-    const cancelStatus = bookingPage.dataset.cancelStatus;
-    const handoverStatus = bookingPage.dataset.handoverStatus;
-
-    if (cancelStatus === "success") {
-        showPopup(
-            "success",
-            "Cancel Successful",
-            "Your booking has been cancelled successfully."
-        );
-    } else if (cancelStatus === "fail") {
-        showPopup(
-            "error",
-            "Cancel Failed",
-            "Unable to cancel this booking."
-        );
-    } else if (cancelStatus === "error") {
-        showPopup(
-            "error",
-            "System Error",
-            "Something went wrong while cancelling the booking."
-        );
-    }
-
-    if (handoverStatus === "confirm_success") {
-        showPopup(
-            "success",
-            "Handover Confirmed",
-            "Vehicle handover has been confirmed successfully."
-        );
-    } else if (handoverStatus === "confirm_fail") {
-        showPopup(
-            "error",
-            "Confirmation Failed",
-            "Failed to confirm vehicle handover."
-        );
-    } else if (handoverStatus === "reject_success") {
-        showPopup(
-            "success",
-            "Vehicle Rejected",
-            "You have rejected the vehicle handover successfully."
-        );
-    } else if (handoverStatus === "reject_fail") {
-        showPopup(
-            "error",
-            "Reject Failed",
-            "Failed to reject vehicle handover."
-        );
     }
 
     const overlay = document.getElementById("popupOverlay");

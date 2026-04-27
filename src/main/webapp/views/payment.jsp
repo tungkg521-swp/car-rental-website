@@ -24,12 +24,6 @@
                 <span>Quay lại danh sách booking</span>
             </a>
 
-            <c:if test="${param.result == 'success'}">
-                <div class="alert alert-success mb-4">
-                    Thanh toán cọc thành công. Booking của bạn đã được xác nhận.
-                </div>
-            </c:if>
-
             <c:if test="${param.result == 'fail'}">
                 <div class="alert alert-danger mb-4">
                     Thanh toán thất bại. Booking vẫn đang ở trạng thái chờ thanh toán.

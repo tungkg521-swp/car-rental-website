@@ -34,7 +34,7 @@ public class CarChangeRequestDAO extends DBContext {
             VALUES (?, ?, ?, 'STAFF', 'PENDING', ?)
         """;
 
-        try (PreparedStatement ps = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, request.getBookingId());
             ps.setInt(2, request.getOldCarId());
             ps.setInt(3, request.getNewCarId());

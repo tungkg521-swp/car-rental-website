@@ -56,6 +56,8 @@ public class StaffContractController extends HttpServlet {
 
             try {
 
+                HttpSession session = request.getSession(false);
+
                 int id = Integer.parseInt(request.getParameter("id"));
 
                 ContractModel contract
@@ -75,14 +77,23 @@ public class StaffContractController extends HttpServlet {
                 CarModel car
                         = carDAO.findById(contract.getCarId());
 
-                boolean maintenanceBlocked = "MAINTENANCE".equalsIgnoreCase(car.getStatus());
 
-                boolean scheduleConflict = bookingDAO.hasBookingConflictExcludeBooking(
+                boolean bookingScheduleConflict = bookingDAO.hasBookingConflictExcludeBooking(
                         contract.getCarId(),
                         contract.getContractStartTime(),
                         contract.getContractEndTime(),
                         contract.getBookingId()
                 );
+
+                boolean maintenanceScheduleConflict = bookingDAO.hasMaintenanceConflict(
+                        contract.getCarId(),
+                        contract.getContractStartTime(),
+                        contract.getContractEndTime()
+                );
+
+                boolean scheduleConflict = bookingScheduleConflict || maintenanceScheduleConflict;
+                
+                boolean maintenanceBlocked = maintenanceScheduleConflict;
 
                 Duration duration = Duration.between(
                         contract.getContractStartTime().toLocalDateTime(),
@@ -233,6 +244,20 @@ public class StaffContractController extends HttpServlet {
                 request.setAttribute("actualReturnDateValue", actualReturnDateValue);
                 request.setAttribute("actualReturnHourValue", actualReturnHourValue);
 
+                if (session != null) {
+                    String message = (String) session.getAttribute("message");
+                    if (message != null) {
+                        request.setAttribute("message", message);
+                        session.removeAttribute("message");
+                    }
+
+                    String error = (String) session.getAttribute("error");
+                    if (error != null) {
+                        request.setAttribute("error", error);
+                        session.removeAttribute("error");
+                    }
+                }
+
                 request.getRequestDispatcher("/views/staff-contract-detail.jsp")
                         .forward(request, response);
 
@@ -282,7 +307,7 @@ public class StaffContractController extends HttpServlet {
 
                 if (!hasReturnCheck(contractId)) {
                     request.getSession().setAttribute("error",
-                            "Please inspect the vehicle first before completing the return.");
+                            "Vui lòng kiểm tra xe khi trả trước khi hoàn tất hợp đồng.");
                     response.sendRedirect(request.getContextPath()
                             + "/staff/contracts?action=detail&id=" + contractId);
                     return;
@@ -298,10 +323,54 @@ public class StaffContractController extends HttpServlet {
                 return;
             }
 
-            if (success) {
-                request.getSession().setAttribute("message", "Contract updated successfully.");
+            if ("saveCheck".equals(action)) {
+                if (success) {
+                    request.getSession().setAttribute("message", "Lưu kiểm tra xe trước khi giao thành công.");
+                } else {
+                    request.getSession().setAttribute("error", "Lưu kiểm tra xe trước khi giao thất bại.");
+                }
+
+            } else if ("sendToCustomer".equals(action)) {
+                if (success) {
+                    request.getSession().setAttribute("message", "Đã gửi thông tin kiểm tra xe cho khách hàng xác nhận.");
+                } else {
+                    request.getSession().setAttribute("error", "Không thể gửi thông tin kiểm tra xe cho khách hàng. Vui lòng kiểm tra lại kết quả kiểm tra xe.");
+                }
+
+            } else if ("markNoShow".equals(action)) {
+                if (success) {
+                    request.getSession().setAttribute("message", "Đã ghi nhận khách hàng không đến nhận xe.");
+                } else {
+                    request.getSession().setAttribute("error", "Ghi nhận khách hàng không đến nhận xe thất bại.");
+                }
+
+            } else if ("complete".equals(action)) {
+                if (success) {
+                    request.getSession().setAttribute("message", "Hoàn tất trả xe thành công.");
+                } else {
+                    request.getSession().setAttribute("error", "Hoàn tất trả xe thất bại. Vui lòng kiểm tra lại thông tin hậu kiểm.");
+                }
+
+            } else if ("cancel".equals(action)) {
+                if (success) {
+                    request.getSession().setAttribute("message", "Hủy hợp đồng thành công.");
+                } else {
+                    request.getSession().setAttribute("error", "Hủy hợp đồng thất bại.");
+                }
+
+            } else if ("deliverCar".equals(action)) {
+                if (success) {
+                    request.getSession().setAttribute("message", "Giao xe thành công.");
+                } else {
+                    request.getSession().setAttribute("error", "Giao xe thất bại. Khách hàng có thể chưa xác nhận nhận xe.");
+                }
+
             } else {
-                request.getSession().setAttribute("error", "Failed to update contract status.");
+                if (success) {
+                    request.getSession().setAttribute("message", "Xử lý thành công.");
+                } else {
+                    request.getSession().setAttribute("error", "Xử lý thất bại. Vui lòng thử lại.");
+                }
             }
 
             response.sendRedirect(
@@ -395,7 +464,38 @@ public class StaffContractController extends HttpServlet {
             return false;
         }
 
-        boolean carKmUpdated = carDAO.updateCurrentOdometerKm(contract.getCarId(), returnCheck.getOdometerKm());
+        contract = contractDAO.getContractById(contractId);
+        if (contract == null) {
+            return false;
+        }
+
+        double extraKmFee = contract.getExtraKmFee() != null
+                ? contract.getExtraKmFee()
+                : 0;
+
+        double lateFee = calculateExtraTimeFee(contract, contract.getActualReturnTime());
+
+        long returnIssueFeeTotal = calculateReturnIssueFeeTotal(returnCheck);
+
+        double extraFeeTotal = extraKmFee + lateFee + returnIssueFeeTotal;
+
+        double finalAmount = contract.getTotalAmount() + extraFeeTotal;
+
+        boolean settlementUpdated = contractDAO.updateFinalSettlement(
+                contractId,
+                extraFeeTotal,
+                finalAmount
+        );
+
+        if (!settlementUpdated) {
+            return false;
+        }
+
+        boolean carKmUpdated = carDAO.updateCurrentOdometerKm(
+                contract.getCarId(),
+                returnCheck.getOdometerKm()
+        );
+
         if (!carKmUpdated) {
             return false;
         }
@@ -414,6 +514,19 @@ public class StaffContractController extends HttpServlet {
         }
 
         return true;
+    }
+
+    private long calculateReturnIssueFeeTotal(CarCheckModel returnCheck) {
+        List<Long> feeAmounts = parseReturnFeeAmounts(returnCheck);
+
+        long total = 0;
+        for (Long amount : feeAmounts) {
+            if (amount != null) {
+                total += amount;
+            }
+        }
+
+        return total;
     }
 
     private boolean saveCarCheck(HttpServletRequest request) {
@@ -466,19 +579,26 @@ public class StaffContractController extends HttpServlet {
             String exteriorNote = joinIssueArray(exteriorIssues);
             String interiorNote = joinIssueArray(interiorIssues);
 
-            boolean maintenanceBlocked = "MAINTENANCE".equalsIgnoreCase(car.getStatus());
+            
 
-            boolean scheduleConflict = bookingDAO.hasBookingConflictExcludeBooking(
+            boolean bookingScheduleConflict = bookingDAO.hasBookingConflictExcludeBooking(
                     contract.getCarId(),
                     contract.getContractStartTime(),
                     contract.getContractEndTime(),
                     contract.getBookingId()
             );
 
+            boolean maintenanceScheduleConflict = bookingDAO.hasMaintenanceConflict(
+                    contract.getCarId(),
+                    contract.getContractStartTime(),
+                    contract.getContractEndTime()
+            );
+
+            boolean scheduleConflict = bookingScheduleConflict || maintenanceScheduleConflict;
+
             String finalResult = "OK";
 
             if ("NOT_OK".equalsIgnoreCase(physicalStatus)
-                    || maintenanceBlocked
                     || scheduleConflict) {
                 finalResult = "NOT_OK";
             }
@@ -487,13 +607,6 @@ public class StaffContractController extends HttpServlet {
 
             if (userNote != null && !userNote.trim().isEmpty()) {
                 finalNote.append(userNote.trim());
-            }
-
-            if (maintenanceBlocked) {
-                if (finalNote.length() > 0) {
-                    finalNote.append(" | ");
-                }
-                finalNote.append("System detected: car is currently under maintenance.");
             }
 
             if (scheduleConflict) {
@@ -529,13 +642,13 @@ public class StaffContractController extends HttpServlet {
 
             ContractModel contract = contractDAO.getContractById(contractId);
             if (contract == null) {
-                request.getSession().setAttribute("error", "Contract not found.");
+                request.getSession().setAttribute("error", "Không tìm thấy hợp đồng.");
                 response.sendRedirect(request.getContextPath() + "/staff/contracts");
                 return;
             }
 
             if (!"ACTIVE".equalsIgnoreCase(contract.getContractStatus())) {
-                request.getSession().setAttribute("error", "Only ACTIVE contracts can save return check.");
+                request.getSession().setAttribute("error", "Chỉ hợp đồng đang thuê mới có thể lưu kiểm tra trả xe.");
                 response.sendRedirect(request.getContextPath() + "/staff/contracts?action=detail&id=" + contractId);
                 return;
             }
@@ -558,21 +671,21 @@ public class StaffContractController extends HttpServlet {
 
             String odometerKmRaw = request.getParameter("odometerKm");
             if (odometerKmRaw == null || odometerKmRaw.trim().isEmpty()) {
-                request.getSession().setAttribute("error", "Please enter return odometer.");
+                request.getSession().setAttribute("error", "Vui lòng nhập số km khi trả xe.");
                 response.sendRedirect(request.getContextPath() + "/staff/contracts?action=detail&id=" + contractId);
                 return;
             }
 
             int returnOdometerKm = Integer.parseInt(odometerKmRaw.trim());
             if (returnOdometerKm < 0) {
-                request.getSession().setAttribute("error", "Return odometer must be greater than or equal to 0.");
+                request.getSession().setAttribute("error", "Số km khi trả xe phải lớn hơn hoặc bằng 0.");
                 response.sendRedirect(request.getContextPath() + "/staff/contracts?action=detail&id=" + contractId);
                 return;
             }
 
             Timestamp actualReturnTime = parseDateTimeFromRequest(request, "actualReturnDate", "actualReturnHour");
             if (actualReturnTime == null) {
-                request.getSession().setAttribute("error", "Please select a valid actual return date and hour.");
+                request.getSession().setAttribute("error", "Vui lòng chọn ngày và giờ trả xe thực tế hợp lệ.");
                 response.sendRedirect(request.getContextPath() + "/staff/contracts?action=detail&id=" + contractId);
                 return;
             }
@@ -582,14 +695,14 @@ public class StaffContractController extends HttpServlet {
                     contract.getCarId()
             );
             if (preDeliveryCheck == null || preDeliveryCheck.getOdometerKm() == null) {
-                request.getSession().setAttribute("error", "Pre-delivery odometer not found.");
+                request.getSession().setAttribute("error", "Không tìm thấy số km trước khi giao xe.");
                 response.sendRedirect(request.getContextPath() + "/staff/contracts?action=detail&id=" + contractId);
                 return;
             }
 
             int startOdometerKm = preDeliveryCheck.getOdometerKm();
             if (returnOdometerKm < startOdometerKm) {
-                request.getSession().setAttribute("error", "Return odometer cannot be smaller than pre-check odometer.");
+                request.getSession().setAttribute("error", "Số km khi trả xe không được nhỏ hơn số km trước khi giao.");
                 response.sendRedirect(request.getContextPath() + "/staff/contracts?action=detail&id=" + contractId);
                 return;
             }
@@ -621,14 +734,14 @@ public class StaffContractController extends HttpServlet {
                     String amountRaw = request.getParameter("amount_" + safeSuffix);
 
                     if (amountRaw == null || amountRaw.trim().isEmpty()) {
-                        request.getSession().setAttribute("error", "Please enter amount for issue: " + issue);
+                        request.getSession().setAttribute("error", "Vui lòng nhập số tiền cho lỗi: " + issue);
                         response.sendRedirect(request.getContextPath() + "/staff/contracts?action=detail&id=" + contractId);
                         return;
                     }
 
                     long amount = Long.parseLong(amountRaw.trim());
                     if (amount <= 0) {
-                        request.getSession().setAttribute("error", "Amount must be greater than 0 for issue: " + issue);
+                        request.getSession().setAttribute("error", "Số tiền phải lớn hơn 0 cho lỗi: " + issue);
                         response.sendRedirect(request.getContextPath() + "/staff/contracts?action=detail&id=" + contractId);
                         return;
                     }
@@ -661,7 +774,7 @@ public class StaffContractController extends HttpServlet {
             if (saved) {
                 boolean returnTimeUpdated = contractDAO.updateActualReturnTime(contractId, actualReturnTime);
                 if (!returnTimeUpdated) {
-                    request.getSession().setAttribute("error", "Return check saved but failed to update actual return time.");
+                    request.getSession().setAttribute("error", "Đã lưu kiểm tra trả xe nhưng cập nhật thời gian trả thực tế thất bại.");
                     response.sendRedirect(request.getContextPath() + "/staff/contracts?action=detail&id=" + contractId);
                     return;
                 }
@@ -669,23 +782,23 @@ public class StaffContractController extends HttpServlet {
                 boolean mileageUpdated = updateContractMileageSummary(contractId);
 
                 if (mileageUpdated) {
-                    request.getSession().setAttribute("message", "Return check saved successfully.");
+                    request.getSession().setAttribute("message", "Lưu kiểm tra trả xe thành công.");
                 } else {
-                    request.getSession().setAttribute("error", "Return check saved but failed to update mileage summary.");
+                    request.getSession().setAttribute("error", "Đã lưu kiểm tra trả xe nhưng cập nhật tổng số km thất bại.");
                 }
             } else {
-                request.getSession().setAttribute("error", "Failed to save return check.");
+                request.getSession().setAttribute("error", "Lưu kiểm tra trả xe thất bại.");
             }
 
             response.sendRedirect(request.getContextPath() + "/staff/contracts?action=detail&id=" + contractId);
 
         } catch (NumberFormatException e) {
             e.printStackTrace();
-            request.getSession().setAttribute("error", "Invalid number format.");
+            request.getSession().setAttribute("error", "Dữ liệu số không hợp lệ.");
             response.sendRedirect(request.getContextPath() + "/staff/contracts");
         } catch (Exception e) {
             e.printStackTrace();
-            request.getSession().setAttribute("error", "Failed to save return check.");
+            request.getSession().setAttribute("error", "Lưu kiểm tra trả xe thất bại.");
             response.sendRedirect(request.getContextPath() + "/staff/contracts");
         }
     }

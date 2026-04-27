@@ -68,6 +68,8 @@
 
                         <form action="${pageContext.request.contextPath}/cars" method="get" class="hero-booking-form">
                             <input type="hidden" name="action" value="list">
+                            
+                            <div id="homeDateTimeError" class="home-date-error" style="display:none;"></div>
 
                             <div class="hero-booking-grid">
                                 <div class="hero-field">
@@ -78,7 +80,7 @@
                                 <div class="hero-field">
                                     <label>Giờ nhận xe</label>
                                     <div class="time-dropdown" data-target="startHour">
-                                        <button type="button" class="time-dropdown-toggle">Chọn giờ</button>
+                                        <button type="button" class="time-dropdown-toggle">00:00</button>
                                         <div class="time-dropdown-menu">
                                             <div class="time-option" data-value="00:00">00:00</div>
                                             <div class="time-option" data-value="01:00">01:00</div>
@@ -105,7 +107,7 @@
                                             <div class="time-option" data-value="22:00">22:00</div>
                                             <div class="time-option" data-value="23:00">23:00</div>
                                         </div>
-                                        <input type="hidden" name="startHour" id="startHour" required>
+                                        <input type="hidden" name="startHour" id="startHour" value="00:00" required>
                                     </div>
                                 </div>
 
@@ -117,7 +119,7 @@
                                 <div class="hero-field">
                                     <label>Giờ trả xe</label>
                                     <div class="time-dropdown" data-target="endHour">
-                                        <button type="button" class="time-dropdown-toggle">Chọn giờ</button>
+                                        <button type="button" class="time-dropdown-toggle">23:00</button>
                                         <div class="time-dropdown-menu">
                                             <div class="time-option" data-value="00:00">00:00</div>
                                             <div class="time-option" data-value="01:00">01:00</div>
@@ -144,7 +146,7 @@
                                             <div class="time-option" data-value="22:00">22:00</div>
                                             <div class="time-option" data-value="23:00">23:00</div>
                                         </div>
-                                        <input type="hidden" name="endHour" id="endHour" required>
+                                        <input type="hidden" name="endHour" id="endHour" value="23:00" required>
                                     </div>
                                 </div>
 

@@ -28,6 +28,12 @@
 
             <h1 class="page-title">My Bookings</h1>
 
+            <c:if test="${param.deleteStatus == 'success'}">
+                <div class="alert alert-success">
+                    Xóa đơn đặt xe thành công.
+                </div>
+            </c:if>
+
             <!-- EMPTY STATE -->
             <c:if test="${empty BOOKINGS}">
                 <div class="empty-state">

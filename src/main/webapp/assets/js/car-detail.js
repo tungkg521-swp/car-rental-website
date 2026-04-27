@@ -11,11 +11,13 @@ document.addEventListener("DOMContentLoaded", function () {
  ========================= */
 function initGallery() {
     const mainImage = document.getElementById("mainCarImage");
+
     if (!mainImage) {
         return;
     }
 
     const thumbnails = Array.from(document.querySelectorAll(".thumbs img"));
+
     if (thumbnails.length === 0) {
         return;
     }
@@ -85,6 +87,8 @@ function initRentalCalendar() {
     const selectedPeriodValue = document.getElementById("selectedPeriodValue");
     const errorBox = document.getElementById("calendarDateError");
 
+    let calendarErrorTimer = null;
+
     if (
             !modal ||
             !calendarEl ||
@@ -104,7 +108,7 @@ function initRentalCalendar() {
     let tempStartDate = startInput.value || "";
     let tempEndDate = endInput.value || "";
     let tempStartHour = startHourInput.value || "00:00";
-    let tempEndHour = endHourInput.value || "23:59";
+    let tempEndHour = endHourInput.value || "23:00";
 
     let fp = null;
 
@@ -114,9 +118,11 @@ function initRentalCalendar() {
         }
 
         const defaultDates = [];
+
         if (tempStartDate) {
             defaultDates.push(tempStartDate);
         }
+
         if (tempEndDate) {
             defaultDates.push(tempEndDate);
         }
@@ -135,6 +141,7 @@ function initRentalCalendar() {
                 }
 
                 const dateText = formatLocalDate(dayElem.dateObj);
+
                 if (busyDateSet.has(dateText)) {
                     dayElem.classList.add("busy-day");
                 }
@@ -142,6 +149,7 @@ function initRentalCalendar() {
             onChange: function (selectedDates) {
                 tempStartDate = selectedDates[0] ? formatLocalDate(selectedDates[0]) : "";
                 tempEndDate = selectedDates[1] ? formatLocalDate(selectedDates[1]) : "";
+
                 hideCalendarError();
                 updateSelectedDisplay();
             }
@@ -153,7 +161,7 @@ function initRentalCalendar() {
         document.body.classList.add("modal-open");
 
         modalStartHour.value = tempStartHour || "00:00";
-        modalEndHour.value = tempEndHour || "23:59";
+        modalEndHour.value = tempEndHour || "23:00";
 
         setTimeout(function () {
             createCalendar();
@@ -170,16 +178,31 @@ function initRentalCalendar() {
         if (!errorBox) {
             return;
         }
+
         errorBox.textContent = message;
         errorBox.style.display = "block";
+
+        if (calendarErrorTimer) {
+            clearTimeout(calendarErrorTimer);
+        }
+
+        calendarErrorTimer = setTimeout(function () {
+            hideCalendarError();
+        }, 3500);
     }
 
     function hideCalendarError() {
         if (!errorBox) {
             return;
         }
+
         errorBox.textContent = "";
         errorBox.style.display = "none";
+
+        if (calendarErrorTimer) {
+            clearTimeout(calendarErrorTimer);
+            calendarErrorTimer = null;
+        }
     }
 
     function updateSelectedDisplay() {
@@ -212,50 +235,59 @@ function initRentalCalendar() {
             return;
         }
 
-        const isCarAvailable = bookingButton.dataset.carAvailable === "true";
         const hasFullSelection = !!(tempStartDate && tempStartHour && tempEndDate && tempEndHour);
 
-        bookingButton.disabled = !(isCarAvailable && hasFullSelection);
-        bookingButton.classList.toggle("disabled", !(isCarAvailable && hasFullSelection));
+        bookingButton.disabled = !hasFullSelection;
+        bookingButton.classList.toggle("disabled", !hasFullSelection);
     }
 
-    function applySelection() {
-        hideCalendarError();
-
-        if (!tempStartDate || !tempStartHour || !tempEndDate || !tempEndHour) {
-            showCalendarError("Vui lòng chọn đầy đủ ngày và giờ nhận/trả xe.");
-            return;
+    function validateRentalDateTime(startDateValue, startHourValue, endDateValue, endHourValue) {
+        if (!startDateValue || !startHourValue || !endDateValue || !endHourValue) {
+            return "Vui lòng chọn đầy đủ ngày và giờ nhận/trả xe.";
         }
 
-        const startDateTime = tempStartDate + "T" + tempStartHour;
-        const endDateTime = tempEndDate + "T" + tempEndHour;
+        const startDateTime = startDateValue + "T" + startHourValue;
+        const endDateTime = endDateValue + "T" + endHourValue;
 
         const startDate = new Date(startDateTime);
         const endDate = new Date(endDateTime);
         const now = new Date();
 
         if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-            showCalendarError("Thời gian thuê không hợp lệ.");
-            return;
+            return "Thời gian thuê không hợp lệ. Vui lòng kiểm tra lại.";
         }
 
         if (startDate < now) {
-            showCalendarError("Thời gian nhận xe không được ở quá khứ.");
-            return;
+            return "Thời gian nhận xe không được nhỏ hơn thời điểm hiện tại.";
         }
 
         if (endDate <= startDate) {
-            showCalendarError("Thời gian trả xe phải sau thời gian nhận xe.");
-            return;
+            return "Thời gian trả xe phải sau thời gian nhận xe.";
         }
 
         if (endDate - startDate < 60 * 60 * 1000) {
-            showCalendarError("Thời gian thuê tối thiểu là 1 giờ.");
-            return;
+            return "Thời gian thuê tối thiểu là 1 giờ.";
         }
 
         if (hasTimeConflict(startDateTime, endDateTime)) {
-            showCalendarError("Khoảng thời gian bạn chọn trùng với lịch đã được đặt. Vui lòng chọn lại.");
+            return "Khoảng thời gian bạn chọn xe đã bận. Vui lòng chọn thời gian khác.";
+        }
+
+        return "";
+    }
+
+    function applySelection() {
+        hideCalendarError();
+
+        const errorMessage = validateRentalDateTime(
+                tempStartDate,
+                tempStartHour,
+                tempEndDate,
+                tempEndHour
+                );
+
+        if (errorMessage) {
+            showCalendarError(errorMessage);
             return;
         }
 
@@ -304,12 +336,6 @@ function initRentalCalendar() {
 
     if (bookingButton) {
         bookingButton.addEventListener("click", function () {
-            const isCarAvailable = bookingButton.dataset.carAvailable === "true";
-
-            if (!isCarAvailable) {
-                return;
-            }
-
             const hasFullSelection = !!(
                     startInput.value &&
                     startHourInput.value &&
@@ -319,6 +345,25 @@ function initRentalCalendar() {
 
             if (!hasFullSelection) {
                 openModal();
+                showCalendarError("Vui lòng chọn đầy đủ ngày và giờ nhận/trả xe.");
+                return;
+            }
+
+            const errorMessage = validateRentalDateTime(
+                    startInput.value,
+                    startHourInput.value,
+                    endInput.value,
+                    endHourInput.value
+                    );
+
+            if (errorMessage) {
+                tempStartDate = startInput.value || "";
+                tempStartHour = startHourInput.value || "00:00";
+                tempEndDate = endInput.value || "";
+                tempEndHour = endHourInput.value || "23:00";
+
+                openModal();
+                showCalendarError(errorMessage);
                 return;
             }
 
@@ -363,16 +408,19 @@ function initReviewEditButtons() {
  ========================= */
 function initVerifyModalAutoOpen() {
     const verifyModal = document.getElementById("licenseVerifyModal");
+
     if (!verifyModal) {
         return;
     }
 
     const shouldOpen = verifyModal.dataset.open === "true";
+
     if (shouldOpen) {
         verifyModal.style.display = "flex";
     }
 
     const closeButtons = verifyModal.querySelectorAll("[data-close-verify]");
+
     closeButtons.forEach(function (button) {
         button.addEventListener("click", function () {
             verifyModal.style.display = "none";
@@ -396,6 +444,7 @@ function parseBusyDates(rawValue) {
 
     try {
         const parsed = JSON.parse(rawValue);
+
         if (Array.isArray(parsed)) {
             return parsed.filter(function (item) {
                 return typeof item === "string" && item.trim() !== "";
@@ -410,12 +459,14 @@ function parseBusyDates(rawValue) {
 
 function parseBusyTimeRanges() {
     const dataEl = document.getElementById("busyTimeRangesData");
+
     if (!dataEl) {
         return [];
     }
 
     try {
         const parsed = JSON.parse(dataEl.textContent || "[]");
+
         if (Array.isArray(parsed)) {
             return parsed.filter(function (item) {
                 return item && item.start && item.end;
@@ -430,6 +481,7 @@ function parseBusyTimeRanges() {
 
 function renderBusyTimeRanges() {
     const listEl = document.getElementById("busyTimeList");
+
     if (!listEl) {
         return;
     }
@@ -443,10 +495,53 @@ function renderBusyTimeRanges() {
     }
 
     ranges.forEach(function (item) {
+        const blockedRange = getBlockedTimeRange(item);
+
         const li = document.createElement("li");
-        li.textContent = formatDateTimeVN(item.start) + " → " + formatDateTimeVN(item.end);
+        li.textContent = formatDateTimeVN(blockedRange.start)
+                + " → "
+                + formatDateTimeVN(blockedRange.end);
+
         listEl.appendChild(li);
     });
+}
+
+function getBlockedTimeRange(item) {
+    const type = (item.type || item.source || "BOOKING").toUpperCase();
+
+    if (type === "MAINTENANCE") {
+        return {
+            start: item.start,
+            end: item.end
+        };
+    }
+
+    return {
+        start: addHours(item.start, -4),
+        end: addHours(item.end, 4)
+    };
+}
+
+function addHours(dateValue, hours) {
+    const date = new Date(dateValue);
+
+    if (isNaN(date.getTime())) {
+        return dateValue;
+    }
+
+    date.setHours(date.getHours() + hours);
+
+    return toLocalDateTimeValue(date);
+}
+
+function toLocalDateTimeValue(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hour = String(date.getHours()).padStart(2, "0");
+    const minute = String(date.getMinutes()).padStart(2, "0");
+
+    return year + "-" + month + "-" + day + "T" + hour + ":" + minute;
 }
 
 function hasTimeConflict(startValue, endValue) {
@@ -460,8 +555,14 @@ function hasTimeConflict(startValue, endValue) {
     }
 
     return ranges.some(function (item) {
-        const busyStart = new Date(item.start);
-        const busyEnd = new Date(item.end);
+        const blockedRange = getBlockedTimeRange(item);
+
+        const busyStart = new Date(blockedRange.start);
+        const busyEnd = new Date(blockedRange.end);
+
+        if (isNaN(busyStart.getTime()) || isNaN(busyEnd.getTime())) {
+            return false;
+        }
 
         return busyStart < end && busyEnd > start;
     });
@@ -471,6 +572,7 @@ function formatLocalDate(date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
+
     return year + "-" + month + "-" + day;
 }
 
@@ -480,6 +582,7 @@ function formatDateTimeVN(dateStr) {
     }
 
     const date = new Date(dateStr);
+
     if (isNaN(date.getTime())) {
         return "--/--/---- --:--";
     }

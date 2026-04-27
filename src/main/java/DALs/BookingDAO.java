@@ -110,7 +110,7 @@ public class BookingDAO extends DBContext {
                 booking.setDepositAmount(rs.getBigDecimal("deposit_amount"));
                 booking.setRemainingAmount(rs.getBigDecimal("remaining_amount"));
                 booking.setPaymentDeadline(rs.getTimestamp("payment_deadline"));
-                
+
                 return booking;
             }
         } catch (SQLException e) {
@@ -233,8 +233,6 @@ public class BookingDAO extends DBContext {
                 booking.setDepositAmount(rs.getBigDecimal("deposit_amount"));
                 booking.setRemainingAmount(rs.getBigDecimal("remaining_amount"));
                 booking.setPaymentDeadline(rs.getTimestamp("payment_deadline"));
-
-                
 
                 return booking;
             }
@@ -532,7 +530,7 @@ public class BookingDAO extends DBContext {
             DELETE FROM booking
             WHERE booking_id = ?
               AND customer_id = ?
-              AND status = 'CANCELLED'
+              AND status IN ('CANCELLED', 'COMPLETED')
         """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -569,6 +567,35 @@ public class BookingDAO extends DBContext {
         return false;
     }
 
+    public boolean hasMaintenanceConflict(int carId, Timestamp startTime, Timestamp endTime) {
+        String sql = """
+        SELECT 1
+        FROM car_maintenance
+        WHERE car_id = ?
+          AND status IN ('SCHEDULED', 'IN_PROGRESS')
+          AND start_date <= CAST(? AS date)
+          AND end_date >= CAST(? AS date)
+    """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, carId);
+            ps.setTimestamp(2, endTime);
+            ps.setTimestamp(3, startTime);
+
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public boolean hasCarUnavailableConflict(int carId, Timestamp startTime, Timestamp endTime) {
+        return hasBookingConflict(carId, startTime, endTime)
+                || hasMaintenanceConflict(carId, startTime, endTime);
+    }
+
     public List<Timestamp[]> getBusyDateRangesByCarId(int carId) {
         List<Timestamp[]> ranges = new ArrayList<>();
 
@@ -577,11 +604,22 @@ public class BookingDAO extends DBContext {
         FROM booking
         WHERE car_id = ?
           AND status IN ('AWAITING_PAYMENT', 'PENDING_APPROVAL', 'CONFIRMED', 'WAITING_CUSTOMER_CONFIRM', 'ACTIVE')
+
+        UNION ALL
+
+        SELECT
+            CAST(start_date AS datetime) AS start_time,
+            DATEADD(SECOND, -1, DATEADD(DAY, 1, CAST(end_date AS datetime))) AS end_time
+        FROM car_maintenance
+        WHERE car_id = ?
+          AND status IN ('SCHEDULED', 'IN_PROGRESS')
+
         ORDER BY start_time
     """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, carId);
+            ps.setInt(2, carId);
 
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
