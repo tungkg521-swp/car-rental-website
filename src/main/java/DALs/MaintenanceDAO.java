@@ -204,7 +204,7 @@ public class MaintenanceDAO extends DBContext {
 
     public boolean hasScheduleConflict(int carId, Date startDate, Date endDate, Integer excludeMaintenanceId) {
         String sql = """
-            SELECT TOP 1 1
+            SELECT TOP 1 *
             FROM (
                 SELECT 
                     CAST(b.start_time AS date) AS start_date,
@@ -315,7 +315,7 @@ public class MaintenanceDAO extends DBContext {
 
     public boolean hasActiveMaintenanceForCar(int carId, Integer excludeMaintenanceId) {
         String sql = """
-            SELECT TOP 1 1
+            SELECT TOP 1 *
             FROM car_maintenance
             WHERE car_id = ?
               AND status IN ('SCHEDULED', 'IN_PROGRESS')
